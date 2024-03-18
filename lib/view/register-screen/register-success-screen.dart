@@ -42,17 +42,17 @@ class _RegisterSuccessScreenState extends State<RegisterSuccessScreen> {
       children: [
         LottieWidget(
           lottieRes: AssetManager.lottieFile(name: 'success'),
-          size: const Size.square(IconSizeManager.extralarge * 1.2),
+          size: const Size.square(IconSizeManager.extralarge * 5.5),
           fit: BoxFit.cover,
+          loop: false,
         ),
-        mediumSpacer(),
         Text(
-          "Registeration Complete",
+          "Registeration Complete.",
           style: TextStyle(
               color: ColorManager.primary,
               fontFamily: 'Lato',
               fontWeight: FontWeightManager.semibold,
-              fontSize: FontSizeManager.large),
+              fontSize: FontSizeManager.large * 0.9),
         ),
       ],
     ));

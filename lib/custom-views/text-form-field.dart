@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/app/asset-manager.dart';
 import 'package:troco/app/color-manager.dart';
 import 'package:troco/app/font-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/app/theme-manager.dart';
+import 'package:troco/providers/enabled-provider.dart';
 
-class InputFormField extends StatefulWidget {
+class InputFormField extends ConsumerStatefulWidget {
   final TextEditingController? controller;
   final String Function(String? value)? onValidate;
   final void Function(String? value)? onSaved;
@@ -20,16 +22,16 @@ class InputFormField extends StatefulWidget {
     this.onSaved,
     required this.label,
     required this.prefixIcon,
-    this.inputType = TextInputType.name,
+    this.inputType = TextInputType.text,
     this.isPassword = false,
     this.controller,
   });
 
   @override
-  State<InputFormField> createState() => _InputFormFieldState();
+  ConsumerState<InputFormField> createState() => _InputFormFieldState();
 }
 
-class _InputFormFieldState extends State<InputFormField> {
+class _InputFormFieldState extends ConsumerState<InputFormField> {
   bool obscure = false;
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _InputFormFieldState extends State<InputFormField> {
       controller: widget.controller,
       cursorColor: ColorManager.themeColor,
       cursorRadius: const Radius.circular(20),
+      readOnly: !ref.watch(enabledProvider),
       keyboardType: widget.inputType,
       style: TextStyle(
           color: ColorManager.primary,

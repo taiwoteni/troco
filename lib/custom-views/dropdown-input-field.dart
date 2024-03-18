@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/app/size-manager.dart';
+import 'package:troco/providers/enabled-provider.dart';
 
 import '../app/color-manager.dart';
 import '../app/font-manager.dart';
 import '../app/theme-manager.dart';
 
-class DropdownInputFormField extends StatelessWidget {
+class DropdownInputFormField extends ConsumerStatefulWidget {
   /// The [margin] attribute is used to specify the margin of the
   /// Dropdown Input Field.
   final EdgeInsets? margin;
@@ -43,6 +45,13 @@ class DropdownInputFormField extends StatelessWidget {
   });
 
   @override
+  ConsumerState<DropdownInputFormField> createState() =>
+      _DropdownInputFormFieldState();
+}
+
+class _DropdownInputFormFieldState
+    extends ConsumerState<DropdownInputFormField> {
+  @override
   Widget build(BuildContext context) {
     final TextStyle hintStyle = TextStyle(
         color: ColorManager.secondary,
@@ -52,15 +61,15 @@ class DropdownInputFormField extends StatelessWidget {
 
     return Container(
       width: double.maxFinite,
-      padding: margin == null ? EdgeInsets.zero : margin!,
+      padding: widget.margin == null ? EdgeInsets.zero : widget.margin!,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(SizeManager.large),
       ),
       child: DropdownButtonFormField<String>(
-          value: value.trim() == "" ? null : value,
-          items: items
+          value: widget.value.trim() == "" ? null : widget.value,
+          items: widget.items
               .map((item) => DropdownMenuItem<String>(
-                    enabled: true,
+                    enabled: ref.watch(enabledProvider),
                     value: item,
                     child: Text(
                       item.toString(),
@@ -69,10 +78,10 @@ class DropdownInputFormField extends StatelessWidget {
                   ))
               .toList(),
           hint: Text(
-            hint,
+            widget.hint,
             style: hintStyle,
           ),
-          selectedItemBuilder: (context) => items
+          selectedItemBuilder: (context) => widget.items
               .map((item) => Text(
                     item.toString(),
                     style: hintStyle.copyWith(color: ColorManager.primary),
@@ -81,10 +90,11 @@ class DropdownInputFormField extends StatelessWidget {
           isExpanded: true,
           elevation: 1,
           focusColor: Colors.transparent,
-          validator: onValidate,
-          onChanged: onChanged,
+          validator: widget.onValidate,
+          onChanged: widget.onChanged,
           padding: EdgeInsets.zero,
           decoration: decoration(),
+          enableFeedback: ref.watch(enabledProvider),
           isDense: true,
           dropdownColor: Colors.white,
           borderRadius: BorderRadius.circular(SizeManager.large)),
@@ -94,12 +104,13 @@ class DropdownInputFormField extends StatelessWidget {
   InputDecoration decoration() {
     return InputDecoration(
         isDense: true,
-        prefixIcon: prefixIcon == null
+        enabled: ref.watch(enabledProvider),
+        prefixIcon: widget.prefixIcon == null
             ? null
             : Theme(
                 data: ThemeManager.getApplicationTheme()
                     .copyWith(useMaterial3: false),
-                child: prefixIcon!,
+                child: widget.prefixIcon!,
               ),
         contentPadding: const EdgeInsets.symmetric(
             horizontal: SizeManager.medium * 1.2,
@@ -107,6 +118,10 @@ class DropdownInputFormField extends StatelessWidget {
         filled: true,
         fillColor: ColorManager.tertiary,
         enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+                color: ColorManager.themeColor, style: BorderStyle.none),
+            borderRadius: BorderRadius.circular(SizeManager.large)),
+        disabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
                 color: ColorManager.themeColor, style: BorderStyle.none),
             borderRadius: BorderRadius.circular(SizeManager.large)),

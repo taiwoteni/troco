@@ -11,9 +11,13 @@ class LottieWidget extends StatelessWidget {
   /// The [fit] is the fit of the lottie, usually defaults to BoxFit.scaleDown
   final BoxFit? fit;
 
+  /// The [loop] is to indicate wether the animation should
+  /// replay after the first complete frame.
+  final bool? loop;
+
   /// The [color] is the color or tint of the lottie
   final Color? color;
-  const LottieWidget({super.key, required this.lottieRes,required this.size, this.color, this.fit});
+  const LottieWidget({super.key, required this.lottieRes,required this.size, this.color, this.fit, this.loop});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +31,7 @@ class LottieWidget extends StatelessWidget {
       height: size.height,
       fit: fit ?? BoxFit.cover,
       animate: true,
-      repeat: true
+      repeat: loop ?? true
     );
   }
 }

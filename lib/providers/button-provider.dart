@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/providers/enabled-provider.dart';
 
 /// [_buttonProviders] is used to store the list of states used for the buttons.
 final List<StateProvider<Map<String, bool>>> _buttonProviders = [];
@@ -39,6 +40,7 @@ class ButtonProvider {
       {required final UniqueKey buttonKey, required WidgetRef ref}) {
     final buttonProvider = _buttonProviders[_buttonKeys.indexOf(buttonKey)];
     final bool loading = ref.watch(buttonProvider)["loading"] as bool;
+    ref.watch(enabledProvider.notifier).state = false;
     ref.read(buttonProvider.notifier).state = {
       "loading": loading,
       "enabled": false
@@ -49,6 +51,7 @@ class ButtonProvider {
       {required final UniqueKey buttonKey, required WidgetRef ref}) {
     final buttonProvider = _buttonProviders[_buttonKeys.indexOf(buttonKey)];
     final bool loading = ref.watch(buttonProvider)["loading"] as bool;
+    ref.watch(enabledProvider.notifier).state = true;
     ref.read(buttonProvider.notifier).state = {
       "loading": loading,
       "enabled": true
