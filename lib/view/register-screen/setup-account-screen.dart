@@ -58,7 +58,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
                 legitAddressWidget(),
                 regularSpacer(),
                 largeSpacer(),
-                doneButton(),
+                nextButton(),
               ],
             )),
           ),
@@ -275,7 +275,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
     );
   }
 
-  Widget doneButton() {
+  Widget nextButton() {
     return CustomButton(
       buttonKey: buttonKey,
       onPressed: () async {

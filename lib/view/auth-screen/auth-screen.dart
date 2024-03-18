@@ -6,6 +6,7 @@ import 'package:troco/app/font-manager.dart';
 import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/app/theme-manager.dart';
+import 'package:troco/custom-views/button.dart';
 import 'package:troco/custom-views/lottie.dart';
 import 'package:troco/custom-views/spacer.dart';
 
@@ -29,6 +30,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: ColorManager.background,
       body: Container(
         color: ColorManager.background,
@@ -103,28 +105,13 @@ class _AuthScreenState extends State<AuthScreen> {
       child: Row(
         children: [
           Expanded(
-            child: GestureDetector(
-              onTap: () => Navigator.pushNamed(context, Routes.registerRoute),
-              child: Container(
-                height: SizeManager.extralarge * 2,
-                margin: const EdgeInsets.symmetric(
+            child: CustomButton(
+              onPressed: ()=> Navigator.pushNamed(context, Routes.registerRoute),
+              label: "REGISTER",
+              margin: const EdgeInsets.symmetric(
                     horizontal: SizeManager.regular,
                     vertical: SizeManager.medium),
-                decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(SizeManager.regular * 1.2),
-                    color: ColorManager.themeColor),
-                alignment: Alignment.center,
-                child: Text(
-                  "REGISTER",
-                  style: TextStyle(
-                      color: ColorManager.primaryDark,
-                      fontSize: FontSizeManager.large * 0.8,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeightManager.bold),
-                ),
               ),
-            ),
           ),
           Expanded(
             child: GestureDetector(

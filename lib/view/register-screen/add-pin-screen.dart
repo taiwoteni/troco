@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/app/asset-manager.dart';
+import 'package:troco/app/routes-manager.dart';
 import 'package:troco/custom-views/button.dart';
 import 'package:troco/custom-views/otp-input-field.dart';
 import 'package:troco/custom-views/spacer.dart';
@@ -210,8 +211,8 @@ class _SetTransactionPinScreenState
   Widget finishButton() {
     return CustomButton(
       buttonKey: key,
-      onPressed: () {},
-      label: "FINISH",
+      onPressed: () => Navigator.pushReplacementNamed(context, Routes.registerSuccessRoute),
+      label: "SET",
       usesProvider: true,
       margin: const EdgeInsets.symmetric(
           horizontal: SizeManager.large, vertical: SizeManager.medium),

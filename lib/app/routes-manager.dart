@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:troco/view/auth-screen/auth-screen.dart';
 import 'package:troco/view/otp-screen/otp-screen.dart';
 import 'package:troco/view/register-screen/add-pin-screen.dart';
+import 'package:troco/view/register-screen/register-success-screen.dart';
 import 'package:troco/view/register-screen/setup-account-screen.dart';
 import 'package:troco/view/splash-screen/splash-screen.dart';
 
@@ -44,6 +45,8 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) => const SetTransactionPinScreen());
+      case Routes.registerSuccessRoute:
+      return MaterialPageRoute(settings: routeSettings,builder: (context) => const RegisterSuccessScreen(),);
       case Routes.loginRoute:
         return MaterialPageRoute(settings: routeSettings,builder: (context) => const LoginScreen());
       case Routes.otpLoginRoute:
