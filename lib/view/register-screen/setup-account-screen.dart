@@ -29,7 +29,7 @@ class SetupAccountScreen extends ConsumerStatefulWidget {
 
 class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
   final UniqueKey buttonKey = UniqueKey();
-  Role? role;
+  Category? role;
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +50,8 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
                 descriptionWidget(),
                 firstNameWidget(),
                 lastNameWidget(),
-                roleWidget(),
+                categoryWidget(),
                 bussinessNameWidget(),
-                bussinessCategoryWidget(),
                 addressWidget(),
                 regularSpacer(),
                 legitAddressWidget(),
@@ -125,7 +124,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
     );
   }
 
-  Widget roleWidget() {
+  Widget categoryWidget() {
     return DropdownInputFormField(
       margin: const EdgeInsets.symmetric(
           horizontal: SizeManager.medium, vertical: SizeManager.regular),
@@ -133,14 +132,16 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
         if (value == null) {
           return;
         }
-        Role role = RoleConverter.convertToRole(role: value.toString());
+        Category role =
+            CatgoryConverter.convertToCategory(category: value.toString());
         setState(() {
           this.role = role;
         });
       },
-      value: role == null ? "" : RoleConverter.convertToString(role: role!),
-      hint: "Role",
-      items: Role.values.map((role) => role.name).toList(),
+      value:
+          role == null ? "" : CatgoryConverter.convertToString(category: role!),
+      hint: "account category",
+      items: Category.values.map((role) => role.name).toList(),
       prefixIcon: IconButton(
         onPressed: null,
         iconSize: IconSizeManager.regular,
@@ -165,26 +166,6 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
           iconSize: IconSizeManager.regular,
           icon: SvgIcon(
             svgRes: AssetManager.svgFile(name: "work-fill"),
-            color: ColorManager.themeColor,
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget bussinessCategoryWidget() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: SizeManager.medium, vertical: SizeManager.regular),
-      child: InputFormField(
-        inputType: TextInputType.emailAddress,
-        label: "category",
-        prefixIcon: IconButton(
-          onPressed: null,
-          iconSize: IconSizeManager.regular,
-          icon: SvgIcon(
-            svgRes: AssetManager.svgFile(name: "work"),
             color: ColorManager.themeColor,
             fit: BoxFit.cover,
           ),
@@ -283,7 +264,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
         await Future.delayed(const Duration(seconds: 2));
         //..Logic to get location details.
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-        Navigator.pushNamed(context, Routes.addTransactionPinRoute);
+        Navigator.pushNamed(context, Routes.addProfileRoute);
       },
       usesProvider: true,
       label: "NEXT",

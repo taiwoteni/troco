@@ -1,25 +1,25 @@
-
 import 'enums.dart';
 
-class RoleConverter{
-  static Role convertToRole({required String role}){
-    switch(role.toString().toLowerCase()){
-      case "business":
-      return Role.business;
+class CatgoryConverter {
+  static Category convertToCategory({required String category}) {
+    switch (category.toString().toLowerCase()) {
+      case "company":
+        return Category.Company;
       case 'merchant':
-      return Role.merchant;
+        return Category.Merchant;
       default:
-      return Role.student;
+        return Category.Business;
     }
   }
-  static String convertToString({required Role role}){
-    switch(role){
-      case Role.business:
-      return "business";
-      case Role.merchant:
-      return 'merchant';
+
+  static String convertToString({required Category category}) {
+    switch (category) {
+      case Category.Company:
+        return "Company";
+      case Category.Merchant:
+        return 'Merchant';
       default:
-      return 'student';
+        return 'Business';
     }
   }
 }

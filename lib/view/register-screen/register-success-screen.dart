@@ -4,7 +4,6 @@ import 'package:troco/app/font-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/custom-views/button.dart';
 import 'package:troco/custom-views/lottie.dart';
-import 'package:troco/custom-views/spacer.dart';
 import '../../app/color-manager.dart';
 
 class RegisterSuccessScreen extends StatefulWidget {

@@ -24,7 +24,7 @@ class CustomButton extends ConsumerStatefulWidget {
   }) {
     if (usesProvider) {
       if (buttonKey == null) {
-        throw Exception(" usersProvider should only be true if a key is given!");
+        throw Exception("usesProvider should only be true if a key is given!");
       }
     }
   }
@@ -43,8 +43,10 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
       ButtonProvider(key: widget.buttonKey!);
       //To add this key to button provider
       // Key would be true since useProvider is true and no error is thrown.
-      loading = ButtonProvider.loadingValue(buttonKey: widget.buttonKey!, ref: ref);
-      enabled = ButtonProvider.enabledValue(buttonKey: widget.buttonKey!, ref: ref);
+      loading =
+          ButtonProvider.loadingValue(buttonKey: widget.buttonKey!, ref: ref);
+      enabled =
+          ButtonProvider.enabledValue(buttonKey: widget.buttonKey!, ref: ref);
     }
     return Padding(
       padding: widget.margin ?? EdgeInsets.zero,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:troco/view/auth-screen/auth-screen.dart';
 import 'package:troco/view/otp-screen/otp-screen.dart';
 import 'package:troco/view/register-screen/add-pin-screen.dart';
+import 'package:troco/view/register-screen/add-profile-screen.dart';
 import 'package:troco/view/register-screen/register-success-screen.dart';
 import 'package:troco/view/register-screen/setup-account-screen.dart';
 import 'package:troco/view/splash-screen/splash-screen.dart';
@@ -15,9 +16,10 @@ class Routes {
   static const authRoute = "/auth";
   static const loginRoute = "/login";
   static const registerRoute = "/register";
-  static const setupAccountRoute = '/setup-account';
   static const otpLoginRoute = "/otp-login";
   static const otpRegisterRoute = "/otp-register";
+  static const setupAccountRoute = '/setup-account';
+  static const addProfileRoute = '/add-profile';
   static const addTransactionPinRoute = "/add-transaction-pin";
   static const registerSuccessRoute = "/register-success";
 }
@@ -41,6 +43,8 @@ class RouteGenerator {
             ));
       case Routes.setupAccountRoute:
         return MaterialPageRoute(settings: routeSettings,builder: (context) => const SetupAccountScreen());
+      case Routes.addProfileRoute:
+      return MaterialPageRoute(settings: routeSettings,builder: (context) => const AddProfileScreen(),);
       case Routes.addTransactionPinRoute:
         return MaterialPageRoute(
           settings: routeSettings,
