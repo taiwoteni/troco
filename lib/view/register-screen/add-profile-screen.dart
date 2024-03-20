@@ -22,6 +22,7 @@ class AddProfileScreen extends ConsumerStatefulWidget {
 
 class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
   final UniqueKey buttonKey = UniqueKey();
+  String? profilePath;
 
   @override
   void initState() {
@@ -157,7 +158,16 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
     return Container(
       width: double.maxFinite,
       alignment: Alignment.center,
-      child: const PickProfileIcon(size: IconSizeManager.extralarge * 1.8),
+      child: PickProfileIcon(
+          onPicked: (path) {
+            setState(() => profilePath = path);
+            if (path == null) {
+              ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
+            } else {
+              ButtonProvider.enable(buttonKey: buttonKey, ref: ref);
+            }
+          },
+          size: IconSizeManager.extralarge * 1.8),
     );
   }
 

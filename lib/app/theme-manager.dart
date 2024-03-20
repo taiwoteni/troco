@@ -16,6 +16,7 @@ class ThemeManager {
 
   static SystemUiOverlayStyle getSystemUiOverlayStyle() {
     return SystemUiOverlayStyle.light.copyWith(
+        statusBarBrightness: Brightness.light,
         statusBarColor: ColorManager.background,
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: ColorManager.background,

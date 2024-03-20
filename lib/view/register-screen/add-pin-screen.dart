@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/app/asset-manager.dart';
 import 'package:troco/app/routes-manager.dart';
+import 'package:troco/app/theme-manager.dart';
 import 'package:troco/custom-views/button.dart';
 import 'package:troco/custom-views/otp-input-field.dart';
 import 'package:troco/custom-views/spacer.dart';
@@ -30,6 +32,8 @@ class _SetTransactionPinScreenState
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      SystemChrome.setSystemUIOverlayStyle(
+          ThemeManager.getSystemUiOverlayStyle());
       ButtonProvider.disable(buttonKey: key, ref: ref);
     });
   }
@@ -211,7 +215,8 @@ class _SetTransactionPinScreenState
   Widget finishButton() {
     return CustomButton(
       buttonKey: key,
-      onPressed: () => Navigator.pushReplacementNamed(context, Routes.registerSuccessRoute),
+      onPressed: () =>
+          Navigator.pushReplacementNamed(context, Routes.registerSuccessRoute),
       label: "SET",
       usesProvider: true,
       margin: const EdgeInsets.symmetric(

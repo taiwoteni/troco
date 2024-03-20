@@ -40,6 +40,7 @@ dependencies:
   flutter_riverpod: ^2.4.10
   dropdown_textfield: ^1.0.8
   image_picker: ^1.0.7
+  croppy: ^1.1.4
 
 dev_dependencies:
   flutter_test:

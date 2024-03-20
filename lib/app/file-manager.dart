@@ -5,6 +5,7 @@ class FileManager{
     final XFile? file = await picker.pickImage(source: imageSource?? ImageSource.gallery);
     return file;
   }
+  
   static Future<XFile?> pickVideo({final ImageSource? imageSource})async{
   ImagePicker picker = ImagePicker();
     final XFile? file = await picker.pickVideo(source: imageSource??ImageSource.gallery);

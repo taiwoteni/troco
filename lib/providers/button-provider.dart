@@ -37,10 +37,12 @@ class ButtonProvider {
   }
 
   static void disable(
-      {required final UniqueKey buttonKey, required WidgetRef ref}) {
+      {required final UniqueKey buttonKey,
+      required WidgetRef ref,
+      bool? disableAll}) {
     final buttonProvider = _buttonProviders[_buttonKeys.indexOf(buttonKey)];
     final bool loading = ref.watch(buttonProvider)["loading"] as bool;
-    ref.watch(enabledProvider.notifier).state = false;
+    ref.watch(enabledProvider.notifier).state = !(disableAll ?? false);
     ref.read(buttonProvider.notifier).state = {
       "loading": loading,
       "enabled": false
