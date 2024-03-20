@@ -56,7 +56,7 @@ class ButtonProvider {
     ref.watch(enabledProvider.notifier).state = true;
     ref.read(buttonProvider.notifier).state = {
       "loading": loading,
-      "enabled": true
+      "enabled": true,
     };
   }
 
