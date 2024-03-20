@@ -1,4 +1,4 @@
 
 This screen is to simply show the that the registeration process is completed.
-This would be shown immediately after the verification page i.e OtpScreen.
+This would be shown immediately after the add transaction pin i.e SetTransactionPinScreen.
 It is not shown after login is completed rather, Login takes thou to the next page which is the HomePage.
