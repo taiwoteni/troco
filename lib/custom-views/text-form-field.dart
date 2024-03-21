@@ -6,23 +6,29 @@ import 'package:troco/app/color-manager.dart';
 import 'package:troco/app/font-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/app/theme-manager.dart';
-import 'package:troco/providers/enabled-provider.dart';
 
 class InputFormField extends ConsumerStatefulWidget {
   final TextEditingController? controller;
-  final String Function(String? value)? onValidate;
+  final String? Function(String? value)? validator;
   final void Function(String? value)? onSaved;
+  final Future<String?> Function()? onRedirect;
   final String label;
+  final String? prefixText;
+  final bool showLeadingIcon, readOnly;
   final TextInputType inputType;
   final bool isPassword;
   final Widget prefixIcon;
   const InputFormField({
     super.key,
-    this.onValidate,
+    this.validator,
     this.onSaved,
+    this.prefixText,
     required this.label,
     required this.prefixIcon,
     this.inputType = TextInputType.text,
+    this.onRedirect,
+    this.showLeadingIcon = false,
+    this.readOnly = false,
     this.isPassword = false,
     this.controller,
   });
@@ -33,36 +39,44 @@ class InputFormField extends ConsumerStatefulWidget {
 
 class _InputFormFieldState extends ConsumerState<InputFormField> {
   bool obscure = false;
+  late TextEditingController controller;
   @override
   void initState() {
     obscure = widget.isPassword ? true : false;
+    controller = widget.controller ?? TextEditingController();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      onSaved: widget.onSaved,
-      validator: widget.onValidate,
-      obscureText: obscure,
-      autocorrect: !widget.isPassword,
-      enableSuggestions: !widget.isPassword,
-      controller: widget.controller,
-      cursorColor: ColorManager.themeColor,
-      cursorRadius: const Radius.circular(20),
-      readOnly: !ref.watch(enabledProvider),
-      keyboardType: widget.inputType,
-      style: TextStyle(
-          color: ColorManager.primary,
-          fontSize: FontSizeManager.medium,
-          fontWeight: FontWeightManager.medium,
-
-          fontFamily: 'Lato'),
-      decoration: InputDecoration(
+        autofocus: true,
+        onSaved: widget.onSaved,
+        validator: widget.validator,
+        onTap: () async {
+          if (widget.onRedirect != null) {
+            final s = await widget.onRedirect!();
+            setState(() {
+              controller.text = s ?? "";
+            });
+          }
+        },
+        obscureText: obscure,
+        autocorrect: !widget.isPassword,
+        enableSuggestions: !widget.isPassword,
+        controller: controller,
+        cursorColor: ColorManager.themeColor,
+        cursorRadius: const Radius.circular(20),
+        readOnly: widget.readOnly,
+        keyboardType: widget.inputType,
+        style: defaultStyle(),
+        decoration: InputDecoration(
           prefixIcon: Theme(
               data: ThemeManager.getApplicationTheme()
                   .copyWith(useMaterial3: false),
               child: widget.prefixIcon),
+          prefixText: widget.prefixText,
+          prefixStyle: defaultStyle().copyWith(color: ColorManager.accentColor),
           suffixIcon: widget.isPassword
               ? IconButton(
                   onPressed: () => setState(() => obscure = !obscure),
@@ -76,31 +90,48 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
                     color: ColorManager.themeColor,
                   ),
                 )
-              : null,
+              : widget.showLeadingIcon
+                  ? IconButton(
+                      onPressed: null,
+                      iconSize: IconSizeManager.regular,
+                      icon: Icon(
+                        Icons.arrow_drop_down_rounded,
+                        size: IconSizeManager.regular,
+                        color: ColorManager.themeColor,
+                      ),
+                    )
+                  : null,
           contentPadding: const EdgeInsets.symmetric(
               horizontal: SizeManager.medium * 1.2,
               vertical: SizeManager.medium * 1.4),
           floatingLabelBehavior: FloatingLabelBehavior.never,
           filled: true,
           fillColor: ColorManager.tertiary,
-          hintStyle: TextStyle(
-              color: ColorManager.secondary,
-              fontSize: FontSizeManager.medium,
-              fontWeight: FontWeightManager.medium,
-              fontFamily: 'Lato'),
+          hintStyle: defaultStyle().copyWith(color: ColorManager.secondary),
           hintText: widget.label,
-          enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                  color: ColorManager.themeColor, style: BorderStyle.none),
-              borderRadius: BorderRadius.circular(SizeManager.large)),
-          border: OutlineInputBorder(
-              borderSide: BorderSide(
-                  color: ColorManager.themeColor, style: BorderStyle.none),
-              borderRadius: BorderRadius.circular(SizeManager.large)),
-          focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                  color: ColorManager.themeColor, style: BorderStyle.none),
-              borderRadius: BorderRadius.circular(SizeManager.large))),
-    );
+          errorStyle: defaultStyle().copyWith(
+              color: ColorManager.accentColor,
+              fontSize: FontSizeManager.regular),
+          errorBorder: defaultBorder(),
+          focusedErrorBorder: defaultBorder(),
+          enabledBorder: defaultBorder(),
+          border: defaultBorder(),
+          focusedBorder: defaultBorder(),
+        ));
+  }
+
+  TextStyle defaultStyle() {
+    return TextStyle(
+        color: ColorManager.primary,
+        fontSize: FontSizeManager.medium,
+        fontWeight: FontWeightManager.medium,
+        fontFamily: 'Lato');
+  }
+
+  InputBorder defaultBorder() {
+    return OutlineInputBorder(
+        borderSide:
+            BorderSide(color: ColorManager.themeColor, style: BorderStyle.none),
+        borderRadius: BorderRadius.circular(SizeManager.large));
   }
 }

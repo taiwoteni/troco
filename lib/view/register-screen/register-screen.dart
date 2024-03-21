@@ -1,6 +1,8 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/app/asset-manager.dart';
 import 'package:troco/app/color-manager.dart';
@@ -10,18 +12,26 @@ import 'package:troco/custom-views/info-text.dart';
 import 'package:troco/custom-views/spacer.dart';
 import 'package:troco/custom-views/svg.dart';
 import 'package:troco/custom-views/text-form-field.dart';
+import 'package:troco/data/login-data.dart';
+import 'package:troco/providers/button-provider.dart';
 
 import '../../app/routes-manager.dart';
 import '../../custom-views/button.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final buttonKey = UniqueKey();
+  final formKey = GlobalKey<FormState>();
+  bool primaryPasswordError = false;
+  List<String> emails = [];
+  List<String> phoneNumbers = [];
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -35,6 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         body: SingleChildScrollView(
           child: Center(
             child: Form(
+              key: formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -45,6 +56,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: InputFormField(
                       inputType: TextInputType.emailAddress,
                       label: "email",
+                      validator: (value) {
+                        if (value == null) {
+                          return "* enter your email";
+                        }
+                        if (emails.contains(value.trim())) {
+                          return "* email already exists.";
+                        }
+                        return EmailValidator.validate(value) &&
+                                value.isNotEmpty
+                            ? null
+                            : "* enter a valid email.";
+                      },
+                      onSaved: (value) {
+                        LoginData.email = value?.trim();
+                      },
                       prefixIcon: IconButton(
                         onPressed: null,
                         iconSize: IconSizeManager.regular,
@@ -63,6 +89,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: InputFormField(
                       inputType: TextInputType.phone,
                       label: "phone",
+                      prefixText: "+234  ",
+                      validator: (value) {
+                        if (value == null) {
+                          return "* enter your phone number.";
+                        }
+                        if (phoneNumbers.contains(value.trim())) {
+                          return "* phone number already exists.";
+                        }
+                        return validatePhoneNumber(value.trim())
+                            ? null
+                            : "* enter valid phone number.";
+                      },
+                      onSaved: (value) {
+                        LoginData.password = value?.trim();
+                      },
                       prefixIcon: IconButton(
                         onPressed: null,
                         iconSize: IconSizeManager.regular,
@@ -81,6 +122,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       inputType: TextInputType.visiblePassword,
                       isPassword: true,
                       label: "password",
+                      validator: (value) {
+                        if (value == null) {
+                          setState(() {
+                            primaryPasswordError = true;
+                          });
+                          return "";
+                        }
+                        LoginData.password = value.trim();
+
+                        setState(() =>
+                            primaryPasswordError = !validatePassword(value));
+
+                        return null;
+                      },
+                      onSaved: (value) {
+                        LoginData.password = value?.trim();
+                      },
                       prefixIcon: IconButton(
                         onPressed: null,
                         iconSize: IconSizeManager.regular,
@@ -99,7 +157,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         horizontal: SizeManager.medium * 1.5),
                     child: InfoText(
                       text: "* should be at least 8 digits in length.",
-                      color: ColorManager.secondary,
+                      color: primaryPasswordError
+                          ? ColorManager.accentColor
+                          : ColorManager.secondary,
                     ),
                   ),
                   Padding(
@@ -109,11 +169,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         1.5,
                     child: InfoText(
                       text: "* should have at least a number and a letter.",
-                      color: ColorManager.secondary,
+                      color: primaryPasswordError
+                          ? ColorManager.accentColor
+                          : ColorManager.secondary,
                     ),
                   ),
                   regularSpacer(),
-
                   // Confirm password input field
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -123,6 +184,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       inputType: TextInputType.visiblePassword,
                       isPassword: true,
                       label: "confirm password",
+                      validator: (value) {
+                        if (value == null) {
+                          return "* enter a valid password.";
+                        }
+                        return LoginData.password == value.trim() &&
+                                value.isNotEmpty
+                            ? null
+                            : "* passwords don't match";
+                      },
                       prefixIcon: IconButton(
                         onPressed: null,
                         iconSize: IconSizeManager.regular,
@@ -136,9 +206,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   largeSpacer(),
                   CustomButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, Routes.otpRegisterRoute),
-                        buttonKey: UniqueKey(),
+                    onPressed: next,
+                    buttonKey: buttonKey,
                     usesProvider: true,
                     label: "REGISTER",
                     margin: const EdgeInsets.symmetric(
@@ -156,6 +225,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> next() async {
+    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    if (formKey.currentState!.validate() && !primaryPasswordError) {
+      formKey.currentState!.save();
+      await Future.delayed(const Duration(seconds: 2));
+      Navigator.pushNamed(context, Routes.otpRegisterRoute);
+    }
+
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+  }
+
+  Future<void> getEmailsandPhones() async {
+    // ..Logic to get all emails && phone numbers through Finbar's API.
+    // ..Numbers should be gotten in 10-digit form.
+    // ..Due to prefix text. NOTE !!!
+    // ..It should be called durring init state
   }
 
   PreferredSizeWidget appBar() {
@@ -243,5 +330,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ..onTap = () =>
                     Navigator.pushReplacementNamed(context, Routes.loginRoute))
         ]));
+  }
+
+  bool validatePhoneNumber(String number) {
+    // Define the regex pattern for a phone number
+    RegExp regExp = RegExp(r'^\d{10,10}$');
+    // Check if the input matches the regex pattern
+    return regExp.hasMatch(number.trim());
+  }
+
+  bool validatePassword(String input) {
+    RegExp regExp = RegExp(r'^(?=.*[A-Za-z])(?=.*\d).{8,}$');
+    return regExp.hasMatch(input);
   }
 }

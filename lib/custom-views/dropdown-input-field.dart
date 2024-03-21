@@ -26,7 +26,7 @@ class DropdownInputFormField extends ConsumerStatefulWidget {
   /// The [prefixIcon] of the dropdown widget.
   /// Can be null if u don't want to show it.
   final Widget? prefixIcon;
-  final String Function(dynamic value)? onValidate;
+  final String? Function(String? value)? onValidate;
 
   /// [onChanged] is a callback called whenever the user selects an item.
   /// The [onChanged.value] parameter is String since it's the visual representation
@@ -91,6 +91,7 @@ class _DropdownInputFormFieldState
           elevation: 1,
           focusColor: Colors.transparent,
           validator: widget.onValidate,
+          onSaved: widget.onChanged,
           onChanged: widget.onChanged,
           padding: EdgeInsets.zero,
           decoration: decoration(),
@@ -117,21 +118,23 @@ class _DropdownInputFormFieldState
             vertical: SizeManager.medium * 1.3),
         filled: true,
         fillColor: ColorManager.tertiary,
-        enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-                color: ColorManager.themeColor, style: BorderStyle.none),
-            borderRadius: BorderRadius.circular(SizeManager.large)),
-        disabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-                color: ColorManager.themeColor, style: BorderStyle.none),
-            borderRadius: BorderRadius.circular(SizeManager.large)),
-        border: OutlineInputBorder(
-            borderSide: BorderSide(
-                color: ColorManager.themeColor, style: BorderStyle.none),
-            borderRadius: BorderRadius.circular(SizeManager.large)),
-        focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-                color: ColorManager.themeColor, style: BorderStyle.none),
-            borderRadius: BorderRadius.circular(SizeManager.large)));
+        errorStyle: TextStyle(
+            color: ColorManager.accentColor,
+            fontSize: FontSizeManager.regular,
+            fontWeight: FontWeightManager.medium,
+            fontFamily: 'Lato'),
+        enabledBorder: defaultBorder(),
+        disabledBorder: defaultBorder(),
+        border: defaultBorder(),
+        focusedBorder: defaultBorder(),
+        errorBorder: defaultBorder(),
+        focusedErrorBorder: defaultBorder());
+  }
+
+  InputBorder defaultBorder() {
+    return OutlineInputBorder(
+        borderSide:
+            BorderSide(color: ColorManager.themeColor, style: BorderStyle.none),
+        borderRadius: BorderRadius.circular(SizeManager.large));
   }
 }
