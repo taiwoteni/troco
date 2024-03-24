@@ -2,21 +2,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/app/asset-manager.dart';
 import 'package:troco/app/color-manager.dart';
 import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/app/theme-manager.dart';
 import 'package:troco/custom-views/lottie.dart';
+import 'package:troco/providers/client-provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   bool showLoading = false;
 
   @override
@@ -31,7 +33,9 @@ class _SplashScreenState extends State<SplashScreen> {
         showLoading = true;
       });
       await Future.delayed(const Duration(seconds: 5));
-      Navigator.pushReplacementNamed(context, Routes.authRoute);
+      final isLoggedIn = ref.watch(ClientProvider.userProvider) != null;
+      Navigator.pushReplacementNamed(
+          context, isLoggedIn ? Routes.homeRoute : Routes.authRoute);
     });
   }
 

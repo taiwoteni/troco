@@ -36,9 +36,10 @@ class _SearchPlaceScreenState extends State<SearchPlaceScreen> {
       height: double.maxFinite,
       padding: const EdgeInsets.only(top: SizeManager.large),
       decoration: BoxDecoration(
-          color: ColorManager.background,
-          borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(SizeManager.large))),
+        color: ColorManager.background,
+        // borderRadius: const BorderRadius.vertical(
+        //     top: Radius.circular(SizeManager.large))
+      ),
       child: Column(
         children: [
           const DragHandle(),

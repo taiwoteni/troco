@@ -1,33 +1,38 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:troco/app/routes-manager.dart';
-import 'package:troco/custom-views/button.dart';
-import 'package:troco/custom-views/otp-input-field.dart';
-import 'package:troco/data/login-data.dart';
-import 'package:troco/providers/button-provider.dart';
-import 'package:troco/providers/timer-provider.dart';
+import 'package:troco/custom-views/lottie.dart';
 
 import '../../app/asset-manager.dart';
 import '../../app/color-manager.dart';
 import '../../app/font-manager.dart';
 import '../../app/size-manager.dart';
+import '../../custom-views/button.dart';
+import '../../custom-views/otp-input-field.dart';
 import '../../custom-views/spacer.dart';
 import '../../custom-views/svg.dart';
+import '../../data/login-data.dart';
+import '../../providers/button-provider.dart';
+import '../../providers/timer-provider.dart';
 
-class OTPScreen extends ConsumerStatefulWidget {
-  final bool isFromLogin;
-  const OTPScreen({super.key, required this.isFromLogin});
+class OTPForgetPasswordScreen extends ConsumerStatefulWidget {
+  final bool isFromLogin = true;
+  const OTPForgetPasswordScreen({super.key});
 
   @override
-  ConsumerState<OTPScreen> createState() => _OTPScreenState();
+  ConsumerState<OTPForgetPasswordScreen> createState() =>
+      _OTPForgetPasswordScreenState();
 }
 
-class _OTPScreenState extends ConsumerState<OTPScreen> {
+class _OTPForgetPasswordScreenState
+    extends ConsumerState<OTPForgetPasswordScreen> {
   final UniqueKey buttonKey = UniqueKey();
   late bool isEmail;
   bool timerIntialized = false;
+  bool resetPassword = false;
   bool resendCode = false;
   late TimerProvider timerProvider;
 
@@ -50,12 +55,11 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
   void initState() {
     /// We don't need to check if phone number is empty
     /// because whenever we navigate to login screen, Login Data is cleared.
-    /// And it is from login screen that we come to OTPScreen with the [isFromLogin] argument
+    /// And it is from login screen that we come to OTPForgetPasswordScreen.The [isFromLogin] argument
     /// being true.
-
     bool emailNull = LoginData.email == null;
     bool emailEmpty = emailNull ? true : LoginData.email!.trim().isEmpty;
-    isEmail = widget.isFromLogin ? !emailEmpty : false;
+    isEmail = !emailEmpty;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
@@ -94,50 +98,52 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-          top: MediaQuery.of(context).viewPadding.top,
-          bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: ColorManager.background,
-        appBar: appBar(),
-        body: SingleChildScrollView(
-          child: Center(
-            child: Form(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SizeManager.medium,
-                    vertical: SizeManager.regular,
-                  ),
-                  child: Text(
-                    "Verification Code",
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                        fontFamily: 'Lato',
-                        color: ColorManager.primary,
-                        fontSize: FontSizeManager.extralarge,
-                        fontWeight: FontWeightManager.extrabold),
-                  ),
+    return resetPassword
+        ? const ResetComplete()
+        : Padding(
+            padding: EdgeInsets.only(
+                top: MediaQuery.of(context).viewPadding.top,
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              backgroundColor: ColorManager.background,
+              appBar: appBar(),
+              body: SingleChildScrollView(
+                child: Center(
+                  child: Form(
+                      child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: SizeManager.medium,
+                          vertical: SizeManager.regular,
+                        ),
+                        child: Text(
+                          "Verify ${isEmail ? "Email" : "Phone Number"}",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                              fontFamily: 'Lato',
+                              color: ColorManager.primary,
+                              fontSize: FontSizeManager.extralarge,
+                              fontWeight: FontWeightManager.extrabold),
+                        ),
+                      ),
+                      mediumSpacer(),
+                      descriptionWidget(),
+                      mediumSpacer(),
+                      otpRow(),
+                      regularSpacer(),
+                      resendCodeWidget(),
+                      regularSpacer(),
+                      buttonWidget()
+                    ],
+                  )),
                 ),
-                mediumSpacer(),
-                descriptionWidget(),
-                mediumSpacer(),
-                otpRow(),
-                regularSpacer(),
-                resendCodeWidget(),
-                regularSpacer(),
-                buttonWidget()
-              ],
-            )),
-          ),
-        ),
-      ),
-    );
+              ),
+            ),
+          );
   }
 
   Widget buttonWidget() {
@@ -147,12 +153,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         Future.delayed(const Duration(seconds: 5)).then((value) {
           ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-          if (widget.isFromLogin) {
-            Navigator.pushNamedAndRemoveUntil(
-                context, Routes.homeRoute, (route) => false);
-          } else {
-            Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
-          }
+          setState(() => resetPassword = true);
         });
       },
       label: "VERIFY",
@@ -218,7 +219,9 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
       ),
       child: RichText(
         text: TextSpan(style: defaultStyle, children: [
-          const TextSpan(text: "We just sent a 5-digit verification code to\n"),
+          const TextSpan(
+              text:
+                  "Before we reset your password,\nWe just sent a 5-digit verification code to\n"),
           TextSpan(
               text: isEmail ? LoginData.email : LoginData.phoneNumber,
               style: defaultStyle.copyWith(color: ColorManager.primary)),
@@ -261,7 +264,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
                 ),
                 const Gap(16),
                 Text(
-                  "Verify ${isEmail ? "Email" : "Phone number"}",
+                  "Reset ${isEmail ? "Email" : "Phone number"}",
                   style: TextStyle(
                       color: ColorManager.primary,
                       fontFamily: 'Lato',
@@ -322,6 +325,71 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
               });
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class ResetComplete extends StatefulWidget {
+  const ResetComplete({super.key});
+
+  @override
+  State<ResetComplete> createState() => _ResetCompleteState();
+}
+
+class _ResetCompleteState extends State<ResetComplete> {
+  @override
+  Widget build(BuildContext context) {
+    Widget backButton() {
+      return Padding(
+        padding: const EdgeInsets.only(
+            left: SizeManager.regular,
+            right: SizeManager.regular,
+            bottom: SizeManager.extralarge),
+        child: CustomButton(
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
+          label: "BACK",
+          margin: const EdgeInsets.symmetric(
+              horizontal: SizeManager.regular, vertical: SizeManager.medium),
+        ),
+      );
+    }
+
+    return Container(
+      width: double.maxFinite,
+      height: double.maxFinite,
+      color: ColorManager.background,
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                LottieWidget(
+                  lottieRes: AssetManager.lottieFile(name: "reset"),
+                  size: const Size.square(IconSizeManager.extralarge * 2),
+                  loop: true,
+                  color: ColorManager.accentColor,
+                ),
+                mediumSpacer(),
+                Text(
+                  "Password Reset Complete.",
+                  style: TextStyle(
+                      color: ColorManager.primary,
+                      fontFamily: 'Lato',
+                      fontWeight: FontWeightManager.semibold,
+                      fontSize: FontSizeManager.large * 0.8),
+                ),
+              ],
+            ),
+          ),
+          backButton(),
         ],
       ),
     );

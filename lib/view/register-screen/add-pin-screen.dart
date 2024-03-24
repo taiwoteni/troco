@@ -3,12 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/app/asset-manager.dart';
-import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/theme-manager.dart';
 import 'package:troco/custom-views/button.dart';
 import 'package:troco/custom-views/otp-input-field.dart';
 import 'package:troco/custom-views/spacer.dart';
+import 'package:troco/data/login-data.dart';
 import 'package:troco/providers/button-provider.dart';
+import 'package:troco/view/register-screen/register-success-screen.dart';
 
 import '../../app/color-manager.dart';
 import '../../app/font-manager.dart';
@@ -26,6 +27,7 @@ class SetTransactionPinScreen extends ConsumerStatefulWidget {
 class _SetTransactionPinScreenState
     extends ConsumerState<SetTransactionPinScreen> {
   final UniqueKey key = UniqueKey();
+  bool registerSuccess = false;
   String pin1 = "", pin2 = "", pin3 = "", pin4 = "";
 
   @override
@@ -56,33 +58,35 @@ class _SetTransactionPinScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-          top: MediaQuery.of(context).viewPadding.top,
-          bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Scaffold(
-        appBar: appBar(),
-        resizeToAvoidBottomInset: false,
-        backgroundColor: ColorManager.background,
-        body: SingleChildScrollView(
-          child: Center(
-            child: Form(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                titleWidget(),
-                mediumSpacer(),
-                descriptionWidget(),
-                mediumSpacer(),
-                pinRow(),
-                mediumSpacer(),
-                finishButton()
-              ],
-            )),
-          ),
-        ),
-      ),
-    );
+    return registerSuccess
+        ? const RegisterSuccessScreen()
+        : Padding(
+            padding: EdgeInsets.only(
+                top: MediaQuery.of(context).viewPadding.top,
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Scaffold(
+              appBar: appBar(),
+              resizeToAvoidBottomInset: false,
+              backgroundColor: ColorManager.background,
+              body: SingleChildScrollView(
+                child: Center(
+                  child: Form(
+                      child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      titleWidget(),
+                      mediumSpacer(),
+                      descriptionWidget(),
+                      mediumSpacer(),
+                      pinRow(),
+                      mediumSpacer(),
+                      finishButton()
+                    ],
+                  )),
+                ),
+              ),
+            ),
+          );
   }
 
   PreferredSizeWidget appBar() {
@@ -215,8 +219,14 @@ class _SetTransactionPinScreenState
   Widget finishButton() {
     return CustomButton(
       buttonKey: key,
-      onPressed: () =>
-          Navigator.pushReplacementNamed(context, Routes.registerSuccessRoute),
+      onPressed: () async {
+        ButtonProvider.startLoading(buttonKey: key, ref: ref);
+        LoginData.transactionPin = pin1 + pin2 + pin3 + pin4;
+        await Future.delayed(const Duration(seconds: 2));
+        // .... Logic to create user.
+        setState(() => registerSuccess = true);
+        // Navigator.pushReplacementNamed(context, Routes.registerSuccessRoute);
+      },
       label: "SET",
       usesProvider: true,
       margin: const EdgeInsets.symmetric(

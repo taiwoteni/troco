@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:nigerian_states_and_lga/nigerian_states_and_lga.dart';
 
 class ValuesManager {
@@ -5,7 +7,7 @@ class ValuesManager {
   static const List<String> members = ["Teninlanimi Taiwo", "Micheal", "..."];
   static const String dummyDescription =
       "It is a long established fact with a\nreadable content of a page when\n looking at its layout.";
-  static const double bottomBarHeight = 65.0;
+  static const String USER_STORAGE_KEY = "userData";
 
   static Map<String, List<String>> allCitiesAndState() {
     Map<String, List<String>> nigerianStatesAndCities = {};

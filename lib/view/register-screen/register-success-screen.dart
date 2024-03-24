@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/app/asset-manager.dart';
 import 'package:troco/app/font-manager.dart';
+import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/custom-views/button.dart';
 import 'package:troco/custom-views/lottie.dart';
+import 'package:troco/data/login-data.dart';
+import 'package:troco/providers/client-provider.dart';
 import '../../app/color-manager.dart';
 
-class RegisterSuccessScreen extends StatefulWidget {
+class RegisterSuccessScreen extends ConsumerStatefulWidget {
   const RegisterSuccessScreen({super.key});
 
   @override
-  State<RegisterSuccessScreen> createState() => _RegisterSuccessScreenState();
+  ConsumerState<RegisterSuccessScreen> createState() =>
+      _RegisterSuccessScreenState();
 }
 
-class _RegisterSuccessScreenState extends State<RegisterSuccessScreen> {
+class _RegisterSuccessScreenState extends ConsumerState<RegisterSuccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +53,7 @@ class _RegisterSuccessScreenState extends State<RegisterSuccessScreen> {
         Text(
           "Registeration Complete.",
           style: TextStyle(
-              color: ColorManager.primary,
+              color: ColorManager.secondary,
               fontFamily: 'Lato',
               fontWeight: FontWeightManager.semibold,
               fontSize: FontSizeManager.large * 0.9),
@@ -64,6 +69,11 @@ class _RegisterSuccessScreenState extends State<RegisterSuccessScreen> {
           right: SizeManager.regular,
           bottom: SizeManager.extralarge),
       child: CustomButton(
+        onPressed: () {
+          ClientProvider.saveUserData(ref: ref, json: LoginData.toClientJson());
+          Navigator.pushNamedAndRemoveUntil(
+              context, Routes.homeRoute, (route) => false);
+        },
         label: "LET'S GO",
         margin: const EdgeInsets.symmetric(
             horizontal: SizeManager.regular, vertical: SizeManager.medium),

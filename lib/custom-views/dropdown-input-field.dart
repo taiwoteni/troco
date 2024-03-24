@@ -118,8 +118,8 @@ class _DropdownInputFormFieldState
             vertical: SizeManager.medium * 1.3),
         filled: true,
         fillColor: ColorManager.tertiary,
-        errorStyle: TextStyle(
-            color: ColorManager.accentColor,
+        errorStyle: const TextStyle(
+            color: Colors.red,
             fontSize: FontSizeManager.regular,
             fontWeight: FontWeightManager.medium,
             fontFamily: 'Lato'),

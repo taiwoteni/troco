@@ -89,7 +89,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     child: InputFormField(
                       inputType: TextInputType.phone,
                       label: "phone",
-                      prefixText: "+234  ",
                       validator: (value) {
                         if (value == null) {
                           return "* enter your phone number.";
@@ -102,7 +101,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             : "* enter valid phone number.";
                       },
                       onSaved: (value) {
-                        LoginData.password = value?.trim();
+                        if (value == null) {
+                          return;
+                        }
+
+                        /// Since onSaved means that there was no
+                        /// error when validating then it can only be either
+                        /// 11 digits or 14 digits.
+                        bool is11 = value.length == 11 && !value.contains("+");
+                        LoginData.phoneNumber =
+                            is11 ? "+234${value.trim()}" : value.trim();
                       },
                       prefixIcon: IconButton(
                         onPressed: null,
@@ -158,7 +166,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     child: InfoText(
                       text: "* should be at least 8 digits in length.",
                       color: primaryPasswordError
-                          ? ColorManager.accentColor
+                          ? Colors.red
                           : ColorManager.secondary,
                     ),
                   ),
@@ -170,7 +178,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     child: InfoText(
                       text: "* should have at least a number and a letter.",
                       color: primaryPasswordError
-                          ? ColorManager.accentColor
+                          ? Colors.red
                           : ColorManager.secondary,
                     ),
                   ),
@@ -332,11 +340,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ]));
   }
 
-  bool validatePhoneNumber(String number) {
+  bool validatePhoneNumber(String phoneNumber) {
+    final String number = phoneNumber.trim();
     // Define the regex pattern for a phone number
-    RegExp regExp = RegExp(r'^\d{10,10}$');
+    RegExp regExp = RegExp(r'^\d{11,14}$');
     // Check if the input matches the regex pattern
-    return regExp.hasMatch(number.trim());
+    bool is11 = number.length == 11 && !number.contains("+");
+    bool is14 = number.length == 14 && number.startsWith("+234");
+    bool is13 = number.length == 13 && number.startsWith("234");
+    bool is12 = number.length == 12;
+    return (regExp.hasMatch(number) || is11 || is14) && !is13 && !is12;
   }
 
   bool validatePassword(String input) {

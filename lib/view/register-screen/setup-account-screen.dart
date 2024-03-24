@@ -161,6 +161,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
         setState(() {
           this.role = role;
         });
+        LoginData.category = role;
       },
       value:
           role == null ? "" : CatgoryConverter.convertToString(category: role!),
@@ -273,7 +274,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
       padding: const EdgeInsets.symmetric(
           horizontal: SizeManager.medium, vertical: SizeManager.regular),
       child: InputFormField(
-        inputType: TextInputType.name,
+        inputType: TextInputType.streetAddress,
         label: "address",
         validator: (value) {
           if (value == null) {
@@ -322,7 +323,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
             },
           );
           setState(() {
-            state = answer; 
+            state = answer;
             city = null;
           });
           return answer;
@@ -365,6 +366,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
           final answer = await showModalBottomSheet<String?>(
             isScrollControlled: true,
             enableDrag: true,
+            useSafeArea: true,
             backgroundColor: ColorManager.background,
             context: context,
             builder: (context) {
@@ -438,7 +440,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
           top: SizeManager.regular,
           bottom: SizeManager.regular),
       child: InputFormField(
-        inputType: TextInputType.name,
+        inputType: TextInputType.phone,
         label: "zip code",
         validator: (value) {
           if (value == null) {

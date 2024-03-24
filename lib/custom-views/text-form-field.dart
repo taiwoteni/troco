@@ -11,20 +11,23 @@ class InputFormField extends ConsumerStatefulWidget {
   final TextEditingController? controller;
   final String? Function(String? value)? validator;
   final void Function(String? value)? onSaved;
+  final void Function(String value)? onChanged;
   final Future<String?> Function()? onRedirect;
   final String label;
-  final String? prefixText;
+  final String? prefixText,errorText;
   final bool showLeadingIcon, readOnly;
   final TextInputType inputType;
   final bool isPassword;
   final Widget prefixIcon;
   const InputFormField({
     super.key,
+    this.onChanged,
     this.validator,
     this.onSaved,
     this.prefixText,
     required this.label,
     required this.prefixIcon,
+    this.errorText,
     this.inputType = TextInputType.text,
     this.onRedirect,
     this.showLeadingIcon = false,
@@ -51,6 +54,7 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
   Widget build(BuildContext context) {
     return TextFormField(
         autofocus: true,
+        onChanged: widget.onChanged,
         onSaved: widget.onSaved,
         validator: widget.validator,
         onTap: () async {
@@ -109,8 +113,9 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
           fillColor: ColorManager.tertiary,
           hintStyle: defaultStyle().copyWith(color: ColorManager.secondary),
           hintText: widget.label,
+          errorText: widget.errorText,
           errorStyle: defaultStyle().copyWith(
-              color: ColorManager.accentColor,
+              color: Colors.red,
               fontSize: FontSizeManager.regular),
           errorBorder: defaultBorder(),
           focusedErrorBorder: defaultBorder(),

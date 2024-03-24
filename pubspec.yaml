@@ -43,6 +43,10 @@ dependencies:
   croppy: ^1.1.4
   email_validator: ^2.1.17
   nigerian_states_and_lga: ^1.0.0
+  nigerian_phone_number_validator: ^0.0.1
+  shared_preferences: ^2.2.2
+  carousel_slider: ^4.2.1
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
@@ -96,6 +100,18 @@ flutter:
           weight: 200
         - asset: assets/fonts/Lato-Black.ttf
           weight: 600
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand-Bold.ttf
+          weight: 800
+        - asset: assets/fonts/Quicksand-SemiBold.ttf
+          weight: 700
+        - asset: assets/fonts/Quicksand-Medium.ttf
+          weight: 600
+        - asset: assets/fonts/Quicksand-Regular.ttf
+          weight: 500
+        - asset: assets/fonts/Quicksand-Light.ttf
+          weight: 200
 
   #         style: italic
   #   - family: Trajan Pro

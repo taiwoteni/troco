@@ -6,6 +6,7 @@ import 'package:troco/app/routes-manager.dart';
 import 'package:troco/custom-views/button.dart';
 import 'package:troco/custom-views/pick-profile-widget.dart';
 import 'package:troco/custom-views/spacer.dart';
+import 'package:troco/data/login-data.dart';
 import 'package:troco/providers/button-provider.dart';
 
 import '../../app/asset-manager.dart';
@@ -174,8 +175,10 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
   Widget nextButton() {
     return CustomButton(
       buttonKey: buttonKey,
-      onPressed: () =>
-          Navigator.pushNamed(context, Routes.addTransactionPinRoute),
+      onPressed: (){
+        LoginData.profile = profilePath;
+        Navigator.pushNamed(context, Routes.addTransactionPinRoute);
+      },
       label: "NEXT",
       usesProvider: true,
       margin: const EdgeInsets.symmetric(

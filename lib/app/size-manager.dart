@@ -9,6 +9,10 @@ class SizeManager {
   static const double large = 20.0;
   /// The [extralarge] size is the largest size. It is 32.0 by default
   static const double extralarge = 32.0;
+
+  /// The [bottomBarHeight] is the height of the HomeScreen's bottom bar.
+  /// It is 65.0 by default.
+  static const double bottomBarHeight = 68.0;
 }
 
 class IconSizeManager {
