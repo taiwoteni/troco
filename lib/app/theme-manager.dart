@@ -30,4 +30,27 @@ class ThemeManager {
         systemNavigationBarColor: ColorManager.themeColor,
         systemNavigationBarIconBrightness: Brightness.light);
   }
+  static SystemUiOverlayStyle getGroupsUiOverlayStyle() {
+    return SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: ColorManager.background,
+        systemNavigationBarIconBrightness: Brightness.dark);
+  }
+  
+  static SystemUiOverlayStyle getWalletUiOverlayStyle() {
+    return SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: ColorManager.background,
+        systemNavigationBarIconBrightness: Brightness.dark);
+  }
+
+  static SystemUiOverlayStyle getHomeUiOverlayStyle() {
+    return SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: ColorManager.background,
+        systemNavigationBarIconBrightness: Brightness.dark);
+  }
 }

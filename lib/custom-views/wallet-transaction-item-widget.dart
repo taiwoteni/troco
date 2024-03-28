@@ -6,17 +6,16 @@ import 'package:troco/app/color-manager.dart';
 import 'package:troco/app/font-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/custom-views/svg.dart';
-import 'package:troco/data/converters.dart';
 import 'package:troco/data/enums.dart';
 import 'package:troco/models/transaction.dart';
 
-class TransactionItemWidget extends StatelessWidget {
+class WalletTransactionWidget extends StatelessWidget {
   final Transaction transaction;
-  const TransactionItemWidget({super.key, required this.transaction});
+  const WalletTransactionWidget({super.key, required this.transaction});
 
   @override
   Widget build(BuildContext context) {
-    bool isBuying = transaction.transactionPurpose == TransactionPurpose.Buying;
+    bool isDebit = transaction.transactionPurpose == TransactionPurpose.Buying;
     Color color = transaction.transactionPurpose == TransactionPurpose.Buying
         ? Colors.deepOrange
         : ColorManager.accentColor;
@@ -62,8 +61,7 @@ class TransactionItemWidget extends StatelessWidget {
               fontFamily: 'Lato',
               fontSize: FontSizeManager.medium,
               fontWeight: FontWeightManager.semibold),
-          subtitle: Text(TransactionConverter.convertToStringStatus(
-              status: transaction.transactionStatus)),
+          subtitle: const Text("25 Mar 2024 - 21:19 PM"),
           subtitleTextStyle: TextStyle(
               color: ColorManager.secondary,
               fontFamily: 'Quicksand',
@@ -76,14 +74,15 @@ class TransactionItemWidget extends StatelessWidget {
             decoration: BoxDecoration(
                 shape: BoxShape.circle, color: color.withOpacity(0.2)),
             child: SvgIcon(
-              svgRes: AssetManager.svgFile(name: isBuying ? "buy" : "delivery"),
+              angle: isDebit ? 225 : 90,
+              svgRes: AssetManager.svgFile(name: "plane"),
               color: color,
               size: const Size.square(IconSizeManager.regular),
             ),
           ),
-          trailing: Text("$formattedNumber NG"),
+          trailing: Text("${isDebit ? "-" : "+"}$formattedNumber NG"),
           leadingAndTrailingTextStyle: TextStyle(
-              color: ColorManager.accentColor,
+              color: color,
               fontFamily: 'Lato',
               fontSize: FontSizeManager.medium * 0.8,
               fontWeight: FontWeightManager.bold),

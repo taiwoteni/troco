@@ -21,8 +21,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: ColorManager.background,
       extendBody: true,
       body: Padding(
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).viewPadding.top,
+        padding: const EdgeInsets.only(
           bottom: SizeManager.regular,
         ),
         child: homeItems[ref.watch(homeProvider)].page,

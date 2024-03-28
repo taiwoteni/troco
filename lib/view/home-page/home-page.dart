@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:troco/app/asset-manager.dart';
 import 'package:troco/app/color-manager.dart';
 import 'package:troco/app/font-manager.dart';
@@ -11,12 +13,13 @@ import 'package:troco/app/theme-manager.dart';
 import 'package:troco/custom-views/profile-icon.dart';
 import 'package:troco/custom-views/spacer.dart';
 import 'package:troco/custom-views/svg.dart';
-import 'package:troco/custom-views/transaction-item-widget.dart';
 import 'package:troco/models/client.dart';
 import 'package:troco/providers/client-provider.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:troco/view/clippers/bottom-rounded.dart';
 
+import '../../custom-views/transaction-item-widget.dart';
 import '../../models/transaction.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -33,7 +36,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
-          ThemeManager.getSystemUiOverlayStyle());
+          ThemeManager.getHomeUiOverlayStyle());
     });
   }
 
@@ -42,12 +45,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(top: SizeManager.medium),
         child: Column(
           children: [
             appBarWidget(),
-            largeSpacer(),
-            carouselWidget(),
             mediumSpacer(),
             latestTransactionsWidget(),
           ],
@@ -57,32 +57,56 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget appBarWidget() {
-    return Container(
+    return SizedBox(
       width: double.maxFinite,
-      padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      height: 342,
+      child: Stack(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ProfileIcon(
-                profile: DecorationImage(
-                    image: FileImage(
-                        File(ref.watch(ClientProvider.userProvider)!.profile)),
-                    fit: BoxFit.cover),
-                size: IconSizeManager.medium * 1.3,
+          ClipPath(
+            clipper: BottomRoundedClipper(),
+            child: Container(
+              width: double.maxFinite,
+              height: 290,
+              color: ColorManager.accentColor.withOpacity(0.8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Gap(MediaQuery.of(context).viewPadding.top),
+                  mediumSpacer(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: SizeManager.medium * 1.5),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ProfileIcon(
+                          profile: DecorationImage(
+                              image: FileImage(File(ref
+                                  .watch(ClientProvider.userProvider)!
+                                  .profile)),
+                              fit: BoxFit.cover),
+                          size: IconSizeManager.medium * 1.3,
+                        ),
+                        SvgIcon(
+                          svgRes: AssetManager.svgFile(name: "bell"),
+                          color: ColorManager.primaryDark,
+                          size: const Size.square(IconSizeManager.medium),
+                        )
+                      ],
+                    ),
+                  ),
+                  largeSpacer(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: SizeManager.medium * 1.5),
+                    child: nameWidget(),
+                  ),
+                ],
               ),
-              SvgIcon(
-                svgRes: AssetManager.svgFile(name: "bell"),
-                color: ColorManager.accentColor,
-                size: const Size.square(IconSizeManager.medium),
-              )
-            ],
+            ),
           ),
-          largeSpacer(),
-          nameWidget(),
+          Positioned(bottom: 0, child: carouselWidget()),
         ],
       ),
     );
@@ -91,7 +115,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget nameWidget() {
     final defaultStyle = TextStyle(
         fontFamily: 'Quicksand',
-        color: ColorManager.secondary,
+        color: ColorManager.background.withOpacity(0.8),
         height: 1.5,
         fontSize: FontSizeManager.large * 1.1,
         fontWeight: FontWeightManager.medium);
@@ -102,8 +126,8 @@ class _HomePageState extends ConsumerState<HomePage> {
           TextSpan(
               text: "${ref.watch(ClientProvider.userProvider)!.fullName}.",
               style: defaultStyle.copyWith(
-                  color: ColorManager.primary,
-                  fontWeight: FontWeightManager.semibold))
+                  color: ColorManager.primaryDark,
+                  fontWeight: FontWeightManager.bold))
         ]));
   }
 
@@ -111,9 +135,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     const defaultStyle = TextStyle(
         fontFamily: 'Quicksand',
         color: Colors.white,
-        fontSize: FontSizeManager.regular * 1.1,
+        fontSize: FontSizeManager.regular * 0.9,
         fontWeight: FontWeightManager.semibold);
-    return Padding(
+    return Container(
+      width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.symmetric(vertical: SizeManager.medium * 1.4),
       child: CarouselSlider.builder(
           itemCount: 3,
@@ -124,7 +149,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     horizontal: SizeManager.medium),
                 decoration: BoxDecoration(
                   color: index == 0
-                      ? Colors.green
+                      ? Colors.blue
                       : index == 1
                           ? Colors.purple
                           : Colors.red.shade700,
@@ -133,7 +158,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: Stack(
                   children: [
                     Positioned(
-                        bottom: -5,
+                        bottom: 10,
                         right: -5,
                         child: index == 0
                             ? completeIcon()
@@ -153,7 +178,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           "N100,000",
                           style: defaultStyle.copyWith(
                               fontWeight: FontWeightManager.bold,
-                              fontSize: FontSizeManager.extralarge * 1.1),
+                              fontSize: FontSizeManager.extralarge * 0.9),
                         ),
                         const Spacer(),
                         mediumSpacer(),
@@ -166,8 +191,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             autoPlay: true,
             scrollPhysics: const AlwaysScrollableScrollPhysics(),
             enlargeCenterPage: true,
-            viewportFraction: 0.7,
-            height: 130,
+            viewportFraction: 0.6,
+            height: 120,
             autoPlayInterval: const Duration(seconds: 6),
           )),
     );
@@ -176,7 +201,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget cancelIcon() {
     return Icon(
       CupertinoIcons.xmark,
-      size: IconSizeManager.extralarge * 1.5,
+      size: IconSizeManager.extralarge,
       color: Colors.white.withOpacity(0.4),
     );
   }
@@ -184,7 +209,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget completeIcon() {
     return Icon(
       CupertinoIcons.checkmark,
-      size: IconSizeManager.extralarge * 1.5,
+      size: IconSizeManager.extralarge,
       color: Colors.white.withOpacity(0.4),
     );
   }
@@ -192,36 +217,44 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget ongoingIcon() {
     return SvgIcon(
       svgRes: AssetManager.svgFile(name: 'transaction'),
-      size: const Size.square(IconSizeManager.extralarge * 1.4),
+      size: const Size.square(IconSizeManager.extralarge),
       color: Colors.white.withOpacity(0.4),
     );
   }
 
   Widget latestTransactionsWidget() {
     final defaultStyle = TextStyle(
-        fontFamily: 'Quicksand',
+        fontFamily: 'Lato',
         color: ColorManager.primary,
         fontSize: FontSizeManager.large,
         fontWeight: FontWeightManager.bold);
-    return Container(
+    return SizedBox(
       width: double.maxFinite,
-      padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Latest Transactions",
-            style: defaultStyle,
-            textAlign: TextAlign.start,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
+            child: Text(
+              "Latest Transactions",
+              style: defaultStyle,
+              textAlign: TextAlign.start,
+            ),
           ),
+          regularSpacer(),
           ListView.separated(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: SizeManager.small),
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               itemBuilder: (context, index) => TransactionItemWidget(
                     transaction: transactions()[index],
                   ),
-              separatorBuilder: (context, index) => mediumSpacer(),
+              separatorBuilder: (context, index) => Divider(
+                    thickness: 0.8,
+                    color: ColorManager.secondary.withOpacity(0.08),
+                  ),
               itemCount: transactions().length)
         ],
       ),

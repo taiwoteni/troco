@@ -283,7 +283,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
           return value.trim().isNotEmpty ? null : "* enter valid address.";
         },
         onSaved: (value) {
-          LoginData.businessName = value;
+          LoginData.address = value;
         },
         prefixIcon: IconButton(
           onPressed: null,
