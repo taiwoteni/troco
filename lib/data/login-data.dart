@@ -2,8 +2,12 @@ import '../models/client.dart';
 import 'converters.dart';
 import 'enums.dart';
 
+// TODO: REMOVE ID ONCE FINBAR GIVES API
+/// The id is only there for testing without @Finbar's ApIs
+/// Once API is given, You should remove it.
+
 class LoginData {
-  static String? phoneNumber, email, password, nearestBustop, transactionPin;
+  static String? phoneNumber, email, password, id, nearestBustop, transactionPin;
   static String? firstName,
       profile,
       lastName,
@@ -16,6 +20,7 @@ class LoginData {
   static int? long, lat;
 
   static void clear() {
+    id=null;
     phoneNumber = null;
     email = null;
     password = null;
@@ -36,6 +41,7 @@ class LoginData {
 
   static Map<dynamic, dynamic> toClientJson() {
     return {
+      "id":"sdhjdsjsdsds",
       "first name": firstName,
       "last name": lastName,
       "email": email,

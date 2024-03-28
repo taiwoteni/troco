@@ -77,6 +77,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
         padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
         child: FloatingActionButton(
           onPressed: null,
+          heroTag: "add-group",
           shape: const CircleBorder(),
           backgroundColor: ColorManager.accentColor,
           foregroundColor: Colors.white,

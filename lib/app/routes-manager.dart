@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:troco/data/login-data.dart';
 import 'package:troco/view/auth-screen/auth-screen.dart';
+import 'package:troco/view/chat-screen/chat-screen.dart';
 import 'package:troco/view/forget-password-screen/forget-password-otp.dart';
 import 'package:troco/view/forget-password-screen/forget-password.dart';
 import 'package:troco/view/home-screen/home-screen.dart';
@@ -11,6 +12,7 @@ import 'package:troco/view/register-screen/register-success-screen.dart';
 import 'package:troco/view/register-screen/setup-account-screen.dart';
 import 'package:troco/view/splash-screen/splash-screen.dart';
 
+import '../models/client.dart';
 import '../view/login-screen/login-screen.dart';
 import '../view/register-screen/register-screen.dart';
 
@@ -30,6 +32,10 @@ class Routes {
   static const registerSuccessRoute = "/register-success";
 
   static const homeRoute = "/home";
+
+  /// [chatRoute] is the route for the chat screen.
+  /// Must pass the recipient client as an argument!
+  static const chatRoute = "/chat";
 }
 
 class RouteGenerator {
@@ -61,6 +67,11 @@ class RouteGenerator {
       return MaterialPageRoute(settings: routeSettings,builder: (context) => const OTPForgetPasswordScreen());
       case Routes.homeRoute:
       return MaterialPageRoute(settings: routeSettings,builder: (context) => const HomeScreen(),);
+      case Routes.chatRoute:
+      return MaterialPageRoute(settings: routeSettings,builder: (context) {
+        final client = routeSettings.arguments as Client;
+        return ChatScreen(client: client);
+      },);
       default:
         return MaterialPageRoute(settings: routeSettings,builder: (context) => const SplashScreen());
     }

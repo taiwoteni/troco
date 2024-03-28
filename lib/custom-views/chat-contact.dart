@@ -5,19 +5,40 @@ import 'package:gap/gap.dart';
 import 'package:flutter/material.dart';
 import 'package:troco/app/color-manager.dart';
 import 'package:troco/app/font-manager.dart';
+import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/custom-views/profile-icon.dart';
 import 'package:troco/custom-views/spacer.dart';
+import 'package:troco/models/client.dart';
 import 'package:troco/models/transaction.dart';
 import 'package:troco/providers/client-provider.dart';
 
-class ChatContactWidget extends StatelessWidget {
+class ChatContactWidget extends ConsumerStatefulWidget {
   final Transaction transaction;
   const ChatContactWidget({super.key, required this.transaction});
 
   @override
+  ConsumerState<ChatContactWidget> createState() => _ChatContactWidgetState();
+}
+
+class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
+  late Transaction transaction;
+
+  @override
+  void initState() {
+    transaction = widget.transaction;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Color color = ColorManager.accentColor;
+
+    // TODO : REMOVE THIS CODE AND USE THE CONFIRM CLIENT NOT A DUMMY.
+    /// This is only to be done if Finbar hasn't given API yet.
+    final clientJson = ref.read(ClientProvider.userProvider)!.toJson();
+    clientJson["id"] = "dsddshuyewew";
+    Client client = Client.fromJson(json: clientJson);
 
     final messageStyle = TextStyle(
         color: color,
@@ -40,6 +61,8 @@ class ChatContactWidget extends StatelessWidget {
             //     ]),
           ),
           child: ListTile(
+              onTap: () => Navigator.pushNamed(context, Routes.chatRoute,
+                  arguments: client),
               dense: true,
               tileColor: Colors.transparent,
               contentPadding: const EdgeInsets.only(

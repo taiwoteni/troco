@@ -6,6 +6,8 @@ class Client{
   Map<dynamic,dynamic> _json;
   Client.fromJson({required final Map<dynamic,dynamic> json}):_json = json;
 
+
+  String get userId => _json["id"] ?? "7832u8923";
   String get firstName => _json["first name"];
   String get lastName => _json["last name"];
   String get profile => _json["profile"];
