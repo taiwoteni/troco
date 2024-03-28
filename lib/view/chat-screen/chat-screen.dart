@@ -207,7 +207,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     controller: controller,
                     cursorColor: ColorManager.accentColor,
                     cursorRadius: const Radius.circular(SizeManager.large),
-                    autofocus: true,
+                    autofocus: false,
                     maxLines: null,
                     expands: false,
                     style: TextStyle(
