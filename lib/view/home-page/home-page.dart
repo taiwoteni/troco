@@ -44,11 +44,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: SingleChildScrollView(
+      body: Container(
+        width: double.maxFinite,
+        height: double.maxFinite,
+        padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
         child: Column(
           children: [
             appBarWidget(),
             mediumSpacer(),
+            const Spacer(),
             latestTransactionsWidget(),
           ],
         ),
@@ -255,7 +259,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     thickness: 0.8,
                     color: ColorManager.secondary.withOpacity(0.08),
                   ),
-              itemCount: transactions().length)
+              itemCount: transactions().length >= 3 ? 3 : transactions().length)
         ],
       ),
     );

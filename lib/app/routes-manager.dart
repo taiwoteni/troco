@@ -5,6 +5,7 @@ import 'package:troco/view/chat-screen/chat-screen.dart';
 import 'package:troco/view/forget-password-screen/forget-password-otp.dart';
 import 'package:troco/view/forget-password-screen/forget-password.dart';
 import 'package:troco/view/home-screen/home-screen.dart';
+import 'package:troco/view/onboarding-screen/onboarding-sceen.dart';
 import 'package:troco/view/otp-screen/otp-screen.dart';
 import 'package:troco/view/register-screen/add-pin-screen.dart';
 import 'package:troco/view/register-screen/add-profile-screen.dart';
@@ -41,6 +42,8 @@ class Routes {
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
+      case Routes.onBoardingRoute:
+      return MaterialPageRoute(settings: routeSettings,builder: (context) => const OnboardingScreen());
       case Routes.authRoute:
         return MaterialPageRoute(settings: routeSettings,builder: (context) => const AuthScreen(),);
       case Routes.registerRoute:

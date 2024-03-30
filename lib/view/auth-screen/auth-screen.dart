@@ -1,11 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:troco/app/asset-manager.dart';
 import 'package:troco/app/color-manager.dart';
 import 'package:troco/app/font-manager.dart';
 import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/app/theme-manager.dart';
+import 'package:troco/app/value-manager.dart';
 import 'package:troco/custom-views/lottie.dart';
 import 'package:troco/custom-views/spacer.dart';
 
@@ -43,46 +46,55 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Align(
-                    child: LottieWidget(
-                      lottieRes: AssetManager.lottieFile(name: "welcome"),
-                      size: const Size(
-                        double.maxFinite,
-                        SizeManager.extralarge * 5.7,
+                  Expanded(
+                    flex: 7,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Image.asset(
+                        AssetManager.imageFile(name: 'welcome'),
+                        width: IconSizeManager.extralarge * 4,
+                        fit: BoxFit.cover,
+                        height: IconSizeManager.extralarge * 4,
                       ),
-                      fit: BoxFit.scaleDown,
                     ),
                   ),
-                  Text(
-                    "TO",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      fontSize: FontSizeManager.extralarge,
-                      fontWeight: FontWeightManager.bold,
-                      color: ColorManager.primary,
-                    ),
-                  ),
-                  largeSpacer(),
-                  regularSpacer(),
-                  Align(
-                    child: Image.asset(
-                      AssetManager.iconFile(name: 'troco-green'),
-                      width: double.maxFinite,
-                      fit: BoxFit.contain,
-                      height: IconSizeManager.large,
-                    ),
-                  ),
-                  mediumSpacer(),
-                  Text(
-                    "It is a long established fact with a\nreadable content of a page when\n looking at its layout.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: ColorManager.secondary,
-                      fontSize: FontSizeManager.medium,
-                      height: 1.36,
-                      wordSpacing: 1.2,
-                      fontFamily: 'Lato',
+                  Expanded(
+                    flex: 6,
+                    child: Column(
+                      children: [
+                        Text(
+                          "WELCOME TO",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontSize: FontSizeManager.large,
+                            fontWeight: FontWeightManager.extrabold,
+                            color: ColorManager.primary,
+                          ),
+                        ),
+                        largeSpacer(),
+                        Align(
+                          child: Image.asset(
+                            AssetManager.imageFile(name: 'troco'),
+                            width: double.maxFinite,
+                            fit: BoxFit.contain,
+                            height: IconSizeManager.large * 0.7,
+                          ),
+                        ),
+                        largeSpacer(),
+                        Text(
+                          ValuesManager.welcomeString,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeightManager.medium,
+                            color: ColorManager.secondary,
+                            fontSize: FontSizeManager.medium * 0.9,
+                            height: 1.36,
+                            wordSpacing: 1.2,
+                            fontFamily: 'Lato',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

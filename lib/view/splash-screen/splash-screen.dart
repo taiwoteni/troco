@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/app/asset-manager.dart';
 import 'package:troco/app/color-manager.dart';
@@ -35,7 +36,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       await Future.delayed(const Duration(seconds: 5));
       final isLoggedIn = ref.watch(ClientProvider.userProvider) != null;
       Navigator.pushReplacementNamed(
-          context, isLoggedIn ? Routes.homeRoute : Routes.authRoute);
+          context,isLoggedIn? Routes.homeRoute: Routes.onBoardingRoute);
     });
   }
 
@@ -48,16 +49,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         height: double.maxFinite,
         color: ColorManager.themeColor,
         alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
+          alignment: Alignment.center,
           children: [
             Image.asset(
-              AssetManager.imageFile(name: "troco"),
-              width: 300,
-              height: 80,
+              AssetManager.imageFile(name: "troco-white",),
+              width: 200,
+              height: 40,
             ),
-            Visibility(
-              visible: true,
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 50,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 5000),
                 opacity: showLoading ? 1 : 0,

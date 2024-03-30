@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -203,7 +202,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
                 SvgIcon(
                   svgRes: item.svgRes,
                   color: ColorManager.accentColor,
-                  size: const Size.square(IconSizeManager.regular * 1.3),
+                  size: const Size.square(IconSizeManager.regular * 1.1),
                 ),
                 regularSpacer(),
                 Text(
@@ -212,7 +211,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
                       fontFamily: 'Lato',
                       color: ColorManager.accentColor,
                       fontWeight: FontWeightManager.medium,
-                      fontSize: FontSizeManager.small * 0.9),
+                      fontSize: FontSizeManager.small * 0.8),
                 )
               ],
             ),
@@ -238,6 +237,8 @@ class _WalletPageState extends ConsumerState<WalletPage>
           svgRes: AssetManager.svgFile(name: 'wallet'),
           label: "History",
           color: Colors.indigo),
+      WalletMenuItem(
+          svgRes: AssetManager.svgFile(name: 'group'), label: "Referred"),
       // WalletMenuItem(
       //     svgRes: AssetManager.svgFile(name: 'withdraw'),
       //     label: "Transfer",
@@ -246,8 +247,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
       //     svgRes: AssetManager.svgFile(name: 'settings'),
       //     label: "Settings",
       //     color: Colors.purple),
-      WalletMenuItem(
-          svgRes: AssetManager.svgFile(name: 'group'), label: "Referred"),
+
       // WalletMenuItem(
       //     svgRes: AssetManager.svgFile(name: 'invite'), label: "Refer"),
     ];
