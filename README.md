@@ -1,16 +1,9 @@
-# troco
-
-An E-commerce application.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<body>
+<div style="display:flex;align-items:center;justify-content:center;">
+<p>TROCO</p>
+<img src="https://firebasestorage.googleapis.com/v0/b/personal-hosting-files.appspot.com/o/troco%2Fapp_icon_round.png?alt=media&token=27ee44d8-9859-42f9-9766-d17835346f7a" width="200px" height="200px"/>
+<p>An E-commerce Application</p>
+  
+</div>
+  
+</body>
