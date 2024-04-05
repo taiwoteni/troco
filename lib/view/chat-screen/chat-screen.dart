@@ -60,8 +60,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           }
         }
       });
-      scrollController.animateTo(scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 800), curve: Curves.ease);
+      // scrollController.animateTo(scrollController.position.maxScrollExtent,
+      //     duration: const Duration(milliseconds: 800), curve: Curves.ease);
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
       setState(
         () => canUsePixels = true,
       );
@@ -97,7 +98,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         appBar: PreferredSize(
             preferredSize:
-                Size.fromHeight(79.33 + MediaQuery.of(context).viewPadding.top),
+                Size.fromHeight(75 + MediaQuery.of(context).viewPadding.top),
             child: appBar()),
         body: Container(
           width: double.maxFinite,
@@ -285,7 +286,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   blurRadius: kElevationToShadow[1]![0].blurRadius,
                   blurStyle: kElevationToShadow[1]![0].blurStyle,
                   spreadRadius: kElevationToShadow[1]![0].spreadRadius,
-                  color: ColorManager.secondary.withOpacity(0.2))
+                  color: ColorManager.secondary.withOpacity(0.08))
             ]),
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(
@@ -336,13 +337,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SvgIcon(
-                  svgRes: AssetManager.svgFile(name: "video-call"),
+                  svgRes: AssetManager.svgFile(name: "buy"),
                   color: ColorManager.accentColor,
                   size: const Size.square(IconSizeManager.regular * 1.3),
                 ),
                 mediumSpacer(),
+                regularSpacer(),
                 SvgIcon(
-                  svgRes: AssetManager.svgFile(name: "audio-call"),
+                  svgRes: AssetManager.svgFile(name: "add-member"),
                   color: ColorManager.accentColor,
                   size: const Size.square(IconSizeManager.regular * 1.3),
                 )

@@ -59,7 +59,7 @@ class _SetTransactionPinScreenState
   @override
   Widget build(BuildContext context) {
     return registerSuccess
-        ? const RegisterSuccessScreen()
+        ? const AuthSuccessScreen()
         : Padding(
             padding: EdgeInsets.only(
                 top: MediaQuery.of(context).viewPadding.top,

@@ -149,7 +149,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
           ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
           if (widget.isFromLogin) {
             Navigator.pushNamedAndRemoveUntil(
-                context, Routes.homeRoute, (route) => false);
+                context, Routes.authSuccessRoute, (route) => false);
           } else {
             Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
           }

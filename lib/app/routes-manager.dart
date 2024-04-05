@@ -30,8 +30,7 @@ class Routes {
   static const setupAccountRoute = '/setup-account';
   static const addProfileRoute = '/add-profile';
   static const addTransactionPinRoute = "/add-transaction-pin";
-  static const registerSuccessRoute = "/register-success";
-
+  static const authSuccessRoute = "/auth-success";
   static const homeRoute = "/home";
 
   /// [chatRoute] is the route for the chat screen.
@@ -43,40 +42,78 @@ class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
       case Routes.onBoardingRoute:
-      return MaterialPageRoute(settings: routeSettings,builder: (context) => const OnboardingScreen());
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const OnboardingScreen());
       case Routes.authRoute:
-        return MaterialPageRoute(settings: routeSettings,builder: (context) => const AuthScreen(),);
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const AuthScreen(),
+        );
       case Routes.registerRoute:
-      LoginData.clear();
-        return MaterialPageRoute(settings: routeSettings,builder: (context) => const RegisterScreen());
+        LoginData.clear();
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const RegisterScreen());
       case Routes.otpRegisterRoute:
-        return MaterialPageRoute(settings: routeSettings, builder: (context) => const OTPScreen(isFromLogin: false,));
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const OTPScreen(
+                  isFromLogin: false,
+                ));
       case Routes.setupAccountRoute:
-        return MaterialPageRoute(settings: routeSettings,builder: (context) => const SetupAccountScreen());
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const SetupAccountScreen());
       case Routes.addProfileRoute:
-      return MaterialPageRoute(settings: routeSettings,builder: (context) => const AddProfileScreen(),);
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const AddProfileScreen(),
+        );
       case Routes.addTransactionPinRoute:
-        return MaterialPageRoute(settings: routeSettings,builder: (context) => const SetTransactionPinScreen());
-      case Routes.registerSuccessRoute:
-      return MaterialPageRoute(settings: routeSettings,builder: (context) => const RegisterSuccessScreen(),);
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const SetTransactionPinScreen());
+      case Routes.authSuccessRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const AuthSuccessScreen(),
+        );
       case Routes.loginRoute:
-      LoginData.clear();
-        return MaterialPageRoute(settings: routeSettings,builder: (context) => const LoginScreen());
+        LoginData.clear();
+        return MaterialPageRoute(
+            settings: routeSettings, builder: (context) => const LoginScreen());
       case Routes.otpLoginRoute:
-        return MaterialPageRoute(settings: routeSettings,builder: (context) => const OTPScreen(isFromLogin: true,));
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const OTPScreen(
+                  isFromLogin: true,
+                ));
       case Routes.forgotPasswordRoute:
-      return MaterialPageRoute(settings: routeSettings,builder: (context) => const ForgotPasswordScreen());
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const ForgotPasswordScreen());
       case Routes.otpForgotPasswordRoute:
-      return MaterialPageRoute(settings: routeSettings,builder: (context) => const OTPForgetPasswordScreen());
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const OTPForgetPasswordScreen());
       case Routes.homeRoute:
-      return MaterialPageRoute(settings: routeSettings,builder: (context) => const HomeScreen(),);
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const HomeScreen(),
+        );
       case Routes.chatRoute:
-      return MaterialPageRoute(settings: routeSettings,builder: (context) {
-        final client = routeSettings.arguments as Client;
-        return ChatScreen(client: client);
-      },);
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) {
+            final client = routeSettings.arguments as Client;
+            return ChatScreen(client: client);
+          },
+        );
       default:
-        return MaterialPageRoute(settings: routeSettings,builder: (context) => const SplashScreen());
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const SplashScreen());
     }
   }
 }

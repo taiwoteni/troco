@@ -5,20 +5,21 @@ import 'package:troco/app/font-manager.dart';
 import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/custom-views/button.dart';
-import 'package:troco/custom-views/lottie.dart';
+import 'package:troco/custom-views/spacer.dart';
 import 'package:troco/data/login-data.dart';
 import 'package:troco/providers/client-provider.dart';
 import '../../app/color-manager.dart';
+import '../../app/value-manager.dart';
 
-class RegisterSuccessScreen extends ConsumerStatefulWidget {
-  const RegisterSuccessScreen({super.key});
+class AuthSuccessScreen extends ConsumerStatefulWidget {
+  const AuthSuccessScreen({super.key});
 
   @override
-  ConsumerState<RegisterSuccessScreen> createState() =>
+  ConsumerState<AuthSuccessScreen> createState() =>
       _RegisterSuccessScreenState();
 }
 
-class _RegisterSuccessScreenState extends ConsumerState<RegisterSuccessScreen> {
+class _RegisterSuccessScreenState extends ConsumerState<AuthSuccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +32,7 @@ class _RegisterSuccessScreenState extends ConsumerState<RegisterSuccessScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            registerSuccess(),
+            detailsScreen(),
             nextButton(),
           ],
         ),
@@ -39,24 +40,43 @@ class _RegisterSuccessScreenState extends ConsumerState<RegisterSuccessScreen> {
     );
   }
 
-  Widget registerSuccess() {
+  Widget detailsScreen() {
     return Expanded(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        LottieWidget(
-          lottieRes: AssetManager.lottieFile(name: 'success'),
-          size: const Size.square(IconSizeManager.extralarge * 5.5),
-          fit: BoxFit.cover,
-          loop: false,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Image.asset(
+            AssetManager.imageFile(name: 'created'),
+            width: IconSizeManager.extralarge * 4,
+            fit: BoxFit.cover,
+            height: IconSizeManager.extralarge * 4,
+          ),
         ),
+        mediumSpacer(),
         Text(
-          "Registeration Complete.",
+          "Congratulations",
+          textAlign: TextAlign.center,
           style: TextStyle(
-              color: ColorManager.secondary,
-              fontFamily: 'Lato',
-              fontWeight: FontWeightManager.semibold,
-              fontSize: FontSizeManager.large * 0.9),
+            fontFamily: "Lato",
+            fontSize: FontSizeManager.large,
+            fontWeight: FontWeightManager.extrabold,
+            color: ColorManager.primary,
+          ),
+        ),
+        largeSpacer(),
+        Text(
+          ValuesManager.authSuccessString,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeightManager.medium,
+            color: ColorManager.secondary,
+            fontSize: FontSizeManager.medium * 0.9,
+            height: 1.36,
+            wordSpacing: 1.2,
+            fontFamily: 'Lato',
+          ),
         ),
       ],
     ));

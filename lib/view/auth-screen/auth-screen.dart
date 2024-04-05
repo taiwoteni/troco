@@ -9,7 +9,6 @@ import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/app/theme-manager.dart';
 import 'package:troco/app/value-manager.dart';
-import 'package:troco/custom-views/lottie.dart';
 import 'package:troco/custom-views/spacer.dart';
 
 class AuthScreen extends StatefulWidget {

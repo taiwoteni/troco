@@ -1,5 +1,4 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -10,6 +9,7 @@ import 'package:troco/app/routes-manager.dart';
 import 'package:troco/app/size-manager.dart';
 import 'package:troco/app/theme-manager.dart';
 import 'package:troco/custom-views/lottie.dart';
+import 'package:troco/data/api-interface.dart';
 import 'package:troco/providers/client-provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -33,10 +33,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       setState(() {
         showLoading = true;
       });
+      
+
       await Future.delayed(const Duration(seconds: 5));
       final isLoggedIn = ref.watch(ClientProvider.userProvider) != null;
       Navigator.pushReplacementNamed(
-          context,isLoggedIn? Routes.homeRoute: Routes.onBoardingRoute);
+          context, isLoggedIn? Routes.homeRoute: Routes.onBoardingRoute);
     });
   }
 
@@ -45,6 +47,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     return Scaffold(
       backgroundColor: ColorManager.themeColor,
       body: Container(
+        
         width: double.maxFinite,
         height: double.maxFinite,
         color: ColorManager.themeColor,
@@ -53,7 +56,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           alignment: Alignment.center,
           children: [
             Image.asset(
-              AssetManager.imageFile(name: "troco-white",),
+              AssetManager.imageFile(
+                name: "troco-white",
+              ),
               width: 200,
               height: 40,
             ),

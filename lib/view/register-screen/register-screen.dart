@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -12,6 +14,8 @@ import 'package:troco/custom-views/info-text.dart';
 import 'package:troco/custom-views/spacer.dart';
 import 'package:troco/custom-views/svg.dart';
 import 'package:troco/custom-views/text-form-field.dart';
+import 'package:troco/data/api-interface.dart';
+import 'package:troco/data/converters.dart';
 import 'package:troco/data/login-data.dart';
 import 'package:troco/providers/button-provider.dart';
 
@@ -104,13 +108,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         if (value == null) {
                           return;
                         }
-
-                        /// Since onSaved means that there was no
-                        /// error when validating then it can only be either
-                        /// 11 digits or 14 digits.
-                        bool is11 = value.length == 11 && !value.contains("+");
                         LoginData.phoneNumber =
-                            is11 ? "+234${value.trim()}" : value.trim();
+                            PhoneNumberConverter.convertToFull(value);
                       },
                       prefixIcon: IconButton(
                         onPressed: null,
@@ -235,15 +234,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  Future<void> register() async {
+    log(LoginData.phoneNumber!.toString());
+    // final result = await ApiInterface.registerUser(
+    //     email: LoginData.email!,
+    //     phoneNumber: LoginData.phoneNumber!,
+    //     password: LoginData.password!);
+
+    // if (/**result != null && !result.error*/ true) {
+    // log(result.body);
+    Navigator.pushNamed(context, Routes.otpRegisterRoute);
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    // }
+    // else {
+    //   log(result?.body ?? "null");
+    //   ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    // }
+  }
+
   Future<void> next() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     if (formKey.currentState!.validate() && !primaryPasswordError) {
       formKey.currentState!.save();
       await Future.delayed(const Duration(seconds: 2));
-      Navigator.pushNamed(context, Routes.otpRegisterRoute);
+      register();
+    } else {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     }
-
-    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
   }
 
   Future<void> getEmailsandPhones() async {
