@@ -236,20 +236,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> register() async {
     log(LoginData.phoneNumber!.toString());
-    // final result = await ApiInterface.registerUser(
-    //     email: LoginData.email!,
-    //     phoneNumber: LoginData.phoneNumber!,
-    //     password: LoginData.password!);
+    log(LoginData.email!.toString());
+    log(LoginData.password!.toString());
 
-    // if (/**result != null && !result.error*/ true) {
-    // log(result.body);
+    final result = await ApiInterface.registerUser(
+        email: LoginData.email!,
+        phoneNumber: LoginData.phoneNumber!,
+        password: LoginData.password!);
+
+    if (result != null && !result.error ?? true) {
+    log(result?.body ?? "null");
     Navigator.pushNamed(context, Routes.otpRegisterRoute);
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    // }
-    // else {
-    //   log(result?.body ?? "null");
-    //   ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    // }
+    }
+    else {
+      log(result?.body ?? "null");
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    }
   }
 
   Future<void> next() async {

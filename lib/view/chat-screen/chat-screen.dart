@@ -336,17 +336,29 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SvgIcon(
-                  svgRes: AssetManager.svgFile(name: "buy"),
-                  color: ColorManager.accentColor,
-                  size: const Size.square(IconSizeManager.regular * 1.3),
+                IconButton(
+                  onPressed: () => null,
+                  highlightColor: ColorManager.accentColor.withOpacity(0.15),
+                  style:
+                      const ButtonStyle(splashFactory: InkRipple.splashFactory),
+                  icon: SvgIcon(
+                    svgRes: AssetManager.svgFile(name: "buy"),
+                    color: ColorManager.accentColor,
+                    size: const Size.square(IconSizeManager.regular * 1.3),
+                  ),
                 ),
                 mediumSpacer(),
-                regularSpacer(),
-                SvgIcon(
-                  svgRes: AssetManager.svgFile(name: "add-member"),
-                  color: ColorManager.accentColor,
-                  size: const Size.square(IconSizeManager.regular * 1.3),
+                smallSpacer(),
+                IconButton(
+                  onPressed: () => null,
+                  highlightColor: ColorManager.accentColor.withOpacity(0.15),
+                  style:
+                      const ButtonStyle(splashFactory: InkRipple.splashFactory),
+                  icon: SvgIcon(
+                    svgRes: AssetManager.svgFile(name: "add-member"),
+                    color: ColorManager.accentColor,
+                    size: const Size.square(IconSizeManager.regular * 1.3),
+                  ),
                 )
               ],
             ),
