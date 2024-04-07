@@ -1,0 +1,17 @@
+// ignore_for_file: constant_identifier_names
+
+enum Category { Business, Merchant, Admin }
+
+enum TransactionPurpose { Buying, Selling }
+
+enum ProductCondition { Used, New }
+
+enum TransactionStatus {
+  Pending,
+  Inprogress,
+  Processing,
+  Ongoing,
+  Finalizing,
+  Completed,
+  Cancelled,
+}

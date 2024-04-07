@@ -10,6 +10,18 @@
             "type": "dart"
         },
         {
+            "name":"troco Android",
+            "request":"launch",
+            "type":"dart",
+            "deviceId": "RZCW30J24RP"
+        },
+        {
+            "name":"troco Windows",
+            "request":"launch",
+            "type":"dart",
+            "deviceId": "windows"
+        },
+        {
             "name": "troco (profile mode)",
             "request": "launch",
             "type": "dart",
@@ -20,6 +32,12 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Windows & Android",
+            "configurations": ["troco Android","troco Windows"]
         }
     ]
 }
