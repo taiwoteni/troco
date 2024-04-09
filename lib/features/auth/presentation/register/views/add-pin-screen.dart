@@ -232,10 +232,11 @@ class _SetTransactionPinScreenState
   Future<void> setupAccount() async {
     ButtonProvider.startLoading(buttonKey: key, ref: ref);
     LoginData.transactionPin = pin1 + pin2 + pin3 + pin4;
-    await Future.delayed(const Duration(seconds: 2));
+    final pinResponse = await AuthenticationRepo.addTransactionPin(
+        userId: LoginData.id!, pin: LoginData.transactionPin!);
+    log(pinResponse.body);
     final response = await AuthenticationRepo.updateUser(
-        userId: LoginData.id!,
-        body: LoginData.toClientJson());
+        userId: LoginData.id!, body: LoginData.toClientJson());
     log(response.messageBody.toString());
     if (!response.error) {
       setState(() => registerSuccess = true);

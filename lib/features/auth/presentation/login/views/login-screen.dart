@@ -12,10 +12,10 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
-import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -271,24 +271,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       formKey.currentState!.save();
       final response = await AuthenticationRepo.loginUserEmail(
           email: LoginData.email!, password: LoginData.password!);
-      log("login:" + response.body);
+      log("login:${response.body}");
 
       if (response.error) {
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
         setState(() => errorText = "*${response.messageBody!["message"]}");
       } else {
         setState(() => errorText = null);
-        findUser(userId: response.messageBody!["data"]["_id"]);
+        Map<dynamic, dynamic> map = response.messageBody!["data"];
+        map["id"] = map["_id"];
+        map.remove("__v");
+        map.remove("password");
+        ClientProvider.saveUserData(ref: ref, json: map);
+        Navigator.pushNamedAndRemoveUntil(
+            context, Routes.homeRoute, (route) => false);
       }
     }
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-  }
-
-  Future<void> findUser({required final String userId}) async {
-    final response = await ApiInterface.findUser(userId: userId);
-
-    log(response.body);
-    if (!response.error) {}
   }
 
   PreferredSizeWidget appBar() {

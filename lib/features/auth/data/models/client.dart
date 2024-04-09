@@ -9,20 +9,20 @@ class Client{
 
 
   String get userId => _json["id"] ?? "7832u8923";
-  String get firstName => _json["first name"];
-  String get lastName => _json["last name"];
+  String get firstName => _json["firstName"];
+  String get lastName => _json["lastName"];
   String get profile => _json["profile"]??"null";
   String get fullName => "$firstName $lastName";
   String get email => _json["email"]; 
-  String get phoneNumber => _json["phone number"];
-  String get businessName => _json["business name"];
-  Category get accountCategory => CatgoryConverter.convertToCategory(category: _json["category"]); 
+  String get phoneNumber => _json["phoneNumber"];
+  String get businessName => _json["businessName"] ?? "$firstName Ventures";
+  Category get accountCategory => CatgoryConverter.convertToCategory(category: _json["category"]??"merchant"); 
   String get address => _json["address"];
   String get city => _json["city"];
   String get state => _json["state"];
   String get zipcode => _json["zipcode"];
-  String get bustop => _json["nearest bustop"];
-  String get transactionPin => _json["transaction pin"];
+  String get bustop => _json["nearestBustop"];
+  String get transactionPin => _json["transactionPin"];
 
   ImageProvider<Object> profileImage(){
     if(_json["profile"] == null){

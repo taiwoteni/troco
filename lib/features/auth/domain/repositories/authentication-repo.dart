@@ -52,6 +52,8 @@ class AuthenticationRepo{
     return result;
   }
 
+  //66151e93e4d870dc1782e4b2
+
   static Future<HttpResponseModel> resendOTP(
       {required final String userId,
       required final String otp,
@@ -70,6 +72,17 @@ class AuthenticationRepo{
   }) async {
     final result = await ApiInterface.patchRequest(
         url: "updateuser/$userId", data: body, headers: header);
+    return result;
+  }
+
+  static Future<HttpResponseModel> addTransactionPin(
+      {required final String userId,
+      required final String pin,
+      final Map<String, String>? headers}) async {
+    final result =
+        await ApiInterface.patchRequest(url: "addtransactionPin/$userId", data: {
+      "transactionPin":pin,
+    });
     return result;
   }
 

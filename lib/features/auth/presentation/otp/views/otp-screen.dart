@@ -56,6 +56,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
     /// being true.
 
     bool emailNull = LoginData.email == null;
+    //TODO: For now, Finbarr only does Email
     bool emailEmpty = emailNull ? true : LoginData.email!.trim().isEmpty;
     isEmail = /**widget.isFromLogin ? !emailEmpty : false*/ true;
     super.initState();

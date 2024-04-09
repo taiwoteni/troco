@@ -42,18 +42,18 @@ class LoginData {
   static Map<String, dynamic> toClientJson() {
     return {
       "id":id,
-      "first name": firstName,
-      "last name": lastName,
+      "firstName": firstName,
+      "lastName": lastName,
       "email": email,
       "profile": profile,
-      "phone number": phoneNumber,
-      "business name": businessName,
+      "phoneNumber": phoneNumber,
+      "businessName": businessName,
       "category": CatgoryConverter.convertToString(category: category!),
       "address": address,
       "city": city,
       "state": state,
-      "nearest bustop": nearestBustop,
-      "transaction pin": transactionPin,
+      "nearestBustop": nearestBustop,
+      "transactionPin": transactionPin,
       "zipcode": zipCode,
     };
   }

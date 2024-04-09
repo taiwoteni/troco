@@ -45,16 +45,15 @@ class _HomePageState extends ConsumerState<HomePage> {
       backgroundColor: Colors.transparent,
       body: Container(
         width: double.maxFinite,
+        height: double.maxFinite,
         padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              appBarWidget(),
-              carouselWidget(),
-              largeSpacer(),
-              latestTransactionsWidget(),
-            ],
-          ),
+        child: Column(
+          children: [
+            appBarWidget(),
+            mediumSpacer(),
+            const Spacer(),
+            latestTransactionsWidget(),
+          ],
         ),
       ),
     );
@@ -63,44 +62,50 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget appBarWidget() {
     return SizedBox(
       width: double.maxFinite,
-      child: ClipPath(
-        clipper: BottomRoundedClipper(),
-        child: Container(
-          width: double.maxFinite,
-          height: 250,
-          color: ColorManager.accentColor.withOpacity(0.8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Gap(MediaQuery.of(context).viewPadding.top),
-              mediumSpacer(),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: SizeManager.medium * 1.5),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const UserProfileIcon(
-                      size: IconSizeManager.medium * 1.3,
+      height: 342,
+      child: Stack(
+        children: [
+          ClipPath(
+            clipper: BottomRoundedClipper(),
+            child: Container(
+              width: double.maxFinite,
+              height: 290,
+              color: ColorManager.accentColor.withOpacity(0.8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Gap(MediaQuery.of(context).viewPadding.top),
+                  mediumSpacer(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: SizeManager.medium * 1.5),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const UserProfileIcon(
+                          size: IconSizeManager.medium * 1.3,
+                        ),
+                        SvgIcon(
+                          svgRes: AssetManager.svgFile(name: "bell"),
+                          color: ColorManager.primaryDark,
+                          size: const Size.square(IconSizeManager.medium),
+                        )
+                      ],
                     ),
-                    SvgIcon(
-                      svgRes: AssetManager.svgFile(name: "bell"),
-                      color: ColorManager.primaryDark,
-                      size: const Size.square(IconSizeManager.medium),
-                    )
-                  ],
-                ),
+                  ),
+                  largeSpacer(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: SizeManager.medium * 1.5),
+                    child: nameWidget(),
+                  ),
+                ],
               ),
-              largeSpacer(),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: SizeManager.medium * 1.5),
-                child: nameWidget(),
-              ),
-            ],
+            ),
           ),
-        ),
+          Positioned(bottom: 0, child: carouselWidget()),
+        ],
       ),
     );
   }
@@ -143,8 +148,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           itemCount: 3,
           itemBuilder: (context, index, realIndex) => Container(
                 width: double.maxFinite,
-                margin:
-                    const EdgeInsets.symmetric(horizontal: SizeManager.medium),
                 padding: const EdgeInsets.symmetric(
                     vertical: SizeManager.regular,
                     horizontal: SizeManager.medium),
@@ -191,8 +194,8 @@ class _HomePageState extends ConsumerState<HomePage> {
           options: CarouselOptions(
             autoPlay: true,
             scrollPhysics: const AlwaysScrollableScrollPhysics(),
-            enlargeCenterPage: false,
-            viewportFraction: 0.7,
+            enlargeCenterPage: true,
+            viewportFraction: 0.6,
             height: 120,
             autoPlayInterval: const Duration(seconds: 6),
           )),

@@ -13,7 +13,7 @@ class ApiInterface {
       final int okCode = 200,
       Map<String, String>? headers}) async {
     try {
-      final Uri uri = Uri.parse("$_serverUrl/url");
+      final Uri uri = Uri.parse("$_serverUrl/$url");
 
       final request = http.Request('GET', uri);
       request.headers['Content-Type'] = 'application/json';
@@ -41,7 +41,7 @@ class ApiInterface {
       required final Map<String, dynamic> data,
       Map<String, String>? headers}) async {
     try {
-      final Uri uri = Uri.parse("$_serverUrl/url");
+      final Uri uri = Uri.parse("$_serverUrl/$url");
       final jsonData = json.encode(data);
       final request = http.Request('POST', uri);
       request.headers['Content-Type'] = 'application/json';
@@ -67,7 +67,7 @@ class ApiInterface {
       required final Map<String, dynamic> data,
       Map<String, String>? headers}) async {
     try {
-      final Uri uri = Uri.parse("$_serverUrl/url");
+      final Uri uri = Uri.parse("$_serverUrl/$url");
       final jsonData = json.encode(data);
       final request = http.Request('PATCH', uri);
       request.headers['Content-Type'] = 'application/json';
@@ -118,8 +118,7 @@ class ApiInterface {
     required final String query,
     final Map<String, String>? headers,
   }) async {
-    final result =
-        await getRequest(url: 'searchUser', headers: headers);
+    final result = await getRequest(url: 'searchUser', headers: headers);
     return result;
   }
 
@@ -127,12 +126,11 @@ class ApiInterface {
     required final String userId,
     final Map<String, String>? headers,
   }) async {
-    final result = await getRequest(
-        url: 'findoneuser/$userId', headers: headers);
+    final result =
+        await getRequest(url: 'findoneuser/$userId', headers: headers);
     return result;
   }
 
- 
   static Future<HttpResponseModel> createGroup(
       {required final String groupName, required final String userId}) async {
     final result = await postRequest(

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -26,9 +27,14 @@ class CreateGroupSheet extends ConsumerStatefulWidget {
 
 class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
   final buttonKey = UniqueKey();
-  bool groupNameError = false;
+  final TextEditingController deliveryController =
+      TextEditingController(text: "Delivery");
   final formKey = GlobalKey<FormState>();
-  final TextEditingController groupNameController = TextEditingController();
+
+  bool groupNameError = false;
+  bool useDelivery = true;
+
+  final Map<dynamic, dynamic> groupJson = {};
 
   @override
   void initState() {
@@ -73,7 +79,6 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
             mediumSpacer(),
             InputFormField(
                 label: "Group name",
-                controller: groupNameController,
                 inputType: TextInputType.name,
                 validator: (value) {
                   if (value == null) {
@@ -86,6 +91,10 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                   } else {
                     setState(() => groupNameError = false);
                   }
+                  return null;
+                },
+                onSaved: (value) {
+                  groupJson["groupName"] = value!;
                 },
                 prefixIcon: Icon(
                   Icons.abc_rounded,
@@ -102,7 +111,75 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
               text: " * should be a unique name",
               color: groupNameError ? Colors.red : ColorManager.secondary,
             ),
-            largeSpacer(),
+            mediumSpacer(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.only(right: SizeManager.regular),
+                  child: InputFormField(
+                      label: "delivery",
+                      readOnly: true,
+                      controller: deliveryController,
+                      inputType: TextInputType.none,
+                      onSaved: (value) {
+                        groupJson["useDelivery"] = useDelivery;
+                      },
+                      prefixIcon: Checkbox(
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        value: useDelivery,
+                        tristate: false,
+                        checkColor: Colors.white,
+                        activeColor: ColorManager.accentColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2),
+                            side: BorderSide(
+                                color: ColorManager.accentColor, width: 1.3)),
+                        overlayColor: null,
+                        fillColor: null,
+                        onChanged: (value) {
+                          setState(() => useDelivery = value!);
+                        },
+                      )),
+                )),
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.only(left: SizeManager.regular),
+                  child: InputFormField(
+                    label: "days",
+                    inputType: TextInputType.number,
+                    prefixIcon: Icon(
+                      CupertinoIcons.time_solid,
+                      color: ColorManager.accentColor,
+                      size: IconSizeManager.regular,
+                    ),
+                    validator: (value) {
+                      if(value == null){
+                        return "* enter duration";
+                      }
+                      if(value.trim().isEmpty){
+                        return "* enter duration";
+                      }
+                      if(!RegExp(r'\d').hasMatch(value.trim())){
+                        return "* valid number";
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      groupJson["ceatedTime"] =
+                          DateTime.now().toIso8601String();
+                      groupJson["transactionTime"] = DateTime.now()
+                          .copyWith(
+                              day:
+                                  DateTime.now().day + int.parse(value!.trim()))
+                          .toIso8601String();
+                    },
+                  ),
+                ))
+              ],
+            ),
+            mediumSpacer(),
             CustomButton(
               onPressed: createGroup,
               label: "Create",
@@ -121,10 +198,10 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
     if (formKey.currentState!.validate() && !groupNameError) {
+      formKey.currentState!.save();
       log(ref.read(ClientProvider.userProvider)!.userId);
       try {
-        GroupModel groupModel = GroupModel.fromJson(
-            json: {"group name": groupNameController.text.trim()});
+        GroupModel groupModel = GroupModel.fromJson(json: groupJson);
         final abby = await ref.watch(groupsProvider.future);
         abby.add(groupModel);
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

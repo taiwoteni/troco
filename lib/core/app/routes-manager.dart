@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
+import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
 import 'package:troco/features/groups/data/models/group-model.dart';
 import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password-otp.dart';
@@ -45,6 +46,10 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const OnboardingScreen());
+      case Routes.authRoute:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (context) => const AuthScreen(),);
       case Routes.registerRoute:
         LoginData.clear();
         return MaterialPageRoute(

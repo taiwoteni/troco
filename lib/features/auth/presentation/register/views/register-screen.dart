@@ -253,7 +253,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       Navigator.pushNamed(context, Routes.otpRegisterRoute);
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       LoginData.id = result.messageBody!["data"]["_id"];
-      LoginData.otp = result.messageBody!["data"]["verificationPin"];
+      LoginData.otp = result.messageBody!["data"]["verificationPin"].toString();
     } else {
       log(result.code.toString());
       print(result.body);

@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
@@ -12,6 +10,7 @@ import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/chat/presentation/providers/preset-chat-list-provider.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../widgets/chat-widget.dart';
@@ -40,9 +39,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     group = widget.group;
-    chats = chatList();
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      setState(() {
+        chats = ref.read(presetChatNotifier);
+      });
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getChatUiOverlayStyle());
       scrollController.addListener(() {
@@ -156,13 +157,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: SizeManager.medium),
-                                child: endToEndEncrypted(),
-                              ),
                               mediumSpacer(),
+                              groupDetailsWidget(),
+                              groupCreationTime(),
+                              adminJoinedWidget(),
+                              addedWidget(),
+                              smallSpacer(),
+                              endToEndEncrypted(),
+                              mediumSpacer(),
+                              divider(),
+                              extraLargeSpacer(),
                             ],
                           ),
                         Padding(
@@ -300,6 +304,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget appBar() {
+    /// Not using the usual [DateTime.day]- [Now.day] because of
+    /// Situations whereby the days may not be of the same month.
+    /// becos [DateTime.day] is the day of the month.
+    final String daysRemaining =
+        "${group.transactionTime.difference(DateTime.now()).inDays + 1}";
     return Container(
         padding: const EdgeInsets.only(
             left: SizeManager.regular, right: SizeManager.medium),
@@ -349,12 +358,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 fontFamily: 'Lato',
                 fontSize: FontSizeManager.medium * 1.3,
                 fontWeight: FontWeightManager.semibold),
-            subtitle: const Text("online"),
+            subtitle: Text(daysRemaining == "0"
+                ? "Last business day"
+                : "$daysRemaining business day${daysRemaining == "1" ? "" : "s"} left"),
             subtitleTextStyle: TextStyle(
-                color: ColorManager.secondary,
+                color: ColorManager.accentColor,
                 fontFamily: 'Quicksand',
                 fontSize: FontSizeManager.regular * 0.8,
-                fontWeight: FontWeightManager.regular),
+                fontWeight: FontWeightManager.medium),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -366,7 +377,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       const ButtonStyle(splashFactory: InkRipple.splashFactory),
                   icon: SvgIcon(
                     svgRes: AssetManager.svgFile(name: "buy"),
-                    color: ColorManager.accentColor,
+                    color: group.members.isEmpty
+                        ? ColorManager.secondary
+                        : ColorManager.accentColor,
                     size: const Size.square(IconSizeManager.regular * 1.3),
                   ),
                 ),
@@ -418,8 +431,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget endToEndEncrypted() {
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: SizeManager.regular),
       padding: const EdgeInsets.symmetric(
-          horizontal: SizeManager.regular * 1.2,
+          horizontal: SizeManager.regular * 1.1,
           vertical: SizeManager.regular * 1.1),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -428,89 +442,174 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       child: Text(
         "Conversations are end-to-end Encrypted",
         style: TextStyle(
-            color: ColorManager.accentColor,
+            color: ColorManager.themeColor,
             fontFamily: 'Lato',
-            fontSize: FontSizeManager.regular * 0.7,
-            fontWeight: FontWeightManager.medium),
+            fontSize: FontSizeManager.regular * 0.75,
+            fontWeight: FontWeightManager.semibold),
       ),
     );
   }
 
-  List<Chat> chatList() {
-    return [
-      const Chat.fromJson(json: {
-        "id": "AlznchfU-jsa",
-        "sender id": "AlzbchdUisdn0i9",
-        "message": "Hey Teni, How're You? 🙃",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      Chat.fromJson(json: {
-        "id": "Alznccdsiut",
-        "sender id": ref.read(ClientProvider.userProvider)!.userId,
-        "message": "I'm Good You? 😎",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      const Chat.fromJson(json: {
-        "id": "AlznchfU-jsa",
-        "sender id": "AlzbchdUisdn0i9",
-        "message": "Yh. I'm Good. How's School?",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      const Chat.fromJson(json: {
-        "id": "AlznchfU-jsa",
-        "sender id": "AlzbchdUisdn0i9",
-        "message": "I heard that you aren't going to Babcock anymore",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      const Chat.fromJson(json: {
-        "id": "AlznchfU-jsa",
-        "sender id": "AlzbchdUisdn0i9",
-        "message": "So which Uni, are you currently going to?",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      Chat.fromJson(json: {
-        "id": "Alznccdsiutcd",
-        "sender id": ref.read(ClientProvider.userProvider)!.userId,
-        "message": "I'm Going to NIIT",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      Chat.fromJson(json: {
-        "id": "Alznccdsiutcd",
-        "sender id": ref.read(ClientProvider.userProvider)!.userId,
-        "message": "Meaning National Institute Of Innovative Technology",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      const Chat.fromJson(json: {
-        "id": "AlznchfU-jsa",
-        "sender id": "AlzbchdUisdn0i9",
-        "message": "Oh wow?",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      Chat.fromJson(json: {
-        "id": "Alznccdsiutcd",
-        "sender id": ref.read(ClientProvider.userProvider)!.userId,
-        "message":
-            "It's an institution that teaches both older (working class) and younger age groups Tech related courses. Both standalone and Full courses. It's used to learn and acquire skills for jobs. But they also have a special programme for those learning Software Engineering. Those learning S.E are taught for 2 yrs but given their well known reputation, Universities also admit students who have finished the two years and enables them to join directly into yhe final year.",
-        "time": "2024-03-04T00:00:00.000",
-        "read": true
-      }),
-      const Chat.fromJson(json: {
-        "id": "AlznchfU-jsa",
-        "sender id": "AlzbchdUisdn0i9",
-        // "attachment": ref.read(ClientProvider.userProvider)!.profile,
-        "message": "Why use this as ur Dp 😂?",
-        "time": "2024-03-04T00:00:00.000",
-        "read": false
-      }),
-    ];
+  Widget groupCreationTime() {
+    return Container(
+      margin: const EdgeInsets.only(
+          top: SizeManager.regular, bottom: SizeManager.small),
+      padding: const EdgeInsets.symmetric(
+          horizontal: SizeManager.regular * 1.1,
+          vertical: SizeManager.regular * 1.1),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(SizeManager.regular),
+      ),
+      child: Text(
+        '"${group.groupName}" was created',
+        style: TextStyle(
+            color: ColorManager.secondary,
+            fontFamily: 'Lato',
+            fontSize: FontSizeManager.regular * 0.75,
+            fontWeight: FontWeightManager.semibold),
+      ),
+    );
+  }
+
+  Widget addedWidget() {
+    return Container(
+      margin: const EdgeInsets.only(
+          top: SizeManager.regular, bottom: SizeManager.small),
+      padding: const EdgeInsets.symmetric(
+          horizontal: SizeManager.regular * 1.1,
+          vertical: SizeManager.regular * 1.1),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(SizeManager.regular),
+      ),
+      child: Text(
+        'you were added',
+        style: TextStyle(
+            color: ColorManager.secondary,
+            fontFamily: 'Lato',
+            fontSize: FontSizeManager.regular * 0.75,
+            fontWeight: FontWeightManager.semibold),
+      ),
+    );
+  }
+
+  Widget adminJoinedWidget() {
+    return Container(
+      margin: const EdgeInsets.only(
+          top: SizeManager.regular, bottom: SizeManager.small),
+      padding: const EdgeInsets.symmetric(
+          horizontal: SizeManager.regular * 1.1,
+          vertical: SizeManager.regular * 1.1),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(SizeManager.regular),
+      ),
+      child: Text(
+        'Admin Joined',
+        style: TextStyle(
+            color: ColorManager.secondary,
+            fontFamily: 'Lato',
+            fontSize: FontSizeManager.regular * 0.75,
+            fontWeight: FontWeightManager.semibold),
+      ),
+    );
+  }
+
+  Widget groupDetailsWidget() {
+    return Container(
+      width: double.maxFinite,
+      padding: const EdgeInsets.symmetric(
+          vertical: SizeManager.medium, horizontal: SizeManager.medium),
+      margin: const EdgeInsets.symmetric(
+        horizontal: SizeManager.large,
+        vertical: SizeManager.small,
+      ),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(SizeManager.regular * 1.5),
+          color: ColorManager.background),
+      child: Column(
+        children: [
+          regularSpacer(),
+          const GroupProfileIcon(
+            size: IconSizeManager.extralarge * 0.95,
+          ),
+          regularSpacer(),
+          Text(
+            group.groupName,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'Lato',
+              fontWeight: FontWeightManager.semibold,
+              fontSize: FontSizeManager.regular * 1.1,
+            ),
+          ),
+          regularSpacer(),
+          Text(
+            "No Transactions yet",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'Lato',
+              fontWeight: FontWeightManager.light,
+              fontSize: FontSizeManager.small,
+            ),
+          ),
+          regularSpacer(),
+          Text(
+            "${group.members.length} member${group.members.length == 1 ? "" : "s"}",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'Lato',
+              fontWeight: FontWeightManager.light,
+              fontSize: FontSizeManager.small,
+            ),
+          ),
+          regularSpacer(),
+        ],
+      ),
+    );
+  }
+
+  Widget divider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            width: double.maxFinite,
+            margin: const EdgeInsets.only(
+                left: SizeManager.large, right: SizeManager.regular),
+            height: 1,
+            decoration: BoxDecoration(
+                color: ColorManager.secondary.withOpacity(0.09),
+                borderRadius: BorderRadius.circular(SizeManager.regular)),
+          ),
+        ),
+        Text(
+          "Business Starts",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: ColorManager.secondary,
+            fontFamily: 'Quicksand',
+            fontWeight: FontWeightManager.medium,
+            fontSize: FontSizeManager.regular * 0.9,
+          ),
+        ),
+        Expanded(
+          child: Container(
+            width: double.maxFinite,
+            margin: const EdgeInsets.only(
+                right: SizeManager.large, left: SizeManager.regular),
+            height: 1,
+            decoration: BoxDecoration(
+                color: ColorManager.secondary.withOpacity(0.09),
+                borderRadius: BorderRadius.circular(SizeManager.regular)),
+          ),
+        )
+      ],
+    );
   }
 
   Future<void> sendChat() async {
