@@ -14,7 +14,8 @@ class InputFormField extends ConsumerStatefulWidget {
   final void Function(String value)? onChanged;
   final Future<String?> Function()? onRedirect;
   final String label;
-  final String? prefixText,errorText;
+  final int lines;
+  final String? prefixText, errorText;
   final bool showLeadingIcon, readOnly;
   final TextInputType inputType;
   final bool isPassword;
@@ -27,6 +28,7 @@ class InputFormField extends ConsumerStatefulWidget {
     this.prefixText,
     required this.label,
     required this.prefixIcon,
+    this.lines = 1,
     this.errorText,
     this.inputType = TextInputType.text,
     this.onRedirect,
@@ -52,77 +54,89 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-        autofocus: true,
-        onChanged: widget.onChanged,
-        onSaved: widget.onSaved,
-        validator: widget.validator,
-        onTap: () async {
-          if (widget.onRedirect != null) {
-            final s = await widget.onRedirect!();
-            setState(() {
-              controller.text = s ?? "";
-            });
-          }
-        },
-        obscureText: obscure,
-        autocorrect: !widget.isPassword,
-        enableSuggestions: !widget.isPassword,
-        controller: controller,
-        cursorColor: ColorManager.themeColor,
-        cursorRadius: const Radius.circular(20),
-        readOnly: widget.readOnly,
-        keyboardType: widget.inputType,
-        style: defaultStyle(),
-        decoration: InputDecoration(
-          prefixIcon: widget.prefixIcon !=null? Theme(
-              data: ThemeManager.getApplicationTheme()
-                  .copyWith(useMaterial3: false),
-              child: widget.prefixIcon!):null,
-          prefixText: widget.prefixText,
-          prefixStyle: defaultStyle().copyWith(color: ColorManager.accentColor),
-          suffixIcon: widget.isPassword
-              ? IconButton(
-                  onPressed: () => setState(() => obscure = !obscure),
-                  iconSize: IconSizeManager.regular,
-                  icon: Image.asset(
-                    AssetManager.iconFile(
-                        name: obscure ? 'eyes-opened' : 'eyes-closed'),
-                    fit: BoxFit.cover,
-                    width: IconSizeManager.regular,
-                    height: IconSizeManager.regular,
-                    color: ColorManager.themeColor,
-                  ),
-                )
-              : widget.showLeadingIcon
-                  ? IconButton(
-                      onPressed: null,
-                      iconSize: IconSizeManager.regular,
-                      icon: Icon(
-                        Icons.arrow_drop_down_rounded,
-                        size: IconSizeManager.regular,
-                        color: ColorManager.themeColor,
-                      ),
-                    )
-                  : null,
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: SizeManager.medium * 1.2,
-              vertical: SizeManager.medium * 1.4),
-          floatingLabelBehavior: FloatingLabelBehavior.never,
-          filled: true,
-          fillColor: ColorManager.tertiary,
-          hintStyle: defaultStyle().copyWith(color: ColorManager.secondary),
-          hintText: widget.label,
-          errorText: widget.errorText,
-          errorStyle: defaultStyle().copyWith(
-              color: Colors.red,
-              fontSize: FontSizeManager.regular),
-          errorBorder: defaultBorder(),
-          focusedErrorBorder: defaultBorder(),
-          enabledBorder: defaultBorder(),
-          border: defaultBorder(),
-          focusedBorder: defaultBorder(),
-        ));
+    return Theme(
+      data: ThemeData.light(useMaterial3: true).copyWith(
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: ColorManager.accentColor,
+          selectionColor: ColorManager.accentColor.withOpacity(0.2),
+          selectionHandleColor: ColorManager.accentColor,
+        ),
+      ),
+      child: TextFormField(
+          autofocus: false,
+          onChanged: widget.onChanged,
+          onSaved: widget.onSaved,
+          validator: widget.validator,
+          onTap: () async {
+            if (widget.onRedirect != null) {
+              final s = await widget.onRedirect!();
+              setState(() {
+                controller.text = s ?? "";
+              });
+            }
+          },
+          minLines: widget.lines,
+          maxLines: widget.lines == 1 ? 1 : widget.lines,
+          obscureText: obscure,
+          autocorrect: !widget.isPassword,
+          enableSuggestions: !widget.isPassword,
+          controller: controller,
+          cursorColor: ColorManager.themeColor,
+          cursorRadius: const Radius.circular(20),
+          readOnly: widget.readOnly,
+          keyboardType: widget.inputType,
+          style: defaultStyle(),
+          decoration: InputDecoration(
+            prefixIcon: widget.prefixIcon != null
+                ? Theme(
+                    data: ThemeManager.getApplicationTheme(),
+                    child: widget.prefixIcon!)
+                : null,
+            prefixText: widget.prefixText,
+            prefixStyle:
+                defaultStyle().copyWith(color: ColorManager.accentColor),
+            suffixIcon: widget.isPassword
+                ? IconButton(
+                    onPressed: () => setState(() => obscure = !obscure),
+                    iconSize: IconSizeManager.regular,
+                    icon: Image.asset(
+                      AssetManager.iconFile(
+                          name: obscure ? 'eyes-opened' : 'eyes-closed'),
+                      fit: BoxFit.cover,
+                      width: IconSizeManager.regular,
+                      height: IconSizeManager.regular,
+                      color: ColorManager.themeColor,
+                    ),
+                  )
+                : widget.showLeadingIcon
+                    ? IconButton(
+                        onPressed: null,
+                        iconSize: IconSizeManager.regular,
+                        icon: Icon(
+                          Icons.arrow_drop_down_rounded,
+                          size: IconSizeManager.regular,
+                          color: ColorManager.themeColor,
+                        ),
+                      )
+                    : null,
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: SizeManager.medium * 1.2,
+                vertical: SizeManager.medium * 1.4),
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            filled: true,
+            fillColor: ColorManager.tertiary,
+            hintStyle: defaultStyle().copyWith(color: ColorManager.secondary),
+            hintText: widget.label,
+            errorText: widget.errorText,
+            errorStyle: defaultStyle()
+                .copyWith(color: Colors.red, fontSize: FontSizeManager.regular),
+            errorBorder: defaultBorder(),
+            focusedErrorBorder: defaultBorder(),
+            enabledBorder: defaultBorder(),
+            border: defaultBorder(),
+            focusedBorder: defaultBorder(),
+          )),
+    );
   }
 
   TextStyle defaultStyle() {

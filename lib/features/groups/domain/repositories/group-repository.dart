@@ -24,11 +24,12 @@ class GroupRepo{
     return result;
   }
   Future<List<Group>> getGroups()async{
+    List groupListJson = [];
     final result = await ApiInterface.getRequest(url: 'findoneuser/${ClientProvider.readOnlyClient!.userId}');
     if(!result.error){
-      List groupListJson = result.messageBody!["data"]["groups"];
+      groupListJson = result.messageBody!["data"]["groups"];
       List<Group> groups = groupListJson.map((groupJson) => Group.fromJson(json: groupJson)).toList();
-      return groups;
+      return groups;  
     }
     log(result.body.toString());
     return [];

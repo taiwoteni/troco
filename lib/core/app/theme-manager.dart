@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 
 class ThemeManager {
   static ThemeData getApplicationTheme() {
-    return ThemeData.light().copyWith(
-      useMaterial3: true,
+    return ThemeData.light(useMaterial3: true).copyWith(
       primaryColor: ColorManager.themeColor,
       primaryColorDark: ColorManager.primary,
       primaryColorLight: ColorManager.secondary,
@@ -39,6 +38,7 @@ class ThemeManager {
         systemNavigationBarColor: ColorManager.themeColor,
         systemNavigationBarIconBrightness: Brightness.light);
   }
+
   static SystemUiOverlayStyle getGroupsUiOverlayStyle() {
     return SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -46,7 +46,7 @@ class ThemeManager {
         systemNavigationBarColor: ColorManager.background,
         systemNavigationBarIconBrightness: Brightness.dark);
   }
-  
+
   static SystemUiOverlayStyle getWalletUiOverlayStyle() {
     return SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -54,6 +54,7 @@ class ThemeManager {
         systemNavigationBarColor: ColorManager.background,
         systemNavigationBarIconBrightness: Brightness.dark);
   }
+
   static SystemUiOverlayStyle getChatUiOverlayStyle() {
     return SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -61,6 +62,7 @@ class ThemeManager {
         systemNavigationBarColor: ColorManager.background,
         systemNavigationBarIconBrightness: Brightness.dark);
   }
+
   static SystemUiOverlayStyle getTransactionScreenUiOverlayStyle() {
     return SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,

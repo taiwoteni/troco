@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/groups/data/models/group-member-model.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../../core/app/color-manager.dart';

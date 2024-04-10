@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
@@ -11,9 +13,11 @@ import '../provider/button-provider.dart';
 class CustomButton extends ConsumerStatefulWidget {
   final UniqueKey? buttonKey;
   final String label;
+  bool? small;
   final void Function()? onPressed;
   final bool usesProvider;
   final EdgeInsets? margin;
+
   CustomButton({
     super.key,
     required this.label,
@@ -22,6 +26,23 @@ class CustomButton extends ConsumerStatefulWidget {
     this.onPressed,
     this.margin,
   }) {
+    small = false;
+    if (usesProvider) {
+      if (buttonKey == null) {
+        throw Exception("usesProvider should only be true if a key is given!");
+      }
+    }
+  }
+
+  CustomButton.medium({
+    super.key,
+    required this.label,
+    this.buttonKey,
+    this.usesProvider = false,
+    this.onPressed,
+    this.margin,
+  }) {
+    small = true;
     if (usesProvider) {
       if (buttonKey == null) {
         throw Exception("usesProvider should only be true if a key is given!");
@@ -51,7 +72,8 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
     return Padding(
       padding: widget.margin ?? EdgeInsets.zero,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(SizeManager.large),
+        borderRadius: BorderRadius.circular(
+            (widget.small ?? false) ? SizeManager.medium : SizeManager.large),
         child: Material(
           child: InkWell(
             onTap: enabled ? widget.onPressed : null,
@@ -60,11 +82,15 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
             child: Container(
               key: widget.key,
               width: double.maxFinite,
-              height: SizeManager.extralarge * 2,
+              height: (widget.small ?? false)
+                  ? SizeManager.extralarge * 1.7
+                  : SizeManager.extralarge * 2,
               decoration: BoxDecoration(
                   color: !enabled && !loading
                       ? ColorManager.tertiary
-                      : ColorManager.themeColor),
+                      : (widget.small ?? false)
+                          ? ColorManager.accentColor
+                          : ColorManager.themeColor),
               alignment: Alignment.center,
               child: loading
                   ? LottieWidget(
@@ -78,7 +104,9 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
                           color: !enabled
                               ? ColorManager.secondary
                               : ColorManager.primaryDark,
-                          fontSize: FontSizeManager.large * 0.8,
+                          fontSize: (widget.small ?? false)
+                              ? FontSizeManager.large * 0.7
+                              : FontSizeManager.large * 0.8,
                           fontFamily: 'Lato',
                           fontWeight: FontWeightManager.bold),
                     ),
