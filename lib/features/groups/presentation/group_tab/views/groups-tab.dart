@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/features/groups/data/models/group-member-model.dart';
+import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -19,28 +23,34 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
   Widget build(BuildContext context) {
     final asyncConfig = ref.watch(groupsProvider);
     return asyncConfig.when(
-        data: (data) => data.isEmpty
-            ? const EmptyScreen(
-                label: "No Business Groups.\nCreate a Business Group",
-              )
-            : ListView.separated(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: SizeManager.small),
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemBuilder: (context, index) => ChatContactWidget(
-                      group: data[index],
-                    ),
-                separatorBuilder: (context, index) => Divider(
-                      thickness: 0.8,
-                      color: ColorManager.secondary.withOpacity(0.08),
-                    ),
-                itemCount: data.length),
-        error: (error, stackTrace) => const EmptyScreen(
-              label: "No Business Groups.\nCreate a Business Group",
-            ),
+        data: (e) {
+          final List<Group> data = e.map((e) => e).toList();
+          return data.isEmpty
+              ? const EmptyScreen(
+                  label: "No Business Groups.\nCreate a Business Group",
+                )
+              : ListView.separated(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: SizeManager.small),
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) => ChatContactWidget(
+                        group: data[index],
+                      ),
+                  separatorBuilder: (context, index) => Divider(
+                        thickness: 0.8,
+                        color: ColorManager.secondary.withOpacity(0.08),
+                      ),
+                  itemCount: data.length);
+        },
+        error: (error, stackTrace) {
+          log(error.toString(), stackTrace: stackTrace);
+          return const EmptyScreen(
+            label: "Error loading business groups",
+          );
+        },
         loading: () => const EmptyScreen(
-              label: "No Business Groups.\nCreate a Business Group",
+              label: "Loading business groups",
             ));
   }
 }

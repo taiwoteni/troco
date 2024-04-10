@@ -29,4 +29,5 @@ class HttpResponseModel {
       "transaction pin":loginData["transactionPin"]
     };
   }
+  
 }

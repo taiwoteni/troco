@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:troco/core/app/value-manager.dart';
-import 'package:troco/features/auth/data/models/client.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 
 class AppStorage {
   static SharedPreferences? _pref;

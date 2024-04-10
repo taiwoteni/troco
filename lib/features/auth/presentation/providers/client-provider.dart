@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/auth/data/models/client.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 
 import '../../../../core/cache/shared-preferences.dart';
 
@@ -13,4 +13,5 @@ class ClientProvider{
     AppStorage.saveClient(client: Client.fromJson(json: json));
     ref.watch(_clientProvider.notifier).state = AppStorage.getUser();
   }
+  static Client? get readOnlyClient => AppStorage.getUser();
 }

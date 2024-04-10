@@ -6,7 +6,6 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/features/groups/presentation/group_tab/widgets/group-widget.dart';
-import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/core/basecomponents/texts/inputs/search-bar.dart';
 import 'package:troco/core/basecomponents/clippers/inward-bottom-rounded-clipper.dart';
 import 'package:troco/features/groups/presentation/group_tab/widgets/create-group-sheet.dart';
@@ -164,7 +163,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
   }
 
   Widget friendList() {
-    final groups = ref.watch(groupsProvider).value!;
+    final groups = [];
     return ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: SizeManager.small),
         physics: const NeverScrollableScrollPhysics(),

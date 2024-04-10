@@ -12,7 +12,7 @@ import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/features/wallet/presentation/widgets/wallet-transaction-item-widget.dart';
-import 'package:troco/features/transactions/data/model/transaction.dart';
+import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/wallet/data/models/wallet-menu-item-model.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 

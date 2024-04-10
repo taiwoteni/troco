@@ -1,4 +1,4 @@
-import 'client.dart';
+import '../../domain/entities/client.dart';
 import '../../utils/category-converter.dart';
 import '../../../transactions/utils/enums.dart';
 

@@ -131,10 +131,5 @@ class ApiInterface {
     return result;
   }
 
-  static Future<HttpResponseModel> createGroup(
-      {required final String groupName, required final String userId}) async {
-    final result = await postRequest(
-        url: "creategroup/$userId", data: {"name": groupName});
-    return result;
-  }
+  
 }

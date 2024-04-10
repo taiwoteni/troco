@@ -5,7 +5,7 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
-import 'package:troco/features/transactions/data/model/transaction.dart';
+import 'package:troco/features/transactions/domain/entities/transaction.dart';
 
 import '../../../transactions/utils/enums.dart';
 

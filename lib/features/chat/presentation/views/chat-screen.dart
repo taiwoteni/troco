@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
@@ -15,10 +16,10 @@ import 'package:troco/features/chat/presentation/providers/preset-chat-list-prov
 import '../../../../core/app/font-manager.dart';
 import '../widgets/chat-widget.dart';
 import '../../data/model/chat-model.dart';
-import '../../../groups/data/models/group-model.dart';
+import '../../../groups/domain/entities/group.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-  final GroupModel group;
+  final Group group;
   const ChatScreen({super.key, required this.group});
 
   @override
@@ -26,7 +27,7 @@ class ChatScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
-  late GroupModel group;
+  late Group group;
   bool canUsePixels = false;
   final ScrollController scrollController = ScrollController();
   final TextEditingController controller = TextEditingController();
@@ -371,7 +372,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  onPressed: () => null,
+                  onPressed: () => Navigator.pushNamed(
+                      context, Routes.createTransactionRoute),
                   highlightColor: ColorManager.accentColor.withOpacity(0.15),
                   style:
                       const ButtonStyle(splashFactory: InkRipple.splashFactory),

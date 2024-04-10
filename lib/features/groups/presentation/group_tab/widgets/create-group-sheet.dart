@@ -10,10 +10,9 @@ import 'package:troco/core/basecomponents/button/presentation/widget/button.dart
 import 'package:troco/core/basecomponents/others/drag-handle.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/texts/inputs/text-form-field.dart';
-import 'package:troco/features/groups/data/models/group-model.dart';
 import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
-import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
+import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 
 import '../../../../../core/basecomponents/texts/outputs/info-text.dart';
 
@@ -155,21 +154,19 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                       size: IconSizeManager.regular,
                     ),
                     validator: (value) {
-                      if(value == null){
+                      if (value == null) {
                         return "* enter duration";
                       }
-                      if(value.trim().isEmpty){
+                      if (value.trim().isEmpty) {
                         return "* enter duration";
                       }
-                      if(!RegExp(r'\d').hasMatch(value.trim())){
+                      if (!RegExp(r'\d').hasMatch(value.trim())) {
                         return "* valid number";
                       }
                       return null;
                     },
                     onSaved: (value) {
-                      groupJson["ceatedTime"] =
-                          DateTime.now().toIso8601String();
-                      groupJson["transactionTime"] = DateTime.now()
+                      groupJson["deadlineTime"] = DateTime.now()
                           .copyWith(
                               day:
                                   DateTime.now().day + int.parse(value!.trim()))
@@ -200,31 +197,19 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
     if (formKey.currentState!.validate() && !groupNameError) {
       formKey.currentState!.save();
       log(ref.read(ClientProvider.userProvider)!.userId);
-      try {
-        GroupModel groupModel = GroupModel.fromJson(json: groupJson);
-        final abby = await ref.watch(groupsProvider.future);
-        abby.add(groupModel);
-        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-        await Future.delayed(const Duration(seconds: 2));
+      final result = await GroupRepo.createGroup(
+          groupName: groupJson["groupName"],
+          deadlineTime: groupJson["deadlineTime"],
+          useDelivery: groupJson["useDelivery"],
+          userId: ref.read(ClientProvider.userProvider)!.userId);
+          log(result.code.toString());
+      log(result.body);
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      if (!result.error) {
         if (mounted) {
           Navigator.pop(context);
         }
-      } on Exception catch (e) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Process Exited")));
-        log(e.toString());
       }
-
-      // TODO: UnComment once The API works.
-      // final result = await ApiInterface.createGroup(
-      //     groupName: groupNameController.text.trim(),
-      //     userId: ref.read(ClientProvider.userProvider)!.userId);
-      // log(result.body);
-      // ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-
-      // if (result.error) {
-      //   log(result.messageBody!.toString());
-      // }
     } else {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     }

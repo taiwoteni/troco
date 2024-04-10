@@ -1,5 +1,9 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/groups/data/models/group-model.dart';
+import 'package:troco/features/groups/domain/entities/group.dart';
+import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 
-final groupsProvider = FutureProvider<List<GroupModel>>((ref) => []);
+final groupRepoProvider = Provider<GroupRepo>((ref) => GroupRepo());
+
+final groupsProvider = FutureProvider.autoDispose <List<Group>>((ref) async {
+  return ref.watch(groupRepoProvider).getGroups();
+});

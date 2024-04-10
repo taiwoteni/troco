@@ -1,18 +1,24 @@
+import 'package:equatable/equatable.dart';
+import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
 import '../../utils/enums.dart';
 import '../../utils/transaction-purpose-converter.dart';
 import '../../utils/transaction-status-converter.dart';
 
-class Transaction {
+class Transaction extends Equatable {
   final Map<dynamic, dynamic> _json;
   const Transaction.fromJson({required final Map<dynamic, dynamic> json})
       : _json = json;
 
   String get transactionDetail => _json["transaction detail"];
   DateTime get transactionTime => DateTime.parse(_json["transaction time"]);
-  String get id => _json["transaction id"];
+  String get transactionId => _json["transaction id"];
+  TransactionCategory get transactionCategory =>
+      TransactionCategoryConverter.convertToEnum(
+          category: _json["transaction category"]);
   TransactionPurpose get transactionPurpose =>
-      TransactionPurposeConverter.convertToEnum(purpose: _json["transaction purpose"]);
+      TransactionPurposeConverter.convertToEnum(
+          purpose: _json["transaction purpose"]);
   TransactionStatus get transactionStatus =>
       TransactionConverter.convertToStatus(status: _json["transaction status"]);
 
@@ -25,4 +31,7 @@ class Transaction {
       //     condition: _json["product condition"])
       ProductCondition.New;
   double get transactionAmount => _json["transaction amount"];
+
+  @override
+  List<Object?> get props => [transactionId];
 }

@@ -9,10 +9,10 @@ import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/features/groups/data/models/group-model.dart';
+import 'package:troco/features/groups/domain/entities/group.dart';
 
 class ChatContactWidget extends ConsumerStatefulWidget {
-  final GroupModel group;
+  final Group group;
   const ChatContactWidget({super.key, required this.group});
 
   @override
@@ -20,7 +20,7 @@ class ChatContactWidget extends ConsumerStatefulWidget {
 }
 
 class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
-  late GroupModel group;
+  late Group group;
 
   @override
   void initState() {

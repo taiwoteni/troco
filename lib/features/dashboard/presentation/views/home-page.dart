@@ -12,14 +12,14 @@ import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
-import 'package:troco/features/auth/data/models/client.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:troco/core/basecomponents/clippers/bottom-rounded.dart';
 
 import '../widgets/transaction-item-widget.dart';
-import '../../../transactions/data/model/transaction.dart';
+import '../../../transactions/domain/entities/transaction.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

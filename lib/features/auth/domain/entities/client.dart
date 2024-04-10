@@ -1,11 +1,13 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import '../../../transactions/utils/enums.dart';
 import '../../utils/category-converter.dart';
 
-class Client{
-  Map<dynamic,dynamic> _json;
-  Client.fromJson({required final Map<dynamic,dynamic> json}):_json = json;
+
+class Client extends Equatable{
+  final Map<dynamic,dynamic> _json;
+  const Client.fromJson({required final Map<dynamic,dynamic> json}):_json = json;
 
 
   String get userId => _json["id"] ?? "7832u8923";
@@ -34,5 +36,8 @@ class Client{
   Map<dynamic,dynamic> toJson(){
     return _json;
   }
+  
+  @override
+  List<Object?> get props => [userId];
 
 }

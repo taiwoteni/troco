@@ -61,6 +61,13 @@ class ThemeManager {
         systemNavigationBarColor: ColorManager.background,
         systemNavigationBarIconBrightness: Brightness.dark);
   }
+  static SystemUiOverlayStyle getTransactionScreenUiOverlayStyle() {
+    return SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: ColorManager.background,
+        systemNavigationBarIconBrightness: Brightness.dark);
+  }
 
   static SystemUiOverlayStyle getHomeUiOverlayStyle() {
     return SystemUiOverlayStyle.light.copyWith(

@@ -4,6 +4,8 @@ enum Category { Business, Merchant, Admin }
 
 enum TransactionPurpose { Buying, Selling }
 
+enum TransactionCategory{ Product, Service, Virtual}
+
 enum ProductCondition { Used, New }
 
 enum TransactionStatus {

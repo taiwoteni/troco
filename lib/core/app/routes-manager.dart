@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
-import 'package:troco/features/groups/data/models/group-model.dart';
+import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password-otp.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password.dart';
@@ -12,7 +12,7 @@ import 'package:troco/features/auth/presentation/register/views/add-pin-screen.d
 import 'package:troco/features/auth/presentation/register/views/add-profile-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/splash/presentation/splash-screen.dart';
-
+import 'package:troco/features/transactions/presentation/views/create-transaction-screen.dart';
 
 import '../../features/auth/presentation/login/views/login-screen.dart';
 import '../../features/auth/presentation/register/views/register-screen.dart';
@@ -32,11 +32,14 @@ class Routes {
   static const addProfileRoute = '/add-profile';
   static const addTransactionPinRoute = "/add-transaction-pin";
   static const authSuccessRoute = "/auth-success";
+
   static const homeRoute = "/home";
 
   /// [chatRoute] is the route for the chat screen.
   /// Must pass the recipient client as an argument!
   static const chatRoute = "/chat";
+
+  static const createTransactionRoute = "/create-transaction";
 }
 
 class RouteGenerator {
@@ -47,9 +50,10 @@ class RouteGenerator {
             settings: routeSettings,
             builder: (context) => const OnboardingScreen());
       case Routes.authRoute:
-      return MaterialPageRoute(
-        settings: routeSettings,
-        builder: (context) => const AuthScreen(),);
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const AuthScreen(),
+        );
       case Routes.registerRoute:
         LoginData.clear();
         return MaterialPageRoute(
@@ -106,9 +110,13 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) {
-            final group = routeSettings.arguments as GroupModel;
+            final group = routeSettings.arguments as Group;
             return ChatScreen(group: group);
           },
+        );
+      case Routes.createTransactionRoute:
+        return MaterialPageRoute(
+          builder: (context) => const CreateTransactionScreen(),
         );
       default:
         return MaterialPageRoute(

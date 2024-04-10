@@ -9,7 +9,7 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/features/chat/data/model/chat-model.dart';
-import 'package:troco/features/auth/data/models/client.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';

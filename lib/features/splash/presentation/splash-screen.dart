@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -9,7 +8,6 @@ import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/animations/lottie.dart';
-import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
