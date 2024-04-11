@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/chat/data/model/chat-model.dart';
+import 'package:troco/features/chat/domain/entities/chat.dart';
 
 import '../../../auth/presentation/providers/client-provider.dart';
 

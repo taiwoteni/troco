@@ -1,21 +1,30 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/app/platform.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/core/basecomponents/animations/lottie.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
-import 'package:troco/features/chat/presentation/providers/preset-chat-list-provider.dart';
+import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
+import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
+import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
+import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
 
 import '../../../../core/app/font-manager.dart';
-import '../widgets/chat-widget.dart';
-import '../../data/model/chat-model.dart';
+import '../../domain/entities/chat.dart';
 import '../../../groups/domain/entities/group.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -29,49 +38,59 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   late Group group;
   bool canUsePixels = false;
+  final FocusNode messageNode = FocusNode();
   final ScrollController scrollController = ScrollController();
   final TextEditingController controller = TextEditingController();
+  late StreamSubscription chatStreamSubscription;
+  late List<Chat> chats;
   bool sending = false;
   bool newMessage = false;
-  bool fullScroll = false;
+  bool fullScroll = true;
   bool isScrolling = false;
-  List<Chat> chats = [];
 
   @override
   void initState() {
     group = widget.group;
+    chats = AppStorage.getChats(groupId: group.groupId);
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      setState(() {
-        chats = ref.read(presetChatNotifier);
-      });
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getChatUiOverlayStyle());
       scrollController.addListener(() {
         if (fullScroll) {
-          if (scrollController.position.pixels <
-              scrollController.position.maxScrollExtent) {
+          if (scrollController.position.pixels.toInt() <
+              scrollController.position.maxScrollExtent.toInt()) {
             setState(
               () => fullScroll = false,
             );
           }
         } else {
-          if (scrollController.position.pixels >=
-              scrollController.position.maxScrollExtent) {
+          if (scrollController.position.pixels.toInt() >=
+              scrollController.position.maxScrollExtent.toInt()) {
             setState(
               () => fullScroll = true,
             );
           }
         }
       });
-      // scrollController.animateTo(scrollController.position.maxScrollExtent,
-      //     duration: const Duration(milliseconds: 800), curve: Curves.ease);
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
       setState(
         () => canUsePixels = true,
       );
+      messageNode.addListener(() {
+        if (messageNode.hasFocus) {
+          if (!AppPlatform.isDesktop) {
+            setState(() => fullScroll = false);
+          }
+        }
+      });
     });
-    controller.addListener(() => setState(() {}));
+
+    /// Inorder to help the send buttons and action buttons
+    /// rebuild their state.
+    controller.addListener(() => setState(
+          () {},
+        ));
   }
 
   @override
@@ -91,10 +110,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (chats.isNotEmpty) {
-      newMessage = !chats.last.read &&
-          chats.last.senderId != ref.read(ClientProvider.userProvider)!.userId;
-    }
+    listenToChatChanges();
     return Padding(
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -104,89 +120,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         resizeToAvoidBottomInset: false,
         extendBody: true,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        appBar: PreferredSize(
-            preferredSize:
-                Size.fromHeight(75 + MediaQuery.of(context).viewPadding.top),
-            child: appBar()),
+        appBar: appBar(),
         body: Container(
           width: double.maxFinite,
           height: double.maxFinite,
           color: ColorManager.tertiary,
-          padding: const EdgeInsets.only(
-            left: 0,
-            right: 0,
-          ),
           child: SingleChildScrollView(
             controller: scrollController,
             child: Column(
               children: [
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: chats.length,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    final Chat currentChat = chats[index];
-
-                    final bool isFirstMessage = index == 0;
-                    final bool isLastMessage = index == chats.length - 1;
-                    bool sameSender = false,
-                        firstTimeSender = true,
-                        lastTimeSender = false;
-
-                    if (!isFirstMessage && !isLastMessage) {
-                      sameSender =
-                          currentChat.senderId == chats[index - 1].senderId;
-                    }
-                    if (!isFirstMessage) {
-                      firstTimeSender =
-                          currentChat.senderId != chats[index - 1].senderId;
-                    }
-                    if (!isLastMessage) {
-                      lastTimeSender =
-                          currentChat.senderId != chats[index + 1].senderId;
-                    } else {
-                      if (!isFirstMessage) {
-                        lastTimeSender =
-                            currentChat.senderId == chats[index - 1].senderId;
-                      }
-                    }
-
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (index == 0)
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              mediumSpacer(),
-                              groupDetailsWidget(),
-                              groupCreationTime(),
-                              adminJoinedWidget(),
-                              addedWidget(),
-                              smallSpacer(),
-                              endToEndEncrypted(),
-                              mediumSpacer(),
-                              divider(),
-                              extraLargeSpacer(),
-                            ],
-                          ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                              bottom: isLastMessage ? SizeManager.large : 0),
-                          child: ChatWidget(
-                            deviceClient:
-                                ref.read(ClientProvider.userProvider)!,
-                            chat: currentChat,
-                            firstSender: firstTimeSender,
-                            lastSender: lastTimeSender,
-                            sameSender: sameSender,
-                            lastMessage: isLastMessage,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                if (chats.isEmpty)
+                  Column(
+                    children: [
+                      Gap(75 + MediaQuery.of(context).viewPadding.top),
+                      ChatHeader(chats: chats, group: group),
+                    ],
+                  )
+                else
+                  ChatLists(chats: chats, group: group)
               ],
             ),
           ),
@@ -197,6 +148,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  /// The BottomBar that contains the  InputField
+  /// to send messages and attachments
   Widget bottomBar() {
     return Container(
       padding: EdgeInsets.zero,
@@ -234,8 +187,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: controller,
-                    onTap: () => setState(() {}),
                     cursorColor: ColorManager.accentColor,
+                    focusNode: messageNode,
                     cursorRadius: const Radius.circular(SizeManager.large),
                     autofocus: false,
                     maxLines: null,
@@ -288,12 +241,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ],
                   ),
                 if (controller.text.trim().isNotEmpty)
-                  GestureDetector(
-                    onTap: sendChat,
-                    child: SvgIcon(
-                      svgRes: AssetManager.svgFile(name: "send"),
-                      color: ColorManager.accentColor,
-                      size: const Size.square(IconSizeManager.medium),
+                  AnimatedCrossFade(
+                    firstCurve: Curves.ease,
+                    secondCurve: Curves.ease,
+                    duration: const Duration(milliseconds: 350),
+                    crossFadeState: sending
+                        ? CrossFadeState.showSecond
+                        : CrossFadeState.showFirst,
+                    firstChild: GestureDetector(
+                      onTap: sendChat,
+                      child: SvgIcon(
+                        svgRes: AssetManager.svgFile(name: "send"),
+                        color: ColorManager.accentColor,
+                        size: const Size.square(IconSizeManager.medium),
+                      ),
+                    ),
+                    secondChild: Transform.scale(
+                      scale: 1.7,
+                      child: LottieWidget(
+                          color: ColorManager.accentColor,
+                          fit: BoxFit.cover,
+                          lottieRes: AssetManager.lottieFile(name: "loading"),
+                          size: const Size.square(IconSizeManager.medium)),
                     ),
                   )
               ],
@@ -304,108 +273,115 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Widget appBar() {
+  /// The AppBar contains the Groups icon, action button
+  /// And business Days
+  PreferredSizeWidget appBar() {
     /// Not using the usual [DateTime.day]- [Now.day] because of
     /// Situations whereby the days may not be of the same month.
     /// becos [DateTime.day] is the day of the month.
     final String daysRemaining =
-        "${group.transactionTime.difference(DateTime.now()).inDays + 1}";
-    return Container(
-        padding: const EdgeInsets.only(
-            left: SizeManager.regular, right: SizeManager.medium),
-        decoration: BoxDecoration(
-            color: Colors.white,
+        "${DateTime.now().difference(DateTime.now()).inDays + 1}";
+    return PreferredSize(
+      preferredSize:
+          Size.fromHeight(75 + MediaQuery.of(context).viewPadding.top),
+      child: Container(
+          padding: const EdgeInsets.only(
+              left: SizeManager.regular, right: SizeManager.medium),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(SizeManager.large * 1.5)),
+              boxShadow: [
+                BoxShadow(
+                    offset: kElevationToShadow[1]![0].offset,
+                    blurRadius: kElevationToShadow[1]![0].blurRadius,
+                    blurStyle: kElevationToShadow[1]![0].blurStyle,
+                    spreadRadius: kElevationToShadow[1]![0].spreadRadius,
+                    color: ColorManager.secondary.withOpacity(0.08))
+              ]),
+          child: ClipRRect(
             borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(SizeManager.large * 1.5)),
-            boxShadow: [
-              BoxShadow(
-                  offset: kElevationToShadow[1]![0].offset,
-                  blurRadius: kElevationToShadow[1]![0].blurRadius,
-                  blurStyle: kElevationToShadow[1]![0].blurStyle,
-                  spreadRadius: kElevationToShadow[1]![0].spreadRadius,
-                  color: ColorManager.secondary.withOpacity(0.08))
-            ]),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(SizeManager.large * 1.5)),
-          child: ListTile(
-            tileColor: Colors.transparent,
-            dense: true,
-            contentPadding: EdgeInsets.only(
-                top: MediaQuery.of(context).viewPadding.top +
-                    SizeManager.regular,
-                right: SizeManager.small,
-                bottom: SizeManager.regular),
-            horizontalTitleGap: SizeManager.medium * 0.8,
-            leading: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                    onPressed: () => Navigator.pop(context),
+            child: ListTile(
+              tileColor: Colors.transparent,
+              dense: true,
+              contentPadding: EdgeInsets.only(
+                  top: MediaQuery.of(context).viewPadding.top +
+                      SizeManager.regular,
+                  right: SizeManager.small,
+                  bottom: SizeManager.regular),
+              horizontalTitleGap: SizeManager.medium * 0.8,
+              leading: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: SvgIcon(
+                        svgRes: AssetManager.svgFile(name: 'back-chat'),
+                        color: ColorManager.accentColor,
+                        size: const Size.square(IconSizeManager.regular * 1.5),
+                      )),
+                  const GroupProfileIcon(
+                    size: 47,
+                  ),
+                ],
+              ),
+              title: Text(group.groupName),
+              titleTextStyle: TextStyle(
+                  overflow: TextOverflow.ellipsis,
+                  color: ColorManager.primary,
+                  fontFamily: 'Lato',
+                  fontSize: FontSizeManager.medium * 1.3,
+                  fontWeight: FontWeightManager.semibold),
+              subtitle: Text(daysRemaining == "0"
+                  ? "Last business day"
+                  : "$daysRemaining business day${daysRemaining == "1" ? "" : "s"} left"),
+              subtitleTextStyle: TextStyle(
+                  color: ColorManager.accentColor,
+                  fontFamily: 'Quicksand',
+                  fontSize: FontSizeManager.regular * 0.8,
+                  fontWeight: FontWeightManager.medium),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(
+                          context, Routes.createTransactionRoute);
+                    },
+                    highlightColor: ColorManager.accentColor.withOpacity(0.15),
+                    style: const ButtonStyle(
+                        splashFactory: InkRipple.splashFactory),
                     icon: SvgIcon(
-                      svgRes: AssetManager.svgFile(name: 'back-chat'),
+                      svgRes: AssetManager.svgFile(name: "buy"),
+                      color: group.members.isEmpty
+                          ? ColorManager.secondary
+                          : ColorManager.accentColor,
+                      size: const Size.square(IconSizeManager.regular * 1.3),
+                    ),
+                  ),
+                  regularSpacer(),
+                  IconButton(
+                    onPressed: () => null,
+                    highlightColor: ColorManager.accentColor.withOpacity(0.15),
+                    style: const ButtonStyle(
+                        splashFactory: InkRipple.splashFactory),
+                    icon: SvgIcon(
+                      svgRes: AssetManager.svgFile(name: "add-member"),
                       color: ColorManager.accentColor,
-                      size: const Size.square(IconSizeManager.regular * 1.5),
-                    )),
-                const GroupProfileIcon(
-                  size: 47,
-                ),
-              ],
+                      size: const Size.square(IconSizeManager.regular * 1.3),
+                    ),
+                  )
+                ],
+              ),
             ),
-            title: Text(group.groupName),
-            titleTextStyle: TextStyle(
-                overflow: TextOverflow.ellipsis,
-                color: ColorManager.primary,
-                fontFamily: 'Lato',
-                fontSize: FontSizeManager.medium * 1.3,
-                fontWeight: FontWeightManager.semibold),
-            subtitle: Text(daysRemaining == "0"
-                ? "Last business day"
-                : "$daysRemaining business day${daysRemaining == "1" ? "" : "s"} left"),
-            subtitleTextStyle: TextStyle(
-                color: ColorManager.accentColor,
-                fontFamily: 'Quicksand',
-                fontSize: FontSizeManager.regular * 0.8,
-                fontWeight: FontWeightManager.medium),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, Routes.createTransactionRoute);
-                  },
-                  highlightColor: ColorManager.accentColor.withOpacity(0.15),
-                  style:
-                      const ButtonStyle(splashFactory: InkRipple.splashFactory),
-                  icon: SvgIcon(
-                    svgRes: AssetManager.svgFile(name: "buy"),
-                    color: group.members.isEmpty
-                        ? ColorManager.secondary
-                        : ColorManager.accentColor,
-                    size: const Size.square(IconSizeManager.regular * 1.3),
-                  ),
-                ),
-                regularSpacer(),
-                IconButton(
-                  onPressed: () => null,
-                  highlightColor: ColorManager.accentColor.withOpacity(0.15),
-                  style:
-                      const ButtonStyle(splashFactory: InkRipple.splashFactory),
-                  icon: SvgIcon(
-                    svgRes: AssetManager.svgFile(name: "add-member"),
-                    color: ColorManager.accentColor,
-                    size: const Size.square(IconSizeManager.regular * 1.3),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ));
+          )),
+    );
   }
 
   Widget? fabWidget() {
-    return canUsePixels
+    return canUsePixels && chats.isNotEmpty
         ? Visibility(
             visible: !fullScroll ? !isScrolling : false,
             child: FloatingActionButton.small(
@@ -432,214 +408,51 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         : null;
   }
 
-  Widget endToEndEncrypted() {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: SizeManager.regular),
-      padding: const EdgeInsets.symmetric(
-          horizontal: SizeManager.regular * 1.1,
-          vertical: SizeManager.regular * 1.1),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(SizeManager.regular),
-      ),
-      child: Text(
-        "Conversations are end-to-end Encrypted",
-        style: TextStyle(
-            color: ColorManager.themeColor,
-            fontFamily: 'Lato',
-            fontSize: FontSizeManager.regular * 0.75,
-            fontWeight: FontWeightManager.semibold),
-      ),
-    );
-  }
-
-  Widget groupCreationTime() {
-    return Container(
-      margin: const EdgeInsets.only(
-          top: SizeManager.regular, bottom: SizeManager.small),
-      padding: const EdgeInsets.symmetric(
-          horizontal: SizeManager.regular * 1.1,
-          vertical: SizeManager.regular * 1.1),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(SizeManager.regular),
-      ),
-      child: Text(
-        '"${group.groupName}" was created',
-        style: TextStyle(
-            color: ColorManager.secondary,
-            fontFamily: 'Lato',
-            fontSize: FontSizeManager.regular * 0.75,
-            fontWeight: FontWeightManager.semibold),
-      ),
-    );
-  }
-
-  Widget addedWidget() {
-    return Container(
-      margin: const EdgeInsets.only(
-          top: SizeManager.regular, bottom: SizeManager.small),
-      padding: const EdgeInsets.symmetric(
-          horizontal: SizeManager.regular * 1.1,
-          vertical: SizeManager.regular * 1.1),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(SizeManager.regular),
-      ),
-      child: Text(
-        'you were added',
-        style: TextStyle(
-            color: ColorManager.secondary,
-            fontFamily: 'Lato',
-            fontSize: FontSizeManager.regular * 0.75,
-            fontWeight: FontWeightManager.semibold),
-      ),
-    );
-  }
-
-  Widget adminJoinedWidget() {
-    return Container(
-      margin: const EdgeInsets.only(
-          top: SizeManager.regular, bottom: SizeManager.small),
-      padding: const EdgeInsets.symmetric(
-          horizontal: SizeManager.regular * 1.1,
-          vertical: SizeManager.regular * 1.1),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(SizeManager.regular),
-      ),
-      child: Text(
-        'Admin Joined',
-        style: TextStyle(
-            color: ColorManager.secondary,
-            fontFamily: 'Lato',
-            fontSize: FontSizeManager.regular * 0.75,
-            fontWeight: FontWeightManager.semibold),
-      ),
-    );
-  }
-
-  Widget groupDetailsWidget() {
-    return Container(
-      width: double.maxFinite,
-      padding: const EdgeInsets.symmetric(
-          vertical: SizeManager.medium, horizontal: SizeManager.medium),
-      margin: const EdgeInsets.symmetric(
-        horizontal: SizeManager.large,
-        vertical: SizeManager.small,
-      ),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(SizeManager.regular * 1.5),
-          color: ColorManager.background),
-      child: Column(
-        children: [
-          regularSpacer(),
-          const GroupProfileIcon(
-            size: IconSizeManager.extralarge * 0.95,
-          ),
-          regularSpacer(),
-          Text(
-            group.groupName,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: ColorManager.primary,
-              fontFamily: 'Lato',
-              fontWeight: FontWeightManager.semibold,
-              fontSize: FontSizeManager.regular * 1.1,
-            ),
-          ),
-          regularSpacer(),
-          Text(
-            "No Transactions yet",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: ColorManager.primary,
-              fontFamily: 'Lato',
-              fontWeight: FontWeightManager.light,
-              fontSize: FontSizeManager.small,
-            ),
-          ),
-          regularSpacer(),
-          Text(
-            "${group.members.length} member${group.members.length == 1 ? "" : "s"}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: ColorManager.primary,
-              fontFamily: 'Lato',
-              fontWeight: FontWeightManager.light,
-              fontSize: FontSizeManager.small,
-            ),
-          ),
-          regularSpacer(),
-        ],
-      ),
-    );
-  }
-
-  Widget divider() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            width: double.maxFinite,
-            margin: const EdgeInsets.only(
-                left: SizeManager.large, right: SizeManager.regular),
-            height: 1,
-            decoration: BoxDecoration(
-                color: ColorManager.secondary.withOpacity(0.09),
-                borderRadius: BorderRadius.circular(SizeManager.regular)),
-          ),
-        ),
-        Text(
-          "Business Starts",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: ColorManager.secondary,
-            fontFamily: 'Quicksand',
-            fontWeight: FontWeightManager.medium,
-            fontSize: FontSizeManager.regular * 0.9,
-          ),
-        ),
-        Expanded(
-          child: Container(
-            width: double.maxFinite,
-            margin: const EdgeInsets.only(
-                right: SizeManager.large, left: SizeManager.regular),
-            height: 1,
-            decoration: BoxDecoration(
-                color: ColorManager.secondary.withOpacity(0.09),
-                borderRadius: BorderRadius.circular(SizeManager.regular)),
-          ),
-        )
-      ],
-    );
-  }
-
   Future<void> sendChat() async {
     final String chatMessage = controller.text.trim();
-    final Chat chat = Chat.fromJson(json: {
-      "id": "Alznchuaji",
-      "sender id": ref.read(ClientProvider.userProvider)!.userId,
-      "message": chatMessage,
-      "time": DateTime.now().toIso8601String(),
-      "read": false,
-    });
-
     setState(() => sending = true);
-    await Future.delayed(const Duration(microseconds: 5));
+    final response = await ChatRepo.sendChat(
+        groupId: group.groupId,
+        userId: ref.read(ClientProvider.userProvider)!.userId,
+        message: chatMessage);
     setState(() {
       sending = false;
-      chats.add(chat);
     });
-    controller.text = "";
-    WidgetsFlutterBinding.ensureInitialized()
-        .addPostFrameCallback((timeStamp) async {
-      setState(() => isScrolling = true);
-      await scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.ease);
-      setState(() => isScrolling = false);
+    if (response.error) {
+      log("Error When Sending Chat:${response.body}");
+    } else {
+      controller.text = "";
+    }
+  }
+
+  Future<void> listenToChatChanges() async {
+    ref.listen(chatsStreamProvider, (previous, next) {
+      next.when(
+        data: (data) {
+          setState(() {
+            chats = data;
+            newMessage = data.isEmpty
+                ? false
+                : !chats.last.read &&
+                    chats.last.senderId !=
+                        ref.read(ClientProvider.userProvider)!.userId;
+          });
+          if (scrollController.position.pixels >=
+              scrollController.position.maxScrollExtent) {
+            WidgetsFlutterBinding.ensureInitialized()
+                .addPostFrameCallback((timeStamp) async {
+              setState(() => isScrolling = true);
+              await scrollController.animateTo(
+                  scrollController.position.maxScrollExtent,
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.ease);
+              setState(() => isScrolling = false);
+            });
+          }
+        },
+        error: (error, stackTrace) => log(error.toString()),
+        loading: () => null,
+      );
     });
   }
 }

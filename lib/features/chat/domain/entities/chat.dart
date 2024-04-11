@@ -16,6 +16,7 @@ class Chat extends Equatable{
   String get chatId => _json["id"] ?? _json["chatId"] ?? _json["_id"];
   String get profile =>_json["profile"]??"null";
   bool get read => _json["read"] ?? false;
+  bool get loading => _json["loading"] ?? false;
   DateTime get readTime => _json.containsKey("read time")? DateTime.parse(_json["read time"] ?? DateTime.now().toIso8601String()): DateTime.now();
 
   Map<dynamic,dynamic> toJson()=> _json;

@@ -9,6 +9,7 @@ import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
 class ChatContactWidget extends ConsumerStatefulWidget {
@@ -46,8 +47,11 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
             borderRadius: BorderRadius.circular(SizeManager.medium),
           ),
           child: ListTile(
-              onTap: () => Navigator.pushNamed(context, Routes.chatRoute,
-                  arguments: widget.group),
+              onTap: (){
+                ref.watch(chatsGroupProvider.notifier).state = group.groupId;
+                Navigator.pushNamed(context, Routes.chatRoute,
+                  arguments: widget.group);
+              },
               dense: true,
               tileColor: Colors.transparent,
               contentPadding: const EdgeInsets.only(
