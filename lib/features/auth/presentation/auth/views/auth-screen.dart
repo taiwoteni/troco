@@ -51,49 +51,51 @@ class _AuthScreenState extends State<AuthScreen> {
                       alignment: Alignment.bottomCenter,
                       child: Image.asset(
                         AssetManager.imageFile(name: 'welcome'),
-                        width: IconSizeManager.extralarge * 4,
+                        width: IconSizeManager.extralarge * 3.7,
                         fit: BoxFit.cover,
-                        height: IconSizeManager.extralarge * 4,
+                        height: IconSizeManager.extralarge * 3.7,
                       ),
                     ),
                   ),
                   Expanded(
                     flex: 6,
-                    child: Column(
-                      children: [
-                        Text(
-                          "WELCOME TO",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: "Lato",
-                            fontSize: FontSizeManager.large,
-                            fontWeight: FontWeightManager.extrabold,
-                            color: ColorManager.primary,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Text(
+                            "WELCOME TO",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "Lato",
+                              fontSize: FontSizeManager.large,
+                              fontWeight: FontWeightManager.extrabold,
+                              color: ColorManager.primary,
+                            ),
                           ),
-                        ),
-                        largeSpacer(),
-                        Align(
-                          child: Image.asset(
-                            AssetManager.imageFile(name: 'troco'),
-                            width: double.maxFinite,
-                            fit: BoxFit.contain,
-                            height: IconSizeManager.large * 0.7,
+                          largeSpacer(),
+                          Align(
+                            child: Image.asset(
+                              AssetManager.imageFile(name: 'troco'),
+                              width: double.maxFinite,
+                              fit: BoxFit.contain,
+                              height: IconSizeManager.large * 0.7,
+                            ),
                           ),
-                        ),
-                        largeSpacer(),
-                        Text(
-                          ValuesManager.welcomeString,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeightManager.medium,
-                            color: ColorManager.secondary,
-                            fontSize: FontSizeManager.medium * 0.9,
-                            height: 1.36,
-                            wordSpacing: 1.2,
-                            fontFamily: 'Lato',
+                          largeSpacer(),
+                          Text(
+                            ValuesManager.welcomeString,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeightManager.medium,
+                              color: ColorManager.secondary,
+                              fontSize: FontSizeManager.medium * 0.9,
+                              height: 1.36,
+                              wordSpacing: 1.2,
+                              fontFamily: 'Lato',
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],

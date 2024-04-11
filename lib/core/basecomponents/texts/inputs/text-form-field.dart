@@ -89,7 +89,8 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
           decoration: InputDecoration(
             prefixIcon: widget.prefixIcon != null
                 ? Theme(
-                    data: ThemeManager.getApplicationTheme(),
+                    data: ThemeManager.getApplicationTheme()
+                        .copyWith(useMaterial3: false),
                     child: widget.prefixIcon!)
                 : null,
             prefixText: widget.prefixText,

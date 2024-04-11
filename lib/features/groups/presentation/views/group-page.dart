@@ -10,7 +10,6 @@ import 'package:troco/core/basecomponents/texts/inputs/search-bar.dart';
 import 'package:troco/core/basecomponents/clippers/inward-bottom-rounded-clipper.dart';
 import 'package:troco/features/groups/presentation/group_tab/widgets/create-group-sheet.dart';
 import 'package:troco/features/groups/presentation/group_tab/views/groups-tab.dart';
-import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/basecomponents/images/profile-icon.dart';
@@ -45,6 +44,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
       body: Padding(
           padding: const EdgeInsets.only(bottom: SizeManager.medium),
           child: CustomScrollView(
+            primary: true,
             slivers: [
               SliverAppBar(
                 systemOverlayStyle: ThemeManager.getGroupsUiOverlayStyle(),
@@ -61,8 +61,10 @@ class _GroupPageState extends ConsumerState<GroupPage>
                   delegate:
                       _SliverTabBarDelegate(child: tabBar(), context: context)),
               SliverFillRemaining(
-                  fillOverscroll: false,
-                  child: TabBarView(controller: tabController, children: [
+                  child: TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      controller: tabController,
+                      children: [
                     const GroupsPage(),
                     friendList(),
                   ]))

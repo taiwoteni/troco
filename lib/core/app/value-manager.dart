@@ -11,6 +11,8 @@ class ValuesManager {
   static const String dummyDescription =
       "It is a long established fact with a\nreadable content of a page when\n looking at its layout.";
   static const String USER_STORAGE_KEY = "userData";
+  static const String GROUP_STORAGE_KEY = "groups";
+  static String CHAT_STORAGE_KEY ({required String groupId})=> "groups.$groupId.chats";
 
   static Map<String, List<String>> allCitiesAndState() {
     Map<String, List<String>> nigerianStatesAndCities = {};

@@ -36,7 +36,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> deleteUser() async {
     final result =
-        await AuthenticationRepo.deleteUser(userId: "66113de7e0363d79e830e676");
+        await AuthenticationRepo.deleteUser(userId: "66151e93e4d870dc1782e4b2");
     print(result.body);
   }
 

@@ -56,7 +56,7 @@ class ApiInterface {
           code: response.statusCode);
       return responseModel;
     } catch (e) {
-      log(e.toString());
+      log("error caught in runtimer exception $e");
       return HttpResponseModel(error: true, body: e.toString(), code: 500);
     }
   }
@@ -93,7 +93,7 @@ class ApiInterface {
       final int okCode = 200,
       Map<String, String>? headers}) async {
     try {
-      final Uri uri = Uri.parse("$_serverUrl/url");
+      final Uri uri = Uri.parse("$_serverUrl/$url");
 
       final request = http.Request('DELETE', uri);
       request.headers['Content-Type'] = 'application/json';
@@ -130,6 +130,4 @@ class ApiInterface {
         await getRequest(url: 'findoneuser/$userId', headers: headers);
     return result;
   }
-
-  
 }

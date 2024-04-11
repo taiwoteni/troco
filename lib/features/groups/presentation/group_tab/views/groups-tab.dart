@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../../core/app/color-manager.dart';
@@ -20,36 +22,57 @@ class GroupsPage extends ConsumerStatefulWidget {
 class _GroupsPageState extends ConsumerState<GroupsPage> {
   @override
   Widget build(BuildContext context) {
-    final asyncConfig = ref.watch(groupsProvider);
-    return asyncConfig.when(
-        data: (e) {
-          final List<Group> data = e.map((e) => e).toList();
-          return data.isEmpty
-              ? const EmptyScreen(
-                  label: "No Business Groups.\nCreate a Business Group",
-                )
-              : ListView.separated(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: SizeManager.small),
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) => ChatContactWidget(
-                        group: data[index],
-                      ),
-                  separatorBuilder: (context, index) => Divider(
-                        thickness: 0.8,
-                        color: ColorManager.secondary.withOpacity(0.08),
-                      ),
-                  itemCount: data.length);
-        },
-        error: (error, stackTrace) {
-          log(error.toString(), stackTrace: stackTrace);
-          return const EmptyScreen(
-            label: "Error loading business groups",
-          );
-        },
-        loading: () => const EmptyScreen(
-              label: "Loading business groups",
-            ));
+    // final asyncConfig = ref.watch(groupsStreamProvider);
+    return ref.watch(groupsStreamProvider).when(data: (data) {
+      log("rebuilt data: ${data.map((e) => e.groupName).toList()}");
+      data.sort(
+        (a, b) => b.createdTime.compareTo(a.createdTime),
+      );
+      return GroupList(groups: data.map((e) => e).toList());
+    }, error: (error, stackTrace) {
+      log(error.toString(), stackTrace: stackTrace);
+      return const EmptyScreen(
+        label: "Error loading business groups",
+      );
+    }, loading: () {
+      final groups = AppStorage.getGroups();
+      groups.sort(
+        (a, b) => b.createdTime.compareTo(a.createdTime),
+      );
+      return GroupList(groups: groups);
+    });
+  }
+}
+
+class GroupList extends StatelessWidget {
+  final List<Group> groups;
+  const GroupList({super.key, required this.groups});
+
+  @override
+  Widget build(BuildContext context) {
+    return groups.isEmpty
+        ? const EmptyScreen(
+            label: "No Business Groups.\nCreate a Business Group",
+          )
+        : ListView.separated(
+            key: const Key("groupsList"),
+            padding: const EdgeInsets.symmetric(horizontal: SizeManager.small),
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemBuilder: (context, index) => Column(
+                  children: [
+                    ChatContactWidget(
+                      key: Key(groups[index].hashCode.toString()),
+                      group: groups[index],
+                    ),
+                    if (index == groups.length - 1)
+                      const Gap(SizeManager.bottomBarHeight),
+                  ],
+                ),
+            separatorBuilder: (context, index) => Divider(
+                  thickness: 0.8,
+                  color: ColorManager.secondary.withOpacity(0.08),
+                ),
+            itemCount: groups.length);
   }
 }

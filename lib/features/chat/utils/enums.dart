@@ -1,0 +1,1 @@
+enum AttachmentType{Image, Video, Audio, Document}

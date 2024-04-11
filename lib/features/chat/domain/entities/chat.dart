@@ -2,7 +2,7 @@
 
 import 'package:equatable/equatable.dart';
 
-enum AttachmentType{Image, Video, Audio, Document}
+
 class Chat extends Equatable{
   final Map<dynamic,dynamic> _json;
   const Chat.fromJson({required final Map<dynamic,dynamic> json}): _json = json;
@@ -17,6 +17,8 @@ class Chat extends Equatable{
   String get profile =>_json["profile"]??"null";
   bool get read => _json["read"] ?? false;
   DateTime get readTime => _json.containsKey("read time")? DateTime.parse(_json["read time"] ?? DateTime.now().toIso8601String()): DateTime.now();
+
+  Map<dynamic,dynamic> toJson()=> _json;
   
   @override
   List<Object?> get props => [chatId];

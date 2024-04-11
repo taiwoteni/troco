@@ -202,10 +202,21 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
           deadlineTime: groupJson["deadlineTime"],
           useDelivery: groupJson["useDelivery"],
           userId: ref.read(ClientProvider.userProvider)!.userId);
-          log(result.code.toString());
+      log(result.code.toString());
       log(result.body);
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       if (!result.error) {
+        // final groups = AppStorage.getGroups();
+        // final group = Group.fromJson(json: result.messageBody!["group"]);
+
+        /// remove the last group. Inorder to surely, make sure that the
+        /// groups returned from Cache and API listening service are not the same
+        /// Hence, Causing a rebuild.
+        // final json = await GroupRepo().getGroupsJson();
+        // List jsonList = json["groups"];
+        // log("List of groups checked immediately after commiting a new group : ${jsonList.map((e) => e["name"]).toList()}");
+        // await AppStorage.saveGroups(groups: groups);
+
         if (mounted) {
           Navigator.pop(context);
         }

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:troco/features/groups/data/models/group-member-model.dart';
 
@@ -23,6 +22,10 @@ class Group extends Equatable {
 
   String get groupId => _json["id"] ?? _json["_id"];
   String get adminId => _json["adminId"];
+
+  Map<dynamic,dynamic> toJson(){
+    return _json;
+  }
 
   @override
   List<Object?> get props => [groupId];
