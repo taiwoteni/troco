@@ -48,6 +48,7 @@ class _CreateTransactionScreenState
               children: [
                 stages2(),
                 Divider(
+                  height: 1,
                   color: ColorManager.secondary.withOpacity(0.09),
                 ),
                 Expanded(

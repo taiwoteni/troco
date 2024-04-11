@@ -43,7 +43,7 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
   final StreamController<List<Chat>> streamController = StreamController<List<Chat>>();
   final String groupId = ref.watch(chatsGroupProvider);
 
-  final periodic = Timer.periodic(const Duration(seconds: 4),(timer) {
+  final periodic = Timer.periodic(const Duration(milliseconds: 2025),(timer) {
       ref.watch(chatsListProvider(groupId)).whenData((chatsJson){
 
         final _chatsList = AppStorage.getChats(groupId: groupId).map((e) => e.toJson()).toList();

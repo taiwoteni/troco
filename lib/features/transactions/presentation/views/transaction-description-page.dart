@@ -28,7 +28,7 @@ class _TransactionDescriptionPageState
   final TextEditingController aboutProductController =
       TextEditingController(text: TransactionDataHolder.aboutProduct ?? "");
   final formKey = GlobalKey<FormState>();
-  bool inspectByDay = TransactionDataHolder.inspectionPeriod ?? false;
+  bool inspectByDay = TransactionDataHolder.inspectionPeriod ?? true;
   int inspectionDay = TransactionDataHolder.inspectionDays ?? 1;
 
   final buttonKey = UniqueKey();
@@ -39,13 +39,12 @@ class _TransactionDescriptionPageState
         resizeToAvoidBottomInset: false,
         body: Padding(
           padding: const EdgeInsets.only(
-              top: SizeManager.medium,
-              left: SizeManager.large,
-              right: SizeManager.large),
+              left: SizeManager.large, right: SizeManager.large),
           child: SingleChildScrollView(
               child: Form(
             key: formKey,
             child: Column(children: [
+              mediumSpacer(),
               title(),
               largeSpacer(),
               regularSpacer(),
@@ -86,7 +85,7 @@ class _TransactionDescriptionPageState
         InfoText(
           text: " Transaction Name",
           color: ColorManager.secondary,
-          fontWeight: FontWeightManager.semibold,
+          fontWeight: FontWeightManager.medium,
         ),
         regularSpacer(),
         InputFormField(
@@ -119,7 +118,7 @@ class _TransactionDescriptionPageState
         InfoText(
           text: " About Product(s)",
           color: ColorManager.secondary,
-          fontWeight: FontWeightManager.semibold,
+          fontWeight: FontWeightManager.medium,
         ),
         regularSpacer(),
         InputFormField(
@@ -148,15 +147,9 @@ class _TransactionDescriptionPageState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InfoText(
-          text: " Inspection Period",
-          color: ColorManager.secondary,
-          fontWeight: FontWeightManager.semibold,
-        ),
-        regularSpacer(),
         SingleChildScrollView(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               InkWell(
                 onTap: () => setState(() => inspectByDay = true),
@@ -184,7 +177,7 @@ class _TransactionDescriptionPageState
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(2),
                               side: BorderSide(
-                                  color: ColorManager.accentColor, width: 1.3)),
+                                  color: ColorManager.accentColor, width: 1)),
                           onChanged: (value) => null,
                         ),
                         Text(
@@ -225,7 +218,7 @@ class _TransactionDescriptionPageState
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(2),
                               side: BorderSide(
-                                  color: ColorManager.accentColor, width: 1.3)),
+                                  color: ColorManager.accentColor, width: 1)),
                           onChanged: (value) => null,
                         ),
                         Text(
@@ -251,9 +244,9 @@ class _TransactionDescriptionPageState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InfoText(
-          text: " Inspection Days",
+          text: " Transaction Period",
           color: ColorManager.secondary,
-          fontWeight: FontWeightManager.semibold,
+          fontWeight: FontWeightManager.medium,
         ),
         regularSpacer(),
         Container(
@@ -308,7 +301,7 @@ class _TransactionDescriptionPageState
               Expanded(
                 child: InkWell(
                   onTap: () {
-                    if (inspectionDay < 10) {
+                    if (inspectionDay < 24) {
                       setState(() {
                         inspectionDay += 1;
                       });

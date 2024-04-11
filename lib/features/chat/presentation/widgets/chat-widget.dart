@@ -8,13 +8,14 @@ import 'package:lottie/lottie.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
 
-class ChatWidget extends ConsumerStatefulWidget {
+class ChatWidget extends ConsumerWidget {
   final Chat chat;
   final Client deviceClient;
   final bool firstSender, lastSender, sameSender, lastMessage;
@@ -28,27 +29,41 @@ class ChatWidget extends ConsumerStatefulWidget {
       this.lastSender = false});
 
   @override
-  ConsumerState<ChatWidget> createState() => _ChatWidgetState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    bool isSender =
+        ref.watch(ClientProvider.userProvider)!.userId == chat.senderId;
 
-class _ChatWidgetState extends ConsumerState<ChatWidget> {
-  late Chat chat;
-  late bool firstSender, lastSender, sameSender, lastMessage;
-  late bool isSender;
+    BorderRadius generalBubble() {
+      return BorderRadius.only(
+        topLeft: !isSender
+            ? const Radius.circular(SizeManager.medium * 0.8)
+            : const Radius.circular(SizeManager.large),
+        bottomLeft: !isSender
+            ? const Radius.circular(SizeManager.medium * 0.8)
+            : const Radius.circular(SizeManager.large),
+        topRight: isSender
+            ? const Radius.circular(SizeManager.medium * 0.8)
+            : const Radius.circular(SizeManager.large),
+        bottomRight: isSender
+            ? const Radius.circular(SizeManager.medium * 0.8)
+            : const Radius.circular(SizeManager.large),
+      );
+    }
 
-  @override
-  void initState() {
-    chat = widget.chat;
-    isSender = chat.senderId == widget.deviceClient.userId;
-    firstSender = widget.firstSender;
-    sameSender = widget.sameSender;
-    lastSender = widget.lastSender;
-    lastMessage = widget.lastMessage;
-    super.initState();
-  }
+    BorderRadius lastBubble({required final bool isSender}) {
+      return generalBubble().copyWith(
+        topRight: isSender ? const Radius.circular(SizeManager.small) : null,
+        topLeft: isSender ? null : const Radius.circular(SizeManager.small),
+      );
+    }
 
-  @override
-  Widget build(BuildContext context) {
+    BorderRadius firstBubble({required final bool isSender}) {
+      return generalBubble().copyWith(
+        bottomRight: isSender ? const Radius.circular(SizeManager.small) : null,
+        bottomLeft: isSender ? null : const Radius.circular(SizeManager.small),
+      );
+    }
+
     final BorderRadius border = firstSender
         ? firstBubble(isSender: isSender)
         : !lastSender
@@ -124,11 +139,15 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
           if ((lastSender ? lastSender : lastMessage) && !isSender)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: chat.profile != "null"? ProfileIcon(
-                  profile: DecorationImage(
-                      image: NetworkImage(chat.profile),
-                      fit: BoxFit.cover),
-                  size: 28):const UserProfileIcon(size: 28, showOnlyDefault: true,),
+              child: chat.profile != "null"
+                  ? ProfileIcon(
+                      profile: DecorationImage(
+                          image: NetworkImage(chat.profile), fit: BoxFit.cover),
+                      size: 28)
+                  : const UserProfileIcon(
+                      size: 28,
+                      showOnlyDefault: true,
+                    ),
             ),
           Container(
             constraints: BoxConstraints(
@@ -141,7 +160,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
               color: isSender
                   ? chat.read
                       ? ColorManager.accentColor
-                      : Colors.blue
+                      : ColorManager.themeColor
                   : ColorManager.background,
               borderRadius: border,
             ),
@@ -149,37 +168,6 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
           ),
         ],
       ),
-    );
-  }
-
-  BorderRadius generalBubble() {
-    return BorderRadius.only(
-      topLeft: !isSender
-          ? const Radius.circular(SizeManager.medium)
-          : const Radius.circular(SizeManager.large),
-      bottomLeft: !isSender
-          ? const Radius.circular(SizeManager.medium)
-          : const Radius.circular(SizeManager.large),
-      topRight: isSender
-          ? const Radius.circular(SizeManager.medium)
-          : const Radius.circular(SizeManager.large),
-      bottomRight: isSender
-          ? const Radius.circular(SizeManager.medium)
-          : const Radius.circular(SizeManager.large),
-    );
-  }
-
-  BorderRadius lastBubble({required final bool isSender}) {
-    return generalBubble().copyWith(
-      topRight: isSender ? const Radius.circular(SizeManager.small) : null,
-      topLeft: isSender ? null : const Radius.circular(SizeManager.small),
-    );
-  }
-
-  BorderRadius firstBubble({required final bool isSender}) {
-    return generalBubble().copyWith(
-      bottomRight: isSender ? const Radius.circular(SizeManager.small) : null,
-      bottomLeft: isSender ? null : const Radius.circular(SizeManager.small),
     );
   }
 }

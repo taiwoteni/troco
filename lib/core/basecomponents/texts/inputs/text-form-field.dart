@@ -143,7 +143,9 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
   TextStyle defaultStyle() {
     return TextStyle(
         color: ColorManager.primary,
-        fontSize: FontSizeManager.medium,
+        fontSize: widget.prefixIcon == null
+            ? FontSizeManager.medium * 0.8
+            : FontSizeManager.medium,
         fontWeight: FontWeightManager.medium,
         fontFamily: 'Lato');
   }

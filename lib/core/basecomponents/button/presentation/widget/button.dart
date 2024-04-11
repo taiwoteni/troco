@@ -89,7 +89,7 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
                   color: !enabled && !loading
                       ? ColorManager.tertiary
                       : (widget.small ?? false)
-                          ? ColorManager.accentColor
+                          ? ColorManager.themeColor
                           : ColorManager.themeColor),
               alignment: Alignment.center,
               child: loading
