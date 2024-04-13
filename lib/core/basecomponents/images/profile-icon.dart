@@ -53,7 +53,11 @@ class UserProfileIcon extends ConsumerStatefulWidget {
   final bool showOnlyDefault;
   final double? size;
   const UserProfileIcon(
-      {super.key, this.showOnline = false, this.showOnlyDefault=false, this.online = false, this.size});
+      {super.key,
+      this.showOnline = false,
+      this.showOnlyDefault = false,
+      this.online = false,
+      this.size});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -71,11 +75,15 @@ class _UserProfileIconState extends ConsumerState<UserProfileIcon> {
     return SizedBox(
       width: widget.size ?? IconSizeManager.medium,
       height: widget.size ?? IconSizeManager.medium,
-      child: ref.watch(ClientProvider.userProvider)!.profile != "null" && !widget.showOnlyDefault
+      child: ref.watch(ClientProvider.userProvider)!.profile != "null" &&
+              !widget.showOnlyDefault
           ? ProfileIcon(
+              size: double.maxFinite,
               profile: DecorationImage(
-                  image:
-                      ref.watch(ClientProvider.userProvider)!.profileImage())):Container(
+                  image: NetworkImage(
+                      ref.read(ClientProvider.userProvider)!.profile),
+                  fit: BoxFit.cover))
+          : Container(
               width: double.maxFinite,
               height: double.maxFinite,
               alignment: Alignment.center,

@@ -1,7 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
@@ -41,6 +42,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    log(ref.read(ClientProvider.userProvider)!.profile.toString());
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
