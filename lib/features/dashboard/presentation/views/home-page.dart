@@ -49,13 +49,14 @@ class _HomePageState extends ConsumerState<HomePage> {
         width: double.maxFinite,
         height: double.maxFinite,
         padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
-        child: Column(
-          children: [
-            appBarWidget(),
-            mediumSpacer(),
-            const Spacer(),
-            latestTransactionsWidget(),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              appBarWidget(),
+              mediumSpacer(),
+              latestTransactionsWidget(),
+            ],
+          ),
         ),
       ),
     );
