@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -8,6 +10,7 @@ import 'package:troco/core/basecomponents/images/pick-profile-widget.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
+import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -174,14 +177,26 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
   Widget nextButton() {
     return CustomButton(
       buttonKey: buttonKey,
-      onPressed: () {
-        LoginData.profile = profilePath;
-        Navigator.pushNamed(context, Routes.addTransactionPinRoute);
-      },
+      onPressed: uploadProfile,
       label: profilePath == null ? "SKIP" : "NEXT",
       usesProvider: true,
       margin: const EdgeInsets.symmetric(
           horizontal: SizeManager.large, vertical: SizeManager.medium),
     );
+  }
+
+  Future<void> uploadProfile() async {
+    LoginData.profile = profilePath;
+    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    final response = await AuthenticationRepo.uploadProfilePhoto(
+      userId: LoginData.id!, 
+      profilePath: profilePath!);
+    if(response.error){
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      log(response.body);
+    }
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      LoginData.profile = response.messageBody!["data"]["userImage"];
+      Navigator.pushNamed(context, Routes.addTransactionPinRoute);
   }
 }
