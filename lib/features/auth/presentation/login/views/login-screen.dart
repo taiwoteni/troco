@@ -12,6 +12,7 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
@@ -280,8 +281,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         setState(() => errorText = null);
         Map<dynamic, dynamic> map = response.messageBody!["data"];
         map["id"] = map["_id"];
+        // We have to remove the "_v" && "password" key. Although not compulsory.
         map.remove("__v");
         map.remove("password");
+
+        // We have to locally store all the groups and it's respective chats.
+        // And remove it from the user json.
+        AppStorage.saveGroups(groups: map["groups"]);
+        List groups = map["groups"];
+
+        for (final group in groups) {
+          AppStorage.saveChats(chats: group["messages"], groupId: group["_id"]);
+        }
+
+        map.remove("groups");
         ClientProvider.saveUserData(ref: ref, json: map);
         Navigator.pushNamedAndRemoveUntil(
             context, Routes.homeRoute, (route) => false);
