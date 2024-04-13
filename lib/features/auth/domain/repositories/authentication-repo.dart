@@ -51,7 +51,6 @@ class AuthenticationRepo{
     });
     return result;
   }
-
   //66151e93e4d870dc1782e4b2
 
   static Future<HttpResponseModel> resendOTP(
@@ -84,6 +83,22 @@ class AuthenticationRepo{
       "transactionPin":pin,
     });
     return result;
+  }
+
+  static Future<HttpResponseModel> uploadProfilePhoto({
+    required final String userId,
+    required final String profilePath
+  }) async{
+    final result = await ApiInterface.patchRequest(
+      url: 'updateUserImage', 
+    data: profilePath,
+    headers: {
+      "Content-Type":"multipart/form-data"
+    }
+
+    );
+    return result;
+
   }
 
   static Future<HttpResponseModel> deleteUser(

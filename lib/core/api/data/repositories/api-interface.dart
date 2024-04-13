@@ -18,6 +18,11 @@ class ApiInterface {
       final request = http.Request('GET', uri);
       request.headers['Content-Type'] = 'application/json';
       request.headers['accept'] = '*/*';
+      if(headers != null){
+        headers.forEach((key, value) {
+          request.headers[key] = value;
+        });
+      }
       if (data != null) {
         request.body = json.encode(data);
       }
@@ -46,6 +51,11 @@ class ApiInterface {
       final request = http.Request('POST', uri);
       request.headers['Content-Type'] = 'application/json';
       request.headers['accept'] = '*/*';
+      if(headers != null){
+        headers.forEach((key, value) {
+          request.headers[key] = value;
+        });
+      }
       request.body = jsonData;
       final response = await http.Client().send(request);
 
@@ -64,7 +74,7 @@ class ApiInterface {
   static Future<HttpResponseModel> patchRequest(
       {required final String url,
       final int okCode = 200,
-      required final Map<String, dynamic> data,
+      required final dynamic data,
       Map<String, String>? headers}) async {
     try {
       final Uri uri = Uri.parse("$_serverUrl/$url");
@@ -72,6 +82,11 @@ class ApiInterface {
       final request = http.Request('PATCH', uri);
       request.headers['Content-Type'] = 'application/json';
       request.headers['accept'] = '*/*';
+      if(headers != null){
+        headers.forEach((key, value) {
+          request.headers[key] = value;
+        });
+      }
       request.body = jsonData;
       final response = await http.Client().send(request);
 
