@@ -164,11 +164,6 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
       child: PickProfileIcon(
           onPicked: (path) {
             setState(() => profilePath = path);
-            if (path == null) {
-              ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
-            } else {
-              ButtonProvider.enable(buttonKey: buttonKey, ref: ref);
-            }
           },
           size: IconSizeManager.extralarge * 1.8),
     );
@@ -187,16 +182,21 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
 
   Future<void> uploadProfile() async {
     LoginData.profile = profilePath;
-    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
-    final response = await AuthenticationRepo.uploadProfilePhoto(
-      userId: LoginData.id!, 
-      profilePath: profilePath!);
-    if(response.error){
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      log(response.body);
-    }
+
+    if (profilePath != null) {
+      ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+      log(LoginData.profile!);
+      final response = await AuthenticationRepo.uploadProfilePhoto(
+          userId: LoginData.id!, profilePath: profilePath!);
+      if (response.error) {
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+        log(response.body);
+        
+        return;
+      }
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       LoginData.profile = response.messageBody!["data"]["userImage"];
       Navigator.pushNamed(context, Routes.addTransactionPinRoute);
+    }
   }
 }

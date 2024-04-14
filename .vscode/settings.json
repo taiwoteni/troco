@@ -1,0 +1,13 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.foreground": "#FFFFFF",
+        "statusBar.debuggingForeground": "#FFFFFF",
+        "statusBar.debuggingBackground": "#e28800",
+        "commandCenter.activeForeground": "#ffffff",
+        "commandCenter.inactiveForeground": "#ffffff",
+        "commandCenter.foreground": "#FFFFFF",
+        "menu.foreground": "#75777b",
+        "menu.separatorBackground": "#0D1017"
+
+    }
+}

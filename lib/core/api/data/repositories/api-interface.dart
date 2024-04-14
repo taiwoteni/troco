@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:troco/core/api/data/model/response-model.dart';
 
 class ApiInterface {
@@ -18,7 +19,7 @@ class ApiInterface {
       final request = http.Request('GET', uri);
       request.headers['Content-Type'] = 'application/json';
       request.headers['accept'] = '*/*';
-      if(headers != null){
+      if (headers != null) {
         headers.forEach((key, value) {
           request.headers[key] = value;
         });
@@ -51,7 +52,7 @@ class ApiInterface {
       final request = http.Request('POST', uri);
       request.headers['Content-Type'] = 'application/json';
       request.headers['accept'] = '*/*';
-      if(headers != null){
+      if (headers != null) {
         headers.forEach((key, value) {
           request.headers[key] = value;
         });
@@ -82,12 +83,50 @@ class ApiInterface {
       final request = http.Request('PATCH', uri);
       request.headers['Content-Type'] = 'application/json';
       request.headers['accept'] = '*/*';
-      if(headers != null){
+      if (headers != null) {
         headers.forEach((key, value) {
           request.headers[key] = value;
         });
       }
       request.body = jsonData;
+      final response = await http.Client().send(request);
+
+      final String body = await response.stream.bytesToString();
+      final responseModel = HttpResponseModel(
+          error: response.statusCode != okCode,
+          body: body,
+          code: response.statusCode);
+      return responseModel;
+    } catch (e) {
+      log(e.toString());
+      return HttpResponseModel(error: true, body: e.toString(), code: 500);
+    }
+  }
+
+  static Future<HttpResponseModel> multipartPatchRequest(
+      {required final String url,
+      final int okCode = 200,
+      required final String data,
+      required final String fileName,
+      Map<String, String>? headers}) async {
+    try {
+      final Uri uri = Uri.parse("$_serverUrl/$url");
+      final jsonData = json.encode(data);
+      final request = http.MultipartRequest('PATCH', uri);
+      request.headers['Content-Type'] = 'application/json';
+      request.headers['accept'] = '*/*';
+      if (headers != null) {
+        headers.forEach((key, value) {
+          request.headers[key] = value;
+        });
+      }
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          "userImage",
+          data,
+          filename: fileName,
+          contentType: MediaType('image', 'jpeg'))
+      );
       final response = await http.Client().send(request);
 
       final String body = await response.stream.bytesToString();

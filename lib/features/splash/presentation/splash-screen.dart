@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
@@ -25,23 +26,34 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   void initState() {
+    requestPermission();
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
-      log(AppStorage.getGroups().toString());
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getSplashUiOverlayStyle());
       await Future.delayed(const Duration(seconds: 4));
       setState(() {
         showLoading = true;
       });
-      log(AppStorage.getGroups().toString());
 
       await Future.delayed(const Duration(seconds: 5));
       final isLoggedIn = ref.watch(ClientProvider.userProvider) != null;
       Navigator.pushReplacementNamed(
-          context, isLoggedIn ? Routes.homeRoute : Routes.onBoardingRoute);
+          context, Routes.onBoardingRoute);
     });
+  }
+
+  void requestPermission() async {
+    // TODO: ALSO MAKE SURE THAT THESE PERMISSIONS ARE SPECIFIED IN Info.Plist
+    Map<Permission, PermissionStatus> permissions = await [
+      Permission.camera,
+      Permission.manageExternalStorage,
+      Permission.storage,
+      Permission.microphone,
+      Permission.contacts
+    ].request();
+    log(permissions.toString());
   }
 
   @override

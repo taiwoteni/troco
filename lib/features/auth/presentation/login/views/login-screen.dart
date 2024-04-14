@@ -9,6 +9,7 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
@@ -200,7 +201,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void navigateForgetPassword() {
-    Navigator.pushNamed(context, Routes.forgotPasswordRoute);
+    // Navigator.pushNamed(context, Routes.forgotPasswordRoute);
+    SnackbarManager.showBasicSnackbar(
+      context: context,
+      seconds: 4,
+      message: "This is still under construction");
   }
 
   String? validate(String? value) {

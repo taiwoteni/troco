@@ -26,6 +26,10 @@ class AppStorage {
 
   static Future<void> deleteUser() async {
     await _pref!.remove(ValuesManager.USER_STORAGE_KEY);
+    await _pref!.clear();
+  }
+  static Future<bool> clear()async{
+   return await _pref!.clear();
   }
 
   static List<Group> getGroups() {

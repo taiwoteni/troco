@@ -1,15 +1,20 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+
+import "package:path/path.dart" as Path;
+
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
 
-class AuthenticationRepo{
+class AuthenticationRepo {
   static Future<HttpResponseModel> loginUserEmail(
       {required final String email,
       required final String password,
       final Map<String, String>? header}) async {
     final result = await ApiInterface.postRequest(
-        url: "loginuser",
-        data: {"email": email, "password": password});
+        url: "loginuser", data: {"email": email, "password": password});
     return result;
   }
 
@@ -34,10 +39,7 @@ class AuthenticationRepo{
       'phoneNumber': phoneNumber,
     };
     final result = await ApiInterface.postRequest(
-        url: "createUser",
-        okCode: 200,
-        data: body,
-        headers: headers);
+        url: "createUser", okCode: 200, data: body, headers: headers);
     return result;
   }
 
@@ -64,7 +66,7 @@ class AuthenticationRepo{
     return result;
   }
 
-   static Future<HttpResponseModel> updateUser({
+  static Future<HttpResponseModel> updateUser({
     required final String userId,
     required final Map<String, dynamic> body,
     final Map<String, String>? header,
@@ -78,27 +80,26 @@ class AuthenticationRepo{
       {required final String userId,
       required final String pin,
       final Map<String, String>? headers}) async {
-    final result =
-        await ApiInterface.patchRequest(url: "addtransactionPin/$userId", data: {
-      "transactionPin":pin,
-    });
+    final result = await ApiInterface.patchRequest(
+        url: "addtransactionPin/$userId",
+        data: {
+          "transactionPin": pin,
+        });
     return result;
   }
 
-  static Future<HttpResponseModel> uploadProfilePhoto({
-    required final String userId,
-    required final String profilePath
-  }) async{
-    final result = await ApiInterface.patchRequest(
-      url: 'updateUserImage', 
-    data: profilePath,
-    headers: {
-      "Content-Type":"multipart/form-data"
-    }
-
-    );
+  static Future<HttpResponseModel> uploadProfilePhoto(
+      {required final String userId, required final String profilePath}) async {
+    // Convert string to UTF-8 bytes
+    List<int> utf8Bytes = utf8.encode(profilePath);
+    // Encode bytes to Base64
+    String base64String = base64.encode(utf8Bytes);
+    final result = await ApiInterface.multipartPatchRequest(
+        url: 'updateUserImage/$userId',
+        data: profilePath,
+        headers: {"Content-Type": "multipart/form-data"},
+        fileName: Path.basename(profilePath));
     return result;
-
   }
 
   static Future<HttpResponseModel> deleteUser(
@@ -106,5 +107,4 @@ class AuthenticationRepo{
     final result = await ApiInterface.deleteRequest(url: "deleteuser/$userId");
     return result;
   }
-
 }

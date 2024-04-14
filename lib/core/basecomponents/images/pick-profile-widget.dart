@@ -1,4 +1,5 @@
 // ignore_for_file: sized_box_for_whitespace
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -177,6 +178,7 @@ class _PickProfileIconState extends State<PickProfileIcon> {
           ),
         );
       },
+      
     );
   }
 
@@ -189,6 +191,7 @@ class _PickProfileIconState extends State<PickProfileIcon> {
     if (file != null) {
       setState(() {
         profilePath = file.path;
+        log(profilePath!);
         profileImage = DecorationImage(
             fit: BoxFit.cover, image: FileImage(File(file.path)));
       });
@@ -197,10 +200,8 @@ class _PickProfileIconState extends State<PickProfileIcon> {
   }
 
   Future<void> cropProfile() async {
-    final croppedProfile = await showCupertinoImageCropper(
-      context,
-      heroTag: "profile-photo",
-      imageProvider: FileImage(File(profilePath!)));
+    final croppedProfile = await showCupertinoImageCropper(context,
+        heroTag: "profile-photo", imageProvider: FileImage(File(profilePath!)));
 
     // final croppedProfile = await CropScreen.showCustomCropper(
     //   context,
@@ -211,7 +212,7 @@ class _PickProfileIconState extends State<PickProfileIcon> {
     if (croppedProfile != null) {
       final basename = Path.dirname(profilePath!);
       final bytes = await convertImageToBytes(image: croppedProfile.uiImage);
-      String path = "$basename${Path.separator}troco-profile.png";
+      String path = "$basename${Path.separator}troco-profile.jpg";
       if (bytes != null) {
         final imageFile = await convertBytesToFile(bytes: bytes, path: path);
         setState(() {
