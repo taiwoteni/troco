@@ -20,6 +20,7 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
+import 'package:troco/features/chat/presentation/widgets/add-group-member.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
 
@@ -367,7 +368,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                   regularSpacer(),
                   IconButton(
-                    onPressed: () => null,
+                    onPressed: addGroupMember,
                     highlightColor: ColorManager.accentColor.withOpacity(0.15),
                     style: const ButtonStyle(
                         splashFactory: InkRipple.splashFactory),
@@ -381,6 +382,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
           )),
+    );
+  }
+
+  void addGroupMember() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: true,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) {
+        return AddGroupMemberWidget(group: group);
+      },
     );
   }
 

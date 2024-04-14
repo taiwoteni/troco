@@ -11,7 +11,6 @@ import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/animations/lottie.dart';
-import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -40,7 +39,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       await Future.delayed(const Duration(seconds: 5));
       final isLoggedIn = ref.watch(ClientProvider.userProvider) != null;
       Navigator.pushReplacementNamed(
-          context, isLoggedIn ? Routes.homeRoute : Routes.onBoardingRoute);
+          context, Routes.onBoardingRoute);
     });
   }
 

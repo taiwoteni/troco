@@ -18,7 +18,7 @@ final groupsFutureProvider =
     FutureProvider<List<dynamic>>((ref) async {
   final groupRepo = ref.watch(groupRepoProvider);
   final data = await groupRepo.getGroupsJson();
-  log("Loaded data from groupRepo");
+  // log("Loaded data from groupRepo");
   return data;
 });
 
@@ -39,23 +39,23 @@ final groupsStreamProvider = StreamProvider.autoDispose<List<Group>>(
         List<Group> groupsList =
               groupsListJson.map((e) => Group.fromJson(json: e)).toList();
 
-        log("Data Group Names from API: ${groupsList.map((e) => e.groupName).toList()}");
-        log("Data Group Names from Cache: ${AppStorage.getGroups().map((e) => e.groupName).toList()}/n");
+        // log("Data Group Names from API: ${groupsList.map((e) => e.groupName).toList()}");
+        // log("Data Group Names from Cache: ${AppStorage.getGroups().map((e) => e.groupName).toList()}/n");
 
-        log("Data is different : $groupsDifferent");
+        // log("Data is different : $groupsDifferent");
 
         if (groupsDifferent) {
           // Only if Data is not the same
 
-          log("New Groups from API ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
-          log("Groups Newly Saved to Cache ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
-          log("Are the groups now in sync ? ${groupsList.map((e) => e.groupName).toList() == AppStorage.getGroups().map((e) => e.groupName).toList()}");
+          // log("New Groups from API ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
+          // log("Groups Newly Saved to Cache ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
+          // log("Are the groups now in sync ? ${groupsList.map((e) => e.groupName).toList() == AppStorage.getGroups().map((e) => e.groupName).toList()}");
           AppStorage.saveGroups(groups: groupsList);
 
           streamController.sink.add(groupsList);
         }
         ref.read(groupRepoProvider.notifier).state = GroupRepo();
-        log("==================");
+        // log("==================");
       });
     });
 

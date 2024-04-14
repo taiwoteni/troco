@@ -172,7 +172,7 @@ class ApiInterface {
     required final String query,
     final Map<String, String>? headers,
   }) async {
-    final result = await getRequest(url: 'searchUser', headers: headers);
+    final result = await postRequest(url: 'searchUser',data: {"query":query}, headers: headers);
     return result;
   }
 

@@ -1,8 +1,9 @@
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names
+
 import 'dart:convert';
 import 'dart:developer';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:troco/core/app/value-manager.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 
 import '../../features/chat/domain/entities/chat.dart';
@@ -13,6 +14,13 @@ class AppStorage {
   static final Future<SharedPreferences> _pref2 =
       SharedPreferences.getInstance();
 
+  
+  static const String USER_STORAGE_KEY = "userData";
+  static const String GROUP_STORAGE_KEY = "groups";
+  static String CHAT_STORAGE_KEY ({required String groupId})=> "groups.$groupId.chats";
+  static String GROUP_INVITATION_STORAGE_KEY ({required String groupId})=> "groups.$groupId.invitations";
+
+
   static Future<void> initialize() async {
     _pref = await _pref2;
   }
@@ -21,11 +29,11 @@ class AppStorage {
 
   static Future<void> saveClient({required final Client client}) async {
     await _pref!
-        .setString(ValuesManager.USER_STORAGE_KEY, jsonEncode(client.toJson()));
+        .setString(USER_STORAGE_KEY, jsonEncode(client.toJson()));
   }
 
   static Future<void> deleteUser() async {
-    await _pref!.remove(ValuesManager.USER_STORAGE_KEY);
+    await _pref!.remove(USER_STORAGE_KEY);
     await _pref!.clear();
   }
   static Future<bool> clear()async{
@@ -33,7 +41,7 @@ class AppStorage {
   }
 
   static List<Group> getGroups() {
-    final jsonString = _pref!.getString(ValuesManager.GROUP_STORAGE_KEY);
+    final jsonString = _pref!.getString(GROUP_STORAGE_KEY);
     if (jsonString == null) {
       log("No groups Stored");
       return [];
@@ -45,20 +53,20 @@ class AppStorage {
   static Future<void> saveGroups({required final List<Group> groups}) async {
     List<Map<dynamic, dynamic>> groupsJson =
         groups.map((e) => e.toJson()).toList();
-    _pref!.setString(ValuesManager.GROUP_STORAGE_KEY, json.encode(groupsJson));
+    _pref!.setString(GROUP_STORAGE_KEY, json.encode(groupsJson));
   }
 
   static Client? getUser() {
-    if (!_pref!.containsKey(ValuesManager.USER_STORAGE_KEY)) {
+    if (!_pref!.containsKey(USER_STORAGE_KEY)) {
       return null;
     }
-    final jsonString = _pref!.getString(ValuesManager.USER_STORAGE_KEY)!;
+    final jsonString = _pref!.getString(USER_STORAGE_KEY)!;
     final client = Client.fromJson(json: jsonDecode(jsonString));
     return client;
   }
 
   static List<Chat> getChats({required final String groupId}) {
-    final jsonString = _pref!.getString(ValuesManager.CHAT_STORAGE_KEY(groupId: groupId));
+    final jsonString = _pref!.getString(CHAT_STORAGE_KEY(groupId: groupId));
     if (jsonString == null) {
       log("No Chats stored in this group");
       return [];
@@ -71,7 +79,21 @@ class AppStorage {
     List<Map<dynamic, dynamic>> chatsJson =
         chats.map((e) => e.toJson()).toList();
 
-    _pref!.setString(ValuesManager.CHAT_STORAGE_KEY(groupId: groupId), json.encode(chatsJson));
+    _pref!.setString(CHAT_STORAGE_KEY(groupId: groupId), json.encode(chatsJson));
   }
 
+  static Future<List<Client>> getInvitedClients({required final String groupId})async{
+    final jsonString = _pref!.getString(GROUP_INVITATION_STORAGE_KEY(groupId: groupId));
+    if (jsonString == null) {
+      log("No Invitations stored in this group");
+      return [];
+    }
+    final List<dynamic> chatsJson = json.decode(jsonString);
+    return chatsJson.map((e) => Client.fromJson(json: e)).toList();
+  }
+
+  static Future<void> saveInvitedClients({required List<Client> clients, required final String groupId})async{
+    _pref!.setString(GROUP_INVITATION_STORAGE_KEY(groupId: groupId), json.encode(clients.map((e) => e.toJson()).toList()));
+
+  }
 }

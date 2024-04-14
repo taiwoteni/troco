@@ -22,6 +22,20 @@ class GroupRepo {
     return result;
   }
 
+  static Future<HttpResponseModel> addMember({
+    required final String groupId,
+    required final String userId,
+  })async{
+    final result = await ApiInterface.patchRequest(
+      url: "addUserToGroup",
+      data: {
+        "groupId":groupId,
+        "memberId":userId,
+        "userId":ClientProvider.readOnlyClient!.userId
+      });
+      return result;
+  }
+
   Future<List<dynamic>> getGroupsJson() async {
     final result = await ApiInterface.getRequest(
         url: 'findoneuser/${ClientProvider.readOnlyClient!.userId}');

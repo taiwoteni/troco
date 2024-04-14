@@ -52,25 +52,25 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
         List chatsListJson = chatsJson;
         List<Chat> chatsList = chatsListJson.map((e) => Chat.fromJson(json: e)).toList();
 
-        log("Data Chat Names from API: ${chatsList.map((e) => e.message).toList()}");
-        log("Data Chat Names from Cache: ${AppStorage.getChats(groupId: groupId).map((e) => e.message).toList()}/n");
+        // log("Data Chat Names from API: ${chatsList.map((e) => e.message).toList()}");
+        // log("Data Chat Names from Cache: ${AppStorage.getChats(groupId: groupId).map((e) => e.message).toList()}/n");
 
-        log("Data is different : $chatsAreDifferent");
+        // log("Data is different : $chatsAreDifferent");
 
 
         if(chatsAreDifferent){
           // Only if Data is not the same
 
-          log("New Chats from API ${chatsList.map((e) => e.message).toList().where((element) => !AppStorage.getChats(groupId: groupId).map((e) => e.message).toList().contains(element)).toList()}");
-          log("Chats Newly Saved to Cache ${chatsList.map((e) => e.message).toList().where((element) => !AppStorage.getChats(groupId: groupId).map((e) => e.message).toList().contains(element)).toList()}");
-          log("Are the chats now in sync ? ${chatsList.map((e) => e.message).toList() == AppStorage.getChats(groupId: groupId).map((e) => e.message).toList()}");
+          // log("New Chats from API ${chatsList.map((e) => e.message).toList().where((element) => !AppStorage.getChats(groupId: groupId).map((e) => e.message).toList().contains(element)).toList()}");
+          // log("Chats Newly Saved to Cache ${chatsList.map((e) => e.message).toList().where((element) => !AppStorage.getChats(groupId: groupId).map((e) => e.message).toList().contains(element)).toList()}");
+          // log("Are the chats now in sync ? ${chatsList.map((e) => e.message).toList() == AppStorage.getChats(groupId: groupId).map((e) => e.message).toList()}");
           
           AppStorage.saveChats(chats: chatsList, groupId: groupId);
 
           streamController.sink.add(chatsList);
         }
         ref.read(chatsRepoProvider.notifier).state = ChatRepo();
-        log("==================");
+        // log("==================");
       });
     });
 

@@ -13,7 +13,7 @@ import '../provider/button-provider.dart';
 class CustomButton extends ConsumerStatefulWidget {
   final UniqueKey? buttonKey;
   final String label;
-  bool? small;
+  final String size;
   final void Function()? onPressed;
   final bool usesProvider;
   final EdgeInsets? margin;
@@ -22,11 +22,11 @@ class CustomButton extends ConsumerStatefulWidget {
     super.key,
     required this.label,
     this.buttonKey,
+    this.size = "large",
     this.usesProvider = false,
     this.onPressed,
     this.margin,
   }) {
-    small = false;
     if (usesProvider) {
       if (buttonKey == null) {
         throw Exception("usesProvider should only be true if a key is given!");
@@ -38,11 +38,27 @@ class CustomButton extends ConsumerStatefulWidget {
     super.key,
     required this.label,
     this.buttonKey,
+    this.size = "medium",
     this.usesProvider = false,
     this.onPressed,
     this.margin,
   }) {
-    small = true;
+    if (usesProvider) {
+      if (buttonKey == null) {
+        throw Exception("usesProvider should only be true if a key is given!");
+      }
+    }
+  }
+
+  CustomButton.small({
+    super.key,
+    required this.label,
+    this.buttonKey,
+    this.size = "small",
+    this.usesProvider = false,
+    this.onPressed,
+    this.margin,
+  }) {
     if (usesProvider) {
       if (buttonKey == null) {
         throw Exception("usesProvider should only be true if a key is given!");
@@ -72,45 +88,53 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
     return Padding(
       padding: widget.margin ?? EdgeInsets.zero,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-            (widget.small ?? false) ? SizeManager.medium : SizeManager.large),
-        child: Material(
-          child: InkWell(
-            onTap: enabled ? widget.onPressed : null,
-            splashColor: ColorManager.accentColor,
-            splashFactory: InkRipple.splashFactory,
-            child: Container(
-              key: widget.key,
-              width: double.maxFinite,
-              height: (widget.small ?? false)
-                  ? SizeManager.extralarge * 1.7
-                  : SizeManager.extralarge * 2,
-              decoration: BoxDecoration(
-                  color: !enabled && !loading
-                      ? ColorManager.tertiary
-                      : (widget.small ?? false)
-                          ? ColorManager.themeColor
-                          : ColorManager.themeColor),
-              alignment: Alignment.center,
-              child: loading
-                  ? LottieWidget(
-                      lottieRes: AssetManager.lottieFile(name: 'loading'),
-                      size: const Size.square(IconSizeManager.large),
-                      color: Colors.white,
-                    )
-                  : Text(
-                      widget.label,
-                      style: TextStyle(
-                          color: !enabled
-                              ? ColorManager.secondary
-                              : ColorManager.primaryDark,
-                          fontSize: (widget.small ?? false)
-                              ? FontSizeManager.large * 0.7
-                              : FontSizeManager.large * 0.8,
-                          fontFamily: 'Lato',
-                          fontWeight: FontWeightManager.bold),
-                    ),
-            ),
+        borderRadius: BorderRadius.circular((widget.size == "medium")
+            ? SizeManager.medium
+            : widget.size == "small"
+                ? SizeManager.regular * 1.2
+                : SizeManager.large),
+        child: InkWell(
+          onTap: enabled ? widget.onPressed : null,
+          splashColor: ColorManager.accentColor,
+          splashFactory: InkRipple.splashFactory,
+          child: Container(
+            key: widget.key,
+            width: double.maxFinite,
+            height: (widget.size == "medium")
+                ? SizeManager.extralarge * 1.7
+                : (widget.size == "small")
+                    ? SizeManager.large * 1.8
+                    : SizeManager.extralarge * 2,
+            decoration: BoxDecoration(
+                color: !enabled && !loading
+                    ? ColorManager.tertiary
+                    : widget.size == "small"
+                        ? ColorManager.accentColor
+                        : ColorManager.themeColor),
+            alignment: Alignment.center,
+            child: loading
+                ? LottieWidget(
+                    lottieRes: AssetManager.lottieFile(name: 'loading'),
+                    size: Size.square(
+                        widget.size == "large" || widget.size == "medium"
+                            ? IconSizeManager.large
+                            : SizeManager.medium),
+                    color: Colors.white,
+                  )
+                : Text(
+                    widget.label,
+                    style: TextStyle(
+                        color: !enabled
+                            ? ColorManager.secondary
+                            : ColorManager.primaryDark,
+                        fontSize: (widget.size == "medium")
+                            ? FontSizeManager.large * 0.7
+                            : widget.size == "large"
+                                ? FontSizeManager.large * 0.8
+                                : FontSizeManager.regular * 0.8,
+                        fontFamily: 'Lato',
+                        fontWeight: FontWeightManager.bold),
+                  ),
           ),
         ),
       ),
