@@ -24,6 +24,7 @@ import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
 
 import '../../../../core/app/font-manager.dart';
+import '../../../../core/app/snackbar-manager.dart';
 import '../../domain/entities/chat.dart';
 import '../../../groups/domain/entities/group.dart';
 
@@ -347,8 +348,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      Navigator.pushNamed(
-                          context, Routes.createTransactionRoute);
+                      // Navigator.pushNamed(
+                      //     context, Routes.createTransactionRoute);
+                      SnackbarManager.showBasicSnackbar(
+                          context: context,
+                          message:
+                              "This part is currently under construction or maintenance");
                     },
                     highlightColor: ColorManager.accentColor.withOpacity(0.15),
                     style: const ButtonStyle(

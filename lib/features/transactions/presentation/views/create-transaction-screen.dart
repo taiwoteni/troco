@@ -9,6 +9,7 @@ import 'package:troco/features/transactions/presentation/providers/create-transa
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
+import '../../../../core/app/snackbar-manager.dart';
 import '../../../../core/basecomponents/images/svg.dart';
 
 class CreateTransactionScreen extends ConsumerStatefulWidget {
@@ -29,6 +30,8 @@ class _CreateTransactionScreenState
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getTransactionScreenUiOverlayStyle());
+      SnackbarManager.showBasicSnackbar(
+          context: context, message: "No Groups Available");
     });
   }
 

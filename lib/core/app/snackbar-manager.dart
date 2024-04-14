@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/app/theme-manager.dart';
 
 class SnackbarManager {
   static void showBasicSnackbar({
@@ -19,13 +21,22 @@ class SnackbarManager {
           fontWeight: FontWeightManager.medium,
         ),
       ),
+      dismissDirection: DismissDirection.startToEnd,
       // margin: const EdgeInsets.symmetric(
       //     horizontal: SizeManager.regular, vertical: SizeManager.medium),
       padding: const EdgeInsets.symmetric(
           horizontal: SizeManager.medium, vertical: SizeManager.regular),
-      backgroundColor: ColorManager.themeColor,
+      backgroundColor: ColorManager.accentColor,
       duration: Duration(seconds: seconds),
-      showCloseIcon: true,
+      onVisible: () async{
+        SystemChrome.setSystemUIOverlayStyle(ThemeManager.previousUiOverlayStyle!.copyWith(
+          systemNavigationBarColor: ColorManager.accentColor,
+          systemNavigationBarIconBrightness: Brightness.light
+          ));
+        await Future.delayed(Duration(seconds: seconds));
+        SystemChrome.setSystemUIOverlayStyle(ThemeManager.previousUiOverlayStyle!);
+
+      },
     ));
   }
 }
