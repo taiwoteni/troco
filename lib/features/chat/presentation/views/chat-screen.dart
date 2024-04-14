@@ -228,16 +228,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SvgIcon(
-                        svgRes: AssetManager.svgFile(name: "camera"),
-                        color: ColorManager.secondary,
-                        size: const Size.square(IconSizeManager.medium * 0.9),
+                      IconButton(
+                        onPressed: showMaintenanceMessage,
+                        icon: SvgIcon(
+                          svgRes: AssetManager.svgFile(name: "camera"),
+                          color: ColorManager.secondary,
+                          size: const Size.square(IconSizeManager.medium * 0.9),
+                        ),
                       ),
                       mediumSpacer(),
-                      SvgIcon(
-                        svgRes: AssetManager.svgFile(name: "attach"),
-                        color: ColorManager.secondary,
-                        size: const Size.square(IconSizeManager.medium * 0.9),
+                      IconButton(
+                        onPressed: showMaintenanceMessage,
+                        icon: SvgIcon(
+                          svgRes: AssetManager.svgFile(name: "attach"),
+                          color: ColorManager.secondary,
+                          size: const Size.square(IconSizeManager.medium * 0.9),
+                        ),
                       ),
                     ],
                   ),
@@ -347,14 +353,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () {
-                      // Navigator.pushNamed(
-                      //     context, Routes.createTransactionRoute);
-                      SnackbarManager.showBasicSnackbar(
-                          context: context,
-                          message:
-                              "This part is currently under construction or maintenance");
-                    },
+                    onPressed: showMaintenanceMessage,
                     highlightColor: ColorManager.accentColor.withOpacity(0.15),
                     style: const ButtonStyle(
                         splashFactory: InkRipple.splashFactory),
@@ -383,6 +382,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           )),
     );
+  }
+
+  void showMaintenanceMessage() {
+    SnackbarManager.showBasicSnackbar(
+        context: context,
+        message: "This part is currently under construction or maintenance");
   }
 
   Widget? fabWidget() {
