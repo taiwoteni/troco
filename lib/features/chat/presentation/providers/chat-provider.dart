@@ -3,7 +3,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
@@ -22,7 +21,7 @@ final chatsRepoProvider = StateProvider<ChatRepo>((ref) => ChatRepo(),);
 final chatsListProvider = FutureProvider.family<List<dynamic>,String>((ref, groupId)async{
   final chatsRepo = ref.watch(chatsRepoProvider);
   final chats = await chatsRepo.getChats(groupId: groupId);
-  log("Loaded data from Chats Repo");
+  // log("Loaded data from Chats Repo");
   return chats;
 });
 

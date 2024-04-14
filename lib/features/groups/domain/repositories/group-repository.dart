@@ -44,7 +44,7 @@ class GroupRepo {
       List userGroupsList = userJson["groups"];
       return userGroupsList;
     }
-    log(result.body.toString());
+    // log(result.body.toString());
     return [];
   }
 

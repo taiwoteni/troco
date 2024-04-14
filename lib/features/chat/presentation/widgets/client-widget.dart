@@ -111,6 +111,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
     log(widget.group.groupId);
     final response = await GroupRepo.addMember(
         groupId: widget.group.groupId, userId: client.userId);
+    log(response.body);
     if (response.error) {
       log(response.body);
       SnackbarManager.showBasicSnackbar(

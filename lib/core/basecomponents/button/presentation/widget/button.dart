@@ -93,48 +93,50 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
             : widget.size == "small"
                 ? SizeManager.regular * 1.2
                 : SizeManager.large),
-        child: InkWell(
-          onTap: enabled ? widget.onPressed : null,
-          splashColor: ColorManager.accentColor,
-          splashFactory: InkRipple.splashFactory,
-          child: Container(
-            key: widget.key,
-            width: double.maxFinite,
-            height: (widget.size == "medium")
-                ? SizeManager.extralarge * 1.7
-                : (widget.size == "small")
-                    ? SizeManager.large * 1.8
-                    : SizeManager.extralarge * 2,
-            decoration: BoxDecoration(
-                color: !enabled && !loading
-                    ? ColorManager.tertiary
-                    : widget.size == "small"
-                        ? ColorManager.accentColor
-                        : ColorManager.themeColor),
-            alignment: Alignment.center,
-            child: loading
-                ? LottieWidget(
-                    lottieRes: AssetManager.lottieFile(name: 'loading'),
-                    size: Size.square(
-                        widget.size == "large" || widget.size == "medium"
-                            ? IconSizeManager.large
-                            : SizeManager.medium),
-                    color: Colors.white,
-                  )
-                : Text(
-                    widget.label,
-                    style: TextStyle(
-                        color: !enabled
-                            ? ColorManager.secondary
-                            : ColorManager.primaryDark,
-                        fontSize: (widget.size == "medium")
-                            ? FontSizeManager.large * 0.7
-                            : widget.size == "large"
-                                ? FontSizeManager.large * 0.8
-                                : FontSizeManager.regular * 0.8,
-                        fontFamily: 'Lato',
-                        fontWeight: FontWeightManager.bold),
-                  ),
+        child: Material(
+          child: InkWell(
+            onTap: enabled ? widget.onPressed : null,
+            splashColor: ColorManager.accentColor,
+            splashFactory: InkRipple.splashFactory,
+            child: Container(
+              key: widget.key,
+              width: double.maxFinite,
+              height: (widget.size == "medium")
+                  ? SizeManager.extralarge * 1.7
+                  : (widget.size == "small")
+                      ? SizeManager.large * 1.8
+                      : SizeManager.extralarge * 2,
+              decoration: BoxDecoration(
+                  color: !enabled && !loading
+                      ? ColorManager.tertiary
+                      : widget.size == "small"
+                          ? ColorManager.accentColor
+                          : ColorManager.themeColor),
+              alignment: Alignment.center,
+              child: loading
+                  ? LottieWidget(
+                      lottieRes: AssetManager.lottieFile(name: 'loading'),
+                      size: Size.square(
+                          widget.size == "large" || widget.size == "medium"
+                              ? IconSizeManager.large
+                              : IconSizeManager.large * 0.7),
+                      color: Colors.white,
+                    )
+                  : Text(
+                      widget.label,
+                      style: TextStyle(
+                          color: !enabled
+                              ? ColorManager.secondary
+                              : ColorManager.primaryDark,
+                          fontSize: (widget.size == "medium")
+                              ? FontSizeManager.large * 0.7
+                              : widget.size == "large"
+                                  ? FontSizeManager.large * 0.8
+                                  : FontSizeManager.regular * 0.8,
+                          fontFamily: 'Lato',
+                          fontWeight: FontWeightManager.bold),
+                    ),
+            ),
           ),
         ),
       ),
