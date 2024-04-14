@@ -9,8 +9,11 @@ import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
+
+import '../../../../chat/domain/entities/chat.dart';
 
 class ChatContactWidget extends ConsumerStatefulWidget {
   final Group group;
@@ -22,22 +25,35 @@ class ChatContactWidget extends ConsumerStatefulWidget {
 
 class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
   late Group group;
+  late List<Chat> chats;
 
   @override
   void initState() {
     group = widget.group;
+    chats = (group.toJson()["messages"] as List)
+        .map((e) => Chat.fromJson(json: e))
+        .toList();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     Color color = ColorManager.accentColor;
-
     final messageStyle = TextStyle(
         color: color,
         fontFamily: 'Quicksand',
-        fontSize: FontSizeManager.regular,
+        fontSize: FontSizeManager.regular * 0.9,
         fontWeight: FontWeightManager.regular);
+    bool chatIsEmpty = chats.isEmpty;
+    bool clientIsLastSender = chats.isEmpty
+        ? false
+        : chats.last.senderId == ClientProvider.readOnlyClient!.userId;
+    int unseenMessages = clientIsLastSender
+        ? 0
+        : clientIsLastSender
+            ? 0
+            : chats.where((chat) => !chat.read).toList().length;
+    Chat? lastChat = chatIsEmpty ? null : chats.last;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(SizeManager.medium),
@@ -47,10 +63,10 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
             borderRadius: BorderRadius.circular(SizeManager.medium),
           ),
           child: ListTile(
-              onTap: (){
+              onTap: () {
                 ref.watch(chatsGroupProvider.notifier).state = group.groupId;
                 Navigator.pushNamed(context, Routes.chatRoute,
-                  arguments: widget.group);
+                    arguments: widget.group);
               },
               dense: true,
               tileColor: Colors.transparent,
@@ -87,7 +103,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                       )
                     ],
                   ),
-                  const Gap(SizeManager.regular * 1.1),
+                  const Gap(SizeManager.small),
                 ],
               ),
               titleTextStyle: TextStyle(
@@ -100,15 +116,31 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(style: messageStyle, children: [
                     TextSpan(
-                        text: "You: ",
+                        text: chatIsEmpty
+                            ? null
+                            : lastChat!.senderId ==
+                                    ClientProvider.readOnlyClient!.userId
+                                ? "You: "
+                                : null,
                         style: messageStyle.copyWith(
+                            color: clientIsLastSender
+                                ? ColorManager.secondary
+                                : null,
                             fontWeight: FontWeightManager.semibold)),
-                    TextSpan(text: 'created "${group.groupName}"'),
+                    TextSpan(
+                        text: chatIsEmpty
+                            ? 'created "${group.groupName}"'
+                            : lastChat!.message,
+                        style: messageStyle.copyWith(
+                          color: clientIsLastSender
+                              ? ColorManager.secondary
+                              : null,
+                        )),
                   ])),
               leading: const GroupProfileIcon(
                 size: 53,
               ),
-              trailing: true
+              trailing: chatIsEmpty || unseenMessages == 0
                   ? null
                   : Container(
                       height: 25,
@@ -118,9 +150,9 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                         color: color,
                         borderRadius: BorderRadius.circular(100),
                       ),
-                      child: const Text(
-                        "5",
-                        style: TextStyle(
+                      child: Text(
+                        unseenMessages.toString(),
+                        style: const TextStyle(
                             color: Colors.white,
                             fontFamily: 'Lato',
                             fontSize: FontSizeManager.medium * 0.7,

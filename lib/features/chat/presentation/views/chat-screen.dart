@@ -254,21 +254,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     crossFadeState: sending
                         ? CrossFadeState.showSecond
                         : CrossFadeState.showFirst,
-                    firstChild: GestureDetector(
-                      onTap: sendChat,
-                      child: SvgIcon(
+                    firstChild: IconButton(
+                      onPressed: sendChat,
+                      icon: SvgIcon(
                         svgRes: AssetManager.svgFile(name: "send"),
                         color: ColorManager.accentColor,
-                        size: const Size.square(IconSizeManager.medium),
+                        size: const Size.square(IconSizeManager.medium * 0.9),
                       ),
                     ),
                     secondChild: Transform.scale(
                       scale: 1.7,
-                      child: LottieWidget(
-                          color: ColorManager.accentColor,
-                          fit: BoxFit.cover,
-                          lottieRes: AssetManager.lottieFile(name: "loading"),
-                          size: const Size.square(IconSizeManager.medium)),
+
+                      /// IconButton is used becos of the extra padding it gives to
+                      /// its Child.
+                      /// I normally won't use it but inorder to be uniform with
+                      /// other icons and be level the bottom bar
+                      /// with a fixed size throughout, It's needed
+                      child: IconButton(
+                        onPressed: null,
+                        icon: LottieWidget(
+                            color: ColorManager.accentColor,
+                            fit: BoxFit.cover,
+                            lottieRes: AssetManager.lottieFile(name: "loading"),
+                            size: const Size.square(
+                                IconSizeManager.medium * 0.9)),
+                      ),
                     ),
                   )
               ],
