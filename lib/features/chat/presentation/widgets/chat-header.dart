@@ -24,19 +24,19 @@ class ChatHeader extends ConsumerWidget {
         mediumSpacer(),
         groupDetailsWidget(),
         groupCreationTime(),
-        adminJoinedWidget(),
+        if (false) adminJoinedWidget(),
         addedWidget(),
-        if(chats.isNotEmpty)
-        ...[smallSpacer(),
-        endToEndEncrypted(),
-        mediumSpacer(),
-        divider(),
-        extraLargeSpacer(),]
+        if (chats.isNotEmpty) ...[
+          smallSpacer(),
+          endToEndEncrypted(),
+          mediumSpacer(),
+          divider(),
+          extraLargeSpacer(),
+        ]
       ],
     );
   }
 
-  
   Widget endToEndEncrypted() {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: SizeManager.regular),
@@ -219,5 +219,4 @@ class ChatHeader extends ConsumerWidget {
       ],
     );
   }
-
 }

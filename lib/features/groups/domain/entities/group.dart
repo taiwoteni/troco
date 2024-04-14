@@ -12,12 +12,13 @@ class Group extends Equatable {
   DateTime get createdTime => DateTime.parse(_json["creationTime"]);
   bool get usingDelivery => _json["useDelivery"];
 
-  List<GroupMemberModel> get members {
+
+  List<dynamic> get members {
     // List<dynamic> membersJson = json.decode(_json["members"] ?? "[]");
     // return membersJson
     //     .map((json) => GroupMemberModel.fromJson(json: json))
     //     .toList();
-    return [];
+    return _json["members"];
   }
 
   String get groupId => _json["id"] ?? _json["_id"];

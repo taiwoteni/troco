@@ -287,7 +287,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// Situations whereby the days may not be of the same month.
     /// becos [DateTime.day] is the day of the month.
     final String daysRemaining =
-        "${DateTime.now().difference(DateTime.now()).inDays + 1}";
+        "${group.transactionTime.difference(group.createdTime).inDays + 1}";
     return PreferredSize(
       preferredSize:
           Size.fromHeight(75 + MediaQuery.of(context).viewPadding.top),
@@ -359,7 +359,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         splashFactory: InkRipple.splashFactory),
                     icon: SvgIcon(
                       svgRes: AssetManager.svgFile(name: "buy"),
-                      color: group.members.isEmpty
+                      color: group.members.length < 2
                           ? ColorManager.secondary
                           : ColorManager.accentColor,
                       size: const Size.square(IconSizeManager.regular * 1.3),
