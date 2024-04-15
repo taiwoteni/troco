@@ -21,6 +21,7 @@ import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/add-group-member.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
+import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/snackbar-manager.dart';
@@ -52,6 +53,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     group = widget.group;
     chats = AppStorage.getChats(groupId: group.groupId);
+    log(group.toJson().toString());
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
@@ -443,6 +445,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> sendChat() async {
     final String chatMessage = controller.text.trim();
     setState(() => sending = true);
+    
     final response = await ChatRepo.sendChat(
         groupId: group.groupId,
         userId: ref.read(ClientProvider.userProvider)!.userId,
@@ -458,6 +461,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> listenToChatChanges() async {
+    ref.watch(groupsStreamProvider);
     ref.listen(chatsStreamProvider, (previous, next) {
       next.when(
         data: (data) {

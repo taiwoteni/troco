@@ -9,44 +9,53 @@ import '../../domain/entities/chat.dart';
 import 'chat-widget.dart';
 
 /// The Containing the Chats Listview
-class ChatLists extends ConsumerWidget {
+class ChatLists extends ConsumerStatefulWidget {
   final List<Chat> chats;
   final Group group;
   const ChatLists({super.key, required this.chats, required this.group});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChatLists> createState() => _ChatListsState();
+}
+
+class _ChatListsState extends ConsumerState<ChatLists> {
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
-      key: Key("${group.groupId}-chats-list"),
+      key: Key("${widget.group.groupId}-chats-list"),
       shrinkWrap: true,
-      itemCount: chats.length,
+      itemCount: widget.chats.length,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        final Chat currentChat = chats[index];
+        final Chat currentChat = widget.chats[index];
 
         final bool isFirstMessage = index == 0;
-        final bool isLastMessage = index == chats.length - 1;
+        final bool isLastMessage = index == widget.chats.length - 1;
         bool sameSender = false, firstTimeSender = true, lastTimeSender = false;
 
         if (!isFirstMessage && !isLastMessage) {
-          sameSender = currentChat.senderId == chats[index - 1].senderId;
+          sameSender = currentChat.senderId == widget.chats[index - 1].senderId;
         }
         if (!isFirstMessage) {
-          firstTimeSender = currentChat.senderId != chats[index - 1].senderId;
+          firstTimeSender =
+              currentChat.senderId != widget.chats[index - 1].senderId;
         }
         if (!isLastMessage) {
-          lastTimeSender = currentChat.senderId != chats[index + 1].senderId;
+          lastTimeSender =
+              currentChat.senderId != widget.chats[index + 1].senderId;
         } else {
           if (!isFirstMessage) {
-            lastTimeSender = currentChat.senderId == chats[index - 1].senderId;
+            lastTimeSender =
+                currentChat.senderId == widget.chats[index - 1].senderId;
           }
         }
 
         return Column(
-          key: Key(chats[index].hashCode.toString()),
+          key: ObjectKey(widget.chats[index]),
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (index == 0) ChatHeader(chats: chats, group: group),
+            if (index == 0)
+              ChatHeader(chats: widget.chats, group: widget.group),
             Padding(
               padding: EdgeInsets.only(
                   bottom: isLastMessage ? SizeManager.large : 0),

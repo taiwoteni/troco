@@ -7,6 +7,7 @@ import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
+import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
@@ -118,6 +119,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
           context: context, message: response.messageBody!["message"]);
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     } else {
+      ref.watch(groupsStreamProvider);
       setState(() {
         text = "added";
       });

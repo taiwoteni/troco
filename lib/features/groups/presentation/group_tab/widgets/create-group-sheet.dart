@@ -220,6 +220,9 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
         if (mounted) {
           Navigator.pop(context);
         }
+      } else {
+        log(result.body);
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       }
     } else {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

@@ -25,15 +25,14 @@ class GroupRepo {
   static Future<HttpResponseModel> addMember({
     required final String groupId,
     required final String userId,
-  })async{
-    final result = await ApiInterface.patchRequest(
-      url: "addUserToGroup",
-      data: {
-        "groupId":groupId,
-        "memberId":userId,
-        "userId":ClientProvider.readOnlyClient!.userId
-      });
-      return result;
+  }) async {
+    final result =
+        await ApiInterface.patchRequest(url: "addUserToGroup", data: {
+      "groupId": groupId,
+      "memberId": userId,
+      "userId": ClientProvider.readOnlyClient!.userId
+    });
+    return result;
   }
 
   Future<List<dynamic>> getGroupsJson() async {
@@ -47,6 +46,4 @@ class GroupRepo {
     // log(result.body.toString());
     return [];
   }
-
-  
 }

@@ -44,13 +44,18 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
   }
 }
 
-class GroupList extends StatelessWidget {
+class GroupList extends StatefulWidget {
   final List<Group> groups;
   const GroupList({super.key, required this.groups});
 
   @override
+  State<GroupList> createState() => _GroupListState();
+}
+
+class _GroupListState extends State<GroupList> {
+  @override
   Widget build(BuildContext context) {
-    return groups.isEmpty
+    return widget.groups.isEmpty
         ? const EmptyScreen(
             label: "No Business Groups.\nCreate a Business Group",
           )
@@ -62,10 +67,10 @@ class GroupList extends StatelessWidget {
             itemBuilder: (context, index) => Column(
                   children: [
                     ChatContactWidget(
-                      key: Key(groups[index].hashCode.toString()),
-                      group: groups[index],
+                      key: ObjectKey(widget.groups[index]),
+                      group: widget.groups[index],
                     ),
-                    if (index == groups.length - 1)
+                    if (index == widget.groups.length - 1)
                       const Gap(SizeManager.bottomBarHeight),
                   ],
                 ),
@@ -73,6 +78,6 @@ class GroupList extends StatelessWidget {
                   thickness: 0.8,
                   color: ColorManager.secondary.withOpacity(0.08),
                 ),
-            itemCount: groups.length);
+            itemCount: widget.groups.length);
   }
 }

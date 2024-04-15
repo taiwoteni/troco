@@ -123,9 +123,7 @@ class ChatWidget extends ConsumerWidget {
     return Container(
       width: double.maxFinite,
       padding: EdgeInsets.only(
-        left: (lastSender ? lastSender : lastMessage) && !isSender
-            ? 0
-            : SizeManager.extralarge * 1.3,
+        left: (lastSender ? lastSender : lastMessage) && !isSender ? 0 : 48,
         right: SizeManager.medium,
         top: lastSender || sameSender ? SizeManager.small : SizeManager.medium,
       ),

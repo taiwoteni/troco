@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
@@ -87,14 +88,16 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                       ),
                       regularSpacer(),
                       Text(
-                        '•',
+                        "•",
                         style: TextStyle(
                             color: ColorManager.secondary,
                             fontSize: FontSizeManager.small * 0.5),
                       ),
                       regularSpacer(),
                       Text(
-                        'pending',
+                        chatIsEmpty
+                            ? chatTimeFormatter(time: group.createdTime)
+                            : chatTimeFormatter(time: chats.last.time),
                         style: TextStyle(
                             color: ColorManager.secondary,
                             fontFamily: 'Quicksand',
@@ -147,7 +150,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                       width: 25,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: color,
+                        color: ColorManager.accentColor,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: Text(
@@ -160,5 +163,17 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                       ),
                     ))),
     );
+  }
+
+  String chatTimeFormatter({required DateTime time}) {
+    final difference = DateTime.now().difference(time);
+
+    if (difference.inDays > 1) {
+      return DateFormat.yMMMEd().format(time);
+    } else {
+      return difference.inDays == 1
+          ? "yesterday"
+          : DateFormat.Hm().format(time);
+    }
   }
 }
