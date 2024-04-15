@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -14,6 +15,7 @@ import 'package:troco/features/auth/domain/entities/client.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
+import '../../../../core/basecomponents/animations/lottie.dart';
 
 class ChatWidget extends ConsumerWidget {
   final Chat chat;
@@ -36,16 +38,16 @@ class ChatWidget extends ConsumerWidget {
     BorderRadius generalBubble() {
       return BorderRadius.only(
         topLeft: !isSender
-            ? const Radius.circular(SizeManager.medium * 0.8)
+            ? const Radius.circular(SizeManager.large)
             : const Radius.circular(SizeManager.large),
         bottomLeft: !isSender
-            ? const Radius.circular(SizeManager.medium * 0.8)
+            ? const Radius.circular(SizeManager.large)
             : const Radius.circular(SizeManager.large),
         topRight: isSender
-            ? const Radius.circular(SizeManager.medium * 0.8)
+            ? const Radius.circular(SizeManager.large)
             : const Radius.circular(SizeManager.large),
         bottomRight: isSender
-            ? const Radius.circular(SizeManager.medium * 0.8)
+            ? const Radius.circular(SizeManager.large)
             : const Radius.circular(SizeManager.large),
       );
     }
@@ -112,7 +114,7 @@ class ChatWidget extends ConsumerWidget {
                 style: TextStyle(
                     fontFamily: 'Quicksand',
                     color: isSender ? Colors.white : ColorManager.primary,
-                    fontSize: FontSizeManager.regular * 0.9,
+                    fontSize: FontSizeManager.regular * 0.95,
                     fontWeight: FontWeightManager.medium),
               ),
             )
@@ -123,9 +125,11 @@ class ChatWidget extends ConsumerWidget {
     return Container(
       width: double.maxFinite,
       padding: EdgeInsets.only(
-        left: (lastSender ? lastSender : lastMessage) && !isSender ? 0 : 48,
+        left: (lastSender ? lastSender : lastMessage) && !isSender ? 0 : 55,
         right: SizeManager.medium,
-        top: lastSender || sameSender ? SizeManager.small : SizeManager.medium,
+        top: lastSender || sameSender
+            ? SizeManager.small * 0.95
+            : SizeManager.medium * 1.05,
       ),
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Row(
@@ -141,28 +145,48 @@ class ChatWidget extends ConsumerWidget {
                   ? ProfileIcon(
                       profile: DecorationImage(
                           image: NetworkImage(chat.profile), fit: BoxFit.cover),
-                      size: 28)
+                      size: 35)
                   : const UserProfileIcon(
-                      size: 28,
+                      size: 35,
                       showOnlyDefault: true,
                     ),
             ),
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.6,
-            ),
-            padding: const EdgeInsets.symmetric(
-                horizontal: SizeManager.regular * 1.3,
-                vertical: SizeManager.regular),
-            decoration: BoxDecoration(
-              color: isSender
-                  ? chat.read
-                      ? ColorManager.accentColor
-                      : ColorManager.themeColor
-                  : ColorManager.background,
-              borderRadius: border,
-            ),
-            child: informationWidget(),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.6,
+                ),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: SizeManager.regular * 1.3,
+                    vertical: SizeManager.regular * 1),
+                decoration: BoxDecoration(
+                  color: isSender
+                      ? chat.read
+                          ? ColorManager.accentColor
+                          : ColorManager.themeColor
+                      : ColorManager.background,
+                  borderRadius: border,
+                ),
+                child: informationWidget(),
+              ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.ease,
+                width: chat.loading
+                    ? IconSizeManager.regular + SizeManager.small
+                    : 0,
+                alignment: Alignment.centerRight,
+                child: Transform.scale(
+                  scale: 1.6,
+                  child: LottieWidget(
+                      lottieRes: AssetManager.lottieFile(name: "loading"),
+                      size: const Size.square(IconSizeManager.regular),
+                      color: ColorManager.secondary),
+                ),
+              ),
+            ],
           ),
         ],
       ),

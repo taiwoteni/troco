@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as Math;
 import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
+import 'package:troco/features/chat/presentation/providers/pending-chat-list-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/add-group-member.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
@@ -112,6 +114,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    /// To listen to Chat changes.
+    /// In this methos i use stream.when. This can only be used in the Build Method.
+    /// Do not remove from here.
     listenToChatChanges();
     return Padding(
       padding:
@@ -443,20 +448,57 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> sendChat() async {
+    /// The method to send a chat.
+    /// We also have to make a method to still add a chat to the [pendingChatListProvider].
+    /// We would add the loading attribute to specify that it's loading.
+    /// Then after we know that it was sent, We would update it that it's not loading.
     final String chatMessage = controller.text.trim();
+
     setState(() => sending = true);
-    
+
+    /// We create a List of Chats Named Pending Chats and equate it to the one
+    /// used in the _ChatScreenState class.
+
+    /// Asign a random id, with all necessary attributes with the loading set to
+    /// false.
+    final pendingChatJson = {
+      "_id": "chat-${Math.Random().nextInt(1000) + 2000}",
+      "content": chatMessage,
+      "sender": ClientProvider.readOnlyClient!.userId,
+      "profile": ClientProvider.readOnlyClient!.profile,
+      "read": false,
+      "loading": true,
+      "timestamp": DateTime.now().toUtc().toIso8601String()
+    } as Map<dynamic, dynamic>;
+
+    /// Add it to the List Chats fro, the [pendingChatListProvider].
+    ref
+        .watch(pendingChatListProvider(group.groupId).notifier)
+        .state
+        .add(Chat.fromJson(json: pendingChatJson));
+    controller.text = "";
+
+    /// We send the Chat through the API.
     final response = await ChatRepo.sendChat(
         groupId: group.groupId,
         userId: ref.read(ClientProvider.userProvider)!.userId,
         message: chatMessage);
+
     setState(() {
       sending = false;
     });
     if (response.error) {
-      log("Error When Sending Chat:${response.body}");
+      log("Error When Sending Chat: ${response.body}");
     } else {
-      controller.text = "";
+      /// If the Chat is added Successfully we change the loading value to false.
+      final pendingChat = ref
+          .watch(pendingChatListProvider(group.groupId))
+          .firstWhere((element) => element.chatId == pendingChatJson["_id"]);
+      final index = ref
+          .watch(pendingChatListProvider(group.groupId))
+          .indexOf(pendingChat);
+      ref.watch(pendingChatListProvider(group.groupId).notifier).state[index] =
+          Chat.fromJson(json: pendingChatJson);
     }
   }
 

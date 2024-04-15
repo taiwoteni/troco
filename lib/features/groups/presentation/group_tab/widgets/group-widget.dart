@@ -135,6 +135,9 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                             ? 'created "${group.groupName}"'
                             : lastChat!.message,
                         style: messageStyle.copyWith(
+                          fontWeight: unseenMessages == 0
+                              ? null
+                              : FontWeightManager.semibold,
                           color: clientIsLastSender
                               ? ColorManager.secondary
                               : null,

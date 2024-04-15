@@ -10,6 +10,8 @@ import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
+import 'pending-chat-list-provider.dart';
+
 
 /// This is a state Provider, responsible for returning and refreshing
 /// the Chat Repo class. Inorder reload to be on the safer side when looking for changes.
@@ -66,6 +68,7 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
           
           AppStorage.saveChats(chats: chatsList, groupId: groupId);
 
+          ref.watch(pendingChatListProvider(groupId).notifier).state = [];
           streamController.sink.add(chatsList);
         }
         ref.read(chatsRepoProvider.notifier).state = ChatRepo();

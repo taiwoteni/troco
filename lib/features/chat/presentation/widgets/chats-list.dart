@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/features/chat/presentation/providers/pending-chat-list-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
@@ -68,9 +69,16 @@ class _ChatListsState extends ConsumerState<ChatLists> {
                 lastMessage: isLastMessage,
               ),
             ),
+            // for (Chat chat in ref.watch(pendingChatListProvider(widget.group.groupId)))
+            //   ChatWidget(chat: chat, deviceClient: deviceClient)
           ],
         );
       },
     );
   }
+
+  // Widget pendingChatListWidgets(){
+    
+    
+  // }
 }
