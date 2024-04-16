@@ -30,8 +30,9 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
     final streamController = StreamController<List<Group>>();
 
     final periodic = Timer.periodic(const Duration(seconds: 3), (_) {
-      ref.watch(groupsFutureProvider).whenData((groupsJson) {
-        /// First of all we have to compare and contrast between the
+      ref.watch(groupsFutureProvider).when(
+        data: (groupsJson) {
+          /// First of all we have to compare and contrast between the
         /// values gotten from the APIs and saved on the Device Cache.
         ///
         /// We compare and contrast the group itself, it's messages and it's members
@@ -86,7 +87,9 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
         }
         ref.watch(groupRepoProvider.notifier).state = GroupRepo();
         // log("==================");
-      });
+        },
+        error: (error, stackTrace) => log("Error occured when getting api $error"),
+        loading: () => null);
     });
 
     ref.onDispose(() {

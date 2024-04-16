@@ -230,7 +230,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       borderRadius: BorderRadius.circular(SizeManager.large)),
                 ),
                 mediumSpacer(),
-                if (controller.text.trim().isEmpty)
+                if (controller.text.trim().isEmpty ? !sending : false)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -253,7 +253,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                     ],
                   ),
-                if (controller.text.trim().isNotEmpty)
+                if (sending || controller.text.trim().isNotEmpty)
                   AnimatedCrossFade(
                     firstCurve: Curves.ease,
                     secondCurve: Curves.ease,

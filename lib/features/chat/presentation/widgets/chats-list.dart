@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/chat/presentation/providers/pending-chat-list-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 

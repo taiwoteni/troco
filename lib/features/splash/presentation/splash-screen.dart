@@ -57,43 +57,42 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorManager.themeColor,
-      body: Container(
-        width: double.maxFinite,
-        height: double.maxFinite,
-        color: ColorManager.themeColor,
-        alignment: Alignment.center,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset(
-              AssetManager.imageFile(
-                name: "troco-white",
-              ),
-              width: 200,
-              height: 40,
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 50,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 5000),
-                opacity: showLoading ? 1 : 0,
-                curve: Curves.ease,
-                child: LottieWidget(
-                  lottieRes: AssetManager.lottieFile(name: 'loading'),
-                  size: const Size.square(IconSizeManager.large),
-                  fit: BoxFit.cover,
-                  color: Colors.white,
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: ColorManager.themeColor,
+          body: Stack(
+            children: [
+              Container(
+                width: double.maxFinite,
+                height: double.maxFinite,
+                color: ColorManager.themeColor,
+                alignment: Alignment.center,
+                child: Image.asset(
+                  AssetManager.imageFile(
+                    name: "troco-white",
+                  ),
+                  width: 200,
+                  height: 40,
                 ),
               ),
-            )
-          ],
+            ],
+          ),
         ),
-      ),
+        Container(
+          width: double.maxFinite,
+          height: double.maxFinite,
+          color: Colors.transparent,
+          alignment: Alignment.bottomCenter,
+          padding: const EdgeInsets.only(bottom: SizeManager.extralarge),
+          child: LottieWidget(
+            lottieRes: AssetManager.lottieFile(name: 'troco-security'),
+            size: const Size.square(SizeManager.extralarge * 5),
+            loop: false,
+            fit: BoxFit.cover,
+          ),
+        )
+      ],
     );
   }
 }
