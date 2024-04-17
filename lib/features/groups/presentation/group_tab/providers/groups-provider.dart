@@ -88,7 +88,7 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
         ref.watch(groupRepoProvider.notifier).state = GroupRepo();
         // log("==================");
         },
-        error: (error, stackTrace) => log("Error occured when getting api $error"),
+        error: (error, stackTrace) => log("Error occured when getting groups from api $error"),
         loading: () => null);
     });
 

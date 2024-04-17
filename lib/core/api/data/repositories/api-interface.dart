@@ -31,13 +31,15 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
+        returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
       log(e.toString());
-      return HttpResponseModel(error: true, body: e.toString(), code: 500);
+            return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
+
     }
   }
 
@@ -62,13 +64,14 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
+        returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
       log("error caught in runtimer exception $e");
-      return HttpResponseModel(error: true, body: e.toString(), code: 500);
+      return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
     }
   }
 
@@ -93,13 +96,15 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
+        returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
       log(e.toString());
-      return HttpResponseModel(error: true, body: e.toString(), code: 500);
+            return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
+
     }
   }
 
@@ -131,13 +136,15 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
+        returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
       log(e.toString());
-      return HttpResponseModel(error: true, body: e.toString(), code: 500);
+           return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
+
     }
   }
 
@@ -159,12 +166,14 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
+        returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
-      return HttpResponseModel(error: true, body: e.toString(), code: 500);
+           return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
+
     }
   }
 

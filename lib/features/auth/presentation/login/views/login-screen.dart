@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:email_validator/email_validator.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -18,6 +21,8 @@ import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/chat/domain/entities/chat.dart';
+import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -203,9 +208,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void navigateForgetPassword() {
     // Navigator.pushNamed(context, Routes.forgotPasswordRoute);
     SnackbarManager.showBasicSnackbar(
-      context: context,
-      seconds: 4,
-      message: "This is still under construction");
+        context: context,
+        seconds: 4,
+        message: "This is still under construction");
   }
 
   String? validate(String? value) {
@@ -280,6 +285,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       log("login:${response.body}");
 
       if (response.error) {
+        if (response.returnHeaderType.contains("json")) {
+          SnackbarManager.showBasicSnackbar(
+              context: context, message: response.messageBody!["message"]);
+        }
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
         setState(() => errorText = "*${response.messageBody!["message"]}");
       } else {
@@ -289,17 +298,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // We have to remove the "_v" && "password" key. Although not compulsory.
         map.remove("__v");
         map.remove("password");
+        map.remove("groups");
 
         // We have to locally store all the groups and it's respective chats.
-        // And remove it from the user json.
-        AppStorage.saveGroups(groups: map["groups"]);
-        List groups = map["groups"];
 
-        for (final group in groups) {
-          AppStorage.saveChats(chats: group["messages"], groupId: group["_id"]);
+        final newResponse = await ApiInterface.findUser(userId: map["_id"]);
+        if (newResponse.error) {
+          log(newResponse.body.toString());
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+        } else {
+          final Map<dynamic, dynamic> data = newResponse.messageBody!["data"];
+          AppStorage.saveGroups(
+              groups: (data["groups"] as List)
+                  .map((e) => Group.fromJson(json: e))
+                  .toList());
+          List groups = data["groups"];
+
+          for (final group in groups) {
+            AppStorage.saveChats(
+                chats: (group["messages"] as List).map((e) => Chat.fromJson(json: e)).toList(), groupId: group["_id"]);
+          }
         }
 
-        map.remove("groups");
         ClientProvider.saveUserData(ref: ref, json: map);
         Navigator.pushNamedAndRemoveUntil(
             context, Routes.homeRoute, (route) => false);

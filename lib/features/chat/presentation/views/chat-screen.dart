@@ -9,6 +9,7 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/platform.dart';
+import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/animations/lottie.dart';
@@ -242,7 +243,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           size: const Size.square(IconSizeManager.medium * 0.9),
                         ),
                       ),
-                      mediumSpacer(),
+                      smallSpacer(),
                       IconButton(
                         onPressed: showMaintenanceMessage,
                         icon: SvgIcon(
@@ -369,7 +370,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: showMaintenanceMessage,
+                    onPressed: () => Navigator.pushNamed(
+                        context, Routes.createTransactionRoute),
                     highlightColor: ColorManager.accentColor.withOpacity(0.15),
                     style: const ButtonStyle(
                         splashFactory: InkRipple.splashFactory),

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
@@ -20,6 +21,7 @@ class GroupsPage extends ConsumerStatefulWidget {
 }
 
 class _GroupsPageState extends ConsumerState<GroupsPage> {
+  bool hasShownError = false;
   @override
   Widget build(BuildContext context) {
     // final asyncConfig = ref.watch(groupsStreamProvider);
@@ -30,10 +32,19 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
       );
       return GroupList(groups: data.map((e) => e).toList());
     }, error: (error, stackTrace) {
-      log(error.toString(), stackTrace: stackTrace);
-      return const EmptyScreen(
-        label: "Error loading business groups",
+      if (!hasShownError) {
+        hasShownError = true;
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            message:
+                "An unknown error occured. Check your internet connection.");
+      }
+      log("Error occured in group listener in build method: $error");
+      final groups = AppStorage.getGroups();
+      groups.sort(
+        (a, b) => b.createdTime.compareTo(a.createdTime),
       );
+      return GroupList(groups: groups);
     }, loading: () {
       final groups = AppStorage.getGroups();
       groups.sort(

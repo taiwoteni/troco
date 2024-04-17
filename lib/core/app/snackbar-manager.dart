@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/app/theme-manager.dart';
 
 class SnackbarManager {
   static void showBasicSnackbar({
     required final BuildContext context,
+    final bool accentMode = true,
     required final String message,
     int seconds = 2,
   }) async {
@@ -16,27 +15,23 @@ class SnackbarManager {
         message,
         style: TextStyle(
           fontFamily: "Lato",
-          color: ColorManager.primaryDark,
+          color: accentMode ? ColorManager.primaryDark : ColorManager.primary,
           fontSize: FontSizeManager.medium * 0.8,
           fontWeight: FontWeightManager.medium,
         ),
       ),
       dismissDirection: DismissDirection.startToEnd,
-      // margin: const EdgeInsets.symmetric(
-      //     horizontal: SizeManager.regular, vertical: SizeManager.medium),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(SizeManager.regular * 1.8)),
+      behavior: SnackBarBehavior.floating,
+      elevation: 1.5,
+      margin: const EdgeInsets.symmetric(
+          horizontal: SizeManager.regular, vertical: SizeManager.medium),
       padding: const EdgeInsets.symmetric(
-          horizontal: SizeManager.medium, vertical: SizeManager.regular),
-      backgroundColor: ColorManager.accentColor,
+          horizontal: SizeManager.medium * 1.2, vertical: SizeManager.medium),
+      backgroundColor:
+          accentMode ? ColorManager.accentColor : ColorManager.background,
       duration: Duration(seconds: seconds),
-      onVisible: () async{
-        SystemChrome.setSystemUIOverlayStyle(ThemeManager.previousUiOverlayStyle!.copyWith(
-          systemNavigationBarColor: ColorManager.accentColor,
-          systemNavigationBarIconBrightness: Brightness.light
-          ));
-        await Future.delayed(Duration(seconds: seconds));
-        SystemChrome.setSystemUIOverlayStyle(ThemeManager.previousUiOverlayStyle!);
-
-      },
     ));
   }
 }

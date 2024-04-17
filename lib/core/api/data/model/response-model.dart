@@ -3,9 +3,10 @@ import 'dart:convert';
 class HttpResponseModel {
   final bool error;
   final String body;
+  final String returnHeaderType;
   final int code;
   const HttpResponseModel(
-      {required this.error, required this.body, required this.code});
+      {required this.error, this.returnHeaderType = "application/json", required this.body, required this.code});
 
   Map<dynamic,dynamic>? get messageBody => json.decode(body);
 

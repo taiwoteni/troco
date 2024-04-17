@@ -110,9 +110,9 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
         queriedClients.isEmpty
             ? EmptyScreen(
                 expanded: true,
-                lottie: AssetManager.lottieFile(name: "empty"),
+                lottie: AssetManager.lottieFile(name: "plane-cloud"),
                 label: allClients.isEmpty
-                    ? "No users"
+                    ? "Getting users"
                     : "No search results for '${textController.text.toString().trim()}'",
               )
             : ListView.separated(
@@ -123,7 +123,8 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
                       inviteMode: true,
                     ),
                 separatorBuilder: (context, index) => Divider(
-                      color: ColorManager.secondary.withOpacity(0.9),
+                      thickness: 0.8,
+                      color: ColorManager.secondary.withOpacity(0.09),
                     ),
                 itemCount: queriedClients.length)
       ],

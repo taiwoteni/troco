@@ -49,11 +49,18 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
     bool clientIsLastSender = chats.isEmpty
         ? false
         : chats.last.senderId == ClientProvider.readOnlyClient!.userId;
+    int indexOfLastTimeClientChatted = chats.lastIndexWhere(
+        (chat) => chat.senderId == ClientProvider.readOnlyClient!.userId);
+    var listOfMessagesFromLastTimeYouSent = clientIsLastSender
+        ? chats
+        : chats.sublist(indexOfLastTimeClientChatted);
     int unseenMessages = clientIsLastSender
         ? 0
-        : clientIsLastSender
-            ? 0
-            : chats.where((chat) => !chat.read).toList().length;
+        : listOfMessagesFromLastTimeYouSent
+                .where((chat) => !chat.read)
+                .toList()
+                .length -
+            1;
     Chat? lastChat = chatIsEmpty ? null : chats.last;
 
     return ClipRRect(
@@ -132,7 +139,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                             fontWeight: FontWeightManager.semibold)),
                     TextSpan(
                         text: chatIsEmpty
-                            ? 'created "${group.groupName}"'
+                            ? '"${group.groupName}" was created'
                             : lastChat!.message,
                         style: messageStyle.copyWith(
                           fontWeight: unseenMessages == 0
@@ -169,14 +176,24 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
   }
 
   String chatTimeFormatter({required DateTime time}) {
-    final difference = DateTime.now().difference(time);
+    final bool isSameYear = DateTime.now().year == time.year;
+    final bool isSameMonth = DateTime.now().month == time.month && isSameYear;
+    final bool isSameDay = DateTime.now().day == time.day && isSameMonth;
+    final bool isSameTime = isSameDay &&
+        "${DateTime.now().hour}:${DateTime.now().minute}" ==
+            "${time.hour + 1}:${time.minute}";
+    final bool isYesterday = DateTime.now().day - 1 == time.day && !isSameDay;
 
-    if (difference.inDays > 1) {
-      return DateFormat.yMMMEd().format(time);
+    if (isSameDay) {
+      return isSameTime
+          ? "now"
+          : "${time.hour + 1}:${time.minute.toString().padLeft(2, "0")}";
     } else {
-      return difference.inDays == 1
-          ? "yesterday"
-          : DateFormat.Hm().format(time);
+      if (isYesterday) {
+        return "yesterday";
+      } else {
+        return DateFormat.MMMEd().format(time);
+      }
     }
   }
 }

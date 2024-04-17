@@ -127,16 +127,25 @@ class ChatWidget extends ConsumerWidget {
       padding: EdgeInsets.only(
         left: (lastSender ? lastSender : lastMessage) && !isSender ? 0 : 55,
         right: SizeManager.medium,
-        top: lastSender || sameSender
-            ? SizeManager.small * 0.95
-            : SizeManager.medium * 1.05,
+        // bottom: lastSender?,
+        top: sameSender
+
+            /// I removed lastSender from the [top: lastSender || sameSender]
+            /// because sameSender is always true if it is the lastSender.
+            ? (firstSender && lastSender)
+                ? SizeManager.medium * 1.05
+                : SizeManager.small * 0.95
+            : lastMessage
+                ? SizeManager.small * 0.95
+                : SizeManager.medium * 1.05,
       ),
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: chat.hasAttachment
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            (chat.hasAttachment ? true : chat.message!.length >= 116)
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.center,
         children: [
           if ((lastSender ? lastSender : lastMessage) && !isSender)
             Padding(
@@ -156,7 +165,7 @@ class ChatWidget extends ConsumerWidget {
             children: [
               Container(
                 constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.6,
+                  maxWidth: MediaQuery.of(context).size.width * 0.65,
                 ),
                 padding: const EdgeInsets.symmetric(
                     horizontal: SizeManager.regular * 1.3,
