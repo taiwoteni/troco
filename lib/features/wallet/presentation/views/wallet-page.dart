@@ -180,10 +180,10 @@ class _WalletPageState extends ConsumerState<WalletPage>
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        mainAxisExtent: IconSizeManager.extralarge * 1.1,
-        childAspectRatio: 0.9,
+        mainAxisExtent: IconSizeManager.extralarge * 1.2,
+        childAspectRatio: 0.8,
         mainAxisSpacing: SizeManager.regular * 1.2,
-        crossAxisSpacing: SizeManager.regular * 1.2,
+        crossAxisSpacing: SizeManager.regular * 0.8,
       ),
       itemCount: menuItems().length,
       shrinkWrap: true,
@@ -195,15 +195,18 @@ class _WalletPageState extends ConsumerState<WalletPage>
             width: double.maxFinite,
             height: double.maxFinite,
             decoration: BoxDecoration(
-                color: (ColorManager.accentColor).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(SizeManager.small)),
+                gradient: LinearGradient(colors: [
+                  (ColorManager.accentColor).withOpacity(0.2),
+                  (ColorManager.accentColor).withOpacity(0.3)
+                ], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                borderRadius: BorderRadius.circular(SizeManager.small * 1.1)),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SvgIcon(
                   svgRes: item.svgRes,
                   color: ColorManager.accentColor,
-                  size: const Size.square(IconSizeManager.regular * 1.1),
+                  size: const Size.square(IconSizeManager.regular * 1.15),
                 ),
                 regularSpacer(),
                 Text(
@@ -212,7 +215,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
                       fontFamily: 'Lato',
                       color: ColorManager.accentColor,
                       fontWeight: FontWeightManager.medium,
-                      fontSize: FontSizeManager.small * 0.8),
+                      fontSize: FontSizeManager.small * 0.85),
                 )
               ],
             ),

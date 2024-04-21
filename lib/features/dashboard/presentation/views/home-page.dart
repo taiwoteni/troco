@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
@@ -13,14 +12,12 @@ import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
-import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:troco/core/basecomponents/clippers/bottom-rounded.dart';
-
-import '../widgets/transaction-item-widget.dart';
-import '../../../transactions/domain/entities/transaction.dart';
+import 'package:troco/features/dashboard/presentation/widgets/latest-transactions-list.dart';
+import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -30,7 +27,12 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  late Client client;
+  final defaultStyle = TextStyle(
+      fontFamily: 'quicksand',
+      color: ColorManager.primary,
+      fontSize: FontSizeManager.large * 0.85,
+      fontWeight: FontWeightManager.bold);
+
   @override
   void initState() {
     super.initState();
@@ -42,19 +44,21 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    log(ref.read(ClientProvider.userProvider)!.profile.toString());
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Container(
+      body: SizedBox(
         width: double.maxFinite,
         height: double.maxFinite,
-        padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
+        // padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
         child: SingleChildScrollView(
           child: Column(
             children: [
               appBarWidget(),
               mediumSpacer(),
-              latestTransactionsWidget(),
+              const TransactionOverview(),
+              largeSpacer(),
+              const LatestTransactionsList(),
+              const Gap(SizeManager.bottomBarHeight)
             ],
           ),
         ),
@@ -72,36 +76,63 @@ class _HomePageState extends ConsumerState<HomePage> {
             clipper: BottomRoundedClipper(),
             child: Container(
               width: double.maxFinite,
-              height: 290,
+              height: 280,
               color: ColorManager.accentColor.withOpacity(0.8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
-                  Gap(MediaQuery.of(context).viewPadding.top),
-                  mediumSpacer(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: SizeManager.medium * 1.5),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const UserProfileIcon(
-                          size: IconSizeManager.medium * 1.3,
-                        ),
-                        SvgIcon(
-                          svgRes: AssetManager.svgFile(name: "bell"),
-                          color: ColorManager.primaryDark,
-                          size: const Size.square(IconSizeManager.medium),
-                        )
-                      ],
+                  Positioned(
+                    right: -45,
+                    top: -50,
+                    child: Container(
+                      width: 190,
+                      height: 190,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.15)
+                      ),
                     ),
                   ),
-                  largeSpacer(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: SizeManager.medium * 1.5),
-                    child: nameWidget(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Gap(MediaQuery.of(context).viewPadding.top),
+                      largeSpacer(),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: SizeManager.regular * 1.8,
+                            right: SizeManager.medium * 1.5),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Image.asset(
+                              AssetManager.imageFile(name: "troco-white"),
+                              width: 110,
+                              height: 22,
+                              fit: BoxFit.cover,
+                            ),
+                            const Spacer(),
+                            Icon(
+                              Icons.notifications_rounded,
+                              color: ColorManager.primaryDark,
+                              size: IconSizeManager.medium * 0.9,
+                            ),
+                            mediumSpacer(),
+                            regularSpacer(),
+                            const UserProfileIcon(
+                              size: IconSizeManager.medium * 1.2,
+                            ),
+                          ],
+                        ),
+                      ),
+                      largeSpacer(),
+                      regularSpacer(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: SizeManager.medium * 1.6),
+                        child: nameWidget(),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -122,14 +153,17 @@ class _HomePageState extends ConsumerState<HomePage> {
             : "Evening";
     final defaultStyle = TextStyle(
         fontFamily: 'Quicksand',
-        color: ColorManager.background.withOpacity(0.8),
-        height: 1.5,
-        fontSize: FontSizeManager.large * 1.1,
-        fontWeight: FontWeightManager.medium);
+        color: ColorManager.background.withOpacity(0.9),
+        height: 1.45,
+        fontSize: FontSizeManager.large*1.05,
+        fontWeight: FontWeightManager.regular);
     return RichText(
         textAlign: TextAlign.start,
         text: TextSpan(style: defaultStyle, children: [
-          TextSpan(text: "Good $time,\n"),
+          TextSpan(
+              text: "Good $time, \n",
+              style: defaultStyle.copyWith(
+                  fontSize: FontSizeManager.medium*1.1)),
           TextSpan(
               text: "${ref.watch(ClientProvider.userProvider)!.fullName}.",
               style: defaultStyle.copyWith(
@@ -227,70 +261,5 @@ class _HomePageState extends ConsumerState<HomePage> {
       size: const Size.square(IconSizeManager.extralarge),
       color: Colors.white.withOpacity(0.4),
     );
-  }
-
-  Widget latestTransactionsWidget() {
-    final defaultStyle = TextStyle(
-        fontFamily: 'Lato',
-        color: ColorManager.primary,
-        fontSize: FontSizeManager.large,
-        fontWeight: FontWeightManager.bold);
-    return SizedBox(
-      width: double.maxFinite,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-            child: Text(
-              "Latest Transactions",
-              style: defaultStyle,
-              textAlign: TextAlign.start,
-            ),
-          ),
-          regularSpacer(),
-          ListView.separated(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: SizeManager.small),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemBuilder: (context, index) => TransactionItemWidget(
-                    transaction: transactions()[index],
-                  ),
-              separatorBuilder: (context, index) => Divider(
-                    thickness: 0.8,
-                    color: ColorManager.secondary.withOpacity(0.08),
-                  ),
-              itemCount: transactions().length >= 3 ? 3 : transactions().length)
-        ],
-      ),
-    );
-  }
-
-  List<Transaction> transactions() {
-    return [
-      const Transaction.fromJson(json: {
-        "transaction detail": "selling My Passport Ultra Hard Drive",
-        "transaction id": "ID-87aA8",
-        "transaction purpose": "Selling",
-        "transaction amount": 50000.00,
-        "transaction status": "Finalizing",
-      }),
-      const Transaction.fromJson(json: {
-        "transaction detail": "buying macbook pro",
-        "transaction id": "ID-87aA8",
-        "transaction purpose": "Buying",
-        "transaction amount": 100000.00,
-        "transaction status": "Pending",
-      }),
-      const Transaction.fromJson(json: {
-        "transaction detail": "shipping Tera Batteries",
-        "transaction id": "ID-87aA8",
-        "transaction purpose": "Selling",
-        "transaction amount": 250000.00,
-        "transaction status": "Completed",
-      }),
-    ];
   }
 }

@@ -84,7 +84,10 @@ class TransactionItemWidget extends StatelessWidget {
           ),
           trailing: Text("$formattedNumber NG"),
           leadingAndTrailingTextStyle: TextStyle(
-              color: ColorManager.accentColor,
+              color:
+                  transaction.transactionPurpose == TransactionPurpose.Selling
+                      ? ColorManager.accentColor
+                      : Colors.redAccent,
               fontFamily: 'Lato',
               fontSize: FontSizeManager.medium * 0.8,
               fontWeight: FontWeightManager.bold),

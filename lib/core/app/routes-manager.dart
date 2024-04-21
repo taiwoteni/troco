@@ -32,9 +32,8 @@ class Routes {
   static const addProfileRoute = '/add-profile';
   static const addTransactionPinRoute = "/add-transaction-pin";
   static const authSuccessRoute = "/auth-success";
-
   static const homeRoute = "/home";
-
+  static const notificationRoute = "/notification";
   /// [chatRoute] is the route for the chat screen.
   /// Must pass the recipient client as an argument!
   static const chatRoute = "/chat";
@@ -102,6 +101,11 @@ class RouteGenerator {
             settings: routeSettings,
             builder: (context) => const OTPForgetPasswordScreen());
       case Routes.homeRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const HomeScreen(),
+        );
+      case Routes.notificationRoute:
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) => const HomeScreen(),

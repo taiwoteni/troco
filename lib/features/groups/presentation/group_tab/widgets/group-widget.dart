@@ -192,7 +192,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
       if (isYesterday) {
         return "yesterday";
       } else {
-        return DateFormat.MMMEd().format(time);
+        return "${DateFormat.E().format(time)}, ${DateFormat.MMMd().format(time)}";
       }
     }
   }

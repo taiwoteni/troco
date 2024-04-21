@@ -6,7 +6,7 @@ enum TransactionPurpose { Buying, Selling }
 
 enum TransactionCategory{ Product, Service, Virtual}
 
-enum ProductCondition { Used, New }
+enum ProductCondition { Used, New}
 
 enum TransactionStatus {
   Pending,
