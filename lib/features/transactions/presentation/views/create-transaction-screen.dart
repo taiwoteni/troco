@@ -30,8 +30,6 @@ class _CreateTransactionScreenState
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getTransactionScreenUiOverlayStyle());
-      SnackbarManager.showBasicSnackbar(
-          context: context, message: "No Groups Available");
     });
   }
 

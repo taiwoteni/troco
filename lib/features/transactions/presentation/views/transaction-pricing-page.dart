@@ -4,6 +4,7 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/transactions/presentation/widgets/transaction-pricing-item.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
@@ -38,6 +39,8 @@ class _TransactionPricingPageState
               children: [
                 mediumSpacer(),
                 title(),
+                mediumSpacer(),
+                pricingGrid(),
               ],
             ),
           ),
@@ -81,6 +84,17 @@ class _TransactionPricingPageState
     );
   }
 
+  Widget pricingGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      gridDelegate: gridDelegate(),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return const TransactionPricingWidget();
+      },
+    );
+  }
+
   Widget button() {
     return CustomButton.medium(
       label: "Continue",
@@ -100,6 +114,15 @@ class _TransactionPricingPageState
         }
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },
+    );
+  }
+
+  SliverGridDelegateWithFixedCrossAxisCount gridDelegate() {
+    return const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      childAspectRatio: 0.6,
+      crossAxisSpacing: SizeManager.medium * 1.6,
+      mainAxisSpacing: SizeManager.regular,
     );
   }
 }
