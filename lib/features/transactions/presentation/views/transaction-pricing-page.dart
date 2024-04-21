@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
@@ -32,39 +33,50 @@ class _TransactionPricingPageState
       body: Padding(
         padding: const EdgeInsets.only(
             left: SizeManager.large, right: SizeManager.large),
-        child: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              children: [
-                mediumSpacer(),
-                title(),
-                mediumSpacer(),
-                pricingGrid(),
-              ],
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Container(
-        width: double.maxFinite,
-        padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-        child: Row(
-          children: [
-            Expanded(child: button()),
-            mediumSpacer(),
-            FloatingActionButton(
-              onPressed: null,
-              backgroundColor: ColorManager.accentColor,
-              // foregroundColor: Colors.white,
-              child: SvgIcon(
-                svgRes: AssetManager.svgFile(name: "add-product"),
-                size: const Size.square(IconSizeManager.medium * 0.9),
-                color: Colors.white,
+        child: Form(
+          key: formKey,
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      mediumSpacer(),
+                      title(),
+                      mediumSpacer(),
+                      pricingGrid(),
+                      mediumSpacer(),
+                      smallSpacer()
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ],
+              Container(
+                width: double.maxFinite,
+                padding: const EdgeInsets.only(
+                    bottom: SizeManager.regular,
+                    left: SizeManager.medium,
+                    right: SizeManager.medium),
+                child: Row(
+                  children: [
+                    Expanded(child: button()),
+                    mediumSpacer(),
+                    FloatingActionButton(
+                      onPressed: null,
+                      elevation: 0,
+                      backgroundColor: ColorManager.accentColor,
+                      // foregroundColor: Colors.white,
+                      child: SvgIcon(
+                        svgRes: AssetManager.svgFile(name: "add-product"),
+                        size: const Size.square(IconSizeManager.medium * 0.9),
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -87,6 +99,7 @@ class _TransactionPricingPageState
   Widget pricingGrid() {
     return GridView.builder(
       shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       gridDelegate: gridDelegate(),
       itemCount: 4,
       itemBuilder: (context, index) {
@@ -122,7 +135,7 @@ class _TransactionPricingPageState
       crossAxisCount: 2,
       childAspectRatio: 0.6,
       crossAxisSpacing: SizeManager.medium * 1.6,
-      mainAxisSpacing: SizeManager.regular,
+      mainAxisSpacing: SizeManager.medium * 1.2,
     );
   }
 }
