@@ -18,6 +18,7 @@ final groupRepoProvider = StateProvider<GroupRepo>((ref) => GroupRepo());
 final groupsFutureProvider = FutureProvider<List<dynamic>>((ref) async {
   final groupRepo = ref.watch(groupRepoProvider);
   final data = await groupRepo.getGroupsJson();
+  log(data.toString());
   // log("Loaded data from groupRepo");
   return data;
 });

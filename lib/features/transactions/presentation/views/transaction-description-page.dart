@@ -343,4 +343,5 @@ class _TransactionDescriptionPageState
       },
     );
   }
+
 }

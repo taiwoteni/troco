@@ -25,7 +25,8 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
   @override
   Widget build(BuildContext context) {
     // final asyncConfig = ref.watch(groupsStreamProvider);
-    return ref.watch(groupsStreamProvider).when(data: (data) {
+    return ref.watch(groupsStreamProvider).when(
+      data: (data) {
       log("rebuilt data: ${data.map((e) => e.groupName).toList()}");
       data.sort(
         (a, b) => b.createdTime.compareTo(a.createdTime),

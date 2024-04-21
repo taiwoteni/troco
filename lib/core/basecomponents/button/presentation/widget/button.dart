@@ -15,6 +15,7 @@ class CustomButton extends ConsumerStatefulWidget {
   final String label;
   final String size;
   final void Function()? onPressed;
+  final Color? color;
   final bool usesProvider;
   final EdgeInsets? margin;
 
@@ -25,6 +26,7 @@ class CustomButton extends ConsumerStatefulWidget {
     this.size = "large",
     this.usesProvider = false,
     this.onPressed,
+    this.color,
     this.margin,
   }) {
     if (usesProvider) {
@@ -42,6 +44,8 @@ class CustomButton extends ConsumerStatefulWidget {
     this.usesProvider = false,
     this.onPressed,
     this.margin,
+    this.color,
+
   }) {
     if (usesProvider) {
       if (buttonKey == null) {
@@ -57,6 +61,8 @@ class CustomButton extends ConsumerStatefulWidget {
     this.size = "small",
     this.usesProvider = false,
     this.onPressed,
+    this.color,
+
     this.margin,
   }) {
     if (usesProvider) {
@@ -109,9 +115,7 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
               decoration: BoxDecoration(
                   color: !enabled && !loading
                       ? ColorManager.tertiary
-                      : widget.size == "small"
-                          ? ColorManager.accentColor
-                          : ColorManager.themeColor),
+                      : widget.color ?? ColorManager.themeColor),
               alignment: Alignment.center,
               child: loading
                   ? LottieWidget(

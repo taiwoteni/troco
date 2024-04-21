@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
@@ -182,16 +183,17 @@ class _GroupPageState extends ConsumerState<GroupPage>
   }
 
   Future<void> createGroup() async {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      enableDrag: true,
-      useSafeArea: true,
-      backgroundColor: ColorManager.background,
-      context: context,
-      builder: (context) {
-        return const SingleChildScrollView(child: CreateGroupSheet());
-      },
-    );
+    Navigator.pushNamed(context, Routes.createTransactionRoute);
+    // showModalBottomSheet(
+    //   isScrollControlled: true,
+    //   enableDrag: true,
+    //   useSafeArea: true,
+    //   backgroundColor: ColorManager.background,
+    //   context: context,
+    //   builder: (context) {
+    //     return const SingleChildScrollView(child: CreateGroupSheet());
+    //   },
+    // );
   }
 }
 

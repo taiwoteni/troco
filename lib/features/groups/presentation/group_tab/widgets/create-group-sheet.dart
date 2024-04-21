@@ -1,11 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
 import 'package:troco/core/basecomponents/others/drag-handle.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
@@ -217,10 +221,18 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
         // log("List of groups checked immediately after commiting a new group : ${jsonList.map((e) => e["name"]).toList()}");
         // await AppStorage.saveGroups(groups: groups);
 
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            message: "Created group successfully",
+            mode: ContentType.success);
         if (mounted) {
           Navigator.pop(context);
         }
       } else {
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            message: "Unable to create group",
+            mode: ContentType.failure);
         log(result.body);
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       }

@@ -40,10 +40,11 @@ class GroupRepo {
         url: 'findoneuser/${ClientProvider.readOnlyClient!.userId}');
     if (!result.error) {
       Map<dynamic, dynamic> userJson = result.messageBody!["data"];
+      // log(userJson.toString());
       List userGroupsList = userJson["groups"];
       return userGroupsList;
     }
-    // log(result.body.toString());
+    log(result.body.toString());
     return [];
   }
 }
