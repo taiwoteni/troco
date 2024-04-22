@@ -55,7 +55,9 @@ class _DropdownInputFormFieldState
   Widget build(BuildContext context) {
     final TextStyle hintStyle = TextStyle(
         color: ColorManager.secondary,
-        fontSize: FontSizeManager.medium,
+        fontSize: widget.prefixIcon == null
+            ? FontSizeManager.medium * 0.8
+            : FontSizeManager.medium,
         fontWeight: FontWeightManager.medium,
         fontFamily: 'Lato');
 

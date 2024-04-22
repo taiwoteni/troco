@@ -164,7 +164,7 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                       if (value.trim().isEmpty) {
                         return "* enter duration";
                       }
-                      if (!RegExp(r'\d').hasMatch(value.trim())) {
+                      if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
                         return "* valid number";
                       }
                       return null;

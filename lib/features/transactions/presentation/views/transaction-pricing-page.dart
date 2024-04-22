@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/transactions/presentation/widgets/add-product-widget.dart';
 import 'package:troco/features/transactions/presentation/widgets/transaction-pricing-item.dart';
 
 import '../../../../core/app/font-manager.dart';
@@ -62,7 +62,18 @@ class _TransactionPricingPageState
                     Expanded(child: button()),
                     mediumSpacer(),
                     FloatingActionButton(
-                      onPressed: null,
+                      onPressed: () {
+                        showModalBottomSheet(
+                          isScrollControlled: true,
+                          enableDrag: true,
+                          useSafeArea: false,
+                          backgroundColor: ColorManager.background,
+                          context: context,
+                          builder: (context) {
+                            return const AddProductWidget();
+                          },
+                        );
+                      },
                       elevation: 0,
                       backgroundColor: ColorManager.accentColor,
                       // foregroundColor: Colors.white,
