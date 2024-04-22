@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/transactions/presentation/views/terms-and-conditions-page.dart';
+import 'package:troco/features/transactions/presentation/views/transaction-category-page.dart';
 import 'package:troco/features/transactions/presentation/views/transaction-description-page.dart';
 import 'package:troco/features/transactions/presentation/views/transaction-preview-page.dart';
 import 'package:troco/features/transactions/presentation/views/transaction-pricing-page.dart';

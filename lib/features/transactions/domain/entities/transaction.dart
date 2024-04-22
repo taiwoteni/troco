@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
 import '../../utils/enums.dart';
@@ -11,6 +12,8 @@ class Transaction extends Equatable {
       : _json = json;
 
   String get transactionDetail => _json["transaction detail"];
+  String get transactionName => _json["transaction name"];
+
   DateTime get transactionTime => DateTime.parse(_json["transaction time"]);
   String get transactionId => _json["transaction id"];
   TransactionCategory get transactionCategory =>
@@ -23,13 +26,17 @@ class Transaction extends Equatable {
       TransactionConverter.convertToStatus(status: _json["transaction status"]);
 
   /// We have to think these through as a transaction can have many products.
-  String get productCategory => _json["product category"];
-  String get productName => _json["product name"];
-  String get productDetail => _json["product detail"];
-  ProductCondition get productCondition =>
-      // TransactionConverter.convertToCondition(
-      //     condition: _json["product condition"])
-      ProductCondition.New;
+  List<Product> get products{
+    return (_json["products"] as List).map((e) => Product.fromJson(json: e)).toList();
+  }
+
+  // String get productCategory => _json["product category"];
+  // String get productName => _json["product name"];
+  // String get productDetail => _json["product detail"];
+  // ProductCondition get productCondition =>
+  //     // TransactionConverter.convertToCondition(
+  //     //     condition: _json["product condition"])
+  //     ProductCondition.New;
   double get transactionAmount => _json["transaction amount"];
 
   @override

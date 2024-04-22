@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -14,7 +12,7 @@ List<Widget> createTransactionStages({required WidgetRef ref}) {
   final TextStyle textStyle = TextStyle(
       fontFamily: "Lato",
       color: ColorManager.primary,
-      fontSize: FontSizeManager.regular * 0.85,
+      fontSize: FontSizeManager.regular * 0.81,
       fontWeight: FontWeightManager.semibold);
   return [
     GestureDetector(
@@ -34,7 +32,7 @@ List<Widget> createTransactionStages({required WidgetRef ref}) {
         endChild: Padding(
           padding: const EdgeInsets.only(top: SizeManager.medium),
           child: Text(
-            "Terms",
+            "Category",
             style: textStyle,
           ),
         ),

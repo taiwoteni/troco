@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -27,11 +26,10 @@ class TransactionPricingPage extends ConsumerStatefulWidget {
       _TransactionPricingPageState();
 }
 
-class _TransactionPricingPageState
-    extends ConsumerState<TransactionPricingPage> {
+class _TransactionPricingPageState extends ConsumerState<TransactionPricingPage> {
   final formKey = GlobalKey<FormState>();
   final buttonKey = UniqueKey();
-  final List<Product> products = [];
+  final List<Product> products = TransactionDataHolder.products ?? [];
   bool listAsGrid = false;
 
   @override
