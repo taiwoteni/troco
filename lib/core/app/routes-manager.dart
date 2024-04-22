@@ -121,7 +121,11 @@ class RouteGenerator {
         );
       case Routes.createTransactionRoute:
         return MaterialPageRoute(
-          builder: (context) => const CreateTransactionScreen(),
+          settings: routeSettings,
+          builder: (context){
+            final group = routeSettings.arguments as Group;
+            return const CreateTransactionScreen();
+          },
         );
       default:
         return MaterialPageRoute(

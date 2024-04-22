@@ -27,6 +27,7 @@ import '../../../../core/basecomponents/others/drag-handle.dart';
 import '../../../../core/basecomponents/others/spacer.dart';
 import '../../../../core/basecomponents/texts/inputs/text-form-field.dart';
 import '../../../../core/basecomponents/texts/outputs/info-text.dart';
+import '../../data/models/create-transaction-data-holder.dart';
 
 class AddProductWidget extends ConsumerStatefulWidget {
   const AddProductWidget({super.key});
@@ -44,6 +45,14 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   final formKey = GlobalKey<FormState>();
   String price = "";
   String name = "";
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      ref.read(productImagesProvider.notifier).state.clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +101,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget title() {
+    final TransactionCategory category =
+        TransactionDataHolder.transactionCategory ??
+            TransactionCategory.Product;
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -100,7 +112,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
           padding: const EdgeInsets.symmetric(vertical: SizeManager.small),
           alignment: Alignment.center,
           child: Text(
-            "Add Product",
+            "Add ${category == TransactionCategory.Product ? "Product" : "Service"}",
             style: TextStyle(
                 color: ColorManager.primary,
                 fontWeight: FontWeightManager.bold,
@@ -129,10 +141,14 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget productName() {
+    final TransactionCategory category =
+        TransactionDataHolder.transactionCategory ??
+            TransactionCategory.Product;
     return Column(
       children: [
         InfoText(
-          text: " Product Name",
+          text:
+              " ${category.name}${category == TransactionCategory.Virtual ? "-Service" : ""} Name",
           color: ColorManager.primary,
           fontWeight: FontWeightManager.medium,
         ),
@@ -161,10 +177,14 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget productCondition() {
+    final TransactionCategory category =
+        TransactionDataHolder.transactionCategory ??
+            TransactionCategory.Product;
     return Column(
       children: [
         InfoText(
-          text: " Product Condition",
+          text:
+              " ${category.name}${category == TransactionCategory.Virtual ? "-Service" : ""} Condition",
           color: ColorManager.primary,
           fontWeight: FontWeightManager.medium,
         ),
@@ -354,11 +374,15 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget button() {
+    final TransactionCategory category =
+        TransactionDataHolder.transactionCategory ??
+            TransactionCategory.Product;
     return CustomButton.medium(
-      label: "Add Product",
+      label:
+          "Add ${category.name}${category == TransactionCategory.Virtual ? "-Service" : ""}",
       usesProvider: true,
       buttonKey: buttonKey,
-      color: ColorManager.accentColor,
+      color: ColorManager.themeColor,
       onPressed: () async {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 2));

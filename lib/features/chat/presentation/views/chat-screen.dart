@@ -371,7 +371,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.pushNamed(
-                        context, Routes.createTransactionRoute),
+                        context, Routes.createTransactionRoute,
+                        arguments: group),
                     highlightColor: ColorManager.accentColor.withOpacity(0.15),
                     style: const ButtonStyle(
                         splashFactory: InkRipple.splashFactory),

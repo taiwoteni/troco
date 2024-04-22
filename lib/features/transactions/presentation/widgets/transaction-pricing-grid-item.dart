@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -8,12 +7,14 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 
 import '../../domain/entities/product.dart';
 
 class TransactionPricingGridWidget extends ConsumerWidget {
   final Product product;
-  const TransactionPricingGridWidget({super.key, required this.product});
+  final void Function()? onDelete;
+  const TransactionPricingGridWidget({super.key, required this.product, this.onDelete});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -68,7 +69,10 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                       child: IconButton(
                         padding: EdgeInsets.zero,
                         iconSize: 0,
-                        onPressed: () => log("message"),
+                        onPressed: (){
+                          onDelete?.call();
+                          TransactionDataHolder.products!.remove(product);
+                        },
                         icon: const Icon(
                           size: IconSizeManager.regular * 1.3,
                           CupertinoIcons.xmark_circle_fill,

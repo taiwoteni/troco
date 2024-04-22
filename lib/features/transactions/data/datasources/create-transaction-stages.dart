@@ -39,7 +39,6 @@ List<Widget> createTransactionStages({required WidgetRef ref}) {
         indicatorStyle: IndicatorStyle(
             width: IconSizeManager.medium * 1.1,
             height: IconSizeManager.medium * 1.1,
-            
             iconStyle: IconStyle(
                 fontSize: IconSizeManager.regular * 0.9,
                 iconData:
@@ -144,7 +143,7 @@ List<Widget> createTransactionStages({required WidgetRef ref}) {
         endChild: Padding(
           padding: const EdgeInsets.only(top: SizeManager.medium),
           child: Text(
-            "Preview",
+            "Finalize",
             style: textStyle,
           ),
         ),

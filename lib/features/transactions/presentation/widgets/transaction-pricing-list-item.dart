@@ -179,7 +179,6 @@ class _TransactionPricingListWidgetState
             color: ColorManager.accentColor,
           ),
         ),
-        regularSpacer(),
         smallSpacer(),
       ],
     );

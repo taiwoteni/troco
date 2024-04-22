@@ -11,6 +11,7 @@ import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
 import '../../../../core/basecomponents/button/presentation/widget/button.dart';
+import '../../utils/enums.dart';
 import '../providers/create-transaction-provider.dart';
 
 class TransactionDescriptionPage extends ConsumerStatefulWidget {
@@ -113,10 +114,14 @@ class _TransactionDescriptionPageState
   }
 
   Widget aboutProducts() {
+    final TransactionCategory category =
+        TransactionDataHolder.transactionCategory ??
+            TransactionCategory.Product;
     return Column(
       children: [
         InfoText(
-          text: " About Product(s)",
+          text:
+              " About ${category.name}${category == TransactionCategory.Virtual ? "-Service" : ""}(s)",
           color: ColorManager.secondary,
           fontWeight: FontWeightManager.medium,
         ),
@@ -343,5 +348,4 @@ class _TransactionDescriptionPageState
       },
     );
   }
-
 }
