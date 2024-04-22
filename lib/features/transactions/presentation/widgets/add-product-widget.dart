@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
-
+import 'package:uuid/data.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +16,7 @@ import 'package:troco/features/transactions/presentation/providers/product-image
 import 'package:troco/features/transactions/presentation/views/view-added-products-screen.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
@@ -368,6 +369,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
           formKey.currentState!.save();
           final productImages = List.from(ref.read(productImagesProvider));
           Map<dynamic, dynamic> productJson = {
+            "productId": const Uuid().v4(),
             "productName": name,
             "productPrice": double.parse(price),
             "productCondition": selectedProductCondition!.name.toLowerCase(),

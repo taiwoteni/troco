@@ -3,9 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
@@ -13,9 +11,9 @@ import 'package:troco/core/basecomponents/others/spacer.dart';
 
 import '../../domain/entities/product.dart';
 
-class TransactionPricingWidget extends ConsumerWidget {
+class TransactionPricingGridWidget extends ConsumerWidget {
   final Product product;
-  const TransactionPricingWidget({super.key, required this.product});
+  const TransactionPricingGridWidget({super.key, required this.product});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,6 +32,7 @@ class TransactionPricingWidget extends ConsumerWidget {
                 blurRadius: 5)
           ]),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
               child: ClipRRect(
@@ -99,8 +98,7 @@ class TransactionPricingWidget extends ConsumerWidget {
           )),
           smallSpacer(),
           Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: SizeManager.regular * 1.1),
+            padding: const EdgeInsets.only(left: SizeManager.regular * 1.1),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -110,9 +108,9 @@ class TransactionPricingWidget extends ConsumerWidget {
                   textAlign: TextAlign.left,
                   style: TextStyle(
                       fontFamily: 'quicksand',
-                      color: ColorManager.secondary,
+                      color: ColorManager.primary,
                       fontWeight: FontWeightManager.semibold,
-                      fontSize: FontSizeManager.regular * 0.85),
+                      fontSize: FontSizeManager.regular * 0.8),
                 ),
                 regularSpacer(),
                 Row(
@@ -121,7 +119,7 @@ class TransactionPricingWidget extends ConsumerWidget {
                     Icon(
                       Icons.sell_rounded,
                       color: ColorManager.accentColor,
-                      size: IconSizeManager.small,
+                      size: IconSizeManager.small * 0.8,
                     ),
                     smallSpacer(),
                     Text(
@@ -131,7 +129,7 @@ class TransactionPricingWidget extends ConsumerWidget {
                           fontFamily: 'quicksand',
                           color: ColorManager.accentColor,
                           fontWeight: FontWeightManager.bold,
-                          fontSize: FontSizeManager.regular),
+                          fontSize: FontSizeManager.regular * 0.9),
                     ),
                   ],
                 ),

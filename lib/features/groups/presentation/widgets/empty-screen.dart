@@ -10,8 +10,9 @@ import '../../../../core/app/font-manager.dart';
 class EmptyScreen extends StatefulWidget {
   final String? lottie, label;
   final bool expanded;
+  final double scale;
   const EmptyScreen(
-      {super.key, this.expanded = false, this.lottie, this.label});
+      {super.key, this.scale = 1.0, this.expanded = false, this.lottie, this.label});
 
   @override
   State<EmptyScreen> createState() => _EmptyScreenState();
@@ -33,9 +34,12 @@ class _EmptyScreenState extends State<EmptyScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        LottieWidget(
-            lottieRes: widget.lottie ?? AssetManager.lottieFile(name: 'empty'),
-            size: const Size.square(IconSizeManager.extralarge * 2)),
+        Transform.scale(
+          scale: widget.scale,
+          child: LottieWidget(
+              lottieRes: widget.lottie ?? AssetManager.lottieFile(name: 'empty'),
+              size: const Size.square(IconSizeManager.extralarge * 2)),
+        ),
         mediumSpacer(),
         Text(
           widget.label ?? "Nothing Here",

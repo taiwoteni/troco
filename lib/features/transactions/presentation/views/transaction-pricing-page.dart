@@ -1,14 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
+import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/presentation/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/presentation/widgets/add-product-widget.dart';
-import 'package:troco/features/transactions/presentation/widgets/transaction-pricing-item.dart';
+import 'package:troco/features/transactions/presentation/widgets/transaction-pricing-grid-item.dart';
+import 'package:troco/features/transactions/presentation/widgets/transaction-pricing-list-item.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
@@ -29,6 +32,7 @@ class _TransactionPricingPageState
   final formKey = GlobalKey<FormState>();
   final buttonKey = UniqueKey();
   final List<Product> products = [];
+  bool listAsGrid = false;
 
   @override
   Widget build(BuildContext context) {
@@ -61,24 +65,70 @@ class _TransactionPricingPageState
   }
 
   Widget title() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        "Pricing",
-        style: TextStyle(
-            fontFamily: "Quicksand",
-            fontSize: FontSizeManager.large,
-            color: ColorManager.primary,
-            fontWeight: FontWeightManager.bold),
-      ),
+    return Row(
+      children: [
+        Text(
+          "Pricing",
+          style: TextStyle(
+              fontFamily: "Quicksand",
+              fontSize: FontSizeManager.large,
+              color: ColorManager.primary,
+              fontWeight: FontWeightManager.bold),
+        ),
+        const Spacer(),
+        ...[
+          IconButton.filled(
+              onPressed: () => setState(() => listAsGrid = true),
+              style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(listAsGrid
+                      ? ColorManager.accentColor.withOpacity(0.3)
+                      : ColorManager.secondary.withOpacity(0.1))),
+              icon: SvgIcon(
+                svgRes: AssetManager.svgFile(name: 'grid'),
+                color: listAsGrid
+                    ? ColorManager.accentColor
+                    : ColorManager.secondary,
+                size: const Size.square(IconSizeManager.regular),
+              )),
+          regularSpacer(),
+          IconButton.filled(
+              onPressed: () => setState(() => listAsGrid = false),
+              style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(!listAsGrid
+                      ? ColorManager.accentColor.withOpacity(0.3)
+                      : ColorManager.secondary.withOpacity(0.1))),
+              icon: SvgIcon(
+                svgRes: AssetManager.svgFile(name: 'list'),
+                color: !listAsGrid
+                    ? ColorManager.accentColor
+                    : ColorManager.secondary,
+                size: const Size.square(IconSizeManager.regular),
+              ))
+        ]
+      ],
     );
   }
 
   Widget pricingGrid() {
     if (products.isEmpty) {
-      return const EmptyScreen(
-        label: "No products to price",
+      return EmptyScreen(
+        label: "\n\nAdd a product.",
+        scale: 1.8,
+        lottie: AssetManager.lottieFile(name: "add-product"),
         expanded: true,
+      );
+    }
+
+    if (listAsGrid == false) {
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        separatorBuilder: (context, index) =>
+            const Gap(SizeManager.medium * 1.35),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          return TransactionPricingListWidget(product: products[index]);
+        },
       );
     }
 
@@ -88,7 +138,9 @@ class _TransactionPricingPageState
       gridDelegate: gridDelegate(),
       itemCount: products.length,
       itemBuilder: (context, index) {
-        return TransactionPricingWidget(product: products[index],);
+        return TransactionPricingGridWidget(
+          product: products[index],
+        );
       },
     );
   }
@@ -130,6 +182,7 @@ class _TransactionPricingPageState
         mediumSpacer(),
         title(),
         mediumSpacer(),
+        regularSpacer(),
         pricingGrid(),
         if (products.isNotEmpty) ...[mediumSpacer(), smallSpacer()]
       ],
@@ -140,9 +193,8 @@ class _TransactionPricingPageState
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.only(
-          bottom: SizeManager.regular,
-          left: SizeManager.medium,
-          right: SizeManager.medium),
+        bottom: SizeManager.regular,
+      ),
       child: Row(
         children: [
           Expanded(child: button()),
@@ -158,14 +210,14 @@ class _TransactionPricingPageState
                 builder: (context) {
                   return const AddProductWidget();
                 },
-              ).then((product){
+              ).then((product) {
                 ref.read(productImagesProvider.notifier).state.clear();
-                if(product != null){
+                if (product != null) {
                   setState(() {
                     products.add(product);
                   });
+                  TransactionDataHolder.products = products;
                 }
-
               });
             },
             elevation: 0,

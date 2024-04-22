@@ -1,8 +1,9 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
+// ignore_for_file: depend_on_referenced_packages, library_prefixes
 
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 import "package:path/path.dart" as Path;
+import 'package:troco/core/api/data/model/multi-part-model.dart';
 
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 
@@ -90,15 +91,16 @@ class AuthenticationRepo {
 
   static Future<HttpResponseModel> uploadProfilePhoto(
       {required final String userId, required final String profilePath}) async {
-    // Convert string to UTF-8 bytes
-    List<int> utf8Bytes = utf8.encode(profilePath);
-    // Encode bytes to Base64
-    String base64String = base64.encode(utf8Bytes);
+
     final result = await ApiInterface.multipartPatchRequest(
+        multiparts: [
+          MultiPartModel.file(
+              file: MultipartFile.fromPath("userImage", profilePath,
+                  filename: Path.basename(profilePath),
+                  contentType: MediaType('image', 'jpeg')))
+        ],
         url: 'updateUserImage/$userId',
-        data: profilePath,
-        headers: {"Content-Type": "multipart/form-data"},
-        fileName: Path.basename(profilePath));
+        headers: {"Content-Type": "multipart/form-data"});
     return result;
   }
 
