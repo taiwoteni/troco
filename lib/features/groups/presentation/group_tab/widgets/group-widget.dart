@@ -53,8 +53,8 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
         (chat) => chat.senderId == ClientProvider.readOnlyClient!.userId);
     var listOfMessagesFromLastTimeYouSent = clientIsLastSender
         ? chats
-        : chats.sublist(indexOfLastTimeClientChatted);
-    int unseenMessages = clientIsLastSender
+        : chats.isEmpty?[]: chats.sublist(indexOfLastTimeClientChatted);
+    int unseenMessages = clientIsLastSender || chats.isEmpty
         ? 0
         : listOfMessagesFromLastTimeYouSent
                 .where((chat) => !chat.read)

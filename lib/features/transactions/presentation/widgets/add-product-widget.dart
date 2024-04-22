@@ -1,7 +1,19 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:io';
+
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:troco/core/app/file-manager.dart';
+import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/texts/inputs/dropdown-input-field.dart';
+import 'package:troco/features/transactions/domain/entities/product.dart';
+import 'package:troco/features/transactions/presentation/providers/product-images-provider.dart';
+import 'package:troco/features/transactions/presentation/views/view-added-products-screen.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 
@@ -26,8 +38,12 @@ class AddProductWidget extends ConsumerStatefulWidget {
 class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   ProductCondition? selectedProductCondition;
   int quantity = 1;
+  bool productImageError = false;
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
+  String price = "";
+  String name = "";
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -129,10 +145,13 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             if (value.trim().isEmpty) {
               return "* enter a product name";
             }
-            if (value.trim().length <= 8) {
-              return "* should be at least 8 digits";
+            if (value.trim().length <= 4) {
+              return "* should be at least 4 digits";
             }
             return null;
+          },
+          onSaved: (value) {
+            setState(() => name = value?.toString() ?? "");
           },
           prefixIcon: null,
         ),
@@ -198,6 +217,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
               return "* enter valid price";
             }
             return null;
+          },
+          onSaved: (value) {
+            setState(() => price = value?.toString() ?? "");
           },
           prefixIcon: null,
         ),
@@ -288,6 +310,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget uploadPicture() {
+    final List<String> productImages = ref.watch(productImagesProvider);
     return Column(
       children: [
         InfoText(
@@ -298,9 +321,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
         regularSpacer(),
         InfoText(
           text: " (Each image should be clear and have a max size of 2MB)",
-          color: ColorManager.secondary,
+          color: productImageError ? Colors.redAccent : ColorManager.secondary,
           fontSize: FontSizeManager.regular * 0.8,
-          fontWeight: FontWeightManager.light,
+          fontWeight: FontWeightManager.regular,
         ),
         largeSpacer(),
         SizedBox(
@@ -310,48 +333,18 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 60,
-                height: 60,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: ColorManager.accentColor.withOpacity(0.2),
-                ),
-                child: Icon(
-                  CupertinoIcons.add,
-                  color: ColorManager.accentColor,
-                  size: IconSizeManager.medium,
-                ),
-              ),
-              Container(
-                width: 60,
-                height: 60,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: ColorManager.accentColor.withOpacity(0.2),
-                ),
-                child: Icon(
-                  CupertinoIcons.add,
-                  color: ColorManager.accentColor,
-                  size: IconSizeManager.medium,
-                ),
-              ),
-              Container(
-                width: 60,
-                height: 60,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: ColorManager.accentColor.withOpacity(0.2),
-                ),
-                child: Icon(
-                  CupertinoIcons.add,
-                  color: ColorManager.accentColor,
-                  size: IconSizeManager.medium,
-                ),
-              )
+              if (productImages.isEmpty)
+                pickProductImage()
+              else
+                productImage(position: 0),
+              if (productImages.isEmpty || productImages.length < 2)
+                pickProductImage()
+              else
+                productImage(position: 1),
+              if (productImages.isEmpty || productImages.length < 3)
+                pickProductImage()
+              else
+                productImage(position: 2),
             ],
           ),
         ),
@@ -368,15 +361,81 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
       onPressed: () async {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 2));
-        if (formKey.currentState!.validate()) {
+        setState(() {
+          productImageError = ref.read(productImagesProvider).isEmpty;
+        });
+        if (formKey.currentState!.validate() && !productImageError) {
           formKey.currentState!.save();
-          // TransactionDataHolder.inspectionPeriod = inspectByDay;
-          // TransactionDataHolder.inspectionDays = inspectionDay;
-          // ref.read(createTransactionPageController.notifier).state.nextPage(
-          //     duration: const Duration(milliseconds: 450), curve: Curves.ease);
-          // ref.read(createTransactionProgressProvider.notifier).state = 2;
+          final productImages = List.from(ref.read(productImagesProvider));
+          Map<dynamic, dynamic> productJson = {
+            "productName": name,
+            "productPrice": double.parse(price),
+            "productCondition": selectedProductCondition!.name.toLowerCase(),
+            "quantity": quantity,
+            "productImages": productImages,
+          };
+          Navigator.pop(context, Product.fromJson(json: productJson));
         }
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      },
+    );
+  }
+
+  Widget pickProductImage() {
+    return InkWell(
+      onTap: () async {
+        final pickedFile =
+            await FileManager.pickImage(imageSource: ImageSource.gallery);
+        if (pickedFile != null) {
+          setState(() {
+            ref.read(productImagesProvider.notifier).state.add(pickedFile.path);
+          });
+        }
+      },
+      highlightColor: ColorManager.accentColor.withOpacity(0.3),
+      customBorder: const CircleBorder(),
+      child: Container(
+        width: 70,
+        height: 70,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: ColorManager.accentColor.withOpacity(0.2),
+        ),
+        child: Icon(
+          CupertinoIcons.add,
+          color: ColorManager.accentColor,
+          size: IconSizeManager.medium,
+        ),
+      ),
+    );
+  }
+
+  Widget productImage({required final int position}) {
+    return OpenContainer(
+      closedElevation: 0,
+      transitionDuration: const Duration(milliseconds: 500),
+      middleColor: ColorManager.background,
+      onClosed: (data) {
+        SystemChrome.setSystemUIOverlayStyle(
+            ThemeManager.getTransactionScreenUiOverlayStyle());
+      },
+      closedBuilder: (context, action) {
+        return Container(
+          width: 70,
+          height: 80,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(SizeManager.regular * 1.3),
+              image: DecorationImage(
+                  image: FileImage(
+                      File(ref.watch(productImagesProvider)[position])),
+                  fit: BoxFit.cover)),
+        );
+      },
+      openBuilder: (context, action) {
+        return ViewAddedProductsScreen(
+          currentPosition: position,
+        );
       },
     );
   }

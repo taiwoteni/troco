@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +11,11 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 
+import '../../domain/entities/product.dart';
+
 class TransactionPricingWidget extends ConsumerWidget {
-  const TransactionPricingWidget({super.key});
+  final Product product;
+  const TransactionPricingWidget({super.key, required this.product});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,10 +46,7 @@ class TransactionPricingWidget extends ConsumerWidget {
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(SizeManager.regular)),
                   image: DecorationImage(
-                      image: AssetImage(
-                        AssetManager.imageFile(
-                            name: "nike-shoe-sample", ext: Extension.jpeg),
-                      ),
+                      image: FileImage(File(product.productImages[0])),
                       fit: BoxFit.cover)),
               child: Container(
                 padding:
@@ -76,14 +77,14 @@ class TransactionPricingWidget extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const Align(
+                    Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(4),
                         child: Text(
-                          "5 Qty",
+                          "${product.quantity} Qty",
                           textAlign: TextAlign.left,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontFamily: 'quicksand',
                               color: Colors.white,
                               fontWeight: FontWeightManager.bold,
@@ -105,7 +106,7 @@ class TransactionPricingWidget extends ConsumerWidget {
               children: [
                 smallSpacer(),
                 Text(
-                  "Nike Airforce Wind Supreme.",
+                  product.productName,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                       fontFamily: 'quicksand',
@@ -124,7 +125,7 @@ class TransactionPricingWidget extends ConsumerWidget {
                     ),
                     smallSpacer(),
                     Text(
-                      "20,000",
+                      product.productPriceString,
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           fontFamily: 'quicksand',

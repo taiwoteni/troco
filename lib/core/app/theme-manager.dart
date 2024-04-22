@@ -71,6 +71,13 @@ class ThemeManager {
         systemNavigationBarColor: ColorManager.background,
         systemNavigationBarIconBrightness: Brightness.dark);
   }
+  static SystemUiOverlayStyle getViewProductScreenUiOverlayStyle() {
+    return SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.black,
+        systemNavigationBarIconBrightness: Brightness.light);
+  }
 
   static SystemUiOverlayStyle getHomeUiOverlayStyle() {
     return SystemUiOverlayStyle.light.copyWith(

@@ -34,6 +34,7 @@ class Routes {
   static const authSuccessRoute = "/auth-success";
   static const homeRoute = "/home";
   static const notificationRoute = "/notification";
+
   /// [chatRoute] is the route for the chat screen.
   /// Must pass the recipient client as an argument!
   static const chatRoute = "/chat";
