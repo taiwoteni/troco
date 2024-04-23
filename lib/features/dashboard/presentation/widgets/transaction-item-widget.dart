@@ -1,5 +1,4 @@
-import 'dart:ui';
-import 'package:intl/intl.dart';
+
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -21,15 +20,8 @@ class TransactionItemWidget extends StatelessWidget {
     Color color = transaction.transactionPurpose == TransactionPurpose.Buying
         ? Colors.deepOrange
         : ColorManager.accentColor;
-    final NumberFormat formatter = NumberFormat.currency(
-      locale: 'en_NG',
-      // symbol: '₦',
-      symbol: '',
-      decimalDigits: 0,
-    );
 
-    final String formattedNumber =
-        formatter.format(transaction.transactionAmount);
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(SizeManager.medium),
       child: Container(
@@ -82,7 +74,9 @@ class TransactionItemWidget extends StatelessWidget {
               size: const Size.square(IconSizeManager.regular),
             ),
           ),
-          trailing: Text("$formattedNumber NG"),
+          trailing: Text(transaction.transactionAmount.toInt() == 0
+              ? "FREE"
+              : "${transaction.transactionAmountString} NG"),
           leadingAndTrailingTextStyle: TextStyle(
               color:
                   transaction.transactionPurpose == TransactionPurpose.Selling

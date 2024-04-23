@@ -51,23 +51,32 @@ class Transaction extends Equatable {
 
   TransactionStatus get transactionStatus =>
       TransactionConverter.convertToStatus(
-          status: _json["transaction status"] ?? "pending");
+          status: _json["transaction status"] ?? _json["status"] ?? "pending");
 
   /// We have to think these through as a transaction can have many products.
   List<Product> get products {
-    return (_json["products"] ?? _json["pricing"] as List)
+    return ((_json["products"] ?? _json["pricing"]) as List)
         .map((e) => Product.fromJson(json: e))
         .toList();
   }
 
-  String get transactionAmountString => NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "").format(transactionAmount);
+  String get transactionAmountString =>
+      NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
+          .format(transactionAmount);
 
   double get transactionAmount {
     if (_json["transaction amount"] != null) {
       return _json["transaction amount"];
     }
 
-    int amount = products.map((e) => e.quantity * e.productPrice).toList().fold(0, (previousValue, currentPrice) =>previousValue+currentPrice);
+    if (products.isEmpty) {
+      return 0;
+    }
+
+    int amount = products
+        .map((e) => e.quantity * e.productPrice)
+        .toList()
+        .fold(0, (previousValue, currentPrice) => previousValue + currentPrice);
     return amount.toDouble();
   }
 

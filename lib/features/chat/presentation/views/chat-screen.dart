@@ -56,7 +56,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     group = widget.group;
     chats = AppStorage.getChats(groupId: group.groupId);
-    log(group.toJson().toString());
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(

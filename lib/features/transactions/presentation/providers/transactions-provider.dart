@@ -12,11 +12,13 @@ import '../../domain/entities/transaction.dart';
 
 /// This is a state Provider, responsible for returning and refreshing
 /// the Transaction Repo class. Inorder reload to be on the safer side when looking for changes.
-final transacionRepoProvider = StateProvider<TransactionRepo>((ref) => TransactionRepo());
+final transacionRepoProvider =
+    StateProvider<TransactionRepo>((ref) => TransactionRepo());
 
 /// The Future provider that helps us to perform
 /// The Future task of getting Groups.
-final transactionFutureProvider = FutureProvider<List<dynamic>>((ref) async {
+final transactionFutureProvider =
+    FutureProvider<List<Map<dynamic, dynamic>>>((ref) async {
   final transactionRepo = ref.watch(transacionRepoProvider);
   final data = await transactionRepo.getTransactions();
   // log(data.toString());
@@ -33,41 +35,44 @@ final transactionsStreamProvider = StreamProvider<List<Transaction>>(
 
     final periodic = Timer.periodic(const Duration(seconds: 3), (_) {
       ref.watch(transactionFutureProvider).when(
-        data: (transactionsJson) {
-          /// First of all we have to compare and contrast between the
-        /// values gotten from the APIs and saved on the Device Cache.
-        ///
-        /// We compare and contrast the transaction itself.
-        ///
-        /// We extract the Lists. Lists starting with underscores ('_') are from the Cache.
-        /// While the others are from the [transactionsJson];
+          data: (transactionsJson) {
+            log("loaded transactions");
 
-        /// We get the transactionsList from the Cache
-        final _transacionsList =
-            AppStorage.getTransactions().map((e) => e.toJson()).toList();
+            /// First of all we have to compare and contrast between the
+            /// values gotten from the APIs and saved on the Device Cache.
+            ///
+            /// We compare and contrast the transaction itself.
+            ///
+            /// We extract the Lists. Lists starting with underscores ('_') are from the Cache.
+            /// While the others are from the [transactionsJson];
 
-        /// Then We contrast.
-        final bool transactionsDifferent =
-            json.encode(_transacionsList) != json.encode(transactionsJson);
+            /// We get the transactionsList from the Cache
+            final _transacionsList =
+                AppStorage.getTransactions().map((e) => e.toJson()).toList();
 
-        final valuesAreDifferent =
-            transactionsDifferent;
+            /// Then We contrast.
+            final bool transactionsDifferent =
+                json.encode(_transacionsList) != json.encode(transactionsJson);
 
-        List<Transaction> transactionsList =
-            transactionsJson.map((e) => Transaction.fromJson(json: e)).toList();
+            final valuesAreDifferent = transactionsDifferent;
 
+            List<Transaction> transactionsList = transactionsJson
+                .map((e) => Transaction.fromJson(json: e))
+                .toList();
 
-        if (valuesAreDifferent) {
-          log('transactions have changed');
+            if (valuesAreDifferent) {
+              log('transactions have changed');
 
-          AppStorage.saveTransactions(transactions: transactionsList);
-          streamController.sink.add(transactionsList);
-        }
-        ref.watch(transacionRepoProvider.notifier).state = TransactionRepo();
-        // log("==================");
-        },
-        error: (error, stackTrace) => log("Error occured when getting transactions from api $error"),
-        loading: () => null);
+              AppStorage.saveTransactions(transactions: transactionsList);
+              streamController.sink.add(transactionsList);
+            }
+            ref.watch(transacionRepoProvider.notifier).state =
+                TransactionRepo();
+            // log("==================");
+          },
+          error: (error, stackTrace) =>
+              log("Error occured when getting transactions from api $error"),
+          loading: () => null);
     });
 
     ref.onDispose(() {

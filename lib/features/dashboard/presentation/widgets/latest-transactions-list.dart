@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/dashboard/data/datasources/latest-transactions.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/transactions/presentation/providers/transactions-provider.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/basecomponents/others/spacer.dart';
+import '../../../transactions/domain/entities/transaction.dart';
 import 'transaction-item-widget.dart';
 
 class LatestTransactionsList extends ConsumerStatefulWidget {
@@ -16,16 +18,18 @@ class LatestTransactionsList extends ConsumerStatefulWidget {
       _LatestTransactionsListState();
 }
 
-class _LatestTransactionsListState
-    extends ConsumerState<LatestTransactionsList> {
+class _LatestTransactionsListState extends ConsumerState<LatestTransactionsList> {
   final defaultStyle = TextStyle(
       fontFamily: 'quicksand',
       color: ColorManager.primary,
       fontSize: FontSizeManager.large * 0.85,
       fontWeight: FontWeightManager.bold);
 
+  List<Transaction> transactions = AppStorage.getTransactions();
+
   @override
   Widget build(BuildContext context) {
+    listenToTransactionsChanges();
     return SizedBox(
       width: double.maxFinite,
       child: Column(
@@ -57,22 +61,33 @@ class _LatestTransactionsListState
           ),
           regularSpacer(),
           ListView.separated(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: SizeManager.regular),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemBuilder: (context, index) => TransactionItemWidget(
-                    transaction: latestTransactions()[index],
+            key: const Key("latestTransactionsList"),
+            padding: const EdgeInsets.symmetric(horizontal: SizeManager.regular),
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemBuilder: (context, index) => TransactionItemWidget(
+                key: ObjectKey(transactions[index]),
+                    transaction: transactions[index],
                   ),
               separatorBuilder: (context, index) => Divider(
                     thickness: 0.8,
                     color: ColorManager.secondary.withOpacity(0.08),
                   ),
-              itemCount: latestTransactions().length >= 3
+              itemCount: transactions.length >= 3
                   ? 3
-                  : latestTransactions().length)
+                  : transactions.length)
         ],
       ),
     );
+  }
+
+  Future<void> listenToTransactionsChanges() async {
+    ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        setState(() {
+          transactions = value;
+        });
+      });
+    });
   }
 }
