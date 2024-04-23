@@ -8,7 +8,7 @@ class TransactionDataHolder {
   static int? inspectionDays;
   static bool? inspectionPeriod;
   static List<Product>? products;
-  static DateTime? dateOfWork;
+  static int? day,month,year;
 
   static void clear() {
     transactionCategory = null;
@@ -17,6 +17,9 @@ class TransactionDataHolder {
     inspectionDays = null;
     inspectionPeriod = null;
     products = null;
-    dateOfWork = null;
+    day = null;
+    month = null;
+    year = null;
+
   }
 }

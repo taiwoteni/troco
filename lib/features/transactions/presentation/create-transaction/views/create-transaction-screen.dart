@@ -34,6 +34,11 @@ class _CreateTransactionScreenState extends ConsumerState<CreateTransactionScree
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding:

@@ -399,7 +399,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             "quantity": quantity,
             "productImages": productImages,
           };
-          Navigator.pop(context, Product.fromJson(json: productJson));
+          if (mounted) {
+            Navigator.pop(context, Product.fromJson(json: productJson));
+          }
         }
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },

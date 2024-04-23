@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -20,7 +19,6 @@ class TransactionItemWidget extends StatelessWidget {
     Color color = transaction.transactionPurpose == TransactionPurpose.Buying
         ? Colors.deepOrange
         : ColorManager.accentColor;
-
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(SizeManager.medium),
@@ -47,7 +45,7 @@ class TransactionItemWidget extends StatelessWidget {
           ),
           horizontalTitleGap: SizeManager.medium * 0.5,
           title: Text(
-            transaction.transactionDetail,
+            transaction.transactionName,
             overflow: TextOverflow.ellipsis,
           ),
           titleTextStyle: TextStyle(

@@ -11,6 +11,7 @@ import '../../../../groups/domain/entities/group.dart';
 import '../../../data/models/create-transaction-data-holder.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../domain/repository/transaction-repo.dart';
+import '../providers/create-transaction-provider.dart';
 
 class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
   const CreateTransactonProgressScreen({super.key});
@@ -120,11 +121,15 @@ class _CreateTransactonProgressScreenState
           TransactionDataHolder.inspectionPeriod! ? "day" : "hour",
       "transaction category":
           TransactionDataHolder.transactionCategory!.name.toLowerCase(),
-      "DateOfWork": "2024-04-24T10:00:00Z",
     });
+    final day = TransactionDataHolder.day!.toString().padLeft(2, '0');
+    final month = TransactionDataHolder.month!.toString().padLeft(2, '0');
+    final year = TransactionDataHolder.year!.toString();
 
     final response = await TransactionRepo.createTransaction(
-        groupId: group.groupId, transaction: transaction);
+        dateOfWork: "$year-$month-${day}T00:00:00Z",
+        groupId: group.groupId,
+        transaction: transaction);
 
     if (response.error) {
       log(response.body);
@@ -134,7 +139,10 @@ class _CreateTransactonProgressScreenState
         value = 1 / (products.length + 1);
       });
       final transactionJson = response.messageBody!["data"];
-      addProducts(transaction: Transaction.fromJson(json: transactionJson));
+      await addProducts(
+          transaction: Transaction.fromJson(json: transactionJson));
+      ref.read(createTransactionProgressProvider.notifier).state = 0;
+      TransactionDataHolder.clear();
     }
   }
 

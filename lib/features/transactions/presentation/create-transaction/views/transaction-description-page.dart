@@ -28,6 +28,12 @@ class _TransactionDescriptionPageState
       TextEditingController(text: TransactionDataHolder.transactionName ?? "");
   final TextEditingController aboutProductController =
       TextEditingController(text: TransactionDataHolder.aboutProduct ?? "");
+  final TextEditingController dayController = TextEditingController(
+      text: TransactionDataHolder.day?.toString().padLeft(2, "0") ?? "");
+  final TextEditingController monthController = TextEditingController(
+      text: TransactionDataHolder.month?.toString().padLeft(2, "0") ?? "");
+  final TextEditingController yearController =
+      TextEditingController(text: TransactionDataHolder.year?.toString() ?? "");
   final formKey = GlobalKey<FormState>();
   bool inspectByDay = TransactionDataHolder.inspectionPeriod ?? true;
   int inspectionDay = TransactionDataHolder.inspectionDays ?? 1;
@@ -58,6 +64,9 @@ class _TransactionDescriptionPageState
               mediumSpacer(),
               regularSpacer(),
               inspectionPeriod(),
+              mediumSpacer(),
+              regularSpacer(),
+              dateOfWork(),
               extraLargeSpacer(),
               button(),
               largeSpacer(),
@@ -323,6 +332,102 @@ class _TransactionDescriptionPageState
               )
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget dateOfWork() {
+    return Column(
+      children: [
+        InfoText(
+          text: "Sales Day",
+          color: ColorManager.secondary,
+          fontWeight: FontWeightManager.medium,
+        ),
+        regularSpacer(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: InputFormField(
+                controller: dayController,
+                label: 'dd',
+                inputType: TextInputType.datetime,
+                validator: (value) {
+                  if (value == null) {
+                    return "* day";
+                  }
+                  if (value.trim().isEmpty) {
+                    return "* day";
+                  }
+                  if (!RegExp(r'^[0-9]+$').hasMatch(value.trim()) ||
+                      int.parse(value.trim()) > 31) {
+                    return "* day";
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  TransactionDataHolder.day = int.parse(value!.trim());
+                },
+                prefixIcon: null,
+              ),
+            ),
+            regularSpacer(),
+            Expanded(
+              child: InputFormField(
+                label: 'MM',
+                controller: monthController,
+                inputType: TextInputType.datetime,
+                validator: (value) {
+                  if (value == null) {
+                    return "* month";
+                  }
+                  if (value.trim().isEmpty) {
+                    return "* month";
+                  }
+                  if (!RegExp(r'^[0-9]+$').hasMatch(value.trim()) ||
+                      int.parse(value.trim()) > 12) {
+                    return "* month";
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  TransactionDataHolder.month = int.parse(value!.trim());
+                },
+                prefixIcon: null,
+              ),
+            ),
+            regularSpacer(),
+            Expanded(
+              child: InputFormField(
+                label: 'yyyy',
+                controller: yearController,
+                inputType: TextInputType.datetime,
+                validator: (value) {
+                  if (value == null) {
+                    return "* year";
+                  }
+                  if (value.trim().isEmpty) {
+                    return "* year";
+                  }
+                  if (!RegExp(r'^[0-9]+$').hasMatch(value.trim()) ||
+                      value.trim().length != 4) {
+                    return "* year";
+                  }
+                  if (RegExp(r'^[0-9]+$').hasMatch(value.trim()) &&
+                      int.parse(value.trim()) < DateTime.now().year) {
+                    return "* year";
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  TransactionDataHolder.year = int.parse(value!.trim());
+                },
+                prefixIcon: null,
+              ),
+            ),
+          ],
         ),
       ],
     );

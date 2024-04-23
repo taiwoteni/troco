@@ -19,6 +19,7 @@ class TransactionRepo {
   static Future<HttpResponseModel> createTransaction({
     required final String groupId,
     required final Transaction transaction,
+    required final String dateOfWork
   }) async {
     final result = await ApiInterface.postRequest(
         url:
@@ -32,7 +33,7 @@ class TransactionRepo {
           "location": ClientProvider.readOnlyClient!.address,
           "inspectionPeriod": transaction.inspectionPeriod.name.toLowerCase(),
           "inspectionDays": transaction.inspectionDays,
-          "DateOfWork": transaction.transactionTime.toIso8601String(),
+          "DateOfWork": dateOfWork,
         });
 
     return result;
