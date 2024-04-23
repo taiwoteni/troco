@@ -2,7 +2,6 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'package:troco/core/api/data/model/multi-part-model.dart';
 import 'package:troco/core/api/data/model/response-model.dart';
 
@@ -32,15 +31,17 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
-        returnHeaderType: response.headers["content-type"]!,
+          returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
       log(e.toString());
-            return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
-
+      return HttpResponseModel(
+          error: true,
+          body: json.encode({"message": "An unknown exception occured"}),
+          code: 500);
     }
   }
 
@@ -65,14 +66,17 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
-        returnHeaderType: response.headers["content-type"]!,
+          returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
       log("error caught in runtimer exception $e");
-      return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
+      return HttpResponseModel(
+          error: true,
+          body: json.encode({"message": "An unknown exception occured"}),
+          code: 500);
     }
   }
 
@@ -97,15 +101,17 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
-        returnHeaderType: response.headers["content-type"]!,
+          returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
       log(e.toString());
-            return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
-
+      return HttpResponseModel(
+          error: true,
+          body: json.encode({"message": "An unknown exception occured"}),
+          code: 500);
     }
   }
 
@@ -117,7 +123,7 @@ class ApiInterface {
     try {
       final Uri uri = Uri.parse("$_serverUrl/$url");
       final request = http.MultipartRequest('PATCH', uri);
-      request.headers['Content-Type'] = 'application/json';
+      request.headers['Content-Type'] = 'multipart/form-data';
       request.headers['accept'] = '*/*';
       if (headers != null) {
         headers.forEach((key, value) {
@@ -125,75 +131,76 @@ class ApiInterface {
         });
       }
 
-      for(final model in multiparts){
-        if(model.isFileType){
-          request.files.add(
-            await model.file!
-          );
-        }
-        else{
+      for (final model in multiparts) {
+        if (model.isFileType) {
+          request.files.add(await model.file!);
+        } else {
           request.fields[model.field!] = model.value!;
         }
       }
-      
 
-      final response = await http.Client().send(request);
+      final response = await request.send();
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
-        returnHeaderType: response.headers["content-type"]!,
+          returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
       log(e.toString());
-           return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
-
+      return HttpResponseModel(
+          error: true,
+          body: json.encode({"message": "An unknown exception occured"}),
+          code: 500);
     }
   }
 
   static Future<HttpResponseModel> multipartPostRequest(
-    {required final String url,
+      {required final String url,
       final int okCode = 200,
       required final List<MultiPartModel> multiparts,
       Map<String, String>? headers}) async {
     try {
       final Uri uri = Uri.parse("$_serverUrl/$url");
       final request = http.MultipartRequest('POST', uri);
-      request.headers['Content-Type'] = 'application/json';
-      request.headers['accept'] = '*/*';
+      request.headers['Content-Type'] = 'multipart/form-data';
+
+      // request.headers['accept'] = '*/*';
       if (headers != null) {
         headers.forEach((key, value) {
           request.headers[key] = value;
         });
       }
 
-      for(final model in multiparts){
-        if(model.isFileType){
-          request.files.add(
-            await model.file!
-          );
-        }
-        else{
+      for (int i = 0; i < multiparts.length; i++) {
+        final model = multiparts[i];
+        if (!model.isFileType) {
           request.fields[model.field!] = model.value!;
+          // log("added field : ${model.field!}: ${model.value}");
+        } else {
+          request.files.add(model.file!);
+          // log("added file: ${model.file!.field}: ${model.file!.filename}");
         }
       }
-      
-      
-      final response = await http.Client().send(request);
+
+      log(request.fields.toString());
+
+      final response = await request.send();
+      log("sent");
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
-        returnHeaderType: response.headers["content-type"]!,
+          // returnHeaderType: response.headers["content-type"],
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
-      log(e.toString());
-           return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
-
+      // log(e.toString());
+      return HttpResponseModel(
+          error: true, body: json.encode({"message": "$e"}), code: 500);
     }
   }
 
@@ -215,14 +222,16 @@ class ApiInterface {
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(
-        returnHeaderType: response.headers["content-type"]!,
+          returnHeaderType: response.headers["content-type"]!,
           error: response.statusCode != okCode,
           body: body,
           code: response.statusCode);
       return responseModel;
     } catch (e) {
-           return HttpResponseModel(error: true, body: json.encode({"message": "An unknown exception occured"}), code: 500);
-
+      return HttpResponseModel(
+          error: true,
+          body: json.encode({"message": "An unknown exception occured"}),
+          code: 500);
     }
   }
 
@@ -230,7 +239,8 @@ class ApiInterface {
     required final String query,
     final Map<String, String>? headers,
   }) async {
-    final result = await postRequest(url: 'searchUser',data: {"query":query}, headers: headers);
+    final result = await postRequest(
+        url: 'searchUser', data: {"query": query}, headers: headers);
     return result;
   }
 

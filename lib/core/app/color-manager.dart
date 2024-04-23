@@ -8,7 +8,7 @@ class ColorManager {
   static Color background = Colors.white;
   static Color primary = Colors.black;
   static Color secondary = Colors.black54;
-  static Color tertiary = const Color.fromARGB(243, 250, 247, 247);
+  static Color tertiary = const Color(0xF3FAF7F7);
 
   static final List<ColorSwatch> colors = [
     Colors.blue,

@@ -108,10 +108,10 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
       onPressed: () async {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 3));
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
         if (mounted) {
           Navigator.pop(context, true);
         }
-        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },
     );
   }

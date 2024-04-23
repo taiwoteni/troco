@@ -91,14 +91,12 @@ class AuthenticationRepo {
 
   static Future<HttpResponseModel> uploadProfilePhoto(
       {required final String userId, required final String profilePath}) async {
+    final file = await MultipartFile.fromPath("userImage", profilePath,
+        filename: Path.basename(profilePath),
+        contentType: MediaType('image', 'jpeg'));
 
     final result = await ApiInterface.multipartPatchRequest(
-        multiparts: [
-          MultiPartModel.file(
-              file: MultipartFile.fromPath("userImage", profilePath,
-                  filename: Path.basename(profilePath),
-                  contentType: MediaType('image', 'jpeg')))
-        ],
+        multiparts: [MultiPartModel.file(file: file)],
         url: 'updateUserImage/$userId',
         headers: {"Content-Type": "multipart/form-data"});
     return result;

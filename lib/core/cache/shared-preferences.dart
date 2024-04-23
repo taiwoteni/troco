@@ -5,6 +5,7 @@ import 'dart:developer';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
+import 'package:troco/features/transactions/domain/entities/transaction.dart';
 
 import '../../features/chat/domain/entities/chat.dart';
 import '../../features/groups/domain/entities/group.dart';
@@ -17,6 +18,7 @@ class AppStorage {
   
   static const String USER_STORAGE_KEY = "userData";
   static const String GROUP_STORAGE_KEY = "groups";
+  static const String TRANSACTION_STORAGE_KEY = "transactions";
   static String CHAT_STORAGE_KEY ({required String groupId})=> "groups.$groupId.chats";
   static String GROUP_INVITATION_STORAGE_KEY ({required String groupId})=> "groups.$groupId.invitations";
 
@@ -96,4 +98,24 @@ class AppStorage {
     _pref!.setString(GROUP_INVITATION_STORAGE_KEY(groupId: groupId), json.encode(clients.map((e) => e.toJson()).toList()));
 
   }
+
+
+
+  static List<Transaction> getTransactions() {
+    final jsonString = _pref!.getString(TRANSACTION_STORAGE_KEY);
+    if (jsonString == null) {
+      log("No Transactions stored.");
+      return [];
+    }
+    final List<dynamic> transactionsJson = json.decode(jsonString);
+    return transactionsJson.map((e) => Transaction.fromJson(json: e)).toList();
+  }
+
+  static Future<void> saveTransactions({required final List<Transaction> transactions}) async {
+    List<Map<dynamic, dynamic>> transactionsJson =
+        transactions.map((e) => e.toJson()).toList();
+
+    _pref!.setString(TRANSACTION_STORAGE_KEY, json.encode(transactionsJson));
+  }
+
 }

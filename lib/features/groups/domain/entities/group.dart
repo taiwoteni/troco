@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:troco/features/groups/data/models/group-member-model.dart';
 
 class Group extends Equatable {
   final Map<dynamic, dynamic> _json;
@@ -13,12 +12,12 @@ class Group extends Equatable {
   bool get usingDelivery => _json["useDelivery"];
 
 
-  List<dynamic> get members {
+  List<String> get members {
     // List<dynamic> membersJson = json.decode(_json["members"] ?? "[]");
     // return membersJson
     //     .map((json) => GroupMemberModel.fromJson(json: json))
     //     .toList();
-    return _json["members"];
+    return (_json["members"] as List).map((e) => e.toString(),).toList();
   }
 
   String get groupId => _json["id"] ?? _json["_id"];

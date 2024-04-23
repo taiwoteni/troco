@@ -101,7 +101,7 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
                 : SizeManager.large),
         child: Material(
           child: InkWell(
-            onTap: enabled ? widget.onPressed : null,
+            onTap: enabled && !loading? widget.onPressed : null,
             splashColor: ColorManager.accentColor,
             splashFactory: InkRipple.splashFactory,
             child: Container(

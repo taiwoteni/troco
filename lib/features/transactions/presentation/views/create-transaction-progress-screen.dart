@@ -10,7 +10,7 @@ import 'package:troco/core/basecomponents/others/spacer.dart';
 import '../../../groups/domain/entities/group.dart';
 import '../../data/models/create-transaction-data-holder.dart';
 import '../../domain/entities/transaction.dart';
-import '../../domain/repository/create-transaction-repo.dart';
+import '../../domain/repository/transaction-repo.dart';
 
 class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
   const CreateTransactonProgressScreen({super.key});
@@ -20,15 +20,15 @@ class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
       _CreateTransactonProgressScreenState();
 }
 
-class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransactonProgressScreen> {
-
+class _CreateTransactonProgressScreenState
+    extends ConsumerState<CreateTransactonProgressScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp)async{
+    WidgetsFlutterBinding.ensureInitialized()
+        .addPostFrameCallback((timeStamp) async {
       createTransaction();
     });
-    
   }
 
   double value = 0.0;
@@ -39,8 +39,7 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
   Widget build(BuildContext context) {
     return PopScope(
       canPop: canPop,
-      onPopInvoked: (didPop) {
-      },
+      onPopInvoked: (didPop) {},
       child: Scaffold(
           backgroundColor: ColorManager.background,
           body: Container(
@@ -93,20 +92,22 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
     final products = TransactionDataHolder.products!;
     String text = "Creating Transaction...";
 
-    if(value >= 1/(products.length+1)){
-      final productNo = (value * (products.length + 1)).toInt();
+    if (value >= 1 / (products.length + 1)) {
+      final productNo = (value * (products.length + 1)).toInt() - 1;
       text = "Adding Product $productNo...";
     }
-    return Text(
-      text,
-      style: TextStyle(
-          fontFamily: 'quicksand',
-          fontSize: FontSizeManager.regular * 0.85,
-          color: ColorManager.secondary,
-          fontWeight: FontWeightManager.medium),
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Text(
+        text,
+        style: TextStyle(
+            fontFamily: 'quicksand',
+            fontSize: FontSizeManager.regular * 0.85,
+            color: !error ? ColorManager.secondary : Colors.redAccent,
+            fontWeight: FontWeightManager.medium),
+      ),
     );
   }
-
 
   Future<void> createTransaction() async {
     final group = ModalRoute.of(context)!.settings.arguments! as Group;
@@ -122,7 +123,7 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
       "DateOfWork": "2024-04-24T10:00:00Z",
     });
 
-    final response = await CreateTransactionRepo.createTransaction(
+    final response = await TransactionRepo.createTransaction(
         groupId: group.groupId, transaction: transaction);
 
     if (response.error) {
@@ -130,7 +131,7 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
     } else {
       final products = TransactionDataHolder.products!;
       setState(() {
-        value = 1/(products.length+1);
+        value = 1 / (products.length + 1);
       });
       final transactionJson = response.messageBody!["data"];
       addProducts(transaction: Transaction.fromJson(json: transactionJson));
@@ -142,10 +143,10 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
     final products = TransactionDataHolder.products!;
     for (final product in products) {
       setState(() {
-          value += 1/(products.length+1);
-          canPop = value==1;
-        });
-      final response = await CreateTransactionRepo.createPricing(
+        value += 1 / (products.length + 1);
+        canPop = value == 1;
+      });
+      final response = await TransactionRepo.createPricing(
           transactionId: transaction.transactionId,
           groupId: group.groupId,
           buyerId: group.members
@@ -159,10 +160,8 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
       } else {
         if (products.last == product) {
           log("Success: ${response.messageBody!.toString()}");
-
         }
       }
     }
   }
-
 }

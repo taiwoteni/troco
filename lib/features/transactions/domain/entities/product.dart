@@ -11,17 +11,17 @@ class Product extends Equatable {
   String get productId => _json["productId"] ?? _json["_id"];
   String get productName => _json["productName"];
   String get productPriceString =>
-      NumberFormat.currency(locale: "en_NG", decimalDigits: 0, symbol: "")
-          .format(productPrice.toString());
-  double get productPrice =>
-      double.parse((double.parse((_json["productPrice"] ?? _json["price"]).toString())).toStringAsFixed(2));
+      NumberFormat.currency(locale: "en_NG", decimalDigits: 2, symbol: "")
+          .format(productPrice);
+  int get productPrice => _json["productPrice"] ?? _json["price"];
   ProductCondition get productCondition =>
       ProductConditionConverter.convertToEnum(
           condition: _json["productCondition"]);
   int get quantity => _json["quantity"];
-  List<String> get productImages => (_json["productImages"] as List).map((e) => e.toString()).toList();
+  List<String> get productImages =>
+      (_json["productImages"] as List).map((e) => e.toString()).toList();
 
-  Map<dynamic,dynamic> toJson(){
+  Map<dynamic, dynamic> toJson() {
     return _json;
   }
 

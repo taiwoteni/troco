@@ -394,7 +394,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
           Map<dynamic, dynamic> productJson = {
             "productId": const Uuid().v4(),
             "productName": name,
-            "productPrice": double.parse(price),
+            "productPrice": int.parse(price),
             "productCondition": selectedProductCondition!.name.toLowerCase(),
             "quantity": quantity,
             "productImages": productImages,

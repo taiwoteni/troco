@@ -1,3 +1,5 @@
+import 'package:troco/core/cache/shared-preferences.dart';
+
 import '../../../../core/api/data/model/response-model.dart';
 import '../../../../core/api/data/repositories/api-interface.dart';
 import '../../../auth/presentation/providers/client-provider.dart';
@@ -14,7 +16,7 @@ class ChatRepo {
       return groupChatsList;
     }
     // log(result.body.toString());
-    return [];
+    return AppStorage.getChats(groupId: groupId);
   }
 
   static Future<HttpResponseModel> sendChat({

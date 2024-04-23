@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:troco/core/api/data/repositories/api-interface.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
@@ -45,6 +46,6 @@ class GroupRepo {
       return userGroupsList;
     }
     log(result.body.toString());
-    return [];
+    return AppStorage.getGroups().map((e) => e.toJson()).toList();
   }
 }

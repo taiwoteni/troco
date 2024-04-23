@@ -1,12 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/features/transactions/domain/repository/create-transaction-repo.dart';
 import 'package:troco/features/transactions/presentation/widgets/transaction-pin-widget.dart';
 
 import '../../../../core/app/color-manager.dart';
@@ -15,8 +12,6 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
 import '../../../../core/basecomponents/button/presentation/widget/button.dart';
 import '../../../groups/domain/entities/group.dart';
-import '../../data/models/create-transaction-data-holder.dart';
-import '../../domain/entities/transaction.dart';
 import 'create-transaction-progress-screen.dart';
 
 class TransactionFinalizePage extends ConsumerStatefulWidget {
@@ -125,57 +120,9 @@ class _TransactionPreviewPageState
           context,
           MaterialPageRoute(
             settings:
-                RouteSettings(arguments: ModalRoute.of(context)!.settings),
+                RouteSettings(arguments: ModalRoute.of(context)!.settings.arguments),
             builder: (context) => const CreateTransactonProgressScreen(),
           ));
-    }
-  }
-
-  Future<void> createTransaction() async {
-    final group = ModalRoute.of(context)!.settings.arguments! as Group;
-
-    Transaction transaction = Transaction.fromJson(json: {
-      "transactionName": TransactionDataHolder.transactionName!,
-      "aboutService": TransactionDataHolder.aboutProduct!,
-      "inspectionDays": TransactionDataHolder.inspectionDays!,
-      "inspectionPeriod":
-          TransactionDataHolder.inspectionPeriod! ? "day" : "hour",
-      "transaction category":
-          TransactionDataHolder.transactionCategory!.name.toLowerCase(),
-      "DateOfWork": "2024-04-24T10:00:00Z",
-    });
-
-    final response = await CreateTransactionRepo.createTransaction(
-        groupId: group.groupId, transaction: transaction);
-
-    if (response.error) {
-      log(response.body);
-    } else {
-      final transactionJson = response.messageBody!["data"];
-      addProducts(transaction: Transaction.fromJson(json: transactionJson));
-    }
-  }
-
-  Future<void> addProducts({required final Transaction transaction}) async {
-    final group = ModalRoute.of(context)!.settings.arguments! as Group;
-    final products = TransactionDataHolder.products!;
-    for (final product in products) {
-      final response = await CreateTransactionRepo.createPricing(
-          transactionId: transaction.transactionId,
-          groupId: group.groupId,
-          buyerId: group.members
-              .firstWhere(
-                  (element) => element.toString() != transaction.creator)
-              .toString(),
-          product: product);
-
-      if (response.error) {
-        log("Error:${response.body}");
-      } else {
-        if (products.last == product) {
-          log("Success: ${response.messageBody!.toString()}");
-        }
-      }
     }
   }
 }

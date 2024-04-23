@@ -12,12 +12,16 @@ import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:troco/core/basecomponents/clippers/bottom-rounded.dart';
 import 'package:troco/features/dashboard/presentation/widgets/latest-transactions-list.dart';
 import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
+import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
+
+import '../../../transactions/domain/entities/transaction.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -32,6 +36,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       color: ColorManager.primary,
       fontSize: FontSizeManager.large * 0.85,
       fontWeight: FontWeightManager.bold);
+  List<Transaction> transactions = AppStorage.getTransactions(); 
 
   @override
   void initState() {
@@ -49,19 +54,36 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: SizedBox(
         width: double.maxFinite,
         height: double.maxFinite,
-        // padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              appBarWidget(),
-              mediumSpacer(),
-              const TransactionOverview(),
-              largeSpacer(),
-              const LatestTransactionsList(),
-              const Gap(SizeManager.bottomBarHeight)
-            ],
-          ),
-        ),
+        child: transactions.isEmpty? emptyBody():body(),
+      ),
+    );
+  }
+
+  Widget emptyBody() {
+    return Column(children: [
+      appBarWidget(),
+      mediumSpacer(),
+      EmptyScreen(
+        lottie: AssetManager.lottieFile(name: "empty-transactions"),
+        scale: 1.5,
+        label: "You do not have any transactions.",
+        expanded: true,
+      ),
+      const Gap(SizeManager.bottomBarHeight)
+    ]);
+  }
+
+  Widget body() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          appBarWidget(),
+          mediumSpacer(),
+          const TransactionOverview(),
+          largeSpacer(),
+          const LatestTransactionsList(),
+          const Gap(SizeManager.bottomBarHeight)
+        ],
       ),
     );
   }
@@ -87,9 +109,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       width: 190,
                       height: 190,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.15)
-                      ),
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.15)),
                     ),
                   ),
                   Column(
@@ -155,7 +176,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         fontFamily: 'Quicksand',
         color: ColorManager.background.withOpacity(0.9),
         height: 1.45,
-        fontSize: FontSizeManager.large*1.05,
+        fontSize: FontSizeManager.large * 1.05,
         fontWeight: FontWeightManager.regular);
     return RichText(
         textAlign: TextAlign.start,
@@ -163,7 +184,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           TextSpan(
               text: "Good $time, \n",
               style: defaultStyle.copyWith(
-                  fontSize: FontSizeManager.medium*1.1)),
+                  fontSize: FontSizeManager.medium * 1.1)),
           TextSpan(
               text: "${ref.watch(ClientProvider.userProvider)!.fullName}.",
               style: defaultStyle.copyWith(

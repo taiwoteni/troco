@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/utils/inspection-period-converter.dart';
@@ -20,7 +21,7 @@ class Transaction extends Equatable {
 
   DateTime get transactionTime =>
       DateTime.parse(_json["transaction time"] ?? _json["DateOfWork"]);
-      
+
   String get transactionId => _json["transaction id"] ?? _json["_id"];
 
   int get inspectionDays => int.parse(_json["inspectionDays"].toString());
@@ -59,7 +60,20 @@ class Transaction extends Equatable {
         .toList();
   }
 
-  double get transactionAmount => _json["transaction amount"];
+  String get transactionAmountString => NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "").format(transactionAmount);
+
+  double get transactionAmount {
+    if (_json["transaction amount"] != null) {
+      return _json["transaction amount"];
+    }
+
+    int amount = products.map((e) => e.quantity * e.productPrice).toList().fold(0, (previousValue, currentPrice) =>previousValue+currentPrice);
+    return amount.toDouble();
+  }
+
+  Map<dynamic, dynamic> toJson() {
+    return _json;
+  }
 
   @override
   List<Object?> get props => [transactionId];
