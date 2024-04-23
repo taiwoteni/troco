@@ -6,13 +6,13 @@ import 'package:troco/core/basecomponents/texts/inputs/text-form-field.dart';
 import 'package:troco/core/basecomponents/texts/outputs/info-text.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 
-import '../../../../core/app/color-manager.dart';
-import '../../../../core/app/font-manager.dart';
-import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
-import '../../../../core/basecomponents/button/presentation/widget/button.dart';
-import '../../utils/enums.dart';
-import '../providers/create-transaction-provider.dart';
+import '../../../../../core/app/color-manager.dart';
+import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
+import '../../../../../core/basecomponents/button/presentation/widget/button.dart';
+import '../../../utils/enums.dart';
+import '../../create-transaction/providers/create-transaction-provider.dart';
 
 class TransactionDescriptionPage extends ConsumerStatefulWidget {
   const TransactionDescriptionPage({super.key});

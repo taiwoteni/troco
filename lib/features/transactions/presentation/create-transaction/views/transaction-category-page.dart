@@ -5,13 +5,13 @@ import 'package:troco/core/basecomponents/button/presentation/provider/button-pr
 import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
-import 'package:troco/features/transactions/presentation/providers/create-transaction-provider.dart';
-import 'package:troco/features/transactions/presentation/widgets/select-transaction-type-widget.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
 
-import '../../../../core/app/color-manager.dart';
-import '../../../../core/app/font-manager.dart';
-import '../../../../core/app/size-manager.dart';
-import '../../utils/enums.dart';
+import '../../../../../core/app/color-manager.dart';
+import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/app/size-manager.dart';
+import '../../../utils/enums.dart';
+import '../widgets/select-transaction-type-widget.dart';
 
 class TransactionTermsPage extends ConsumerStatefulWidget {
   const TransactionTermsPage({super.key});

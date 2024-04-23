@@ -21,7 +21,7 @@ import 'package:troco/core/basecomponents/clippers/bottom-rounded.dart';
 import 'package:troco/features/dashboard/presentation/widgets/latest-transactions-list.dart';
 import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
-import 'package:troco/features/transactions/presentation/providers/transactions-provider.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/transactions-provider.dart';
 
 import '../../../transactions/domain/entities/transaction.dart';
 

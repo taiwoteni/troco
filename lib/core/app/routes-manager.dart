@@ -13,11 +13,11 @@ import 'package:troco/features/auth/presentation/register/views/add-pin-screen.d
 import 'package:troco/features/auth/presentation/register/views/add-profile-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/splash/presentation/splash-screen.dart';
-import 'package:troco/features/transactions/presentation/views/create-transaction-screen.dart';
 
 import '../../features/auth/presentation/login/views/login-screen.dart';
 import '../../features/auth/presentation/register/views/register-screen.dart';
 import '../../features/auth/presentation/success/views/auth-success-screen.dart';
+import '../../features/transactions/presentation/create-transaction/views/create-transaction-screen.dart';
 
 class Routes {
   static const splashRoute = "/";

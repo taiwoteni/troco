@@ -11,22 +11,22 @@ import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/texts/inputs/dropdown-input-field.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
-import 'package:troco/features/transactions/presentation/providers/product-images-provider.dart';
-import 'package:troco/features/transactions/presentation/views/view-added-products-screen.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../core/app/color-manager.dart';
-import '../../../../core/app/font-manager.dart';
-import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
-import '../../../../core/basecomponents/button/presentation/widget/button.dart';
-import '../../../../core/basecomponents/others/drag-handle.dart';
-import '../../../../core/basecomponents/others/spacer.dart';
-import '../../../../core/basecomponents/texts/inputs/text-form-field.dart';
-import '../../../../core/basecomponents/texts/outputs/info-text.dart';
-import '../../data/models/create-transaction-data-holder.dart';
+import '../../../../../core/app/color-manager.dart';
+import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
+import '../../../../../core/basecomponents/button/presentation/widget/button.dart';
+import '../../../../../core/basecomponents/others/drag-handle.dart';
+import '../../../../../core/basecomponents/others/spacer.dart';
+import '../../../../../core/basecomponents/texts/inputs/text-form-field.dart';
+import '../../../../../core/basecomponents/texts/outputs/info-text.dart';
+import '../../../data/models/create-transaction-data-holder.dart';
+import '../views/view-added-products-screen.dart';
 
 class AddProductWidget extends ConsumerStatefulWidget {
   const AddProductWidget({super.key});

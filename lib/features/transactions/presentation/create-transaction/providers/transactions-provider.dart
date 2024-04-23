@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 
-import '../../domain/entities/transaction.dart';
+import '../../../domain/entities/transaction.dart';
 
 /// This is a state Provider, responsible for returning and refreshing
 /// the Transaction Repo class. Inorder reload to be on the safer side when looking for changes.

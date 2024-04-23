@@ -9,7 +9,7 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 
-import '../../domain/entities/product.dart';
+import '../../../domain/entities/product.dart';
 
 class TransactionPricingGridWidget extends ConsumerWidget {
   final Product product;

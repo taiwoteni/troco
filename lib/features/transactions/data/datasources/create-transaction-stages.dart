@@ -4,7 +4,7 @@ import 'package:timeline_tile/timeline_tile.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/features/transactions/presentation/providers/create-transaction-provider.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
 
 List<Widget> createTransactionStages({required WidgetRef ref}) {
   int currentIndex = ref.watch(createTransactionProgressProvider);

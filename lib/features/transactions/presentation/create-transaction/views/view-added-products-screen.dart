@@ -6,11 +6,11 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/features/transactions/presentation/providers/product-images-provider.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 
-import '../../../../core/app/asset-manager.dart';
-import '../../../../core/app/font-manager.dart';
-import '../../../../core/basecomponents/images/svg.dart';
+import '../../../../../core/app/asset-manager.dart';
+import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/basecomponents/images/svg.dart';
 
 class ViewAddedProductsScreen extends ConsumerStatefulWidget {
   final int? currentPosition;

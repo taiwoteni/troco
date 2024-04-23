@@ -7,17 +7,16 @@ import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
-import 'package:troco/features/transactions/presentation/widgets/add-product-widget.dart';
-import 'package:troco/features/transactions/presentation/widgets/transaction-pricing-grid-item.dart';
-import 'package:troco/features/transactions/presentation/widgets/transaction-pricing-list-item.dart';
-
-import '../../../../core/app/font-manager.dart';
-import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
-import '../../../../core/basecomponents/button/presentation/widget/button.dart';
-import '../../domain/entities/product.dart';
-import '../../utils/enums.dart';
-import '../providers/create-transaction-provider.dart';
+import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
+import '../../../../../core/basecomponents/button/presentation/widget/button.dart';
+import '../../../domain/entities/product.dart';
+import '../../../utils/enums.dart';
+import '../../create-transaction/providers/create-transaction-provider.dart';
+import '../widgets/add-product-widget.dart';
+import '../widgets/transaction-pricing-grid-item.dart';
+import '../widgets/transaction-pricing-list-item.dart';
 
 class TransactionPricingPage extends ConsumerStatefulWidget {
   const TransactionPricingPage({super.key});

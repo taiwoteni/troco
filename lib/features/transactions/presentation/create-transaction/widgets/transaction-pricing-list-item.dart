@@ -7,11 +7,11 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 
-import '../../../../core/app/asset-manager.dart';
-import '../../../../core/app/color-manager.dart';
-import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/images/svg.dart';
-import '../../domain/entities/product.dart';
+import '../../../../../core/app/asset-manager.dart';
+import '../../../../../core/app/color-manager.dart';
+import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/basecomponents/images/svg.dart';
+import '../../../domain/entities/product.dart';
 
 class TransactionPricingListWidget extends ConsumerStatefulWidget {
   final Product product;

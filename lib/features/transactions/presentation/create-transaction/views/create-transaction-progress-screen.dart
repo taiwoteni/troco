@@ -7,10 +7,10 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 
-import '../../../groups/domain/entities/group.dart';
-import '../../data/models/create-transaction-data-holder.dart';
-import '../../domain/entities/transaction.dart';
-import '../../domain/repository/transaction-repo.dart';
+import '../../../../groups/domain/entities/group.dart';
+import '../../../data/models/create-transaction-data-holder.dart';
+import '../../../domain/entities/transaction.dart';
+import '../../../domain/repository/transaction-repo.dart';
 
 class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
   const CreateTransactonProgressScreen({super.key});
