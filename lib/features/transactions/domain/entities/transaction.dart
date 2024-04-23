@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
+import 'package:troco/features/transactions/utils/inspection-period-converter.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
 import '../../utils/enums.dart';
@@ -11,32 +13,52 @@ class Transaction extends Equatable {
   const Transaction.fromJson({required final Map<dynamic, dynamic> json})
       : _json = json;
 
-  String get transactionDetail => _json["transaction detail"];
-  String get transactionName => _json["transaction name"];
+  String get transactionDetail =>
+      _json["transaction detail"] ?? _json["aboutService"];
+  String get transactionName =>
+      _json["transaction name"] ?? _json["transactionName"];
 
-  DateTime get transactionTime => DateTime.parse(_json["transaction time"]);
-  String get transactionId => _json["transaction id"];
-  TransactionCategory get transactionCategory =>
-      TransactionCategoryConverter.convertToEnum(
-          category: _json["transaction category"]);
-  TransactionPurpose get transactionPurpose =>
-      TransactionPurposeConverter.convertToEnum(
-          purpose: _json["transaction purpose"]);
-  TransactionStatus get transactionStatus =>
-      TransactionConverter.convertToStatus(status: _json["transaction status"]);
+  DateTime get transactionTime =>
+      DateTime.parse(_json["transaction time"] ?? _json["DateOfWork"]);
+      
+  String get transactionId => _json["transaction id"] ?? _json["_id"];
 
-  /// We have to think these through as a transaction can have many products.
-  List<Product> get products{
-    return (_json["products"] as List).map((e) => Product.fromJson(json: e)).toList();
+  int get inspectionDays => int.parse(_json["inspectionDays"].toString());
+
+  String get creator => _json["creator"];
+
+  InspectionPeriod get inspectionPeriod =>
+      InspectionPeriodConverter.converToEnum(
+          inspectionPeriod: _json["inspectionPeriod"]);
+
+  String get inspectionString {
+    return "$inspectionDays ${inspectionPeriod.name}${inspectionDays == 1 ? "" : "s"}";
   }
 
-  // String get productCategory => _json["product category"];
-  // String get productName => _json["product name"];
-  // String get productDetail => _json["product detail"];
-  // ProductCondition get productCondition =>
-  //     // TransactionConverter.convertToCondition(
-  //     //     condition: _json["product condition"])
-  //     ProductCondition.New;
+  TransactionCategory get transactionCategory =>
+      TransactionCategoryConverter.convertToEnum(
+          category:
+              _json["transaction category"] ?? _json["typeOftransaction"]);
+
+  TransactionPurpose get transactionPurpose =>
+      TransactionPurposeConverter.convertToEnum(
+          purpose: _json["transaction purpose"] ??
+              (_json["creator"].toString().toLowerCase() !=
+                      ClientProvider.readOnlyClient!.userId
+                  ? "buying"
+                  : "selling"));
+
+  TransactionStatus get transactionStatus =>
+      TransactionConverter.convertToStatus(
+          status: _json["transaction status"] ?? "pending");
+
+  /// We have to think these through as a transaction can have many products.
+  List<Product> get products {
+    return (_json["products"] ?? _json["pricing"] as List)
+        .map((e) => Product.fromJson(json: e))
+        .toList();
+  }
+
   double get transactionAmount => _json["transaction amount"];
 
   @override

@@ -8,13 +8,13 @@ class Product extends Equatable {
   const Product.fromJson({required final Map<dynamic, dynamic> json})
       : _json = json;
 
-  String get productId => _json["productId"];
+  String get productId => _json["productId"] ?? _json["_id"];
   String get productName => _json["productName"];
   String get productPriceString =>
       NumberFormat.currency(locale: "en_NG", decimalDigits: 0, symbol: "")
-          .format(_json["productPrice"]);
+          .format(productPrice.toString());
   double get productPrice =>
-      double.parse((_json["productPrice"] as double).toStringAsFixed(2));
+      double.parse((double.parse((_json["productPrice"] ?? _json["price"]).toString())).toStringAsFixed(2));
   ProductCondition get productCondition =>
       ProductConditionConverter.convertToEnum(
           condition: _json["productCondition"]);

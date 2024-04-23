@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
-import 'package:uuid/data.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +49,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      ref.read(productImagesProvider.notifier).state.clear();
+      ref.watch(productImagesProvider.notifier).state.clear();
     });
   }
 

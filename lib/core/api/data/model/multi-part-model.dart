@@ -5,7 +5,7 @@ import 'package:http/src/multipart_file.dart';
 class MultiPartModel{
   final bool isFileType;
   final String? field;
-  final String? value;
+  final dynamic value;
   final Future<MultipartFile>? file;
 
   const MultiPartModel.file({required this.file}):isFileType=true,field =null, value=null;

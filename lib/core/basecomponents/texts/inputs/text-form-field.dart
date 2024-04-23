@@ -45,6 +45,7 @@ class InputFormField extends ConsumerStatefulWidget {
 class _InputFormFieldState extends ConsumerState<InputFormField> {
   bool obscure = false;
   late TextEditingController controller;
+
   @override
   void initState() {
     obscure = widget.isPassword ? true : false;
@@ -75,8 +76,9 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
               });
             }
           },
-          minLines: widget.lines,
-          maxLines: widget.lines == 1 ? 1 : widget.lines,
+          // minLines: widget.lines,
+          minLines: widget.lines == 1 ? 1 : widget.lines,
+          maxLines: widget.lines == 1 ? 1 : null,
           obscureText: obscure,
           autocorrect: !widget.isPassword,
           enableSuggestions: !widget.isPassword,

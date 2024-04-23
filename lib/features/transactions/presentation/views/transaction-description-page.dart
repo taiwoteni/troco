@@ -249,7 +249,7 @@ class _TransactionDescriptionPageState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InfoText(
-          text: " Transaction Period",
+          text: " Inspection Period",
           color: ColorManager.secondary,
           fontWeight: FontWeightManager.medium,
         ),
