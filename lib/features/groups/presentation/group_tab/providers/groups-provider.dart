@@ -9,6 +9,8 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 
+import '../../../../chat/domain/entities/chat.dart';
+
 /// This is a state Provider, responsible for returning and refreshing
 /// the Group Repo class. Inorder reload to be on the safer side when looking for changes.
 final groupRepoProvider = StateProvider<GroupRepo>((ref) => GroupRepo());
@@ -84,6 +86,11 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
           // log("Groups Newly Saved to Cache ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
           // log("Are the groups now in sync ? ${groupsList.map((e) => e.groupName).toList() == AppStorage.getGroups().map((e) => e.groupName).toList()}");
           AppStorage.saveGroups(groups: groupsList);
+          for (final group in groupsList){
+            final groupJson = group.toJson();
+            final chats = (groupJson["messages"] as List).map((e) => Chat.fromJson(json: e)).toList();
+            AppStorage.saveChats(chats: chats, groupId: group.groupId);
+          }
           streamController.sink.add(groupsList);
         }
         ref.watch(groupRepoProvider.notifier).state = GroupRepo();

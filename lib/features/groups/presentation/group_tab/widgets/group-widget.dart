@@ -189,9 +189,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
     final bool isYesterday = DateTime.now().day - 1 == time.day && !isSameDay;
 
     if (isSameDay) {
-      return isSameTime
-          ? "now"
-          : "${time.hour + 1}:${time.minute.toString().padLeft(2, "0")}";
+      return isSameTime ? "now" : DateFormat.jm().format(time);
     } else {
       if (isYesterday) {
         return "yesterday";

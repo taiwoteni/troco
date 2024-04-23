@@ -30,6 +30,8 @@ class _LatestTransactionsListState extends ConsumerState<LatestTransactionsList>
   @override
   Widget build(BuildContext context) {
     listenToTransactionsChanges();
+    transactions.sort((a, b) => (1.compareTo(0)),);
+    
     return SizedBox(
       width: double.maxFinite,
       child: Column(

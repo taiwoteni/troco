@@ -9,6 +9,7 @@ import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
+import '../../../../chat/domain/entities/chat.dart';
 import '../../widgets/empty-screen.dart';
 import '../widgets/group-widget.dart';
 import '../providers/groups-provider.dart';
@@ -25,8 +26,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
   @override
   Widget build(BuildContext context) {
     // final asyncConfig = ref.watch(groupsStreamProvider);
-    return ref.watch(groupsStreamProvider).when(
-      data: (data) {
+    return ref.watch(groupsStreamProvider).when(data: (data) {
       log("rebuilt data: ${data.map((e) => e.groupName).toList()}");
       data.sort(
         (a, b) => b.createdTime.compareTo(a.createdTime),
@@ -67,6 +67,25 @@ class GroupList extends StatefulWidget {
 class _GroupListState extends State<GroupList> {
   @override
   Widget build(BuildContext context) {
+    final groups = widget.groups;
+
+    groups.sort((groupA, groupB) {
+      List<Chat> chatsA = (groupA.toJson()["messages"] as List)
+          .map((e) => Chat.fromJson(json: e))
+          .toList();
+      List<Chat> chatsB = (groupB.toJson()["messages"] as List)
+          .map((e) => Chat.fromJson(json: e))
+          .toList();
+
+      bool chatsGroupAEmpty = chatsA.isEmpty;
+      bool chatsGroupBEmpty = chatsB.isEmpty;
+
+      DateTime timeA = chatsGroupAEmpty ? groupA.createdTime : chatsA.last.time;
+      DateTime timeB = chatsGroupBEmpty ? groupB.createdTime : chatsB.last.time;
+
+      return timeB.compareTo(timeA);
+    });
+
     return widget.groups.isEmpty
         ? const EmptyScreen(
             label: "No Business Groups.\nCreate a Business Group",

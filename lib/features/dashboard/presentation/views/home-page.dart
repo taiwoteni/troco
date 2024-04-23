@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
+import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/images/profile-icon.dart';
@@ -145,10 +146,18 @@ class _HomePageState extends ConsumerState<HomePage> {
                               fit: BoxFit.cover,
                             ),
                             const Spacer(),
-                            Icon(
-                              Icons.notifications_rounded,
-                              color: ColorManager.primaryDark,
-                              size: IconSizeManager.medium * 0.9,
+                            GestureDetector(
+                              onTap: () async {
+                                await Navigator.pushNamed(
+                                    context, Routes.notificationRoute);
+                                SystemChrome.setSystemUIOverlayStyle(
+                                    ThemeManager.getHomeUiOverlayStyle());
+                              },
+                              child: Icon(
+                                Icons.notifications_rounded,
+                                color: ColorManager.primaryDark,
+                                size: IconSizeManager.medium * 0.9,
+                              ),
                             ),
                             mediumSpacer(),
                             regularSpacer(),

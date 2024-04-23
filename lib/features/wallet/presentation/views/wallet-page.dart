@@ -196,8 +196,8 @@ class _WalletPageState extends ConsumerState<WalletPage>
             height: double.maxFinite,
             decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [
-                  (ColorManager.accentColor).withOpacity(0.2),
-                  (ColorManager.accentColor).withOpacity(0.3)
+                  (ColorManager.accentColor).withOpacity(0.12),
+                  (ColorManager.accentColor).withOpacity(0.25)
                 ], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 borderRadius: BorderRadius.circular(SizeManager.small * 1.1)),
             child: Column(
@@ -206,9 +206,9 @@ class _WalletPageState extends ConsumerState<WalletPage>
                 SvgIcon(
                   svgRes: item.svgRes,
                   color: ColorManager.accentColor,
-                  size: const Size.square(IconSizeManager.regular * 1.15),
+                  size: const Size.square(IconSizeManager.medium * 0.9),
                 ),
-                regularSpacer(),
+                smallSpacer(),
                 Text(
                   item.label,
                   style: TextStyle(

@@ -6,6 +6,7 @@ import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password-otp.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password.dart';
 import 'package:troco/features/home/presentation/views/home-screen.dart';
+import 'package:troco/features/notifications/presentation/views/notification-screen.dart';
 import 'package:troco/features/onboarding/presentation/views/onboarding-sceen.dart';
 import 'package:troco/features/auth/presentation/otp/views/otp-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/add-pin-screen.dart';
@@ -109,7 +110,7 @@ class RouteGenerator {
       case Routes.notificationRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context) => const HomeScreen(),
+          builder: (context) => const NotificationScreen(),
         );
       case Routes.chatRoute:
         return MaterialPageRoute(
@@ -123,7 +124,7 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context){
-            final group = routeSettings.arguments as Group;
+            // final group = routeSettings.arguments as Group;
             return const CreateTransactionScreen();
           },
         );
