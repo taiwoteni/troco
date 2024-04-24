@@ -5,7 +5,12 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/core/basecomponents/others/drag-handle.dart';
+import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/rounded-tab-indicator.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/tab-item.dart';
 
 class ViewTransactionScreen extends ConsumerStatefulWidget {
   final Transaction transaction;
@@ -24,6 +29,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
       body: Column(
         children: [
           appBar(),
+          body(),
         ],
       ),
       extendBody: true,
@@ -87,9 +93,29 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   }
 
   Widget body() {
-    return const Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: FontSizeManager.medium, vertical: SizeManager.regular));
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: FontSizeManager.medium, vertical: SizeManager.regular),
+      child: Column(
+        children: [
+          regularSpacer(),
+          const DragHandle(scale: 0.8),
+          regularSpacer(),
+          const Row(
+            children: [
+              CustomTabWidget(
+                  isTransation: true,
+                  isFirst: true,
+                  description: "Overview..."),
+              CustomTabWidget(
+                  isTransation: false, description: "Delivering..."),
+            ],
+          ),
+          smallSpacer(),
+          RoundedTabIndicator(firstSelected: ref.watch(tabIndexProvider) == 0),
+        ],
+      ),
+    );
   }
 
   Widget productName() {
