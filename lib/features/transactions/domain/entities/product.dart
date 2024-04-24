@@ -18,6 +18,7 @@ class Product extends Equatable {
       ProductConditionConverter.convertToEnum(
           condition: _json["productCondition"]);
   int get quantity => _json["quantity"];
+  String get prodcutImage => _json["pricingImage"];
   List<String> get productImages =>
       (_json["productImages"] as List).map((e) => e.toString()).toList();
 

@@ -9,6 +9,7 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 
 import '../../features/chat/domain/entities/chat.dart';
 import '../../features/groups/domain/entities/group.dart';
+import '../../features/notifications/domain/entities/notification.dart';
 
 class AppStorage {
   static SharedPreferences? _pref;
@@ -18,6 +19,7 @@ class AppStorage {
   
   static const String USER_STORAGE_KEY = "userData";
   static const String GROUP_STORAGE_KEY = "groups";
+  static const String NOTIFICATION_STORAGE_KEY = "notifications";
   static const String TRANSACTION_STORAGE_KEY = "transactions";
   static String CHAT_STORAGE_KEY ({required String groupId})=> "groups.$groupId.chats";
   static String GROUP_INVITATION_STORAGE_KEY ({required String groupId})=> "groups.$groupId.invitations";
@@ -116,6 +118,22 @@ class AppStorage {
         transactions.map((e) => e.toJson()).toList();
 
     _pref!.setString(TRANSACTION_STORAGE_KEY, json.encode(transactionsJson));
+  }
+
+  static List<Notification> getNotifications() {
+    final jsonString = _pref!.getString(NOTIFICATION_STORAGE_KEY);
+    if (jsonString == null) {
+      return [];
+    }
+    final List<dynamic> notificationsJson = json.decode(jsonString);
+    return notificationsJson.map((e) => Notification.fromJson(json: e)).toList();
+  }
+
+  static Future<void> saveNotifications({required final List<Notification> notifications}) async {
+    List<Map<dynamic, dynamic>> notificationsJson =
+        notifications.map((e) => e.toJson()).toList();
+
+    _pref!.setString(NOTIFICATION_STORAGE_KEY, json.encode(notificationsJson));
   }
 
 }
