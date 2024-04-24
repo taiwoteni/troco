@@ -18,7 +18,8 @@ class LatestTransactionsList extends ConsumerStatefulWidget {
       _LatestTransactionsListState();
 }
 
-class _LatestTransactionsListState extends ConsumerState<LatestTransactionsList> {
+class _LatestTransactionsListState
+    extends ConsumerState<LatestTransactionsList> {
   final defaultStyle = TextStyle(
       fontFamily: 'quicksand',
       color: ColorManager.primary,
@@ -30,8 +31,10 @@ class _LatestTransactionsListState extends ConsumerState<LatestTransactionsList>
   @override
   Widget build(BuildContext context) {
     listenToTransactionsChanges();
-    transactions.sort((a, b) => (1.compareTo(0)),);
-    
+    transactions.sort(
+      (a, b) => (1.compareTo(0)),
+    );
+
     return SizedBox(
       width: double.maxFinite,
       child: Column(
@@ -63,21 +66,20 @@ class _LatestTransactionsListState extends ConsumerState<LatestTransactionsList>
           ),
           regularSpacer(),
           ListView.separated(
-            key: const Key("latestTransactionsList"),
-            padding: const EdgeInsets.symmetric(horizontal: SizeManager.regular),
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemBuilder: (context, index) => TransactionItemWidget(
-                key: ObjectKey(transactions[index]),
+              key: const Key("latestTransactionsList"),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: SizeManager.regular),
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemBuilder: (context, index) => TransactionItemWidget(
+                    key: ObjectKey(transactions[index]),
                     transaction: transactions[index],
                   ),
               separatorBuilder: (context, index) => Divider(
                     thickness: 0.8,
                     color: ColorManager.secondary.withOpacity(0.08),
                   ),
-              itemCount: transactions.length >= 3
-                  ? 3
-                  : transactions.length)
+              itemCount: transactions.length >= 3 ? 3 : transactions.length)
         ],
       ),
     );

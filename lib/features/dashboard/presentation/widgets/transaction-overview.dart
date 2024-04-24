@@ -99,120 +99,111 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
           ),
           extraLargeSpacer(),
           Container(
-              width: double.maxFinite,
-              height: 130,
-              padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-              child: BarChart(
-                BarChartData(
-                  barTouchData: BarTouchData(
-                      allowTouchBarBackDraw: true,
-                      touchTooltipData: BarTouchTooltipData(
-                        tooltipRoundedRadius: SizeManager.regular,
-                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                          return BarTooltipItem(
-                              "${rod.toY.toInt()}K",
-                              style.copyWith(
-                                  fontWeight: FontWeightManager.bold,
-                                  fontSize: style.fontSize! * 1.1,
-                                  color: rodIndex == 1
-                                      ? Colors.red
-                                      : ColorManager.accentColor));
-                        },
-                        getTooltipColor: (group) {
-                          return ColorManager.primary;
-                        },
-                      )
+            width: double.maxFinite,
+            height: 130,
+            padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
+            child: BarChart(BarChartData(
+              barTouchData: BarTouchData(
+                  allowTouchBarBackDraw: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipRoundedRadius: SizeManager.regular,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                          "${rod.toY.toInt()}K",
+                          style.copyWith(
+                              fontWeight: FontWeightManager.bold,
+                              fontSize: style.fontSize! * 1.1,
+                              color: rodIndex == 1
+                                  ? Colors.red
+                                  : ColorManager.accentColor));
+                    },
+                    getTooltipColor: (group) {
+                      return ColorManager.primary;
+                    },
+                  )),
+              minY: 0,
+              maxY: maxAmount + 100,
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  axisNameSize: 0,
+                  sideTitles: SideTitles(
+                    interval: maxAmount / 2,
+                    showTitles: true,
+                    reservedSize: 40,
+                    getTitlesWidget: (value, meta) {
+                      final String text = value == maxAmount
+                          ? "${maxAmount.toInt()}K"
+                          : value == maxAmount / 2
+                              ? "${maxAmount ~/ 2}K"
+                              : "";
+                      return Text(
+                        text,
+                        style: style,
+                      );
+                    },
                   ),
-                  minY: 0,
-                  maxY: maxAmount + 100,
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                        axisNameSize: 0,
-                        sideTitles: SideTitles(
-                          interval: maxAmount / 2,
-                          showTitles: true,
-                          reservedSize: 40,
-                          getTitlesWidget: (value, meta) {
-                            final String text = value == maxAmount
-                                ? "${maxAmount.toInt()}K"
-                                : value == maxAmount / 2
-                                    ? "${maxAmount ~/ 2}K"
-                                    : "";
-                            return Text(
-                              text,
-                              style: style,
-                            );
-                          },
-                        ),
-                    ),
-                    bottomTitles: AxisTitles(
-                        axisNameSize: 0,
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          interval: 1,
-                          reservedSize: 20,
-                          getTitlesWidget: (value, meta) {
-                            final String text = "${value.toInt() + 1}";
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.only(top: SizeManager.small),
-                              child: Text(
-                                "$text${text == "1" ? "st" : text == "2" ? "nd" : text == "3" ? "rd" : "th"}",
-                                style: style,
-                              ),
-                            );
-                          },
-                        )
-                      ),
-                    topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
-                  ),
-                  borderData: FlBorderData(
-                      border: Border(
-                          bottom: BorderSide(color: ColorManager.secondary.withOpacity(0.09)),
-                          left: BorderSide(color: ColorManager.secondary.withOpacity(0.09))
-                      )
-                  ),
-                  gridData: FlGridData(
-                      horizontalInterval: maxAmount / 4,
-                      drawHorizontalLine: true,
-                      getDrawingHorizontalLine: (value) {
-                        return FlLine(color: ColorManager.tertiary, strokeWidth: 2);
+                ),
+                bottomTitles: AxisTitles(
+                    axisNameSize: 0,
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 1,
+                      reservedSize: 20,
+                      getTitlesWidget: (value, meta) {
+                        final String text = "${value.toInt() + 1}";
+                        return Padding(
+                          padding:
+                              const EdgeInsets.only(top: SizeManager.small),
+                          child: Text(
+                            "$text${text == "1" ? "st" : text == "2" ? "nd" : text == "3" ? "rd" : "th"}",
+                            style: style,
+                          ),
+                        );
                       },
-                      drawVerticalLine: false),
-                  barGroups: List.generate(
-                      numberOfWeeks,
-                      (index) {
-                        return BarChartGroupData(
-                            x: index, 
-                            barsSpace: 1.5, 
-                            barRods: [
-                              BarChartRodData(
-                                width: 10,
-                                borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(SizeManager.regular),
-                                ),
-                                toY: weeklySales[index],
-                                color: ColorManager.accentColor,
-                              ),
-                              BarChartRodData(
-                                  width: 10,
-                                  borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(SizeManager.regular),
-                                  ),
-                                  toY: weeklyPurchases[index],
-                                  color: Colors.redAccent,
-                              )
-                            ]
-                          );
-                      },
-                  ),
-                )
-                    
+                    )),
+                topTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
-            ),
+              borderData: FlBorderData(
+                  border: Border(
+                      bottom: BorderSide(
+                          color: ColorManager.secondary.withOpacity(0.09)),
+                      left: BorderSide(
+                          color: ColorManager.secondary.withOpacity(0.09)))),
+              gridData: FlGridData(
+                  horizontalInterval: maxAmount / 4,
+                  drawHorizontalLine: true,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(color: ColorManager.tertiary, strokeWidth: 2);
+                  },
+                  drawVerticalLine: false),
+              barGroups: List.generate(
+                numberOfWeeks,
+                (index) {
+                  return BarChartGroupData(x: index, barsSpace: 1.5, barRods: [
+                    BarChartRodData(
+                      width: 10,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(SizeManager.regular),
+                      ),
+                      toY: weeklySales[index],
+                      color: ColorManager.accentColor,
+                    ),
+                    BarChartRodData(
+                      width: 10,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(SizeManager.regular),
+                      ),
+                      toY: weeklyPurchases[index],
+                      color: Colors.redAccent,
+                    )
+                  ]);
+                },
+              ),
+            )),
+          ),
           mediumSpacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -221,51 +212,43 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: SizeManager.small * 1.4, 
+                    width: SizeManager.small * 1.4,
                     height: SizeManager.small * 1.4,
                     decoration: BoxDecoration(
-                      color: ColorManager.accentColor,
-                      shape: BoxShape.circle
-                    ),
+                        color: ColorManager.accentColor,
+                        shape: BoxShape.circle),
                   ),
                   regularSpacer(),
                   Text(
                     "Sales",
                     style: defaultStyle.copyWith(
-                      fontSize: FontSizeManager.small * 0.9,
-                      fontWeight: FontWeightManager.regular,
-                      color: ColorManager.secondary.withOpacity(0.5)
-                    ),
+                        fontSize: FontSizeManager.small * 0.9,
+                        fontWeight: FontWeightManager.regular,
+                        color: ColorManager.secondary.withOpacity(0.5)),
                   )
                 ],
-
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    width: SizeManager.small * 1.4, 
+                    width: SizeManager.small * 1.4,
                     height: SizeManager.small * 1.4,
                     decoration: const BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle
-                    ),
+                        color: Colors.redAccent, shape: BoxShape.circle),
                   ),
                   regularSpacer(),
                   Text(
                     "Purchases",
                     style: defaultStyle.copyWith(
-                      fontSize: FontSizeManager.small * 0.9,
-                      fontWeight: FontWeightManager.regular,
-                      color: ColorManager.secondary.withOpacity(0.5)
-                    ),
+                        fontSize: FontSizeManager.small * 0.9,
+                        fontWeight: FontWeightManager.regular,
+                        color: ColorManager.secondary.withOpacity(0.5)),
                   )
                 ],
-
               )
             ],
           )
-
         ],
       ),
     );

@@ -16,11 +16,10 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import '../../../../core/api/data/model/response-model.dart';
 
 class TransactionRepo {
-  static Future<HttpResponseModel> createTransaction({
-    required final String groupId,
-    required final Transaction transaction,
-    required final String dateOfWork
-  }) async {
+  static Future<HttpResponseModel> createTransaction(
+      {required final String groupId,
+      required final Transaction transaction,
+      required final String dateOfWork}) async {
     final result = await ApiInterface.postRequest(
         url:
             "createtransaction/${ClientProvider.readOnlyClient!.userId}/$groupId",
@@ -62,7 +61,8 @@ class TransactionRepo {
               value: product.productCondition.name.toLowerCase()),
           MultiPartModel.field(
               field: "quantity", value: product.quantity.toString()),
-          MultiPartModel.field(field: "price", value: product.productPrice.toString()),
+          MultiPartModel.field(
+              field: "price", value: product.productPrice.toString()),
           MultiPartModel.file(file: file),
         ]);
     return result;
@@ -98,15 +98,16 @@ class TransactionRepo {
         code: result.code);
   }
 
-  Future<List<Transaction>> getTransactions() async{
+  Future<List<Transaction>> getTransactions() async {
     final response = await getAllTransactions();
 
-    if(response.error){
+    if (response.error) {
       log("error fetching transactions from provider");
       return AppStorage.getTransactions();
-    }
-    else{
-      final transactionsList = (json.decode(response.body) as List).map((e) => Transaction.fromJson(json: e)).toList();
+    } else {
+      final transactionsList = (json.decode(response.body) as List)
+          .map((e) => Transaction.fromJson(json: e))
+          .toList();
       return transactionsList;
     }
   }
