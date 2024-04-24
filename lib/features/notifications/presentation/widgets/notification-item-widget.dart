@@ -54,6 +54,7 @@ class _NotificationItemWidgetState
       title: Text(widget.notification.label),
       subtitle: Text(
         widget.notification.content,
+        maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
     );

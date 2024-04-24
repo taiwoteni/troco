@@ -24,7 +24,7 @@ class _TransactionProgressPageState extends ConsumerState<TransactionProgressPag
         lottie: AssetManager.lottieFile(name: "empty-transactions"),
         scale: 1.5,
         label: "No Progress Yet.",
-        expanded: true,
+        expanded: false,
       ),
     );
   }

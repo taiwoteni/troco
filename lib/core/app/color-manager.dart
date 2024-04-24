@@ -9,6 +9,7 @@ class ColorManager {
   static Color primary = Colors.black;
   static Color secondary = Colors.black54;
   static Color tertiary = const Color(0xF3FAF7F7);
+  static Color lottieLoading = const Color(0xFFF4F4F4);
 
   static final List<ColorSwatch> colors = [
     Colors.blue,

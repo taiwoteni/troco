@@ -31,6 +31,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
   @override
   void initState() {
+    allNotifications.sort((a, b) => 1.compareTo(0),);
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
@@ -161,6 +162,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   Future<void> listenToTransactionsChanges() async {
     ref.listen(notificationsStreamProvider, (previous, next) {
       next.whenData((value) {
+        value.sort((a, b) => 1.compareTo(0),);
         setState(() {
           allNotifications = value;
         });

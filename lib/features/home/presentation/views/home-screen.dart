@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
+import 'package:troco/features/notifications/presentation/providers/notification-provider.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 
 import '../widgets/bottom-bar.dart';
@@ -24,6 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp)async{
       final result = await TransactionRepo.getAllTransactions();
+      ref.watch(notificationsStreamProvider);
       if(!result.error){
         log((json.decode(result.body) as List).map((e) => {"products":e["pricing"]}).toList().toString());
       }
