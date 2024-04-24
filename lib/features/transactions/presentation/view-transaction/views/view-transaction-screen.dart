@@ -9,6 +9,8 @@ import 'package:troco/core/basecomponents/others/drag-handle.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-details-page.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-progress-page.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/rounded-tab-indicator.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/tab-item.dart';
 
@@ -113,6 +115,15 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
           ),
           smallSpacer(),
           RoundedTabIndicator(firstSelected: ref.watch(tabIndexProvider) == 0),
+          PageView(
+            onPageChanged: (value) => ref.read(tabIndexProvider.notifier).state = value,
+            physics: const BouncingScrollPhysics(),
+            controller: ref.watch(tabControllerProvider),
+            children: [
+              TransactionsDetailPage(transaction: widget.transaction),
+              TransactionProgressPage(transaction: widget.transaction),
+            ],
+          )
         ],
       ),
     );

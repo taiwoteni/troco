@@ -40,6 +40,13 @@ class CustomTabWidget extends ConsumerWidget {
       splashColor: ColorManager.secondary.withOpacity(0.002),
       onTap: () {
         ref.read(tabIndexProvider.notifier).state = isFirst ? 0 : 1;
+        if (isFirst) {
+          ref.read(tabControllerProvider.notifier).state.nextPage(
+              duration: const Duration(milliseconds: 600), curve: Curves.ease);
+        } else {
+          ref.read(tabControllerProvider.notifier).state.previousPage(
+              duration: const Duration(milliseconds: 600), curve: Curves.ease);
+        }
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
