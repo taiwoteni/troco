@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
+import 'package:troco/features/notifications/presentation/providers/notification-provider.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-item-widget.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-menu-button.dart';
 
@@ -11,6 +14,7 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/app/theme-manager.dart';
 import '../../../../core/basecomponents/images/svg.dart';
 import '../../../../core/basecomponents/others/spacer.dart';
+import '../../domain/entities/notification.dart' as n;
 import '../../utils/enums.dart';
 
 class NotificationScreen extends ConsumerStatefulWidget {
@@ -23,6 +27,7 @@ class NotificationScreen extends ConsumerStatefulWidget {
 
 class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   NotificationFilter filter = NotificationFilter.All;
+  List<n.Notification> allNotifications = AppStorage.getNotifications();
 
   @override
   void initState() {
@@ -35,23 +40,36 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    listenToTransactionsChanges();
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: appBar(),
       body: SizedBox.expand(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              mediumSpacer(),
-              menuButtons(),
-              mediumSpacer(),
-              title(),
-              mediumSpacer(),
-              notificationsList(),
-            ],
-          ),
-        ),
+        child: allNotifications.isEmpty ? emptyBody() : body(),
+      ),
+    );
+  }
+
+  Widget emptyBody() {
+    return EmptyScreen(
+      lottie: AssetManager.lottieFile(name: 'empty-transactions'),
+      label: "You have no notifiacations.",
+      scale: 1.5,
+    );
+  }
+
+  Widget body() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          mediumSpacer(),
+          menuButtons(),
+          mediumSpacer(),
+          title(),
+          mediumSpacer(),
+          notificationsList(),
+        ],
       ),
     );
   }
@@ -138,5 +156,15 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
               color: ColorManager.secondary.withOpacity(0.09),
             ),
         itemCount: 6);
+  }
+
+  Future<void> listenToTransactionsChanges() async {
+    ref.listen(notificationsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        setState(() {
+          allNotifications = value;
+        });
+      });
+    });
   }
 }
