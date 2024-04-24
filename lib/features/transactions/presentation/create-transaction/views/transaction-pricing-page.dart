@@ -7,6 +7,7 @@ import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
@@ -227,6 +228,7 @@ class _TransactionPricingPageState
                   });
                   TransactionDataHolder.products = products;
                 }
+                ref.read(productImagesProvider.notifier).state.clear();
               });
             },
             elevation: 0,

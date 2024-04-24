@@ -6,11 +6,13 @@ import 'package:troco/core/app/size-manager.dart';
 
 class OnboardingIndicator extends StatelessWidget {
   bool checked;
-  OnboardingIndicator({super.key, required this.checked});
+  Color? checkedColor;
+  OnboardingIndicator({super.key, this.checkedColor, required this.checked});
 
   @override
   Widget build(BuildContext context) {
     double normalSize = IconSizeManager.small * 0.6;
+    final color = checkedColor ?? ColorManager.themeColor;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
@@ -20,8 +22,8 @@ class OnboardingIndicator extends StatelessWidget {
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(SizeManager.regular),
           color: checked
-              ? ColorManager.themeColor
-              : ColorManager.themeColor.withOpacity(0.4)),
+              ? color
+              : color.withOpacity(0.4)),
     );
   }
 }

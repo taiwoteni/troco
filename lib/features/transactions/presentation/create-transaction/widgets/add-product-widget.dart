@@ -42,8 +42,17 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   bool productImageError = false;
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
+  bool loading = false;
   String price = "";
   String name = "";
+
+  @override
+  void setState(VoidCallback fn) {
+    if (!mounted) {
+      return;
+    }
+    super.setState(fn);
+  }
 
   @override
   void initState() {
@@ -124,7 +133,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
           height: SizeManager.extralarge * 1.1,
           right: SizeManager.regular,
           child: IconButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => loading ? null : Navigator.pop(context),
               style: ButtonStyle(
                   shape: const MaterialStatePropertyAll(CircleBorder()),
                   backgroundColor: MaterialStatePropertyAll(
@@ -384,6 +393,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
       color: ColorManager.themeColor,
       onPressed: () async {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+        setState(() {
+          loading = true;
+        });
         await Future.delayed(const Duration(seconds: 2));
         setState(() {
           productImageError = ref.read(productImagesProvider).isEmpty;
@@ -402,6 +414,10 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
           if (mounted) {
             Navigator.pop(context, Product.fromJson(json: productJson));
           }
+        } else {
+          setState(() {
+            loading = false;
+          });
         }
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },
@@ -441,6 +457,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   Widget productImage({required final int position}) {
     return OpenContainer(
       closedElevation: 0,
+      tappable: !loading,
       transitionDuration: const Duration(milliseconds: 500),
       middleColor: ColorManager.background,
       onClosed: (data) {

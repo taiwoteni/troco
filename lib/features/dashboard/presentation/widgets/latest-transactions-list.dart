@@ -1,3 +1,5 @@
+// ignore_for_file: dead_code
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -62,15 +64,16 @@ class _LatestTransactionsListState
                   textAlign: TextAlign.start,
                 ),
                 const Spacer(),
-                TextButton(
-                    onPressed: null,
-                    child: Text(
-                      "View All",
-                      style: defaultStyle.copyWith(
-                          color: ColorManager.accentColor,
-                          fontSize: FontSizeManager.regular * 0.9,
-                          fontWeight: FontWeightManager.medium),
-                    ))
+                if (false)
+                  TextButton(
+                      onPressed: null,
+                      child: Text(
+                        "View All",
+                        style: defaultStyle.copyWith(
+                            color: ColorManager.accentColor,
+                            fontSize: FontSizeManager.regular * 0.9,
+                            fontWeight: FontWeightManager.medium),
+                      ))
               ],
             ),
           ),
@@ -89,7 +92,8 @@ class _LatestTransactionsListState
                     thickness: 0.8,
                     color: ColorManager.secondary.withOpacity(0.08),
                   ),
-              itemCount: transactions.length >= 3 ? 3 : transactions.length)
+              itemCount:
+                  /**transactions.length >= 3 ? 3 : */ transactions.length)
         ],
       ),
     );
@@ -100,8 +104,8 @@ class _LatestTransactionsListState
       next.whenData((value) {
         log("loaded");
         value.sort(
-      (a, b) => (1.compareTo(0)),
-    );
+          (a, b) => (1.compareTo(0)),
+        );
         setState(() {
           transactions = value;
         });

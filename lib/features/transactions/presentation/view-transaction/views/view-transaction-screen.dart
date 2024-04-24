@@ -7,6 +7,7 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/core/basecomponents/others/drag-handle.dart';
+import 'package:troco/core/basecomponents/others/onboarding-indicator.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
@@ -65,7 +66,8 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
           children: [
             slider(),
             Positioned(top: 0, right: 0, left: 0, child: controls()),
-            Positioned(left: 0, right: 0, bottom: 0, child: productName())
+            Positioned(top: 0, right: 0, left: 0, child: productName()),
+            Positioned(left: 0, right: 0, bottom: 0, child: indicators())
           ],
         ),
       ),
@@ -164,21 +166,11 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     final product = products[productIndex];
     return Container(
       width: double.maxFinite,
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.center,
       padding: const EdgeInsets.only(
           left: SizeManager.medium,
           bottom: SizeManager.extralarge * 1.5,
-          top: SizeManager.medium),
-      decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [
-        Colors.transparent,
-        Colors.black.withOpacity(0.1),
-        Colors.black.withOpacity(0.2),
-        Colors.black.withOpacity(0.3),
-        Colors.black.withOpacity(0.3),
-        Colors.black.withOpacity(0.4),
-        Colors.black.withOpacity(0.5),
-      ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+          top: SizeManager.extralarge),
       child: Text(
         product.productName,
         textAlign: TextAlign.center,
@@ -189,6 +181,35 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
             fontFamily: 'quicksand'),
       ),
     );
+  }
+
+  Widget indicators() {
+    return Container(
+        width: double.maxFinite,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(
+            left: SizeManager.medium,
+            bottom: SizeManager.extralarge * 1.5,
+            top: SizeManager.medium),
+        decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [
+          Colors.transparent,
+          Colors.black.withOpacity(0.1),
+          Colors.black.withOpacity(0.2),
+          Colors.black.withOpacity(0.3),
+          Colors.black.withOpacity(0.3),
+          Colors.black.withOpacity(0.4),
+          Colors.black.withOpacity(0.5),
+        ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ...List.generate(
+                products.length,
+                (index) => OnboardingIndicator(
+                    checkedColor: Colors.white, checked: productIndex == index))
+          ],
+        ));
   }
 
   Widget controls() {

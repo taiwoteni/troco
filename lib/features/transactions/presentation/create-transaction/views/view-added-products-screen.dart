@@ -63,9 +63,9 @@ class _ViewAddedProductsScreenState
                   children: [
                     Image.file(
                       File(e),
+                      width: double.maxFinite,
                       height: double.maxFinite,
                       fit: BoxFit.cover,
-                      alignment: Alignment.center,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(

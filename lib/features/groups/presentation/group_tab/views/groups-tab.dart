@@ -87,14 +87,17 @@ class _GroupListState extends State<GroupList> {
     });
 
     return widget.groups.isEmpty
-        ? const EmptyScreen(
-            label: "No Business Groups.\nCreate a Business Group",
-          )
-        : ListView.separated(
+        ? const SliverFillRemaining(
+          child: EmptyScreen(
+              label: "No Business Groups.\nCreate a Business Group",
+            ),
+        )
+        : SliverList.builder(
             key: const Key("groupsList"),
-            padding: const EdgeInsets.symmetric(horizontal: SizeManager.small),
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
+
+            // padding: const EdgeInsets.symmetric(horizontal: SizeManager.small),
+            // physics: const NeverScrollableScrollPhysics(),
+            // shrinkWrap: true,
             itemBuilder: (context, index) => Column(
                   children: [
                     ChatContactWidget(
@@ -102,12 +105,13 @@ class _GroupListState extends State<GroupList> {
                       group: widget.groups[index],
                     ),
                     if (index == widget.groups.length - 1)
-                      const Gap(SizeManager.bottomBarHeight),
-                  ],
-                ),
-            separatorBuilder: (context, index) => Divider(
+                      const Gap(SizeManager.bottomBarHeight)
+                    else
+                    Divider(
                   thickness: 0.8,
                   color: ColorManager.secondary.withOpacity(0.08),
+                )
+                  ],
                 ),
             itemCount: widget.groups.length);
   }

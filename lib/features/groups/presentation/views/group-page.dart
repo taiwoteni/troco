@@ -60,14 +60,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
                   pinned: true,
                   delegate:
                       _SliverTabBarDelegate(child: tabBar(), context: context)),
-              SliverFillRemaining(
-                  child: TabBarView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      controller: tabController,
-                      children: [
-                    const GroupsPage(),
-                    friendList(),
-                  ]))
+              const GroupsPage(),
             ],
           )),
       floatingActionButton: Padding(

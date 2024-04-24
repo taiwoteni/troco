@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
@@ -20,11 +21,13 @@ class ChatHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    bool hasTransaction = group.transactions.isNotEmpty;
+    listenToGroupChanges(ref, hasTransaction);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         mediumSpacer(),
-        groupDetailsWidget(),
+        groupDetailsWidget(hasTransaction: hasTransaction),
         groupCreationTime(),
         if (false) adminJoinedWidget(),
         addedWidget(),
@@ -126,7 +129,7 @@ class ChatHeader extends ConsumerWidget {
     );
   }
 
-  Widget groupDetailsWidget() {
+  Widget groupDetailsWidget({required final bool hasTransaction}) {
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.symmetric(
@@ -157,12 +160,16 @@ class ChatHeader extends ConsumerWidget {
           ),
           regularSpacer(),
           Text(
-            "No Transactions yet",
+            hasTransaction ? "Transaction Ongoing" : "No Transactions yet",
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: ColorManager.primary,
+              color: hasTransaction
+                  ? ColorManager.accentColor
+                  : ColorManager.primary,
               fontFamily: 'Lato',
-              fontWeight: FontWeightManager.light,
+              fontWeight: hasTransaction
+                  ? FontWeightManager.medium
+                  : FontWeightManager.light,
               fontSize: FontSizeManager.small,
             ),
           ),
@@ -220,5 +227,23 @@ class ChatHeader extends ConsumerWidget {
         )
       ],
     );
+  }
+
+  Future<void> listenToGroupChanges(WidgetRef ref, bool hasTransactions) async {
+    ref.listen(groupsStreamProvider, (previous, next) {
+      ref.watch(groupsStreamProvider).whenData((value) {
+        final group = value
+            .singleWhere((element) => element.groupId == this.group.groupId);
+        if (group.transactions.isNotEmpty) {
+          if (hasTransactions == false) {
+            hasTransactions = true;
+          } else {
+            if (hasTransactions != false) {
+              hasTransactions = false;
+            }
+          }
+        }
+      });
+    });
   }
 }

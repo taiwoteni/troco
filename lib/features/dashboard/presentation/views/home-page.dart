@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -33,6 +34,7 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  List<Transaction> transactions = [];
   final defaultStyle = TextStyle(
       fontFamily: 'quicksand',
       color: ColorManager.primary,
@@ -57,14 +59,15 @@ class _HomePageState extends ConsumerState<HomePage> {
         height: double.maxFinite,
         child: ref.watch(transactionsStreamProvider).when(
           data: (transactions) {
+            this.transactions = transactions;
             return transactions.isEmpty ? emptyBody() : body();
           },
           error: (error, stackTrace) {
-            List<Transaction> transactions = AppStorage.getTransactions();
+            transactions = AppStorage.getTransactions();
             return transactions.isEmpty ? emptyBody() : body();
           },
           loading: () {
-            List<Transaction> transactions = AppStorage.getTransactions();
+            transactions = AppStorage.getTransactions();
             return transactions.isEmpty ? emptyBody() : body();
           },
         ),
@@ -215,6 +218,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget carouselWidget() {
+    final int totalTransactions = transactions
+        .map((e) => e.transactionAmount)
+        .fold(0, (previousValue, element) => (previousValue + element).toInt());
     const defaultStyle = TextStyle(
         fontFamily: 'Quicksand',
         color: Colors.white,
@@ -258,10 +264,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ),
                         const Spacer(),
                         Text(
-                          "N100,000",
+                          index == 1
+                              ? "${NumberFormat.currency(symbol: '', locale: 'en_NG', decimalDigits: 0).format(totalTransactions)} NGN"
+                              : "0 NGN",
                           style: defaultStyle.copyWith(
                               fontWeight: FontWeightManager.bold,
-                              fontSize: FontSizeManager.extralarge * 0.9),
+                              fontSize: FontSizeManager.large * 0.9),
                         ),
                         const Spacer(),
                         mediumSpacer(),

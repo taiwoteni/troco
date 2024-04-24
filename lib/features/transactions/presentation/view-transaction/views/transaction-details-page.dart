@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
@@ -48,11 +49,16 @@ class _TransactionsDetailPageState
           regularSpacer(),
           divider(),
           regularSpacer(),
-          price(),
+          inspectionPeriod(),
           regularSpacer(),
           divider(),
           regularSpacer(),
-          inspectionPeriod(),
+          estimatedTime(),
+          regularSpacer(),
+          divider(),
+          regularSpacer(),
+          price(),
+          regularSpacer(),
           extraLargeSpacer(),
           extraLargeSpacer(),
           button(),
@@ -123,7 +129,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.9),
+              fontSize: FontSizeManager.medium * 0.85),
         ),
         Text(
           "${transaction.transactionAmountString.trim()} NGN",
@@ -133,7 +139,7 @@ class _TransactionsDetailPageState
               fontFamily: 'lato',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium),
+              fontSize: FontSizeManager.medium * 0.92),
         ),
       ],
     );
@@ -151,7 +157,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.9),
+              fontSize: FontSizeManager.medium * 0.85),
         ),
         Text(
           transaction.inspectionString,
@@ -161,7 +167,35 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium),
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
+  Widget estimatedTime() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Estimated End: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary.withOpacity(0.8),
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          DateFormat.yMMMEd().format(transaction.transactionTime),
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
         ),
       ],
     );
@@ -180,7 +214,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.9),
+              fontSize: FontSizeManager.medium * 0.85),
         ),
         Text(
           "$no Product${no == 1 ? "" : "s"}",
@@ -190,7 +224,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium),
+              fontSize: FontSizeManager.medium * 0.92),
         ),
       ],
     );

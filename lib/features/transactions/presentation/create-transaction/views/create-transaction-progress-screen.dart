@@ -6,7 +6,9 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 
+import '../../../../../core/app/routes-manager.dart';
 import '../../../../groups/domain/entities/group.dart';
 import '../../../data/models/create-transaction-data-holder.dart';
 import '../../../domain/entities/transaction.dart';
@@ -39,7 +41,7 @@ class _CreateTransactonProgressScreenState
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: canPop,
+      canPop: canPop || error,
       onPopInvoked: (didPop) {},
       child: Scaffold(
           backgroundColor: ColorManager.background,
@@ -70,7 +72,8 @@ class _CreateTransactonProgressScreenState
           child: FittedBox(
             child: CircularProgressIndicator(
               backgroundColor: ColorManager.tertiary,
-              valueColor: AlwaysStoppedAnimation(ColorManager.accentColor),
+              valueColor: AlwaysStoppedAnimation(
+                  error ? Colors.redAccent : ColorManager.accentColor),
               value: value,
               strokeWidth: 2.5,
             ),
@@ -81,7 +84,7 @@ class _CreateTransactonProgressScreenState
           textAlign: TextAlign.center,
           style: TextStyle(
               fontFamily: "quicksand",
-              color: ColorManager.accentColor,
+              color: error ? Colors.redAccent : ColorManager.accentColor,
               fontSize: FontSizeManager.large,
               fontWeight: FontWeightManager.semibold),
         )
@@ -97,10 +100,17 @@ class _CreateTransactonProgressScreenState
       final productNo = (value * (products.length + 1)).toInt() - 1;
       text = "Adding Product $productNo...";
     }
+    if (value == 1) {
+      text = "Created transaction!";
+    }
+    if (error) {
+      text = "Error occurred.\nCheck your internet.";
+    }
     return GestureDetector(
       onTap: () => Navigator.pop(context),
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: TextStyle(
             fontFamily: 'quicksand',
             fontSize: FontSizeManager.regular * 0.85,
@@ -132,8 +142,12 @@ class _CreateTransactonProgressScreenState
         transaction: transaction);
 
     if (response.error) {
+      setState(() {
+        error = true;
+      });
       log(response.body);
     } else {
+      ref.watch(transactionsStreamProvider);
       final products = TransactionDataHolder.products!;
       setState(() {
         value = 1 / (products.length + 1);
@@ -141,8 +155,6 @@ class _CreateTransactonProgressScreenState
       final transactionJson = response.messageBody!["data"];
       await addProducts(
           transaction: Transaction.fromJson(json: transactionJson));
-      ref.read(createTransactionProgressProvider.notifier).state = 0;
-      TransactionDataHolder.clear();
     }
   }
 
@@ -165,11 +177,20 @@ class _CreateTransactonProgressScreenState
 
       if (response.error) {
         log("Error:${response.body}");
+        setState(() {
+          error = true;
+        });
+        break;
       } else {
         if (products.last == product) {
           log("Success: ${response.messageBody!.toString()}");
         }
       }
     }
+    ref.read(createTransactionProgressProvider.notifier).state = 0;
+    TransactionDataHolder.clear();
+
+    await Future.delayed(const Duration(seconds: 2));
+    Navigator.pushNamed(context, Routes.transactionSuccessRoute);
   }
 }

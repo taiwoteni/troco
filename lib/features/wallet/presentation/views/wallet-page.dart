@@ -1,4 +1,4 @@
-import 'dart:developer';
+// ignore_for_file: dead_code
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,9 +8,11 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/wallet/presentation/widgets/wallet-transaction-item-widget.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/wallet/data/models/wallet-menu-item-model.dart';
@@ -51,21 +53,25 @@ class _WalletPageState extends ConsumerState<WalletPage>
       backgroundColor: Colors.transparent,
       body: Container(
         width: double.maxFinite,
+        height: double.maxFinite,
         padding: const EdgeInsets.only(
           right: SizeManager.medium,
           left: SizeManager.medium,
           bottom: SizeManager.bottomBarHeight,
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              appBar(),
-              extraLargeSpacer(),
-              menu(),
-              extraLargeSpacer(),
-              transactionWidget(),
-            ],
-          ),
+        child: Column(
+          children: [
+            appBar(),
+            extraLargeSpacer(),
+            menu(),
+            extraLargeSpacer(),
+            EmptyScreen(
+              expanded: true,
+              lottie: AssetManager.lottieFile(name: "empty-transactions"),
+              scale: 1.2,
+              label: "No Wallet Transactions so far.",
+            )
+          ],
         ),
       ),
     );
@@ -138,8 +144,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
                     builder: (context, child) {
                       return RichText(
                           text: TextSpan(style: defaultStyle, children: [
-                        TextSpan(
-                            text: formatter.format(controller.value * 5000000)),
+                        TextSpan(text: formatter.format(controller.value * 0)),
                         TextSpan(
                             text: ".00",
                             style: defaultStyle.copyWith(
@@ -150,7 +155,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
                     }),
                 regularSpacer(),
                 const Text(
-                  "+15% 5,000 NGN",
+                  "+15% 0 NGN",
                   style: TextStyle(
                       color: Colors.greenAccent,
                       fontFamily: 'Lato',
@@ -158,9 +163,9 @@ class _WalletPageState extends ConsumerState<WalletPage>
                       fontWeight: FontWeightManager.semibold),
                 ),
                 const Spacer(),
-                const Text(
-                  "EQC8-fAHU9D-I0KU6G7",
-                  style: TextStyle(
+                Text(
+                  "#-${ClientProvider.readOnlyClient!.userId}",
+                  style: const TextStyle(
                       color: Colors.white,
                       fontFamily: 'Quicksand',
                       fontSize: FontSizeManager.medium * 0.8,
@@ -190,7 +195,10 @@ class _WalletPageState extends ConsumerState<WalletPage>
       itemBuilder: (context, index) {
         final item = menuItems()[index];
         return InkWell(
-          onTap: () => log("Hi"),
+          onTap: () {
+            SnackbarManager.showBasicSnackbar(
+                context: context, message: "Coming in next update");
+          },
           child: Container(
             width: double.maxFinite,
             height: double.maxFinite,
