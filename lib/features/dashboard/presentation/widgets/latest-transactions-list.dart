@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
@@ -27,14 +29,22 @@ class _LatestTransactionsListState
       fontWeight: FontWeightManager.bold);
 
   List<Transaction> transactions = AppStorage.getTransactions();
+  @override
+  void initState() {
+    transactions.sort(
+      (a, b) => (1.compareTo(0)),
+    );
+    super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      setState(() {
+        transactions = transactions;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     listenToTransactionsChanges();
-    transactions.sort(
-      (a, b) => (1.compareTo(0)),
-    );
-
     return SizedBox(
       width: double.maxFinite,
       child: Column(
@@ -88,6 +98,10 @@ class _LatestTransactionsListState
   Future<void> listenToTransactionsChanges() async {
     ref.listen(transactionsStreamProvider, (previous, next) {
       next.whenData((value) {
+        log("loaded");
+        value.sort(
+      (a, b) => (1.compareTo(0)),
+    );
         setState(() {
           transactions = value;
         });

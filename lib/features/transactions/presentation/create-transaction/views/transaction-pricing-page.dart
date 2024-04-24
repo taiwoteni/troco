@@ -32,6 +32,7 @@ class _TransactionPricingPageState
   final buttonKey = UniqueKey();
   final List<Product> products = TransactionDataHolder.products ?? [];
   bool listAsGrid = false;
+  bool error = false;
 
   @override
   Widget build(BuildContext context) {
@@ -115,8 +116,9 @@ class _TransactionPricingPageState
 
     if (products.isEmpty) {
       return EmptyScreen(
-        label:
-            "\n\nDemonstrate your ${category.name.toLowerCase()}${category == TransactionCategory.Virtual ? "-service" : ""}(s)",
+        label: error
+            ? "\n\nDemonstrate your ${category.name.toLowerCase()}${category == TransactionCategory.Virtual ? "-service" : ""}(s) 🤨"
+            : "\n\nDemonstrate your ${category.name.toLowerCase()}${category == TransactionCategory.Virtual ? "-service" : ""}(s)",
         scale: 1.8,
         lottie: AssetManager.lottieFile(name: "add-product"),
         expanded: true,
@@ -163,11 +165,12 @@ class _TransactionPricingPageState
       onPressed: () async {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 3));
-        if (formKey.currentState!.validate()) {
-          formKey.currentState!.save();
+        if (TransactionDataHolder.products?.isNotEmpty ?? false) {
           ref.read(createTransactionPageController.notifier).state.nextPage(
               duration: const Duration(milliseconds: 450), curve: Curves.ease);
           ref.read(createTransactionProgressProvider.notifier).state = 3;
+        } else {
+          setState(() => error = true);
         }
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },

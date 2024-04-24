@@ -20,6 +20,10 @@ class Group extends Equatable {
     return (_json["members"] as List).map((e) => e.toString(),).toList();
   }
 
+  List<String> get transactions {
+    return (_json["transactions"] as List).map((e) => e.toString(),).toList();
+  }
+
   String get groupId => _json["id"] ?? _json["_id"];
   String get adminId => _json["adminId"];
 

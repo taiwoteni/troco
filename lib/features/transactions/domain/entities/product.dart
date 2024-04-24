@@ -13,11 +13,12 @@ class Product extends Equatable {
   String get productPriceString =>
       NumberFormat.currency(locale: "en_NG", decimalDigits: 2, symbol: "")
           .format(productPrice);
-  int get productPrice => _json["productPrice"] ?? _json["price"];
+  int get productPrice =>
+      int.parse((_json["productPrice"] ?? _json["price"]).toString());
   ProductCondition get productCondition =>
       ProductConditionConverter.convertToEnum(
           condition: _json["productCondition"]);
-  int get quantity => _json["quantity"];
+  int get quantity => int.parse(_json["quantity"].toString());
   String get prodcutImage => _json["pricingImage"];
   List<String> get productImages =>
       (_json["productImages"] as List).map((e) => e.toString()).toList();

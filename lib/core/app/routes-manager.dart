@@ -13,6 +13,8 @@ import 'package:troco/features/auth/presentation/register/views/add-pin-screen.d
 import 'package:troco/features/auth/presentation/register/views/add-profile-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/splash/presentation/splash-screen.dart';
+import 'package:troco/features/transactions/domain/entities/transaction.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/view-transaction-screen.dart';
 
 import '../../features/auth/presentation/login/views/login-screen.dart';
 import '../../features/auth/presentation/register/views/register-screen.dart';
@@ -41,6 +43,11 @@ class Routes {
   static const chatRoute = "/chat";
 
   static const createTransactionRoute = "/create-transaction";
+
+  /// [viewTransactionRoute] is the route to view a transaction.
+  /// Must pass the transaction as an argument!
+  static const viewTransactionRoute = "/view-transaction";
+
 }
 
 class RouteGenerator {
@@ -116,7 +123,7 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) {
-            final group = routeSettings.arguments as Group;
+            final group = routeSettings.arguments! as Group;
             return ChatScreen(group: group);
           },
         );
@@ -126,6 +133,14 @@ class RouteGenerator {
           builder: (context){
             // final group = routeSettings.arguments as Group;
             return const CreateTransactionScreen();
+          },
+        );
+      case Routes.viewTransactionRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context){
+            final transaction = routeSettings.arguments! as Transaction;
+            return ViewTransactionScreen(transaction: transaction);
           },
         );
       default:

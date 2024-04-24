@@ -5,10 +5,12 @@ import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
+import '../../domain/entities/notification.dart' as n;
 import '../../../../core/basecomponents/images/svg.dart';
 
 class NotificationItemWidget extends ConsumerStatefulWidget {
-  const NotificationItemWidget({super.key});
+  final n.Notification notification;
+  const NotificationItemWidget({super.key, required this.notification});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -49,9 +51,9 @@ class _NotificationItemWidgetState
           size: const Size.square(IconSizeManager.regular),
         ),
       ),
-      title: const Text("Transaction"),
-      subtitle: const Text(
-        "'Service..' now has an Admin.",
+      title: Text(widget.notification.label),
+      subtitle: Text(
+        widget.notification.content,
         overflow: TextOverflow.ellipsis,
       ),
     );

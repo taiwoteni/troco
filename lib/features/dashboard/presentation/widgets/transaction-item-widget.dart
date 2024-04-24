@@ -1,7 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
+import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
@@ -35,6 +38,11 @@ class TransactionItemWidget extends StatelessWidget {
           //     ]),
         ),
         child: ListTile(
+          onTap: () async {
+            await Future.delayed(const Duration(microseconds: 4));
+            Navigator.pushNamed(context, Routes.viewTransactionRoute,
+                arguments: transaction);
+          },
           dense: true,
           tileColor: Colors.transparent,
           contentPadding: const EdgeInsets.only(
@@ -72,9 +80,11 @@ class TransactionItemWidget extends StatelessWidget {
               size: const Size.square(IconSizeManager.regular),
             ),
           ),
-          trailing: Text(transaction.transactionAmount.toInt() == 0
-              ? "FREE"
-              : "${transaction.transactionAmountString} NG"),
+          trailing: const Text("FREE"
+              // transaction.transactionAmount.toInt() == 0
+              //   ? "FREE"
+              //   : "${transaction.transactionAmountString} NG"
+              ),
           leadingAndTrailingTextStyle: TextStyle(
               color:
                   transaction.transactionPurpose == TransactionPurpose.Selling

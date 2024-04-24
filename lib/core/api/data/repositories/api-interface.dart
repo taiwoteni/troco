@@ -166,18 +166,20 @@ class ApiInterface {
       final Uri uri = Uri.parse("$_serverUrl/$url");
       final request = http.MultipartRequest('POST', uri);
       request.headers['Content-Type'] = 'multipart/form-data';
+      
 
-      // request.headers['accept'] = '*/*';
-      if (headers != null) {
-        headers.forEach((key, value) {
-          request.headers[key] = value;
-        });
-      }
+      request.headers['accept'] = '*/*';
+      // if (headers != null) {
+      //   headers.forEach((key, value) {
+      //     request.headers[key] = value;
+      //   });
+      // }
 
       for (int i = 0; i < multiparts.length; i++) {
         final model = multiparts[i];
         if (!model.isFileType) {
-          request.fields[model.field!] = model.value!;
+          final value =  model.value!.toString();
+          request.fields[model.field!.toString()] = value;
           // log("added field : ${model.field!}: ${model.value}");
         } else {
           request.files.add(model.file!);
@@ -186,6 +188,7 @@ class ApiInterface {
       }
 
       log(request.fields.toString());
+      log(request.files.map((e) => {"${e.field}":e.filename}).toString());
 
       final response = await request.send();
       log("sent");

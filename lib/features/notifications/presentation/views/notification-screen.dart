@@ -151,11 +151,11 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     return ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) => const NotificationItemWidget(),
+        itemBuilder: (context, index) => NotificationItemWidget(notification: allNotifications[index]),
         separatorBuilder: (context, index) => Divider(
               color: ColorManager.secondary.withOpacity(0.09),
             ),
-        itemCount: 6);
+        itemCount: allNotifications.length);
   }
 
   Future<void> listenToTransactionsChanges() async {

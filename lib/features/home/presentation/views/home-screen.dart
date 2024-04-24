@@ -26,7 +26,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final result = await ApiInterface.findUser(userId: ClientProvider.readOnlyClient!.userId);
 
       if(!result.error){
-        log(result.messageBody!["data"]["notifications"]?.toString() ?? "Structure wrong");
+        final li = result.messageBody!["data"]["transactions"];
+        final pr = (li as List).firstWhere((element) => (element["pricing"] as List).isNotEmpty, orElse: () => {});
+        log(pr.toString() ?? "Structure wrong");
       }
     });
   }

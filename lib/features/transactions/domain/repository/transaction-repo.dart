@@ -3,9 +3,9 @@
 
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import "package:path/path.dart" as Path;
 import 'package:http/http.dart';
-import 'package:http_parser/src/media_type.dart';
 import 'package:troco/core/api/data/model/multi-part-model.dart';
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
@@ -44,10 +44,12 @@ class TransactionRepo {
     required final String buyerId,
     required final Product product,
   }) async {
-    final file = await MultipartFile.fromPath(
-        "pricingImage", product.productImages[0].toString(),
-        filename: Path.basename(product.productImages[0].toString()),
-        contentType: MediaType('image', "jpeg"));
+    var parsedfile = File(product.productImages[0]);
+    var stream = ByteStream(parsedfile.openRead());
+    var length = await parsedfile.length();
+
+    final file = MultipartFile("pricingImage", stream, length,
+        filename: Path.basename(product.productImages[0].toString()));
 
     final result = await ApiInterface.multipartPostRequest(
         url:
@@ -59,10 +61,8 @@ class TransactionRepo {
           MultiPartModel.field(
               field: "productCondition",
               value: product.productCondition.name.toLowerCase()),
-          MultiPartModel.field(
-              field: "quantity", value: product.quantity.toString()),
-          MultiPartModel.field(
-              field: "price", value: product.productPrice.toString()),
+          MultiPartModel.field(field: "quantity", value: product.quantity),
+          MultiPartModel.field(field: "price", value: product.productPrice),
           MultiPartModel.file(file: file),
         ]);
     return result;

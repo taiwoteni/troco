@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as Math;
 import 'dart:developer';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,6 +47,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController controller = TextEditingController();
   late StreamSubscription chatStreamSubscription;
+  bool isCreator = false;
   late List<Chat> chats;
   bool sending = false;
   bool newMessage = false;
@@ -56,6 +58,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     group = widget.group;
     chats = AppStorage.getChats(groupId: group.groupId);
+    isCreator = group.members.first == ClientProvider.readOnlyClient!.userId;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
@@ -369,17 +372,37 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () => Navigator.pushNamed(
-                        context, Routes.createTransactionRoute,
-                        arguments: group),
+                    onPressed: () {
+                      if (isCreator) {
+                        if(group.members.length>=2){
+                           Navigator.pushNamed(
+                            context, Routes.createTransactionRoute,
+                            arguments: group);
+                        }
+                        else{
+                          SnackbarManager.showBasicSnackbar(
+                            context: context,
+                            message: "Add a buyer",
+                            mode: ContentType.warning);
+                        }
+                       
+                      } else {
+                        SnackbarManager.showBasicSnackbar(
+                            context: context,
+                            message: "Under maintenance for buyers",
+                            mode: ContentType.warning);
+                      }
+                    },
                     highlightColor: ColorManager.accentColor.withOpacity(0.15),
                     style: const ButtonStyle(
                         splashFactory: InkRipple.splashFactory),
                     icon: SvgIcon(
-                      svgRes: AssetManager.svgFile(name: "buy"),
-                      color: group.members.length < 2
-                          ? ColorManager.secondary
-                          : ColorManager.accentColor,
+                      svgRes: AssetManager.svgFile(
+                          name: isCreator ? "delivery" : "buy"),
+                      color:
+                          group.members.length < 2 || group.transactions.isEmpty
+                              ? ColorManager.secondary
+                              : ColorManager.accentColor,
                       size: const Size.square(IconSizeManager.regular * 1.3),
                     ),
                   ),
