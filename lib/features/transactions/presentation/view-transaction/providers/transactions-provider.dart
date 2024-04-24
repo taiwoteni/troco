@@ -48,13 +48,18 @@ final transactionsStreamProvider = StreamProvider<List<Transaction>>(
             final _transacionsList =
                 AppStorage.getTransactions().map((e) => e.toJson()).toList();
 
+                /// This is because some transactions json have empty products.
+                /// Due to previous complications in consuming the APIs. 
+            final sortedTransactionsList = transactionsJson.where((e) => (e["pricing"] as List).isNotEmpty).toList();
+
             /// Then We contrast.
             final bool transactionsDifferent =
-                json.encode(_transacionsList) != json.encode(transactionsJson);
+                json.encode(_transacionsList) != json.encode(sortedTransactionsList);
 
             final valuesAreDifferent = transactionsDifferent;
 
             List<Transaction> transactionsList = transactionsJson
+                .where((element) => (element["pricing"] as List).isNotEmpty)
                 .map((e) => Transaction.fromJson(json: e))
                 .toList();
 

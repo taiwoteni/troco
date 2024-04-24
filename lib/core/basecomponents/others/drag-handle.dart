@@ -4,12 +4,13 @@ import '../../app/color-manager.dart';
 import '../../app/size-manager.dart';
 
 class DragHandle extends StatelessWidget {
-  const DragHandle({super.key});
+  final double scale;
+  const DragHandle({super.key, this.scale = 1});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 55,
+      width: scale* 55,
       height: 5,
       decoration: BoxDecoration(
           color: ColorManager.secondary.withOpacity(0.18),

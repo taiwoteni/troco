@@ -113,7 +113,10 @@ class AppStorage {
       return [];
     }
     final List<dynamic> transactionsJson = json.decode(jsonString);
-    return transactionsJson.map((e) => Transaction.fromJson(json: e)).toList();
+    return transactionsJson
+        .where((element) => (element["pricing"] as List).isNotEmpty)
+        .map((e) => Transaction.fromJson(json: e))
+        .toList();
   }
 
   static Future<void> saveTransactions(

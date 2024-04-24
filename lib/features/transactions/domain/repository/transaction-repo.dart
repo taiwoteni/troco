@@ -89,12 +89,29 @@ class TransactionRepo {
           body: result.body,
           code: result.code);
     }
+
     final transactionsJson = result.messageBody!["data"]["transactions"];
+
+    final List<String> transactionsId = (transactionsJson as List).map((e) => e["_id"].toString()).toList();
+
+    List<Map<dynamic,dynamic>> jsonData = [];
+    for(final String id in transactionsId){
+      final response = await getOneTransaction(transactionId: id);
+      if(response.error){
+        return HttpResponseModel(
+          error: response.error, 
+          body: response.body,
+          code: response.code);
+      }
+
+      final data = response.messageBody!["data"];
+      jsonData.add(data);
+    }
 
     return HttpResponseModel(
         returnHeaderType: result.returnHeaderType,
         error: false,
-        body: json.encode(transactionsJson),
+        body: json.encode(jsonData),
         code: result.code);
   }
 

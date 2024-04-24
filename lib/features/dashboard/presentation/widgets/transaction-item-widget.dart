@@ -80,11 +80,9 @@ class TransactionItemWidget extends StatelessWidget {
               size: const Size.square(IconSizeManager.regular),
             ),
           ),
-          trailing: const Text("FREE"
-              // transaction.transactionAmount.toInt() == 0
-              //   ? "FREE"
-              //   : "${transaction.transactionAmountString} NG"
-              ),
+          trailing: Text(transaction.transactionAmount.toInt() == 0
+              ? "FREE"
+              : "${transaction.transactionAmountString} NG"),
           leadingAndTrailingTextStyle: TextStyle(
               color:
                   transaction.transactionPurpose == TransactionPurpose.Selling
