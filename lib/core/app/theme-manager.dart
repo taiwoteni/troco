@@ -29,7 +29,7 @@ class ThemeManager {
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: ColorManager.background,
         systemNavigationBarIconBrightness: Brightness.dark);
-    ;
+    
   }
 
   static SystemUiOverlayStyle getSplashUiOverlayStyle() {

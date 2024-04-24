@@ -1,11 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as Path;
-import "package:path_provider/path_provider.dart";
 import 'dart:io';
-
-import 'package:troco/core/basecomponents/images/pick-profile-widget.dart';
 
 class FileManager {
   static Future<File?> pickImage({final ImageSource? imageSource}) async {

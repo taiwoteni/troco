@@ -28,7 +28,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if(!result.error){
         final li = result.messageBody!["data"]["transactions"];
         final pr = (li as List).firstWhere((element) => (element["pricing"] as List).isNotEmpty, orElse: () => {});
-        log(pr.toString() ?? "Structure wrong");
+        log(pr.toString());
       }
     });
   }

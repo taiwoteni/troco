@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:troco/core/app/color-manager.dart';
-import 'package:troco/core/app/font-manager.dart';
-import 'package:troco/core/app/size-manager.dart';
 
 class SnackbarManager {
   static void showBasicSnackbar({

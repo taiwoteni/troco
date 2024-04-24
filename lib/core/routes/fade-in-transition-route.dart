@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 
 class FadePageRoute<T> extends PageRouteBuilder<T> {
   final WidgetBuilder builder;
