@@ -78,6 +78,8 @@ class TransactionRepo {
     return response;
   }
 
+  /// User Data must have been saved on Cache first before [getAllTransactions] can be called.
+  /// Else: Error will be thrown.
   static Future<HttpResponseModel> getAllTransactions() async {
     final result = await ApiInterface.findUser(
         userId: ClientProvider.readOnlyClient!.userId);
@@ -115,6 +117,9 @@ class TransactionRepo {
         code: result.code);
   }
 
+
+  /// User Data must have been saved on Cache first before [getTransactions] can be called.
+  /// Else: Error will be thrown.
   Future<List<Transaction>> getTransactions() async {
     final response = await getAllTransactions();
 
