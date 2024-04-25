@@ -23,6 +23,7 @@ import 'package:troco/features/auth/domain/repositories/authentication-repo.dart
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
+import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -300,33 +301,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         map.remove("password");
         map.remove("groups");
 
-        // We have to locally store all the groups and it's respective chats.
-
-        final newResponse = await ApiInterface.findUser(userId: map["_id"]);
-        if (newResponse.error) {
-          log(newResponse.body.toString());
-    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-
-        } else {
-          final Map<dynamic, dynamic> data = newResponse.messageBody!["data"];
-          AppStorage.saveGroups(
-              groups: (data["groups"] as List)
-                  .map((e) => Group.fromJson(json: e))
-                  .toList());
-          List groups = data["groups"];
-
-          for (final group in groups) {
-            AppStorage.saveChats(
-                chats: (group["messages"] as List).map((e) => Chat.fromJson(json: e)).toList(), groupId: group["_id"]);
-          }
-        }
-
+        // We have to save user data first
         ClientProvider.saveUserData(ref: ref, json: map);
+
+        // We have to locally store all the groups and it's respective chats.
+        await saveGroupsAndChats(userId: map["_id"]);
+        // We have to save transactions
+        await saveTransactions();
+
         Navigator.pushNamedAndRemoveUntil(
             context, Routes.homeRoute, (route) => false);
       }
     }
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+  }
+
+  Future<void> saveGroupsAndChats({required final String userId}) async {
+    final newResponse = await ApiInterface.findUser(userId: userId);
+    if (newResponse.error) {
+      log(newResponse.body.toString());
+
+      // We have to clear all progress done in saving any data to cache.
+      await AppStorage.clear();
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    } else {
+      final Map<dynamic, dynamic> data = newResponse.messageBody!["data"];
+      AppStorage.saveGroups(
+          groups: (data["groups"] as List)
+              .map((e) => Group.fromJson(json: e))
+              .toList());
+      List groups = data["groups"];
+
+      for (final group in groups) {
+        AppStorage.saveChats(
+            chats: (group["messages"] as List)
+                .map((e) => Chat.fromJson(json: e))
+                .toList(),
+            groupId: group["_id"]);
+      }
+    }
+  }
+
+  /// User data must have been saved in Cache
+  Future<void> saveTransactions() async {
+    final transactions = await TransactionRepo().getTransactions();
+    AppStorage.saveTransactions(transactions: transactions);
   }
 
   PreferredSizeWidget appBar() {
