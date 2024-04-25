@@ -15,7 +15,7 @@ import 'package:troco/features/transactions/presentation/view-transaction/views/
 import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-progress-page.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/rounded-tab-indicator.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/tab-item.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/widgets/view-transactionproduct-clipper.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/view-transaction-product-clipper.dart';
 
 import '../../../../../core/basecomponents/animations/lottie.dart';
 import '../../../domain/entities/product.dart';
