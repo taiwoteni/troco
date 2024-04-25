@@ -12,6 +12,7 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
 
@@ -132,5 +133,20 @@ class TransactionRepo {
           .toList();
       return transactionsList;
     }
+  }
+
+
+  Future<HttpResponseModel> respondToTransaction({
+    required final bool aprove,
+    required final Transaction transaction,
+    required final TransactionStatus status,
+    })async{
+      final result = await ApiInterface.postRequest(
+        url: "updateTransactionStatus/${transaction.transactionId}/${ClientProvider.readOnlyClient!.userId}/${transaction.creator}",
+        data: {
+          "status":aprove?"approved":"declined"
+        });
+
+      return result;
   }
 }
