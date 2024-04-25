@@ -37,12 +37,20 @@ class TransactionProductClipper extends CustomClipper<Path> {
     // path_0.quadraticBezierTo(size.width * 0.0530000, size.height * 0.8900000,
     //     size.width * 0.0020000, size.height * 1.0020000);
 
-    path_0.moveTo(0,0);
-    path_0.lineTo(size.width,0);
-    path_0.lineTo(size.width*1.0100000,size.height*1.0160000);
-    path_0.quadraticBezierTo(size.width*0.9570000,size.height*0.8690000,size.width*0.8460000,size.height*0.8860000);
-    path_0.cubicTo(size.width*0.8265000,size.height*0.8815000,size.width*0.3095000,size.height*0.8790000,size.width*0.1900000,size.height*0.8840000);
-    path_0.quadraticBezierTo(size.width*0.0430000,size.height*0.8680000,size.width*-0.0020000,size.height*1.0100000);
+    path_0.moveTo(0, 0);
+    path_0.lineTo(size.width, 0);
+    path_0.lineTo(size.width * 1.0008000, size.height * 1.0080100);
+    path_0.quadraticBezierTo(size.width * 0.9676400, size.height * 0.9035700,
+        size.width * 0.8473300, size.height * 0.9006200);
+    path_0.cubicTo(
+        size.width * 0.8278300,
+        size.height * 0.8961200,
+        size.width * 0.3547300,
+        size.height * 0.8936700,
+        size.width * 0.1966500,
+        size.height * 0.8973400);
+    path_0.quadraticBezierTo(size.width * 0.0483200, size.height * 0.8879900,
+        size.width * -0.0006800, size.height * 1.0066200);
     return path_0;
   }
 
