@@ -11,23 +11,31 @@ class Group extends Equatable {
   DateTime get createdTime => DateTime.parse(_json["creationTime"]);
   bool get usingDelivery => _json["useDelivery"];
 
-
   List<String> get members {
     // List<dynamic> membersJson = json.decode(_json["members"] ?? "[]");
     // return membersJson
     //     .map((json) => GroupMemberModel.fromJson(json: json))
     //     .toList();
-    return (_json["members"] as List).map((e) => e.toString(),).toList();
+    return (_json["members"] as List)
+        .map(
+          (e) => e.toString(),
+        )
+        .toList();
   }
 
   List<String> get transactions {
-    return (_json["transactions"] as List).map((e) => e.toString(),).toList();
+    return (_json["transactions"] as List)
+        .map(
+          (e) => e.toString(),
+        )
+        .toList();
   }
 
   String get groupId => _json["id"] ?? _json["_id"];
+  String get creator => members.first;
   String get adminId => _json["adminId"];
 
-  Map<dynamic,dynamic> toJson(){
+  Map<dynamic, dynamic> toJson() {
     return _json;
   }
 

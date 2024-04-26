@@ -136,7 +136,7 @@ class TransactionRepo {
   }
 
 
-  Future<HttpResponseModel> respondToTransaction({
+  static Future<HttpResponseModel> respondToTransaction({
     required final bool aprove,
     required final Transaction transaction,
     required final TransactionStatus status,

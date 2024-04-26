@@ -17,9 +17,14 @@ class Product extends Equatable {
       int.parse((_json["productPrice"] ?? _json["price"]).toString());
   ProductCondition get productCondition =>
       ProductConditionConverter.convertToEnum(
-          condition: _json["productCondition"]);
+          condition: _json["productCondition"] ?? _json["condition"] ?? "new");
   int get quantity => int.parse(_json["quantity"].toString());
   String get productImage => _json["pricingImage"];
+  String get productCategory =>
+      _json["category"] ??
+      _json["productCategory"] ??
+      _json["category"] ??
+      "No Category";
   List<String> get productImages =>
       (_json["productImages"] as List).map((e) => e.toString()).toList();
 

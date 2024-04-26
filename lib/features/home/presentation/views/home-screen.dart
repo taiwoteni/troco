@@ -1,13 +1,12 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
-import 'package:troco/features/notifications/presentation/providers/notification-provider.dart';
-import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 
 import '../widgets/bottom-bar.dart';
 
@@ -24,10 +23,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp)async{
-      final result = await TransactionRepo.getAllTransactions();
-      ref.watch(notificationsStreamProvider);
+      final result = await ApiInterface.findUser(userId: ClientProvider.readOnlyClient!.userId);
+
       if(!result.error){
-        log((json.decode(result.body) as List).map((e) => {"products":e["pricing"]}).toList().toString());
+        log(result.messageBody!["data"]["notifications"]?.toString() ?? "Structure wrong");
       }
     });
   }

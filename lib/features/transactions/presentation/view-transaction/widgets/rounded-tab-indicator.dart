@@ -1,18 +1,18 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 
-class RoundedTabIndicator extends StatefulWidget {
-  final bool firstSelected;
-  const RoundedTabIndicator({super.key, required this.firstSelected});
+import '../providers/transaction-tab-index.dart';
+
+class RoundedTabIndicator extends ConsumerWidget {
+  const RoundedTabIndicator({super.key});
 
   @override
-  State<RoundedTabIndicator> createState() => _RoundedTabIndicatorState();
-}
-
-class _RoundedTabIndicatorState extends State<RoundedTabIndicator> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    bool firstSelected = ref.watch(tabIndexProvider) == 0;
     final tabWidth =
         (MediaQuery.sizeOf(context).width - SizeManager.medium * 2) / 2;
     return Container(
@@ -27,7 +27,7 @@ class _RoundedTabIndicatorState extends State<RoundedTabIndicator> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 500),
             curve: Curves.ease,
-            width: widget.firstSelected ? 0 : tabWidth,
+            width: firstSelected ? 0 : tabWidth,
             height: double.maxFinite,
             decoration: BoxDecoration(
               color: Colors.transparent,

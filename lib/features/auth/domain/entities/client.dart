@@ -8,8 +8,8 @@ class Client extends Equatable {
       : _json = json;
 
   String get userId => _json["id"] ?? _json["_id"] ?? "9439430439392032";
-  String get firstName => _json["firstName"];
-  String get lastName => _json["lastName"];
+  String get firstName => _json["firstName"].toString().trim();
+  String get lastName => _json["lastName"].toString().trim();
   String get profile => _json["profile"] ?? _json["userImage"] ?? "null";
   String get fullName => "$firstName $lastName";
   String get email => _json["email"];

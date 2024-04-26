@@ -26,6 +26,8 @@ class Transaction extends Equatable {
 
   int get inspectionDays => int.parse(_json["inspectionDays"].toString());
 
+  String get address => _json["location"] ?? _json["address"] ?? "No address yet";
+
   String get creator => _json["creator"];
 
   InspectionPeriod get inspectionPeriod =>
@@ -79,6 +81,8 @@ class Transaction extends Equatable {
         .fold(0, (previousValue, currentPrice) => previousValue + currentPrice);
     return amount.toDouble();
   }
+
+  
 
   Map<dynamic, dynamic> toJson() {
     return _json;

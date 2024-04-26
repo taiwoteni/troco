@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:troco/features/notifications/utils/enums.dart';
+import 'package:troco/features/notifications/utils/notification-type-converter.dart';
 
 class Notification extends Equatable{
   final Map<dynamic,dynamic> _json;
@@ -7,9 +9,14 @@ class Notification extends Equatable{
 
   String get id => _json["_id"];
 
-  String get label => _json["title"] ?? "Notification";
+  String get label => _json["title"] ?? _json["notificationTitle"] ?? "Notification";
 
   String get content => _json["notificationContent"];
+  dynamic get argument => _json["argument"];
+
+  NotificationType get type => NotificationTypeConverter.convertToType(notificationType: label);
+
+  DateTime get time => DateTime.parse(_json["notificationTime"]);
 
   Map<dynamic, dynamic> toJson(){
     return _json;

@@ -31,7 +31,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
 
   @override
   void initState() {
-    allNotifications.sort((a, b) => 1.compareTo(0),);
+    allNotifications.sort(
+      (a, b) => 1.compareTo(0),
+    );
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
@@ -151,8 +153,11 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   Widget notificationsList() {
     return ListView.separated(
         shrinkWrap: true,
+        key: const Key("notification-list"),
         physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) => NotificationItemWidget(notification: allNotifications[index]),
+        itemBuilder: (context, index) => NotificationItemWidget(
+            key: ObjectKey(allNotifications[index]),
+            notification: allNotifications[index]),
         separatorBuilder: (context, index) => Divider(
               color: ColorManager.secondary.withOpacity(0.09),
             ),
@@ -162,7 +167,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   Future<void> listenToTransactionsChanges() async {
     ref.listen(notificationsStreamProvider, (previous, next) {
       next.whenData((value) {
-        value.sort((a, b) => 1.compareTo(0),);
+        value.sort(
+          (a, b) => 1.compareTo(0),
+        );
         setState(() {
           allNotifications = value;
         });

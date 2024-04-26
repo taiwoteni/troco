@@ -45,6 +45,14 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
   }
 
   @override
+  void setState(VoidCallback fn) {
+    if (!mounted) {
+      return;
+    }
+    super.setState(fn);
+  }
+
+  @override
   void dispose() {
     controller.dispose();
     textController.dispose();
@@ -117,7 +125,9 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
               )
             : ListView.separated(
                 shrinkWrap: true,
+                key: const Key("add-member-list"),
                 itemBuilder: (context, index) => ClientWidget(
+                      key: ObjectKey(queriedClients[0]),
                       client: queriedClients[index],
                       group: group,
                       inviteMode: true,
@@ -230,12 +240,15 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
         onChanged: (text) {
           final value = text.trim().toLowerCase();
           final queryClients = allClients.where((element) {
-            bool hasFirstName = element.fullName.contains(value) ||
-                value.contains(element.fullName);
+            bool hasfullName =
+                element.lastName.toLowerCase().trim().contains(value) ||
+                    value.contains(element.lastName.trim().toLowerCase()) ||
+                    element.firstName.toLowerCase().trim().contains(value) ||
+                    value.contains(element.firstName.trim().toLowerCase());
             bool byRole =
                 element.accountCategory.name.toLowerCase().contains(value) ||
                     value.contains(element.accountCategory.name.toLowerCase());
-            return hasFirstName || byRole;
+            return hasfullName || byRole;
           }).toList();
           if (value.trim().isEmpty) {
             setState(() {

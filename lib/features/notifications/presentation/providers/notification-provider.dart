@@ -48,7 +48,7 @@ final notificationsStreamProvider = StreamProvider<List<Notification>>(
 
             /// We get the transactionsList from the Cache
             final _notificationsList =
-                AppStorage.getTransactions().map((e) => e.toJson()).toList();
+                AppStorage.getNotifications().map((e) => e.toJson()).toList();
 
             /// Then We contrast.
             final bool notificationsDifferent =
@@ -56,12 +56,12 @@ final notificationsStreamProvider = StreamProvider<List<Notification>>(
 
             final valuesAreDifferent = notificationsDifferent;
 
-            List<Notification> notificationsList = notificationsJson
+            
+            if (valuesAreDifferent) {
+              List<Notification> notificationsList = notificationsJson
                 .map((e) => Notification.fromJson(json: e))
                 .toList();
 
-            if (valuesAreDifferent) {
-              log('notifications have changed');
 
               AppStorage.saveNotifications(notifications: notificationsList);
               streamController.sink.add(notificationsList);

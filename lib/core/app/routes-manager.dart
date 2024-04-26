@@ -15,6 +15,7 @@ import 'package:troco/features/auth/presentation/register/views/setup-account-sc
 import 'package:troco/features/splash/presentation/splash-screen.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/views/transaction-success-screen.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/view-products-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-transaction-screen.dart';
 
 import '../../features/auth/presentation/login/views/login-screen.dart';
@@ -37,6 +38,7 @@ class Routes {
   static const addTransactionPinRoute = "/add-transaction-pin";
   static const authSuccessRoute = "/auth-success";
   static const homeRoute = "/home";
+  
   static const notificationRoute = "/notification";
 
   /// [chatRoute] is the route for the chat screen.
@@ -50,6 +52,9 @@ class Routes {
   /// [viewTransactionRoute] is the route to view a transaction.
   /// Must pass the transaction as an argument!
   static const viewTransactionRoute = "/view-transaction";
+
+  static const viewProductsRoute = "/view-product";
+
 
 }
 
@@ -152,6 +157,14 @@ class RouteGenerator {
           builder: (context){
             final transaction = routeSettings.arguments! as Transaction;
             return ViewTransactionScreen(transaction: transaction);
+          },
+        );
+      case Routes.viewProductsRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context){
+            final transaction = routeSettings.arguments! as Transaction;
+            return ViewProductScreen(transaction: transaction);
           },
         );
       default:

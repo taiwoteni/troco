@@ -121,6 +121,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// In this methos i use stream.when. This can only be used in the Build Method.
     /// Do not remove from here.
     listenToChatChanges();
+    listenToGroupChanges();
     return Padding(
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -374,18 +375,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   IconButton(
                     onPressed: () {
                       if (isCreator) {
-                        if(group.members.length>=2){
-                           Navigator.pushNamed(
-                            context, Routes.createTransactionRoute,
-                            arguments: group);
-                        }
-                        else{
+                        if (group.members.length >= 2) {
+                          Navigator.pushNamed(
+                              context, Routes.createTransactionRoute,
+                              arguments: group);
+                        } else {
                           SnackbarManager.showBasicSnackbar(
-                            context: context,
-                            message: "Add a buyer",
-                            mode: ContentType.warning);
+                              context: context,
+                              message: "Add a buyer",
+                              mode: ContentType.warning);
                         }
-                       
                       } else {
                         SnackbarManager.showBasicSnackbar(
                             context: context,
@@ -407,17 +406,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   regularSpacer(),
-                  IconButton(
-                    onPressed: addGroupMember,
-                    highlightColor: ColorManager.accentColor.withOpacity(0.15),
-                    style: const ButtonStyle(
-                        splashFactory: InkRipple.splashFactory),
-                    icon: SvgIcon(
-                      svgRes: AssetManager.svgFile(name: "add-member"),
-                      color: ColorManager.accentColor,
-                      size: const Size.square(IconSizeManager.regular * 1.3),
-                    ),
-                  )
+                  if (group.creator ==
+                      ClientProvider.readOnlyClient!.userId) ...[
+                    regularSpacer(),
+                    IconButton(
+                      onPressed: addGroupMember,
+                      highlightColor:
+                          ColorManager.accentColor.withOpacity(0.15),
+                      style: const ButtonStyle(
+                          splashFactory: InkRipple.splashFactory),
+                      icon: SvgIcon(
+                        svgRes: AssetManager.svgFile(name: "add-member"),
+                        color: ColorManager.accentColor,
+                        size: const Size.square(IconSizeManager.regular * 1.3),
+                      ),
+                    )
+                  ]
                 ],
               ),
             ),
@@ -426,6 +430,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void addGroupMember() {
+    if (group.members.length >= 2) {
+      SnackbarManager.showBasicSnackbar(
+        context: context,
+        message: "You already have a buyer",
+      );
+      return;
+    }
     showModalBottomSheet(
       isScrollControlled: true,
       enableDrag: true,
@@ -556,6 +567,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         error: (error, stackTrace) => null,
         loading: () => null,
       );
+    });
+  }
+
+  Future<void> listenToGroupChanges() async {
+    ref.listen(groupsStreamProvider, (previous, next) {
+      ref.watch(groupsStreamProvider).whenData((value) {
+        if (value.map((e) => e.groupId).contains(group.groupId)) {
+          final singleGroup =
+              value.firstWhere((element) => element.groupId == group.groupId);
+          if (group.members.length != singleGroup.members.length) {
+            setState(
+              () {
+                group = singleGroup;
+              },
+            );
+          }
+        }
+      });
     });
   }
 }

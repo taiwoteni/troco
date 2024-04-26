@@ -6,14 +6,12 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../groups/domain/entities/group.dart';
 import '../../../data/models/create-transaction-data-holder.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../domain/repository/transaction-repo.dart';
-import '../providers/create-transaction-provider.dart';
 
 class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
   const CreateTransactonProgressScreen({super.key});
@@ -147,7 +145,6 @@ class _CreateTransactonProgressScreenState
       });
       log(response.body);
     } else {
-      ref.watch(transactionsStreamProvider);
       final products = TransactionDataHolder.products!;
       setState(() {
         value = 1 / (products.length + 1);
@@ -187,7 +184,7 @@ class _CreateTransactonProgressScreenState
         }
       }
     }
-    ref.read(createTransactionProgressProvider.notifier).state = 0;
+    // ref.read(createTransactionProgressProvider.notifier).state = 0;
     TransactionDataHolder.clear();
 
     await Future.delayed(const Duration(seconds: 2));

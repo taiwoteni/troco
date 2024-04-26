@@ -1,3 +1,7 @@
+// ignore_for_file: unused_element
+
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +9,7 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/core/basecomponents/others/drag-handle.dart';
 import 'package:troco/core/basecomponents/others/onboarding-indicator.dart';
@@ -32,12 +37,15 @@ class ViewTransactionScreen extends ConsumerStatefulWidget {
 class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   late List<Product> products;
   late Transaction transaction;
+  late PageController controller;
   int productIndex = 0;
 
   @override
   void initState() {
+    controller = PageController();
     products = widget.transaction.products;
     transaction = widget.transaction;
+    log(transaction.toJson().toString());
     super.initState();
   }
 
@@ -45,10 +53,11 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.background,
-      body: Column(
-        children: [
+      body: CustomScrollView(
+        slivers: [
           appBar(),
-          Expanded(child: body()),
+          tabBar(),
+          body(),
         ],
       ),
       extendBody: true,
@@ -56,6 +65,61 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   }
 
   Widget appBar() {
+    return SliverAppBar(
+      systemOverlayStyle: ThemeManager.getGroupsUiOverlayStyle(),
+      automaticallyImplyLeading: false,
+      expandedHeight: MediaQuery.sizeOf(context).height * 0.4 +
+          MediaQuery.viewPaddingOf(context).top,
+      floating: false,
+      backgroundColor: ColorManager.background,
+      pinned: false,
+      flexibleSpace: FlexibleSpaceBar(
+        background: productsWidget(),
+        collapseMode: CollapseMode.parallax,
+      ),
+    );
+  }
+
+  Widget tabBar() {
+    return SliverPersistentHeader(
+        pinned: true,
+        delegate: _SliverTabBarDelegate(
+            child: Container(
+              color: ColorManager.background,
+              child: Column(
+                children: [
+                  const DragHandle(scale: 0.8),
+                  regularSpacer(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: SizeManager.medium),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            CustomTabWidget(
+                                transaction: widget.transaction,
+                                isFirst: true,
+                                description:
+                                    widget.transaction.transactionPurpose.name),
+                            CustomTabWidget(
+                                transaction: widget.transaction,
+                                description:
+                                    widget.transaction.transactionStatus.name),
+                          ],
+                        ),
+                        smallSpacer(),
+                        const RoundedTabIndicator(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            context: context));
+  }
+
+  Widget productsWidget() {
     return ClipPath(
       clipper: TransactionProductClipper(),
       child: SizedBox(
@@ -77,6 +141,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   Widget slider() {
     return SizedBox.expand(
         child: PageView.builder(
+      controller: controller,
       itemCount: products.length,
       onPageChanged: (value) {
         setState(() => productIndex = value);
@@ -115,48 +180,15 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   }
 
   Widget body() {
-    return Container(
-      height: double.maxFinite,
-      padding: const EdgeInsets.only(
-          bottom: SizeManager.regular, top: SizeManager.small),
-      child: Column(
+    return SliverFillRemaining(
+      child: PageView(
+        onPageChanged: (value) =>
+            ref.read(tabIndexProvider.notifier).state = value,
+        physics: const BouncingScrollPhysics(),
+        controller: ref.watch(tabControllerProvider),
         children: [
-          const DragHandle(scale: 0.8),
-          regularSpacer(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    CustomTabWidget(
-                        transaction: widget.transaction,
-                        isFirst: true,
-                        description:
-                            widget.transaction.transactionPurpose.name),
-                    CustomTabWidget(
-                        transaction: widget.transaction,
-                        description: widget.transaction.transactionStatus.name),
-                  ],
-                ),
-                smallSpacer(),
-                RoundedTabIndicator(
-                    firstSelected: ref.watch(tabIndexProvider) == 0),
-              ],
-            ),
-          ),
-          Expanded(
-            child: PageView(
-              onPageChanged: (value) =>
-                  ref.read(tabIndexProvider.notifier).state = value,
-              physics: const BouncingScrollPhysics(),
-              controller: ref.watch(tabControllerProvider),
-              children: [
-                TransactionsDetailPage(transaction: widget.transaction),
-                TransactionProgressPage(transaction: widget.transaction),
-              ],
-            ),
-          ),
+          TransactionsDetailPage(transaction: widget.transaction),
+          TransactionProgressPage(transaction: widget.transaction),
         ],
       ),
     );
@@ -206,8 +238,16 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
           children: [
             ...List.generate(
                 products.length,
-                (index) => OnboardingIndicator(
-                    checkedColor: Colors.white, checked: productIndex == index))
+                (index) => GestureDetector(
+                      onTap: () {
+                        controller.animateToPage(index,
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.ease);
+                      },
+                      child: OnboardingIndicator(
+                          checkedColor: Colors.white,
+                          checked: productIndex == index),
+                    ))
           ],
         ));
   }
@@ -243,5 +283,29 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
         ],
       ),
     );
+  }
+}
+
+class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final BuildContext context;
+
+  _SliverTabBarDelegate({required this.child, required this.context});
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  double get maxExtent => 91;
+
+  @override
+  double get minExtent => 91;
+
+  @override
+  bool shouldRebuild(covariant _SliverTabBarDelegate oldDelegate) {
+    return false;
   }
 }

@@ -23,6 +23,7 @@ import 'package:troco/features/dashboard/presentation/widgets/latest-transaction
 import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../transactions/domain/entities/transaction.dart';
 
@@ -218,8 +219,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget carouselWidget() {
+    // final bo ongoingTransactionBool = element.transactionStatus != TransactionStatus.Pending;
     final int totalTransactions = transactions
-        .map((e) => e.transactionAmount)
+    .map((e) => e.transactionAmount)
         .fold(0, (previousValue, element) => (previousValue + element).toInt());
     const defaultStyle = TextStyle(
         fontFamily: 'Quicksand',
