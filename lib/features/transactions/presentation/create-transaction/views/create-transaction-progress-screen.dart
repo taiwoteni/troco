@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -91,15 +93,15 @@ class _CreateTransactonProgressScreenState
   }
 
   Widget descriptionText() {
-    final products = TransactionDataHolder.products!;
+    final products = TransactionDataHolder.products ?? [];
     String text = "Creating Transaction...";
 
     if (value >= 1 / (products.length + 1)) {
       final productNo = (value * (products.length + 1)).toInt() - 1;
       text = "Adding Product $productNo...";
     }
-    if (value == 1) {
-      text = "Created transaction!";
+    if (value == 1 || products.isEmpty) {
+      text = "Created transaction !";
     }
     if (error) {
       text = "Error occurred.\nCheck your internet.";
@@ -180,14 +182,15 @@ class _CreateTransactonProgressScreenState
         break;
       } else {
         if (products.last == product) {
+          setState(() {
+            error = false;
+          });
           log("Success: ${response.messageBody!.toString()}");
         }
       }
     }
     // ref.read(createTransactionProgressProvider.notifier).state = 0;
-    TransactionDataHolder.clear();
-
-    await Future.delayed(const Duration(seconds: 2));
     Navigator.pushNamed(context, Routes.transactionSuccessRoute);
+    TransactionDataHolder.clear();
   }
 }
