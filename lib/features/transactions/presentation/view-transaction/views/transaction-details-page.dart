@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -5,9 +7,11 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
+import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
 class TransactionsDetailPage extends ConsumerStatefulWidget {
@@ -22,6 +26,10 @@ class TransactionsDetailPage extends ConsumerStatefulWidget {
 class _TransactionsDetailPageState
     extends ConsumerState<TransactionsDetailPage> {
   late Transaction transaction;
+
+  final okKey = UniqueKey();
+  final neutralKey = UniqueKey();
+  final cancelKey = UniqueKey();
 
   @override
   void initState() {
@@ -191,7 +199,6 @@ class _TransactionsDetailPageState
   }
 
   Widget location() {
-    final no = transaction.products.length;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -305,26 +312,121 @@ class _TransactionsDetailPageState
   }
 
   Widget button() {
-    final isBuying =
-        transaction.transactionPurpose == TransactionPurpose.Buying;
+    final isPending =
+        transaction.transactionStatus == TransactionStatus.Pending;
+    final isInProgress =
+        transaction.transactionStatus == TransactionStatus.Inprogress;
+    final isProcessing =
+        transaction.transactionStatus == TransactionStatus.Processing;
+    final isOngoing =
+        transaction.transactionStatus == TransactionStatus.Ongoing;
+    final isFinalizing =
+        transaction.transactionStatus == TransactionStatus.Finalizing;
+    final isCompleted =
+        transaction.transactionStatus == TransactionStatus.Completed;
+    final isCancelled =
+        transaction.transactionStatus == TransactionStatus.Cancelled;
+
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
     return Row(
       children: [
-        if (isBuying) ...[
-          Expanded(
-            child: CustomButton.medium(
-              label: "Accept",
-              color: ColorManager.accentColor,
-            ),
-          ),
-          regularSpacer(),
+        if (isPending) ...[
+          if (isBuyer)
+            actionButton(
+                positive: true, label: "Accept", onPressed: acceptTransaction),
+          actionButton(
+              positive: false,
+              label: isBuyer ? "Reject" : "Cancel",
+              //No function to delete yet.
+              onPressed: isBuyer ? rejectTransaction : () {}),
         ],
-        Expanded(
-          child: CustomButton.medium(
-            label: !isBuying ? "Cancel" : "Reject",
-            color: Colors.red.shade800,
-          ),
-        ),
+        if (isInProgress)
+          actionButton(
+              positive: null, label: "Waiting for admin", onPressed: () {}),
+        if (isProcessing)
+          actionButton(
+              positive: isBuyer ? null : true,
+              label: isBuyer ? "Getting a driver..." : "Add driver details",
+              onPressed: () {}),
+        if (isOngoing)
+          actionButton(
+              positive: !isBuyer ? null : true,
+              label: isBuyer ? "Received Product" : "Sending Product...",
+              onPressed: () {}),
+        if (isFinalizing) ...[
+          if (isBuyer)
+            actionButton(positive: true, label: "Satisfied", onPressed: () {}),
+          actionButton(
+              positive: isBuyer ? null : false,
+              label: isBuyer ? "Unsatisfied" : "Waiting for response...",
+              //No function to delete yet.
+              onPressed: () {}),
+        ],
+        if (isCompleted || isCancelled)
+          actionButton(
+              positive: null,
+              label: isCompleted ? "Completed..." : "Cancelled..",
+              onPressed: () {}),
+
+        // Expanded(
+        //     child: CustomButton.medium(
+        //       label: "Accept",
+        //       usesProvider: true,
+        //       buttonKey: okKey,
+        //       color: ColorManager.accentColor,
+        //     ),
+        //   ),
+
+        // Expanded(
+        //   child: CustomButton.medium(
+        //     buttonKey: cancelKey,
+        //     usesProvider: true,
+        //     label: !isBuyer ? "Cancel" : "Reject",
+        //     color: Colors.red.shade800,
+        //   ),
+        // ),
       ],
     );
+  }
+
+  Widget actionButton(
+      {required final bool? positive,
+      required final String label,
+      required void Function() onPressed}) {
+    return Expanded(
+      child: CustomButton.medium(
+        margin: const EdgeInsets.symmetric(horizontal: SizeManager.small),
+        label: label,
+        buttonKey: positive == null
+            ? neutralKey
+            : positive
+                ? okKey
+                : cancelKey,
+        usesProvider: true,
+        disabled: positive == null,
+        onPressed: onPressed,
+        color: positive == null
+            ? null
+            : positive
+                ? ColorManager.accentColor
+                : Colors.red.shade700,
+      ),
+    );
+  }
+
+  Future<void> acceptTransaction() async {
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    final result = await TransactionRepo.respondToTransaction(
+        aprove: true, transaction: transaction);
+    log(result.body);
+    ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+  }
+
+  Future<void> rejectTransaction() async {
+    ButtonProvider.startLoading(buttonKey: cancelKey, ref: ref);
+    final result = await TransactionRepo.respondToTransaction(
+        aprove: false, transaction: transaction);
+    log(result.body);
+    ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
   }
 }
