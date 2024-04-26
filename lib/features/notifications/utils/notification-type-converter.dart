@@ -5,9 +5,9 @@ class NotificationTypeConverter {
       {required final String notificationType}) {
     switch (notificationType.toLowerCase().trim()) {
       case "verify transaction":
-      return NotificationType.VerifyTransaction;
-      case "await transaction approval":
-      return NotificationType.CreateNotification;
+        return NotificationType.VerifyTransaction;
+      case "awaiting transaction approval":
+        return NotificationType.CreateTransaction;
       default:
         return NotificationType.Unknown;
     }

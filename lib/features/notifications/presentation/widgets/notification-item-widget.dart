@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-item-dialog.dart';
 import 'package:troco/features/notifications/utils/enums.dart';
@@ -82,11 +83,13 @@ class _NotificationItemWidgetState
     var color = widget.notification.type == NotificationType.VerifyTransaction
         ? Colors.redAccent
         : ColorManager.accentColor;
-    if (widget.notification.type != NotificationType.VerifyTransaction) {
+    if (widget.notification.type != NotificationType.VerifyTransaction ||
+        widget.notification.type != NotificationType.CreateTransaction) {
       return;
     }
+    log(widget.notification.argument);
     Navigator.pushNamed(context, Routes.viewTransactionRoute,
-          arguments: Transaction.fromJson(json: widget.notification.argument));
+        arguments: Transaction.fromJson(json: widget.notification.argument));
 
     showDialog(
       context: context,
