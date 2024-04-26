@@ -12,7 +12,7 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
-import 'package:troco/features/transactions/utils/enums.dart';
+import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
 
@@ -61,7 +61,7 @@ class TransactionRepo {
               field: "productName", value: product.productName),
           MultiPartModel.field(
               field: "productCondition",
-              value: product.productCondition.name.toLowerCase()),
+              value: ProductConditionConverter.convertToString(condition: product.productCondition)),
           MultiPartModel.field(field: "quantity", value: product.quantity),
           MultiPartModel.field(field: "price", value: product.productPrice),
           MultiPartModel.file(file: file),
@@ -139,7 +139,6 @@ class TransactionRepo {
   static Future<HttpResponseModel> respondToTransaction({
     required final bool aprove,
     required final Transaction transaction,
-    required final TransactionStatus status,
     })async{
       final result = await ApiInterface.postRequest(
         url: "updateTransactionStatus/${transaction.transactionId}/${ClientProvider.readOnlyClient!.userId}/${transaction.creator}",
