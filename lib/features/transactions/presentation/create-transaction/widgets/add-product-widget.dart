@@ -198,10 +198,12 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
         ),
         regularSpacer(),
         DropdownInputFormField(
-          items:
-              ProductCondition.values.map((e) => ProductConditionConverter.convertToString(condition: e)).toList(),
-          value: selectedProductCondition?.name.toLowerCase() ?? "",
-          
+          items: ProductCondition.values
+              .map((e) =>
+                  ProductConditionConverter.convertToString(condition: e))
+              .toList(),
+          value: selectedProductCondition == null? "": ProductConditionConverter.convertToString(
+              condition: selectedProductCondition!),
           onChanged: (value) {
             if (value != null) {
               setState(() => selectedProductCondition =
@@ -408,7 +410,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             "productId": const Uuid().v4(),
             "productName": name,
             "productPrice": int.parse(price),
-            "productCondition": ProductConditionConverter.convertToString(condition: selectedProductCondition!),
+            "productCondition": ProductConditionConverter.convertToString(
+                condition: selectedProductCondition!),
             "quantity": quantity,
             "productImages": productImages,
           };
