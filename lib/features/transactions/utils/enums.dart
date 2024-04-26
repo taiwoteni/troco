@@ -21,7 +21,7 @@ enum TransactionStatus {
 
   Finalizing, /// When buyer has recieved product but not shown satisfaction. Buyer has received product.
   
-  Completed,  /// When seller is satisfied and admin pays the seller the money
+  Completed,  /// When buyer is satisfied and admin pays the seller the money
   
   Cancelled, /// Do i need to explain this one? 😂
 }
