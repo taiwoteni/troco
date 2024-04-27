@@ -61,7 +61,8 @@ class TransactionRepo {
               field: "productName", value: product.productName),
           MultiPartModel.field(
               field: "productCondition",
-              value: ProductConditionConverter.convertToString(condition: product.productCondition)),
+              value: ProductConditionConverter.convertToString(
+                  condition: product.productCondition)),
           MultiPartModel.field(field: "quantity", value: product.quantity),
           MultiPartModel.field(field: "price", value: product.productPrice),
           MultiPartModel.file(file: file),
@@ -95,16 +96,15 @@ class TransactionRepo {
 
     final transactionsJson = result.messageBody!["data"]["transactions"];
 
-    final List<String> transactionsId = (transactionsJson as List).map((e) => e["_id"].toString()).toList();
+    final List<String> transactionsId =
+        (transactionsJson as List).map((e) => e["_id"].toString()).toList();
 
-    List<Map<dynamic,dynamic>> jsonData = [];
-    for(final String id in transactionsId){
+    List<Map<dynamic, dynamic>> jsonData = [];
+    for (final String id in transactionsId) {
       final response = await getOneTransaction(transactionId: id);
-      if(response.error){
+      if (response.error) {
         return HttpResponseModel(
-          error: response.error, 
-          body: response.body,
-          code: response.code);
+            error: response.error, body: response.body, code: response.code);
       }
 
       final data = response.messageBody!["data"];
@@ -117,7 +117,6 @@ class TransactionRepo {
         body: json.encode(jsonData),
         code: result.code);
   }
-
 
   /// User Data must have been saved on Cache first before [getTransactions] can be called.
   /// Else: Error will be thrown.
@@ -135,17 +134,15 @@ class TransactionRepo {
     }
   }
 
-
   static Future<HttpResponseModel> respondToTransaction({
-    required final bool aprove,
+    required final bool approve,
     required final Transaction transaction,
-    })async{
-      final result = await ApiInterface.postRequest(
-        url: "updateTransactionStatus/${transaction.transactionId}/${ClientProvider.readOnlyClient!.userId}/${transaction.creator}",
-        data: {
-          "status":aprove?"approved":"declined"
-        });
+  }) async {
+    final result = await ApiInterface.patchRequest(
+        url:
+            "updateTransactionStatus/${transaction.transactionId}/${ClientProvider.readOnlyClient!.userId}/${transaction.creator}",
+        data: {"status": approve ? "In Progress" : "Declined"});
 
-      return result;
+    return result;
   }
 }

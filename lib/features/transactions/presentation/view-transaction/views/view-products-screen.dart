@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -184,7 +185,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          product.productName,
+          "${product.productName.substring(0, product.productName.length > 25 ? 23 : null)}${product.productName.length > 25 ? ".." : ""}",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
@@ -312,7 +313,8 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontSize: FontSizeManager.medium * 0.85),
         ),
         Text(
-          product.productCondition.name,
+          ProductConditionConverter.convertToString(
+              condition: product.productCondition),
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,

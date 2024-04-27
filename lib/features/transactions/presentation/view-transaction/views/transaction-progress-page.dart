@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
-import 'package:troco/features/transactions/utils/enums.dart';
+import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/progress-details-page.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/progress-timeline-page.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/menu-toggle.dart';
 
-import '../../../../../core/app/asset-manager.dart';
 import '../../../domain/entities/transaction.dart';
 
 class TransactionProgressPage extends ConsumerStatefulWidget {
@@ -27,34 +30,34 @@ class _TransactionProgressPageState
 
   @override
   Widget build(BuildContext context) {
-    return EmptyScreen(
-      lottie: AssetManager.lottieFile(name: getAnimationName()),
-      scale: getAnimationScale(),
-      label: getAnimationLabel(),
-      expanded: true,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        mediumSpacer(),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: SizeManager.extralarge),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: MenuToggle(),
+          ),
+        ),
+        mediumSpacer(),
+        Expanded(
+          child: AnimatedCrossFade(
+            firstChild: ProgressTimelinePage(
+              transaction: transaction,
+            ),
+            secondChild: ProgressDetailsPage(transaction: transaction),
+            crossFadeState: ref.watch(menuToggleIndexProvider)
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            duration: const Duration(milliseconds: 400),
+            firstCurve: Curves.easeIn,
+            secondCurve: Curves.easeOut,
+            sizeCurve: Curves.ease,
+          ),
+        )
+      ],
     );
-  }
-
-  String getAnimationName() {
-    switch (transaction.transactionStatus) {
-      default:
-        return "pending";
-    }
-  }
-
-  double getAnimationScale() {
-    switch (transaction.transactionStatus) {
-      case TransactionStatus.Pending:
-        return 1.2;
-      default:
-        return 1.0;
-    }
-  }
-
-  String getAnimationLabel() {
-    switch (transaction.transactionStatus) {
-      default:
-        return "Waiting for buyer to approve.";
-    }
   }
 }

@@ -40,34 +40,81 @@ class _TransactionsDetailPageState
   @override
   Widget build(BuildContext context) {
     return ListView(
-      physics: const NeverScrollableScrollPhysics(),
+      // physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.extralarge),
       children: [
         mediumSpacer(),
         transactionId(),
         mediumSpacer(),
         regularSpacer(),
+        // transaction name
         title(),
         mediumSpacer(),
+        // transaction details
         description(),
         extraLargeSpacer(),
         regularSpacer(),
+        // number of products
         numberOfProducts(),
         regularSpacer(),
         divider(),
         regularSpacer(),
+        // location
         location(),
         regularSpacer(),
         divider(),
         regularSpacer(),
+        // inspection period
         inspectionPeriod(),
         regularSpacer(),
         divider(),
         regularSpacer(),
+        // estimated time
         estimatedTime(),
         regularSpacer(),
         divider(),
         regularSpacer(),
+        // escrow fee
+        escrowFee(),
+        regularSpacer(),
+        largeSpacer(),
+
+        //Driver details
+        regularSpacer(),
+        driverDetailsTitle(),
+        largeSpacer(),
+        regularSpacer(),
+        // delivery details
+        driverDestination(),
+        regularSpacer(),
+        divider(),
+        regularSpacer(),
+        // Vehicle Name
+        vehicleName(),
+        regularSpacer(),
+        divider(),
+        regularSpacer(),
+        // Driver Name
+        driverName(),
+        regularSpacer(),
+        divider(),
+        regularSpacer(),
+        // Driver Number
+        driverNumber(),
+        regularSpacer(),
+        divider(),
+        regularSpacer(),
+        // Delivery Date
+        estimatedDate(),
+        regularSpacer(),
+        divider(),
+        regularSpacer(),
+        // Delivery Fee
+        deliveryFee(),
+        regularSpacer(),
+        divider(),
+        extraLargeSpacer(),
+        // total price
         price(),
         regularSpacer(),
         extraLargeSpacer(),
@@ -311,6 +358,215 @@ class _TransactionsDetailPageState
     );
   }
 
+  Widget escrowFee() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Escrow Fee: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          "${NumberFormat.currency(symbol: '', locale: 'en_NG', decimalDigits: 2).format(transaction.transactionAmount * 0.05)} NGN",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.accentColor,
+              fontFamily: 'lato',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
+  Widget driverDetailsTitle() {
+    return Text(
+      "Driver Details",
+      textAlign: TextAlign.left,
+      style: TextStyle(
+          color: ColorManager.primary,
+          fontFamily: 'Quicksand',
+          wordSpacing: -0.5,
+          fontWeight: FontWeightManager.bold,
+          fontSize: FontSizeManager.medium * 0.9),
+    );
+  }
+
+  Widget driverDestination() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Destination: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          "---",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
+  Widget vehicleName() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Vehicle Name: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          '---',
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
+  Widget driverName() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Driver Name: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          '---',
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
+  Widget driverNumber() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Driver Number: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          "---",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
+  Widget deliveryFee() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Delivery Fee",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          '---',
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
+  Widget estimatedDate() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Estimated Del. Date: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          "---",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
   Widget button() {
     final isPending =
         transaction.transactionStatus == TransactionStatus.Pending;
@@ -338,16 +594,16 @@ class _TransactionsDetailPageState
               positive: false,
               label: isBuyer ? "Reject" : "Cancel",
               //No function to delete yet.
-              onPressed: isBuyer ? rejectTransaction : () {}),
+              onPressed: rejectTransaction),
         ],
         if (isInProgress)
           actionButton(
-              positive: null, label: "Waiting for admin", onPressed: () {}),
+              positive: null, label: "Waiting for admin...", onPressed: () {}),
         if (isProcessing)
           actionButton(
               positive: isBuyer ? null : true,
               label: isBuyer ? "Getting a driver..." : "Add driver details",
-              onPressed: () {}),
+              onPressed: addDriverDetails),
         if (isOngoing)
           actionButton(
               positive: !isBuyer ? null : true,
@@ -389,6 +645,14 @@ class _TransactionsDetailPageState
     );
   }
 
+  Future<void> makePayment()async{
+
+  }
+
+  Future<void> addDriverDetails()async{
+
+  }
+
   Widget actionButton(
       {required final bool? positive,
       required final String label,
@@ -414,10 +678,11 @@ class _TransactionsDetailPageState
     );
   }
 
+ 
   Future<void> acceptTransaction() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
     final result = await TransactionRepo.respondToTransaction(
-        aprove: true, transaction: transaction);
+        approve: true, transaction: transaction);
     log(result.body);
     ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
   }
@@ -425,7 +690,7 @@ class _TransactionsDetailPageState
   Future<void> rejectTransaction() async {
     ButtonProvider.startLoading(buttonKey: cancelKey, ref: ref);
     final result = await TransactionRepo.respondToTransaction(
-        aprove: false, transaction: transaction);
+        approve: false, transaction: transaction);
     log(result.body);
     ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
   }

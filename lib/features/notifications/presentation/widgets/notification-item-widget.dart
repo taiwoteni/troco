@@ -83,13 +83,13 @@ class _NotificationItemWidgetState
     var color = widget.notification.type == NotificationType.VerifyTransaction
         ? Colors.redAccent
         : ColorManager.accentColor;
-    if (widget.notification.type != NotificationType.VerifyTransaction ||
-        widget.notification.type != NotificationType.CreateTransaction) {
+    if (widget.notification.type == NotificationType.VerifyTransaction ||
+        widget.notification.type == NotificationType.CreateTransaction) {
+      log(widget.notification.argument.toString());
+      Navigator.pushNamed(context, Routes.viewTransactionRoute,
+          arguments: Transaction.fromJson(json: widget.notification.argument));
       return;
     }
-    log(widget.notification.argument);
-    Navigator.pushNamed(context, Routes.viewTransactionRoute,
-        arguments: Transaction.fromJson(json: widget.notification.argument));
 
     showDialog(
       context: context,

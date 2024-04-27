@@ -5,7 +5,8 @@ class ProductConditionConverter {
     switch (condition.toLowerCase()) {
       case 'new':
         return ProductCondition.New;
-        case 'nigerian used':
+      case 'nigerian used':
+      case 'nigerianused':
         return ProductCondition.NigerianUsed;
       default:
         return ProductCondition.ForeignUsed;
@@ -16,7 +17,7 @@ class ProductConditionConverter {
     switch (condition) {
       case ProductCondition.ForeignUsed:
         return "Foreign Used";
-        case ProductCondition.NigerianUsed:
+      case ProductCondition.NigerianUsed:
         return "Nigerian Used";
       default:
         return "New";

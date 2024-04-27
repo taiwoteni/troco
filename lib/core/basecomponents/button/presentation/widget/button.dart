@@ -16,7 +16,7 @@ class CustomButton extends ConsumerStatefulWidget {
   final String size;
   final void Function()? onPressed;
   final Color? color;
-  final bool usesProvider,disabled;
+  final bool usesProvider, disabled;
   final EdgeInsets? margin;
 
   CustomButton({
@@ -45,10 +45,8 @@ class CustomButton extends ConsumerStatefulWidget {
     this.usesProvider = false,
     this.onPressed,
     this.disabled = false,
-
     this.margin,
     this.color,
-
   }) {
     if (usesProvider) {
       if (buttonKey == null) {
@@ -63,11 +61,9 @@ class CustomButton extends ConsumerStatefulWidget {
     this.buttonKey,
     this.size = "small",
     this.disabled = false,
-
     this.usesProvider = false,
     this.onPressed,
     this.color,
-
     this.margin,
   }) {
     if (usesProvider) {
@@ -83,6 +79,26 @@ class CustomButton extends ConsumerStatefulWidget {
 
 class _CustomButtonState extends ConsumerState<CustomButton> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      if (widget.disabled) {
+        ButtonProvider.disable(buttonKey: widget.buttonKey!, ref: ref);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(CustomButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      if (widget.disabled) {
+        ButtonProvider.disable(buttonKey: widget.buttonKey!, ref: ref);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     bool usesProvider = widget.usesProvider;
     bool loading = false;
@@ -92,9 +108,7 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
       //To add this key to button provider
       // Key would be true since useProvider is true and no error is thrown.
       // If disabled was set by default
-      if(widget.disabled){
-        ButtonProvider.disable(buttonKey: widget.buttonKey!, ref: ref);
-      }
+
       loading =
           ButtonProvider.loadingValue(buttonKey: widget.buttonKey!, ref: ref);
       enabled =
@@ -110,7 +124,7 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
                 : SizeManager.large),
         child: Material(
           child: InkWell(
-            onTap: enabled && !loading? widget.onPressed : null,
+            onTap: enabled && !loading ? widget.onPressed : null,
             splashColor: ColorManager.accentColor,
             splashFactory: InkRipple.splashFactory,
             child: Container(

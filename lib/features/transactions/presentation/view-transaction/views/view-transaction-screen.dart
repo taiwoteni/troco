@@ -21,6 +21,7 @@ import 'package:troco/features/transactions/presentation/view-transaction/views/
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/rounded-tab-indicator.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/tab-item.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/view-transaction-product-clipper.dart';
+import 'package:troco/features/transactions/utils/transaction-status-converter.dart';
 
 import '../../../../../core/basecomponents/animations/lottie.dart';
 import '../../../domain/entities/product.dart';
@@ -104,8 +105,10 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
                                     widget.transaction.transactionPurpose.name),
                             CustomTabWidget(
                                 transaction: widget.transaction,
-                                description:
-                                    widget.transaction.transactionStatus.name),
+                                description: TransactionStatusConverter
+                                    .convertToStringStatus(
+                                        status: widget
+                                            .transaction.transactionStatus)),
                           ],
                         ),
                         smallSpacer(),

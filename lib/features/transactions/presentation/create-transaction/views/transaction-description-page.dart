@@ -111,6 +111,9 @@ class _TransactionDescriptionPageState
             if (value.trim().length <= 8) {
               return "* should be at least 8 digits";
             }
+            if (value.trim().length >= 25) {
+              return "* less than 25 digits";
+            }
             return null;
           },
           onSaved: (value) {

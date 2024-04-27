@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/transactions/domain/entities/driver.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/utils/inspection-period-converter.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
@@ -26,7 +27,8 @@ class Transaction extends Equatable {
 
   int get inspectionDays => int.parse(_json["inspectionDays"].toString());
 
-  String get address => _json["location"] ?? _json["address"] ?? "No address yet";
+  String get address =>
+      _json["location"] ?? _json["address"] ?? "No address yet";
 
   String get creator => _json["creator"];
 
@@ -52,7 +54,7 @@ class Transaction extends Equatable {
                   : "selling"));
 
   TransactionStatus get transactionStatus =>
-      TransactionConverter.convertToStatus(
+      TransactionStatusConverter.convertToStatus(
           status: _json["transaction status"] ?? _json["status"] ?? "pending");
 
   /// We have to think these through as a transaction can have many products.
@@ -61,6 +63,16 @@ class Transaction extends Equatable {
         .map((e) => Product.fromJson(json: e))
         .toList();
   }
+
+  String? get adminId => _json["adminId"];
+
+  bool get hasAdmin => _json.containsKey("adminId");
+
+  Driver get driver => Driver.fromJson(json: _json["driver"]);
+
+  bool get hasDriver => false;
+
+  bool get paymentDone => false;
 
   String get transactionAmountString =>
       NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
@@ -81,8 +93,6 @@ class Transaction extends Equatable {
         .fold(0, (previousValue, currentPrice) => previousValue + currentPrice);
     return amount.toDouble();
   }
-
-  
 
   Map<dynamic, dynamic> toJson() {
     return _json;

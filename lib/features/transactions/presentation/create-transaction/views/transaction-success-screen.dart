@@ -6,6 +6,7 @@ import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
 import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
 import '../../../../../core/app/color-manager.dart';
 
 class TransactionSuccessScreen extends ConsumerStatefulWidget {
@@ -53,7 +54,7 @@ class _AuthSuccessScreenState extends ConsumerState<TransactionSuccessScreen> {
         ),
         mediumSpacer(),
         Text(
-          "Transaction sucess",
+          "Transaction success",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: "Lato",
@@ -87,6 +88,7 @@ class _AuthSuccessScreenState extends ConsumerState<TransactionSuccessScreen> {
           bottom: SizeManager.extralarge),
       child: CustomButton(
         onPressed: () {
+          ref.read(createTransactionProgressProvider.notifier).state = 0;
           Navigator.popUntil(
             context, 
             ModalRoute.withName(Routes.chatRoute));

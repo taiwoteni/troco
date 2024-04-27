@@ -61,7 +61,7 @@ class TransactionItemWidget extends StatelessWidget {
               fontFamily: 'Lato',
               fontSize: FontSizeManager.medium,
               fontWeight: FontWeightManager.semibold),
-          subtitle: Text(TransactionConverter.convertToStringStatus(
+          subtitle: Text(TransactionStatusConverter.convertToStringStatus(
               status: transaction.transactionStatus)),
           subtitleTextStyle: TextStyle(
               color: ColorManager.secondary,

@@ -1,7 +1,6 @@
 import 'package:troco/features/transactions/utils/enums.dart';
 
-
-class TransactionConverter {
+class TransactionStatusConverter {
   static TransactionStatus convertToStatus({required final String status}) {
     switch (status.toLowerCase()) {
       case 'pending':
