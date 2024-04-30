@@ -1,7 +1,6 @@
 class Driver{
-  final Map<dynamic,dynamic> _json;
 
-  Driver.fromJson({required final Map<dynamic,dynamic> json}):_json=json;
+  Driver.fromJson({required final Map<dynamic,dynamic> json});
 
   bool get checkedOut => false;
 }
