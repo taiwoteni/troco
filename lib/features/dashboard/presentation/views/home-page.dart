@@ -23,7 +23,6 @@ import 'package:troco/features/dashboard/presentation/widgets/latest-transaction
 import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
-import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../transactions/domain/entities/transaction.dart';
 
