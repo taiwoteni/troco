@@ -100,62 +100,68 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
               style: titleTextStyle(),
             ),
             mediumSpacer(),
+            subTimelineWidget(subProcesses: process.subProcesses),
           ],
         ));
   }
 
-  Widget subTimelineWidget({required final List<SubProcess> subProcesses}){
-    return FixedTimeline.tileBuilder(
-          theme: TimelineThemeData(
-              indicatorTheme: const IndicatorThemeData(
-                position: 0,
-                size: 10.0,
-              ),
-              connectorTheme: const ConnectorThemeData(
-                thickness: 1,
-              ),
-              direction: Axis.vertical,
-              color: ColorManager.accentColor),
-          builder: TimelineTileBuilder.connected(
-              connectionDirection: ConnectionDirection.after,
-              oppositeContentsBuilder: (context, index) => const SizedBox(
-                    width: 0,
-                    height: 0,
-                  ),
-              nodePositionBuilder: (context, index) => 0,
-              contentsAlign: ContentsAlign.basic,
-              contentsBuilder: (context, index) {
-                final subProcess = subProcesses[index];
-                return Text(
-                  subProcess.message);
-              },
-              connectorBuilder: (context, index, type) {
-                final process = timelines[index];
-                return Connector.solidLine(
-                  color: process.completed
-                      ? ColorManager.accentColor
-                      : ColorManager.secondary.withOpacity(0.2),
-                );
-              },
-              indicatorBuilder: (context, index) {
-                final process = timelines[index];
-                if (!process.completed) {
-                  return OutlinedDotIndicator(
-                    borderWidth: 2.5,
-                    color: ColorManager.secondary.withOpacity(0.3),
-                  );
-                }
+  Widget subTimelineWidget({required final List<SubProcess> subProcesses}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
+      child: FixedTimeline.tileBuilder(
+        theme: TimelineTheme.of(context).copyWith(
+            nodePosition: 0,
+            connectorTheme: TimelineTheme.of(context).connectorTheme.copyWith(
+                  thickness: 1.0,
+                ),
+            indicatorTheme: TimelineTheme.of(context).indicatorTheme.copyWith(
+                  size: 10.0,
+                  position: 0.5,
+                ),
+            direction: Axis.vertical,
+            color: ColorManager.accentColor),
+        builder: TimelineTileBuilder(
+            nodePositionBuilder: (context, index) => 0,
+            contentsAlign: ContentsAlign.basic,
+            startConnectorBuilder: (_, index) => Connector.solidLine(),
+            endConnectorBuilder: (_, index) => Connector.solidLine(),
+            contentsBuilder: (context, index) {
+              final subProcess = subProcesses[index];
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: SizeManager.medium),
+                child: Text(subProcess.message,
+                    style: TextStyle(
+                        color: subProcess.done
+                            ? ColorManager.accentColor
+                            : ColorManager.secondary.withOpacity(0.4),
+                        fontSize: FontSizeManager.small * 1.1,
+                        fontFamily: 'quicksand')),
+              );
+            },
+            itemExtentBuilder: (context, index) =>
+                index == 0 || index == subProcesses.length + 1 ? 20 : 30,
+            nodeItemOverlapBuilder: (context, index) =>
+                index == 0 || index == subProcesses.length + 1 ? true : null,
+            indicatorBuilder: (context, index) {
+              final subProcess = subProcesses[index];
+              if (!subProcess.done) {
                 return DotIndicator(
-                  color: ColorManager.accentColor,
-                  child: Icon(
-                    Icons.check_rounded,
-                    size: IconSizeManager.small * 0.9,
-                    color: ColorManager.primaryDark,
-                  ),
+                  color: ColorManager.secondary.withOpacity(0.4),
                 );
-              },
-              itemCount: timelines.length),
-        );
+              }
+              return DotIndicator(
+                color: ColorManager.accentColor,
+                // child: Icon(
+                //   Icons.check_rounded,
+                //   size: IconSizeManager.small * 0.9,
+                //   color: ColorManager.primaryDark,
+                // ),
+              );
+            },
+            itemCount: subProcesses.length),
+      ),
+    );
   }
 
   TextStyle titleTextStyle() {

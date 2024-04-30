@@ -40,7 +40,7 @@ class _TransactionsDetailPageState
   @override
   Widget build(BuildContext context) {
     return ListView(
-      // physics: const NeverScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.extralarge),
       children: [
         mediumSpacer(),
@@ -645,13 +645,9 @@ class _TransactionsDetailPageState
     );
   }
 
-  Future<void> makePayment()async{
+  Future<void> makePayment() async {}
 
-  }
-
-  Future<void> addDriverDetails()async{
-
-  }
+  Future<void> addDriverDetails() async {}
 
   Widget actionButton(
       {required final bool? positive,
@@ -678,7 +674,6 @@ class _TransactionsDetailPageState
     );
   }
 
- 
   Future<void> acceptTransaction() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
     final result = await TransactionRepo.respondToTransaction(

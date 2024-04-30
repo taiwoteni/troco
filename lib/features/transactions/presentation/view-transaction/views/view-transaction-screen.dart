@@ -20,7 +20,6 @@ import 'package:troco/features/transactions/presentation/view-transaction/views/
 import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-progress-page.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/rounded-tab-indicator.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/tab-item.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/widgets/view-transaction-product-clipper.dart';
 import 'package:troco/features/transactions/utils/transaction-status-converter.dart';
 
 import '../../../../../core/basecomponents/animations/lottie.dart';
@@ -55,9 +54,9 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: CustomScrollView(
+        physics: const NeverScrollableScrollPhysics(),
         slivers: [
           appBar(),
-          tabBar(),
           body(),
         ],
       ),
@@ -71,72 +70,82 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
       automaticallyImplyLeading: false,
       expandedHeight: MediaQuery.sizeOf(context).height * 0.4 +
           MediaQuery.viewPaddingOf(context).top,
-      floating: false,
+      elevation: 0,
+      forceElevated: false,
+      forceMaterialTransparency: true,
+      floating: true,
+      snap: true,
+      stretch: true,
       backgroundColor: ColorManager.background,
-      pinned: false,
       flexibleSpace: FlexibleSpaceBar(
+        stretchModes: const [
+          StretchMode.zoomBackground,
+        ],
         background: productsWidget(),
-        collapseMode: CollapseMode.parallax,
       ),
+      bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(100), child: tabBar()),
     );
   }
 
   Widget tabBar() {
-    return SliverPersistentHeader(
-        pinned: true,
-        delegate: _SliverTabBarDelegate(
-            child: Container(
-              color: ColorManager.background,
-              child: Column(
-                children: [
-                  const DragHandle(scale: 0.8),
-                  regularSpacer(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: SizeManager.medium),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            CustomTabWidget(
-                                transaction: widget.transaction,
-                                isFirst: true,
-                                description:
-                                    widget.transaction.transactionPurpose.name),
-                            CustomTabWidget(
-                                transaction: widget.transaction,
-                                description: TransactionStatusConverter
-                                    .convertToStringStatus(
-                                        status: widget
-                                            .transaction.transactionStatus)),
-                          ],
-                        ),
-                        smallSpacer(),
-                        const RoundedTabIndicator(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    return Container(
+      width: double.maxFinite,
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(SizeManager.extralarge * 1.5)),
+          color: ColorManager.background),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          mediumSpacer(),
+          const DragHandle(scale: 0.8),
+          regularSpacer(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    CustomTabWidget(
+                        transaction: widget.transaction,
+                        isFirst: true,
+                        description:
+                            widget.transaction.transactionPurpose.name),
+                    CustomTabWidget(
+                        transaction: widget.transaction,
+                        description:
+                            TransactionStatusConverter.convertToStringStatus(
+                                status: widget.transaction.transactionStatus)),
+                  ],
+                ),
+                smallSpacer(),
+                const RoundedTabIndicator(),
+                smallSpacer(),
+              ],
             ),
-            context: context));
+          ),
+        ],
+      ),
+    );
   }
 
   Widget productsWidget() {
-    return ClipPath(
-      clipper: TransactionProductClipper(),
-      child: SizedBox(
-        width: double.maxFinite,
-        height: MediaQuery.sizeOf(context).height * 0.4 +
-            MediaQuery.viewPaddingOf(context).top,
-        child: Stack(
-          children: [
-            slider(),
-            Positioned(top: 0, right: 0, left: 0, child: controls()),
-            Positioned(top: 0, right: 0, left: 0, child: productName()),
-            Positioned(left: 0, right: 0, bottom: 0, child: indicators())
-          ],
-        ),
+    return SizedBox(
+      width: double.maxFinite,
+      height: MediaQuery.sizeOf(context).height * 0.4 +
+          MediaQuery.viewPaddingOf(context).top,
+      child: Stack(
+        children: [
+          slider(),
+          Positioned(top: 0, right: 0, left: 0, child: controls()),
+          Positioned(top: 0, right: 0, left: 0, child: productName()),
+          Positioned(
+              left: 0,
+              right: 0,
+              bottom: SizeManager.extralarge * 2,
+              child: indicators())
+        ],
       ),
     );
   }
@@ -286,29 +295,5 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
         ],
       ),
     );
-  }
-}
-
-class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  final BuildContext context;
-
-  _SliverTabBarDelegate({required this.child, required this.context});
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
-  }
-
-  @override
-  double get maxExtent => 91;
-
-  @override
-  double get minExtent => 91;
-
-  @override
-  bool shouldRebuild(covariant _SliverTabBarDelegate oldDelegate) {
-    return false;
   }
 }
