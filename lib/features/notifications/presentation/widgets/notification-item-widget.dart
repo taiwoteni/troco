@@ -7,9 +7,7 @@ import 'package:troco/features/notifications/utils/enums.dart';
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
-import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
-import '../../../transactions/domain/entities/transaction.dart';
 import '../../domain/entities/notification.dart' as n;
 import '../../../../core/basecomponents/images/svg.dart';
 
