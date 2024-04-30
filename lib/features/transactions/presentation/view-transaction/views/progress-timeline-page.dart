@@ -140,9 +140,9 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
               );
             },
             itemExtentBuilder: (context, index) =>
-                index == 0 || index == subProcesses.length + 1 ? 20 : 30,
+                index == 0 || index == subProcesses.length - 1 ? 20 : 30,
             nodeItemOverlapBuilder: (context, index) =>
-                index == 0 || index == subProcesses.length + 1 ? true : null,
+                index == 0 || index == subProcesses.length - 1 ? true : null,
             indicatorBuilder: (context, index) {
               final subProcess = subProcesses[index];
               if (!subProcess.done) {
