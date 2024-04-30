@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/progress-details-page.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/progress-timeline-page.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/widgets/menu-toggle.dart';
-
 import '../../../domain/entities/transaction.dart';
 
 class TransactionProgressPage extends ConsumerStatefulWidget {
@@ -21,11 +16,23 @@ class TransactionProgressPage extends ConsumerStatefulWidget {
 class _TransactionProgressPageState
     extends ConsumerState<TransactionProgressPage> {
   late Transaction transaction;
+  bool doneAnimating = false;
 
   @override
   void initState() {
     transaction = widget.transaction;
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      countDown();
+    });
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    if (!mounted) {
+      return;
+    }
+    super.setState(fn);
   }
 
   @override
@@ -33,22 +40,13 @@ class _TransactionProgressPageState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        mediumSpacer(),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: SizeManager.extralarge),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: MenuToggle(),
-          ),
-        ),
-        mediumSpacer(),
         Expanded(
           child: AnimatedCrossFade(
-            firstChild: ProgressTimelinePage(
+            secondChild: ProgressTimelinePage(
               transaction: transaction,
             ),
-            secondChild: ProgressDetailsPage(transaction: transaction),
-            crossFadeState: ref.watch(menuToggleIndexProvider)
+            firstChild: ProgressDetailsPage(transaction: transaction),
+            crossFadeState: !doneAnimating
                 ? CrossFadeState.showFirst
                 : CrossFadeState.showSecond,
             duration: const Duration(milliseconds: 400),
@@ -59,5 +57,10 @@ class _TransactionProgressPageState
         )
       ],
     );
+  }
+
+  Future<void> countDown() async {
+    await Future.delayed(const Duration(seconds: 3));
+    setState(() => doneAnimating = true);
   }
 }
