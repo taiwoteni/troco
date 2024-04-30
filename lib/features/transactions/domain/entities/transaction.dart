@@ -66,7 +66,7 @@ class Transaction extends Equatable {
 
   String? get adminId => _json["adminId"];
 
-  bool get hasAdmin => _json.containsKey("adminId");
+  bool get hasAdmin => _json.containsKey("adminId") ? adminId != null : false;
 
   Driver get driver => Driver.fromJson(json: _json["driver"]);
 
