@@ -86,8 +86,8 @@ class _NotificationItemWidgetState
     if (widget.notification.type == NotificationType.VerifyTransaction ||
         widget.notification.type == NotificationType.CreateTransaction) {
       log(widget.notification.argument.toString());
-      Navigator.pushNamed(context, Routes.viewTransactionRoute,
-          arguments: Transaction.fromJson(json: widget.notification.argument));
+      // Navigator.pushNamed(context, Routes.viewTransactionRoute,
+      //     arguments: Transaction.fromJson(json: widget.notification.argument));
       return;
     }
 
