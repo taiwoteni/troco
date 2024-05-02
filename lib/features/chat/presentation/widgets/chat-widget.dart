@@ -150,8 +150,7 @@ class ChatWidget extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: chat.profile != "null"
                   ? ProfileIcon(
-                      profile: DecorationImage(
-                          image: NetworkImage(chat.profile), fit: BoxFit.cover),
+                      url: chat.profile,
                       size: 35)
                   : const UserProfileIcon(
                       size: 35,

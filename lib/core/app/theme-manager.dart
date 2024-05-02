@@ -32,6 +32,16 @@ class ThemeManager {
     
   }
 
+  static SystemUiOverlayStyle getSettingsUiOverlayStyle() {
+    return SystemUiOverlayStyle.light.copyWith(
+        statusBarBrightness: Brightness.light,
+        statusBarColor: ColorManager.background,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: ColorManager.background,
+        systemNavigationBarIconBrightness: Brightness.dark);
+    
+  }
+
   static SystemUiOverlayStyle getSplashUiOverlayStyle() {
     return SystemUiOverlayStyle.light.copyWith(
         statusBarColor: ColorManager.themeColor,

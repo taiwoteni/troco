@@ -64,8 +64,8 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
       leading: client.profile != "null"
           ? ProfileIcon(
               size: IconSizeManager.large,
-              profile: DecorationImage(
-                  image: NetworkImage(client.profile), fit: BoxFit.cover))
+              url: client.profile,
+            )
           : Container(
               width: IconSizeManager.large,
               height: IconSizeManager.large,

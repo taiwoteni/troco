@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,14 +7,18 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/basecomponents/images/svg.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
+import '../../app/color-manager.dart';
+import '../animations/lottie.dart';
+
 class ProfileIcon extends ConsumerStatefulWidget {
-  final DecorationImage profile;
+  final String url;
   final bool showOnline;
   final bool online;
   final double? size;
+
   const ProfileIcon(
       {super.key,
-      required this.profile,
+      required this.url,
       this.showOnline = false,
       this.online = false,
       this.size});
@@ -35,12 +40,34 @@ class _ProfileIconState extends ConsumerState<ProfileIcon> {
       height: widget.size ?? IconSizeManager.medium,
       child: Stack(
         children: [
-          Container(
+          CachedNetworkImage(
             width: double.maxFinite,
+            imageUrl: widget.url,
+            fit: BoxFit.cover,
             height: double.maxFinite,
-            decoration:
-                BoxDecoration(shape: BoxShape.circle, image: widget.profile),
-          ),
+            fadeInCurve: Curves.ease,
+            fadeOutCurve: Curves.ease,
+            placeholder: (context, url) {
+              return Container(
+                width: double.maxFinite,
+                height: double.maxFinite,
+                color: ColorManager.lottieLoading,
+                child: LottieWidget(
+                    lottieRes: AssetManager.lottieFile(name: "loading-image"),
+                    size: Size.square(widget.size ?? IconSizeManager.medium * 0.8)),
+              );
+            },
+            errorWidget: (context, url, error) {
+              return Container(
+                width: double.maxFinite,
+                height: double.maxFinite,
+                color: ColorManager.lottieLoading,
+                child: LottieWidget(
+                    lottieRes: AssetManager.lottieFile(name: "loading-image"),
+                    size: Size.square(widget.size ?? IconSizeManager.medium * 0.8)),
+              );
+            },
+          )
         ],
       ),
     );
@@ -79,10 +106,8 @@ class _UserProfileIconState extends ConsumerState<UserProfileIcon> {
               !widget.showOnlyDefault
           ? ProfileIcon(
               size: double.maxFinite,
-              profile: DecorationImage(
-                  image: NetworkImage(
-                      ref.read(ClientProvider.userProvider)!.profile),
-                  fit: BoxFit.cover))
+              url: ref.read(ClientProvider.userProvider)!.profile,
+              )
           : Container(
               width: double.maxFinite,
               height: double.maxFinite,
