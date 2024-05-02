@@ -10,8 +10,8 @@ import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/settings/data/sources/preset-settings.dart';
-import 'package:troco/features/settings/presentation/widget/settings-header-clipper.dart';
-import 'package:troco/features/settings/presentation/widget/settings-tile-widget.dart';
+import 'package:troco/features/settings/presentation/settings-page/widget/settings-header-clipper.dart';
+import 'package:troco/features/settings/presentation/settings-page/widget/settings-tile-widget.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});

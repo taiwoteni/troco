@@ -1,5 +1,5 @@
 import 'package:troco/core/app/asset-manager.dart';
-import 'package:troco/features/settings/utils/enums.dart';
+import 'package:troco/features/settings/presentation/settings-page/utils/enums.dart';
 
 import '../models/settings-model.dart';
 
