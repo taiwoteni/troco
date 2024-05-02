@@ -12,6 +12,7 @@ import 'package:troco/features/auth/presentation/otp/views/otp-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/add-pin-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/add-profile-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
+import 'package:troco/features/settings/presentation/edit-profile-page/views/edit-profile-screen.dart';
 import 'package:troco/features/splash/presentation/splash-screen.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/views/transaction-success-screen.dart';
@@ -52,9 +53,9 @@ class Routes {
   /// [viewTransactionRoute] is the route to view a transaction.
   /// Must pass the transaction as an argument!
   static const viewTransactionRoute = "/view-transaction";
-
   static const viewProductsRoute = "/view-product";
 
+  static const editProfileRoute = "/edit-profile";
 
 }
 
@@ -167,6 +168,8 @@ class RouteGenerator {
             return ViewProductScreen(transaction: transaction);
           },
         );
+      case Routes.editProfileRoute:
+      return MaterialPageRoute(settings: routeSettings,builder: (context) => const EditProfileScreen());
       default:
         return MaterialPageRoute(
             settings: routeSettings,
