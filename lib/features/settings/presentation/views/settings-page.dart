@@ -43,6 +43,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   PreferredSizeWidget appBar(){
     return AppBar(
+      
       centerTitle: true,
       forceMaterialTransparency: true,
       elevation: 0,
