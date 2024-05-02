@@ -26,7 +26,7 @@ List<SettingsModel> settings() {
         icon: AssetManager.svgFile(name: "language"),
         iconType: IconType.svg),
     SettingsModel(
-        label: "Notifications",
+        label: "Notification Settings",
         icon: AssetManager.svgFile(name: "bell"),
         iconType: IconType.svg),
     SettingsModel(

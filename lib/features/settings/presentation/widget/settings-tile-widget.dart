@@ -25,6 +25,7 @@ class SettingsTileWidget extends StatelessWidget {
       titleTextStyle: TextStyle(
           color: setting.grave ? Colors.red.shade600 : ColorManager.primary,
           fontFamily: 'quicksand',
+          overflow: TextOverflow.ellipsis,
           fontSize: FontSizeManager.regular * 1.2,
           fontWeight: FontWeightManager.extrabold),
     );
