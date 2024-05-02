@@ -14,6 +14,7 @@ class SettingsTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: setting.onTap,
       dense: true,
       contentPadding: const EdgeInsets.symmetric(
           horizontal: SizeManager.medium * 1.5,
