@@ -156,14 +156,15 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
           return;
         }
         Category role =
-            CatgoryConverter.convertToCategory(category: value.toString());
+            CategoryConverter.convertToCategory(category: value.toString());
         setState(() {
           this.role = role;
         });
         LoginData.category = role;
       },
-      value:
-          role == null ? "" : CatgoryConverter.convertToString(category: role!),
+      value: role == null
+          ? ""
+          : CategoryConverter.convertToString(category: role!),
       hint: "account category",
       items: Category.values.map((role) => role.name).toList(),
       onValidate: (value) {
@@ -333,7 +334,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
         onSaved: (value) {
           LoginData.state = state;
         },
-        showLeadingIcon: true,
+        showtrailingIcon: true,
         readOnly: true,
         prefixIcon: IconButton(
           onPressed: null,
@@ -387,7 +388,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
           LoginData.city = city;
         },
         readOnly: true,
-        showLeadingIcon: true,
+        showtrailingIcon: true,
         prefixIcon: IconButton(
           onPressed: null,
           iconSize: IconSizeManager.regular,
@@ -512,7 +513,6 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
       formKey.currentState!.save();
       await Future.delayed(const Duration(seconds: 2));
       Navigator.pushNamed(context, Routes.addProfileRoute);
-      
     }
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
   }

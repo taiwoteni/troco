@@ -1,6 +1,11 @@
 // ignore_for_file: constant_identifier_names
 
-enum Category { Business, Merchant, Admin }
+enum Category {
+  Personal,
+  Merchant,
+  Business,
+  Company,
+}
 
 enum TransactionPurpose { Buying, Selling }
 

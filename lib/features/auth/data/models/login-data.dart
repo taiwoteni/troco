@@ -6,7 +6,12 @@ import '../../../transactions/utils/enums.dart';
 /// Once API is given, You should remove it.
 
 class LoginData {
-  static String? phoneNumber, email, password, id, nearestBustop, transactionPin;
+  static String? phoneNumber,
+      email,
+      password,
+      id,
+      nearestBustop,
+      transactionPin;
   static String? firstName,
       profile,
       lastName,
@@ -20,7 +25,7 @@ class LoginData {
   static int? long, lat;
 
   static void clear() {
-    id=null;
+    id = null;
     phoneNumber = null;
     email = null;
     password = null;
@@ -41,14 +46,14 @@ class LoginData {
 
   static Map<String, dynamic> toClientJson() {
     return {
-      "id":id,
+      "id": id,
       "firstName": firstName,
       "lastName": lastName,
       "email": email,
       "profile": profile,
       "phoneNumber": phoneNumber,
       "businessName": businessName,
-      "category": CatgoryConverter.convertToString(category: category!),
+      "category": CategoryConverter.convertToString(category: category!),
       "address": address,
       "city": city,
       "state": state,
