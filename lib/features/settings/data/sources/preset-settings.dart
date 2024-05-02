@@ -1,13 +1,16 @@
+import 'package:flutter/widgets.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/features/settings/presentation/settings-page/utils/enums.dart';
 
+import '../../../../core/app/routes-manager.dart';
 import '../models/settings-model.dart';
 
-List<SettingsModel> settings() {
+List<SettingsModel> presetSettings({required BuildContext context}) {
   return [
     SettingsModel(
         label: "Edit Profile",
         icon: AssetManager.svgFile(name: "edit"),
+        onTap: ()=> Navigator.pushNamed(context,Routes.editProfileRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Two Factor Authentication",

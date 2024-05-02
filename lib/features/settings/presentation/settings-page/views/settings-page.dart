@@ -9,6 +9,7 @@ import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/settings/data/models/settings-model.dart';
 import 'package:troco/features/settings/data/sources/preset-settings.dart';
 import 'package:troco/features/settings/presentation/settings-page/widget/settings-header-clipper.dart';
 import 'package:troco/features/settings/presentation/settings-page/widget/settings-tile-widget.dart';
@@ -105,18 +106,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget settingsList() {
+    final List<SettingsModel> settings = presetSettings(context: context);
     return ListView.separated(
         padding: EdgeInsets.zero,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) =>
-            SettingsTileWidget(setting: settings()[index]),
+            SettingsTileWidget(setting: settings[index]),
         separatorBuilder: (context, index) => Divider(
               indent: SizeManager.large,
               endIndent: SizeManager.large,
               thickness: 0.9,
               color: ColorManager.secondary.withOpacity(0.09),
             ),
-        itemCount: settings().length);
+        itemCount: settings.length);
   }
 }
