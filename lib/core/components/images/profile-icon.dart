@@ -4,22 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/components/images/badge-icon.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import '../../app/color-manager.dart';
 import '../animations/lottie.dart';
 
+/// If [badge] is given, [showOnline] and [online] will be overriden
 class ProfileIcon extends ConsumerStatefulWidget {
   final String url;
   final bool showOnline;
   final bool online;
+  final Widget? badge;
   final double? size;
 
   const ProfileIcon(
       {super.key,
       required this.url,
       this.showOnline = false,
+      this.badge,
       this.online = false,
       this.size});
 
@@ -78,7 +82,8 @@ class _ProfileIconState extends ConsumerState<ProfileIcon> {
                   );
                 },
               ),
-            )
+            ),
+            if (widget.badge != null) widget.badge!
           ],
         ),
       ),
