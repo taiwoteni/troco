@@ -16,7 +16,7 @@ class InputFormField extends ConsumerStatefulWidget {
   final String label;
   final int lines;
   final String? prefixText, errorText;
-  final bool showLeadingIcon, readOnly;
+  final bool showtrailingIcon, readOnly;
   final TextInputType inputType;
   final bool isPassword;
   final Widget? prefixIcon;
@@ -32,7 +32,7 @@ class InputFormField extends ConsumerStatefulWidget {
     this.errorText,
     this.inputType = TextInputType.text,
     this.onRedirect,
-    this.showLeadingIcon = false,
+    this.showtrailingIcon = false,
     this.readOnly = false,
     this.isPassword = false,
     this.controller,
@@ -111,7 +111,7 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
                       color: ColorManager.themeColor,
                     ),
                   )
-                : widget.showLeadingIcon
+                : widget.showtrailingIcon
                     ? IconButton(
                         onPressed: null,
                         iconSize: IconSizeManager.regular,
