@@ -15,7 +15,7 @@ class ProfileIcon extends ConsumerStatefulWidget {
   final String url;
   final bool showOnline;
   final bool online;
-  final Widget? badge;
+  final Positioned? badge;
   final double? size;
 
   const ProfileIcon(
