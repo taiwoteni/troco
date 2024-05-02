@@ -8,7 +8,7 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/app/value-manager.dart';
 
-import '../../../../../core/basecomponents/others/spacer.dart';
+import '../../../../../core/components/others/spacer.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});

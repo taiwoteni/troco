@@ -10,15 +10,15 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
-import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
-import 'package:troco/core/basecomponents/others/drag-handle.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/core/basecomponents/texts/inputs/text-form-field.dart';
-import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
+import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/core/components/others/drag-handle.dart';
+import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/core/components/texts/inputs/text-form-field.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 
-import '../../../../../core/basecomponents/texts/outputs/info-text.dart';
+import '../../../../../core/components/texts/outputs/info-text.dart';
 
 class CreateGroupSheet extends ConsumerStatefulWidget {
   const CreateGroupSheet({super.key});

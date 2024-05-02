@@ -6,8 +6,8 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/images/svg.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/core/components/images/svg.dart';
+import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 

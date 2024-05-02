@@ -4,8 +4,8 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
 import '../../../../../core/app/color-manager.dart';
 

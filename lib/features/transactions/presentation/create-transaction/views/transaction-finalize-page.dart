@@ -2,14 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/core/basecomponents/images/profile-icon.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/core/components/images/profile-icon.dart';
+import 'package:troco/core/components/others/spacer.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
-import '../../../../../core/basecomponents/button/presentation/provider/button-provider.dart';
-import '../../../../../core/basecomponents/button/presentation/widget/button.dart';
+import '../../../../../core/components/button/presentation/provider/button-provider.dart';
+import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../groups/domain/entities/group.dart';
 import '../widgets/transaction-pin-widget.dart';
 import 'create-transaction-progress-screen.dart';

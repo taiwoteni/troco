@@ -7,8 +7,8 @@ import 'package:troco/features/groups/presentation/group_tab/providers/groups-pr
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/images/profile-icon.dart';
-import '../../../../core/basecomponents/others/spacer.dart';
+import '../../../../core/components/images/profile-icon.dart';
+import '../../../../core/components/others/spacer.dart';
 import '../../../groups/domain/entities/group.dart';
 import '../../domain/entities/chat.dart';
 

@@ -10,16 +10,16 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/texts/outputs/info-text.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/core/basecomponents/images/svg.dart';
-import 'package:troco/core/basecomponents/texts/inputs/text-form-field.dart';
+import 'package:troco/core/components/texts/outputs/info-text.dart';
+import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/core/components/images/svg.dart';
+import 'package:troco/core/components/texts/inputs/text-form-field.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
-import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 
 import '../../../../../core/app/routes-manager.dart';
-import '../../../../../core/basecomponents/button/presentation/widget/button.dart';
+import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../utils/phone-number-converter.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {

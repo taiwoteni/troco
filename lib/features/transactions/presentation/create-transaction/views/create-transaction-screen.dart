@@ -3,14 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/datasources/create-transaction-stages.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
-import '../../../../../core/basecomponents/images/svg.dart';
+import '../../../../../core/components/images/svg.dart';
 
 
 class CreateTransactionScreen extends ConsumerStatefulWidget {

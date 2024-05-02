@@ -6,14 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
-import 'package:troco/core/basecomponents/images/profile-icon.dart';
+import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/animations/lottie.dart';
+import '../../../../core/components/animations/lottie.dart';
 
 class ChatWidget extends ConsumerWidget {
   final Chat chat;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/core/components/images/svg.dart';
 
 enum BadgeIconType { svg, asset, icon }
 
@@ -12,7 +12,7 @@ class BadgeIcon extends StatelessWidget {
       this.size,
       this.fillColor,
       this.stroke,
-      this.strokerColor,
+      this.strokeColor,
       this.iconData,
       this.iconString}) {
     if (iconType == BadgeIconType.icon && iconData == null) {
@@ -30,7 +30,7 @@ class BadgeIcon extends StatelessWidget {
   final IconData? iconData;
   final Color? fillColor;
   final double? stroke;
-  final Color? strokerColor;
+  final Color? strokeColor;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class BadgeIcon extends StatelessWidget {
       height: size ?? IconSizeManager.regular * 1.7,
       padding: EdgeInsets.all(stroke ?? SizeManager.small),
       decoration: BoxDecoration(
-          color: strokerColor ?? ColorManager.background,
+          color: strokeColor ?? ColorManager.background,
           shape: BoxShape.circle),
       child: Container(
         width: double.maxFinite,

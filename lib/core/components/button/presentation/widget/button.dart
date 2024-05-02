@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/animations/lottie.dart';
+import 'package:troco/core/components/animations/lottie.dart';
 
 import '../../../../app/color-manager.dart';
 import '../provider/button-provider.dart';

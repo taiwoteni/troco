@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/app/routes-manager.dart';
-import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
-import 'package:troco/core/basecomponents/texts/inputs/otp-input-field.dart';
+import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/core/components/texts/inputs/otp-input-field.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
-import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/otp/providers/timer-provider.dart';
 
@@ -18,8 +18,8 @@ import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
-import '../../../../../core/basecomponents/others/spacer.dart';
-import '../../../../../core/basecomponents/images/svg.dart';
+import '../../../../../core/components/others/spacer.dart';
+import '../../../../../core/components/images/svg.dart';
 
 class OTPScreen extends ConsumerStatefulWidget {
   final bool isFromLogin;

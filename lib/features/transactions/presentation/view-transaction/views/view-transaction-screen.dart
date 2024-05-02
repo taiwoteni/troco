@@ -10,10 +10,10 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
-import 'package:troco/core/basecomponents/images/svg.dart';
-import 'package:troco/core/basecomponents/others/drag-handle.dart';
-import 'package:troco/core/basecomponents/others/onboarding-indicator.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/core/components/images/svg.dart';
+import 'package:troco/core/components/others/drag-handle.dart';
+import 'package:troco/core/components/others/onboarding-indicator.dart';
+import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-details-page.dart';
@@ -22,7 +22,7 @@ import 'package:troco/features/transactions/presentation/view-transaction/widget
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/tab-item.dart';
 import 'package:troco/features/transactions/utils/transaction-status-converter.dart';
 
-import '../../../../../core/basecomponents/animations/lottie.dart';
+import '../../../../../core/components/animations/lottie.dart';
 import '../../../domain/entities/product.dart';
 
 class ViewTransactionScreen extends ConsumerStatefulWidget {

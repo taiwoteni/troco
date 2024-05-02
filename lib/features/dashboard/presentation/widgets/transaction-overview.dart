@@ -7,7 +7,7 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/others/spacer.dart';
+import '../../../../core/components/others/spacer.dart';
 import '../../../transactions/utils/enums.dart';
 
 class TransactionOverview extends ConsumerStatefulWidget {

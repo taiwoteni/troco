@@ -5,14 +5,14 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
-import 'package:troco/core/basecomponents/others/onboarding-indicator.dart';
+import 'package:troco/core/components/others/onboarding-indicator.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/onboarding/presentation/providers/onboarding-provider.dart';
 import 'package:troco/features/onboarding/presentation/widgets/onboarding-item-widget.dart';
 
 import '../../../../core/app/asset-manager.dart';
-import '../../../../core/basecomponents/images/svg.dart';
+import '../../../../core/components/images/svg.dart';
 import '../../data/datasources/onboarding-items-list.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {

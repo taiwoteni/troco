@@ -4,15 +4,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
-import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
-import 'package:troco/core/basecomponents/images/profile-icon.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
+import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/button/presentation/widget/button.dart';
+import '../../../../core/components/button/presentation/widget/button.dart';
 import '../../../auth/domain/entities/client.dart';
 import '../../../groups/domain/entities/group.dart';
 

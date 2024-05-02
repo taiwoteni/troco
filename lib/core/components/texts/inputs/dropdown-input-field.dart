@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/button/presentation/provider/enabled-provider.dart';
+import 'package:troco/core/components/button/presentation/provider/enabled-provider.dart';
 
 import '../../../app/color-manager.dart';
 import '../../../app/font-manager.dart';

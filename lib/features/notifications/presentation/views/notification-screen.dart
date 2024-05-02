@@ -12,8 +12,8 @@ import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/app/theme-manager.dart';
-import '../../../../core/basecomponents/images/svg.dart';
-import '../../../../core/basecomponents/others/spacer.dart';
+import '../../../../core/components/images/svg.dart';
+import '../../../../core/components/others/spacer.dart';
 import '../../domain/entities/notification.dart' as n;
 import '../../utils/enums.dart';
 

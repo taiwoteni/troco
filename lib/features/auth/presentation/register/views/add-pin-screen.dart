@@ -6,17 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
-import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
-import 'package:troco/core/basecomponents/texts/inputs/otp-input-field.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/core/components/texts/inputs/otp-input-field.dart';
+import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
-import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import '../../success/views/auth-success-screen.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
-import '../../../../../core/basecomponents/images/svg.dart';
+import '../../../../../core/components/images/svg.dart';
 
 class SetTransactionPinScreen extends ConsumerStatefulWidget {
   const SetTransactionPinScreen({super.key});

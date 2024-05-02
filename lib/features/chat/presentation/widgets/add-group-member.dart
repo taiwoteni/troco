@@ -13,8 +13,8 @@ import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/images/svg.dart';
-import '../../../../core/basecomponents/others/spacer.dart';
+import '../../../../core/components/images/svg.dart';
+import '../../../../core/components/others/spacer.dart';
 import '../../../groups/domain/entities/group.dart';
 
 class AddGroupMemberWidget extends ConsumerStatefulWidget {

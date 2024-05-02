@@ -4,7 +4,7 @@ import 'package:timelines/timelines.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import '../../../../../core/basecomponents/others/spacer.dart';
+import '../../../../../core/components/others/spacer.dart';
 import '../../../data/models/process-model.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../utils/enums.dart';

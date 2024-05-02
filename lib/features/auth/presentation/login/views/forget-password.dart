@@ -8,16 +8,16 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
-import 'package:troco/core/basecomponents/button/presentation/widget/button.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
-import 'package:troco/core/basecomponents/button/presentation/provider/button-provider.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
-import '../../../../../core/basecomponents/texts/outputs/info-text.dart';
-import '../../../../../core/basecomponents/texts/inputs/text-form-field.dart';
+import '../../../../../core/components/texts/outputs/info-text.dart';
+import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../utils/phone-number-converter.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {

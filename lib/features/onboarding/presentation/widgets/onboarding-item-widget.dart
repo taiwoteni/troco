@@ -4,7 +4,7 @@ import 'package:troco/features/onboarding/data/models/onboarding-item-model.dart
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
-import '../../../../core/basecomponents/others/spacer.dart';
+import '../../../../core/components/others/spacer.dart';
 
 class OnboardingItemWidget extends StatelessWidget {
   final OnboardingItemModel onboardingItem;

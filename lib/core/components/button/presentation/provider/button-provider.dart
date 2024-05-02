@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/core/basecomponents/button/presentation/provider/enabled-provider.dart';
+import 'package:troco/core/components/button/presentation/provider/enabled-provider.dart';
 
 /// [_buttonProviders] is used to store the list of states used for the buttons.
 final List<StateProvider<Map<String, bool>>> _buttonProviders = [];

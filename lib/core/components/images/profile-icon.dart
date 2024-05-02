@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import '../../app/color-manager.dart';

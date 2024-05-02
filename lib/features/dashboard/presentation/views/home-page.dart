@@ -11,14 +11,14 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
-import 'package:troco/core/basecomponents/images/profile-icon.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
-import 'package:troco/core/basecomponents/images/svg.dart';
+import 'package:troco/core/components/images/profile-icon.dart';
+import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:troco/core/basecomponents/clippers/bottom-rounded.dart';
+import 'package:troco/core/components/clippers/bottom-rounded.dart';
 import 'package:troco/features/dashboard/presentation/widgets/latest-transactions-list.dart';
 import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';

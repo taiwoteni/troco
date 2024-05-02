@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/core/components/others/spacer.dart';
 
 class SelectTransactionTypeWidget extends StatefulWidget {
   final bool selected;

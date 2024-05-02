@@ -5,8 +5,8 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 
 import '../../../../../core/app/font-manager.dart';
-import '../../../../../core/basecomponents/others/drag-handle.dart';
-import '../../../../../core/basecomponents/others/spacer.dart';
+import '../../../../../core/components/others/drag-handle.dart';
+import '../../../../../core/components/others/spacer.dart';
 
 class SearchPlaceScreen extends StatefulWidget {
   final List<String> places;

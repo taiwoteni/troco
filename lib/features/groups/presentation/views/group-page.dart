@@ -6,14 +6,14 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/features/groups/presentation/group_tab/widgets/group-widget.dart';
-import 'package:troco/core/basecomponents/texts/inputs/search-bar.dart';
-import 'package:troco/core/basecomponents/clippers/inward-bottom-rounded-clipper.dart';
+import 'package:troco/core/components/texts/inputs/search-bar.dart';
+import 'package:troco/core/components/clippers/inward-bottom-rounded-clipper.dart';
 import 'package:troco/features/groups/presentation/group_tab/widgets/create-group-sheet.dart';
 import 'package:troco/features/groups/presentation/group_tab/views/groups-tab.dart';
 
 import '../../../../core/app/font-manager.dart';
-import '../../../../core/basecomponents/images/profile-icon.dart';
-import '../../../../core/basecomponents/others/spacer.dart';
+import '../../../../core/components/images/profile-icon.dart';
+import '../../../../core/components/others/spacer.dart';
 
 class GroupPage extends ConsumerStatefulWidget {
   const GroupPage({super.key});

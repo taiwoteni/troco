@@ -4,14 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
-import 'package:troco/core/basecomponents/others/spacer.dart';
+import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/size-manager.dart';
-import '../../../../../core/basecomponents/animations/lottie.dart';
-import '../../../../../core/basecomponents/images/svg.dart';
-import '../../../../../core/basecomponents/others/onboarding-indicator.dart';
+import '../../../../../core/components/animations/lottie.dart';
+import '../../../../../core/components/images/svg.dart';
+import '../../../../../core/components/others/onboarding-indicator.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/transaction.dart';
 
