@@ -15,6 +15,7 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
     SettingsModel(
         label: "Two Factor Authentication",
         icon: AssetManager.svgFile(name: "two-factor-authentication"),
+        onTap: ()=> Navigator.pushNamed(context,Routes.twoFactorAuthenticationRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Pin",
