@@ -13,6 +13,7 @@ import 'package:troco/features/auth/presentation/register/views/add-pin-screen.d
 import 'package:troco/features/auth/presentation/register/views/add-profile-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/settings/presentation/edit-profile-page/views/edit-profile-screen.dart';
+import 'package:troco/features/settings/presentation/two-factor-authentication/views/two-factor-authentication-screen.dart';
 import 'package:troco/features/splash/presentation/splash-screen.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/views/transaction-success-screen.dart';
@@ -39,7 +40,7 @@ class Routes {
   static const addTransactionPinRoute = "/add-transaction-pin";
   static const authSuccessRoute = "/auth-success";
   static const homeRoute = "/home";
-  
+
   static const notificationRoute = "/notification";
 
   /// [chatRoute] is the route for the chat screen.
@@ -47,7 +48,7 @@ class Routes {
   static const chatRoute = "/chat";
 
   static const createTransactionRoute = "/create-transaction";
-  
+
   static const transactionSuccessRoute = "/create-transaction-success";
 
   /// [viewTransactionRoute] is the route to view a transaction.
@@ -56,7 +57,7 @@ class Routes {
   static const viewProductsRoute = "/view-product";
 
   static const editProfileRoute = "/edit-profile";
-
+  static const twoFactorAuthenticationRoute = "/two-factor-authentication";
 }
 
 class RouteGenerator {
@@ -139,15 +140,15 @@ class RouteGenerator {
       case Routes.createTransactionRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context){
+          builder: (context) {
             // final group = routeSettings.arguments as Group;
             return const CreateTransactionScreen();
           },
         );
-         case Routes.transactionSuccessRoute:
+      case Routes.transactionSuccessRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context){
+          builder: (context) {
             // final group = routeSettings.arguments as Group;
             return const TransactionSuccessScreen();
           },
@@ -155,7 +156,7 @@ class RouteGenerator {
       case Routes.viewTransactionRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context){
+          builder: (context) {
             final transaction = routeSettings.arguments! as Transaction;
             return ViewTransactionScreen(transaction: transaction);
           },
@@ -163,13 +164,19 @@ class RouteGenerator {
       case Routes.viewProductsRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context){
+          builder: (context) {
             final transaction = routeSettings.arguments! as Transaction;
             return ViewProductScreen(transaction: transaction);
           },
         );
       case Routes.editProfileRoute:
-      return MaterialPageRoute(settings: routeSettings,builder: (context) => const EditProfileScreen());
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const EditProfileScreen());
+      case Routes.twoFactorAuthenticationRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const TwoFactorAuthenticationScreen());
       default:
         return MaterialPageRoute(
             settings: routeSettings,
