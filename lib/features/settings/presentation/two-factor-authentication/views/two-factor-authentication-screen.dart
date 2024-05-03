@@ -21,6 +21,8 @@ class _TwoFactorAuthenticationPageState
     extends ConsumerState<TwoFactorAuthenticationScreen> {
   bool twoFactorEnabled = false;
   bool otpEnabled = true;
+  bool automaticallyLogoutDuringInactivity = true;
+  bool autoLoginPinEnabled = true;
 
   @override
   Widget build(BuildContext context) {
@@ -32,28 +34,44 @@ class _TwoFactorAuthenticationPageState
           mainAxisSize: MainAxisSize.min,
           children: [
             largeSpacer(),
+            sectionText(text: "Enable Two Factor"),
+            regularSpacer(),
             enableTwoFactorAuthentication(),
-            largeSpacer(),
-            typeText(),
-            smallSpacer(),
-            otpMethod(),
-            Divider(
-              endIndent: SizeManager.large,
-              color: ColorManager.secondary.withOpacity(0.09),
-              indent: SizeManager.large,
-            ),
+            extraLargeSpacer(),
+            sectionText(text: "Login Two-Factor Method"),
+            regularSpacer(),
+            loginOtpMethod(),
+            divider(),
+            loginPinMethod(),
+            extraLargeSpacer(),
+            sectionText(text: "App Inactivity"),
+            regularSpacer(),
+            autoLogoutDuringInactivity(),
+            extraLargeSpacer(),
+            sectionText(text: "App Entry Method"),
+            regularSpacer(),
             pinMethod(),
+            divider(),
+            passwordMethod()
           ],
         ),
       ),
     );
   }
 
-  Widget typeText() {
+  Widget divider() {
+    return Divider(
+      endIndent: SizeManager.large,
+      color: ColorManager.secondary.withOpacity(0.09),
+      indent: SizeManager.large,
+    );
+  }
+
+  Widget sectionText({required final String text}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.large),
       child: InfoText(
-        text: "Two-Factor Method",
+        text: text,
         color: ColorManager.accentColor,
         fontSize: FontSizeManager.regular * 0.9,
         fontWeight: FontWeightManager.semibold,
@@ -71,7 +89,7 @@ class _TwoFactorAuthenticationPageState
           vertical: SizeManager.regular, horizontal: SizeManager.medium),
       horizontalTitleGap: SizeManager.large,
       leading: leading(subAssetString: "two-factor-authentication"),
-      title: const Text("Enable Two Factor Authentication"),
+      title: const Text("Two Factor Authentication"),
       titleTextStyle: TextStyle(
           color: ColorManager.primary,
           fontFamily: 'quicksand',
@@ -84,7 +102,104 @@ class _TwoFactorAuthenticationPageState
     );
   }
 
-  Widget otpMethod() {
+  Widget autoLogoutDuringInactivity() {
+    return AnimatedOpacity(
+      opacity: twoFactorEnabled ? 1 : 0.5,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.ease,
+      child: ListTile(
+        onTap: () {
+          if (!twoFactorEnabled) {
+            return;
+          }
+          setState(() => automaticallyLogoutDuringInactivity =
+              !automaticallyLogoutDuringInactivity);
+        },
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(
+            vertical: SizeManager.regular, horizontal: SizeManager.medium),
+        horizontalTitleGap: SizeManager.large,
+        leading: leading(subAssetString: "logout"),
+        title: const Text("Auto Logout after Inactivity"),
+        titleTextStyle: TextStyle(
+            color: ColorManager.primary,
+            fontFamily: 'quicksand',
+            overflow: TextOverflow.ellipsis,
+            fontSize: FontSizeManager.regular * 1.2,
+            fontWeight: FontWeightManager.extrabold),
+        trailing: switchWidget(
+            enabled: automaticallyLogoutDuringInactivity,
+            onChanged: (value) =>
+                setState(() => automaticallyLogoutDuringInactivity = value)),
+      ),
+    );
+  }
+
+  Widget pinMethod() {
+    return AnimatedOpacity(
+      opacity:
+          twoFactorEnabled && automaticallyLogoutDuringInactivity ? 1 : 0.5,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.ease,
+      child: ListTile(
+        onTap: () {
+          if (!(twoFactorEnabled && automaticallyLogoutDuringInactivity)) {
+            return;
+          }
+          setState(() => autoLoginPinEnabled = !autoLoginPinEnabled);
+        },
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(
+            vertical: SizeManager.regular, horizontal: SizeManager.medium),
+        horizontalTitleGap: SizeManager.large,
+        leading: leading(subAssetString: "change-pin"),
+        title: const Text("Transaction Pin"),
+        titleTextStyle: TextStyle(
+            color: ColorManager.primary,
+            fontFamily: 'quicksand',
+            overflow: TextOverflow.ellipsis,
+            fontSize: FontSizeManager.regular * 1.2,
+            fontWeight: FontWeightManager.extrabold),
+        trailing: switchWidget(
+            enabled: autoLoginPinEnabled,
+            onChanged: (value) => setState(() => autoLoginPinEnabled = value)),
+      ),
+    );
+  }
+
+  Widget passwordMethod() {
+    return AnimatedOpacity(
+      opacity:
+          twoFactorEnabled && automaticallyLogoutDuringInactivity ? 1 : 0.5,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.ease,
+      child: ListTile(
+        onTap: () {
+          if (!(twoFactorEnabled && automaticallyLogoutDuringInactivity)) {
+            return;
+          }
+          setState(() => autoLoginPinEnabled = !autoLoginPinEnabled);
+        },
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(
+            vertical: SizeManager.regular, horizontal: SizeManager.medium),
+        horizontalTitleGap: SizeManager.large,
+        leading: leading(subAssetString: "padlock"),
+        title: const Text("Password"),
+        titleTextStyle: TextStyle(
+            color: ColorManager.primary,
+            fontFamily: 'quicksand',
+            overflow: TextOverflow.ellipsis,
+            fontSize: FontSizeManager.regular * 1.2,
+            fontWeight: FontWeightManager.extrabold),
+        trailing: switchWidget(
+            enabled: !autoLoginPinEnabled,
+            onChanged: (value) => setState(() => autoLoginPinEnabled = !value)),
+      ),
+    );
+  }
+
+  Widget loginOtpMethod() {
     return AnimatedOpacity(
       opacity: twoFactorEnabled ? 1 : 0.5,
       duration: const Duration(milliseconds: 300),
@@ -115,7 +230,7 @@ class _TwoFactorAuthenticationPageState
     );
   }
 
-  Widget pinMethod() {
+  Widget loginPinMethod() {
     return AnimatedOpacity(
       opacity: twoFactorEnabled ? 1 : 0.5,
       duration: const Duration(milliseconds: 300),
