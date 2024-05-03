@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -16,6 +15,7 @@ class SettingsTileWidget extends StatelessWidget {
     return ListTile(
       onTap: setting.onTap,
       dense: true,
+      splashColor: ColorManager.tertiary,
       contentPadding: const EdgeInsets.symmetric(
           horizontal: SizeManager.medium * 1.5,
           vertical: SizeManager.small * 0.5),
@@ -77,4 +77,6 @@ class SettingsTileWidget extends StatelessWidget {
       ),
     );
   }
+
+
 }
