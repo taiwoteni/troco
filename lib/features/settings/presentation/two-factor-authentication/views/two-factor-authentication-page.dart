@@ -16,13 +16,55 @@ class TwoFactorAuthenticationPage extends ConsumerStatefulWidget {
       _TwoFactorAuthenticationPageState();
 }
 
-class _TwoFactorAuthenticationPageState
-    extends ConsumerState<TwoFactorAuthenticationPage> {
+class _TwoFactorAuthenticationPageState extends ConsumerState<TwoFactorAuthenticationPage> {
+  bool twoFactorEnabled = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar(),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            largeSpacer(),
+            enableTwoFactorAuthentication(),
+          ],
+        ),
+      ),
     );
+  }
+
+  Widget enableTwoFactorAuthentication() {
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(
+          vertical: SizeManager.small, horizontal: SizeManager.medium),
+      horizontalTitleGap: SizeManager.large,
+      title: const Text("Enable Two Factor Authentication"),
+      titleTextStyle: TextStyle(
+          color: ColorManager.primary,
+          fontFamily: 'quicksand',
+          overflow: TextOverflow.ellipsis,
+          fontSize: FontSizeManager.regular * 1.2,
+          fontWeight: FontWeightManager.extrabold),
+      trailing: switchWidget(
+          enabled: twoFactorEnabled,
+          onChanged: (value) => setState(() => twoFactorEnabled = value)),
+    );
+  }
+
+  Widget switchWidget(
+      {required bool enabled,
+      required final void Function(bool value) onChanged}) {
+    return Switch(
+        value: enabled,
+        inactiveTrackColor: ColorManager.secondary,
+        inactiveThumbColor: ColorManager.background,
+        activeColor: ColorManager.background,
+        activeTrackColor: ColorManager.accentColor,
+        onChanged: onChanged);
   }
 
   PreferredSizeWidget appBar() {
