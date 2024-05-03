@@ -129,8 +129,9 @@ class _TwoFactorAuthenticationPageState
             fontWeight: FontWeightManager.extrabold),
         trailing: switchWidget(
             enabled: automaticallyLogoutDuringInactivity,
-            onChanged: (value) =>
-                setState(() => automaticallyLogoutDuringInactivity = value)),
+            onChanged: (value) => !twoFactorEnabled
+                ? null
+                : setState(() => automaticallyLogoutDuringInactivity = value)),
       ),
     );
   }
@@ -162,7 +163,10 @@ class _TwoFactorAuthenticationPageState
             fontWeight: FontWeightManager.extrabold),
         trailing: switchWidget(
             enabled: autoLoginPinEnabled,
-            onChanged: (value) => setState(() => autoLoginPinEnabled = value)),
+            onChanged: (value) =>
+                !(twoFactorEnabled && automaticallyLogoutDuringInactivity)
+                    ? null
+                    : setState(() => autoLoginPinEnabled = value)),
       ),
     );
   }
@@ -194,7 +198,10 @@ class _TwoFactorAuthenticationPageState
             fontWeight: FontWeightManager.extrabold),
         trailing: switchWidget(
             enabled: !autoLoginPinEnabled,
-            onChanged: (value) => setState(() => autoLoginPinEnabled = !value)),
+            onChanged: (value) =>
+                !(twoFactorEnabled && automaticallyLogoutDuringInactivity)
+                    ? null
+                    : setState(() => autoLoginPinEnabled = !value)),
       ),
     );
   }
@@ -225,7 +232,8 @@ class _TwoFactorAuthenticationPageState
             fontWeight: FontWeightManager.extrabold),
         trailing: switchWidget(
             enabled: otpEnabled,
-            onChanged: (value) => setState(() => otpEnabled = value)),
+            onChanged: (value) =>
+                !twoFactorEnabled ? null : setState(() => otpEnabled = value)),
       ),
     );
   }
@@ -256,7 +264,8 @@ class _TwoFactorAuthenticationPageState
             fontWeight: FontWeightManager.extrabold),
         trailing: switchWidget(
             enabled: !otpEnabled,
-            onChanged: (value) => setState(() => otpEnabled = !value)),
+            onChanged: (value) =>
+                !twoFactorEnabled ? null : setState(() => otpEnabled = !value)),
       ),
     );
   }
