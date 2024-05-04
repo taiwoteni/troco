@@ -29,6 +29,8 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
     SettingsModel(
         label: "Change Language",
         icon: AssetManager.svgFile(name: "language"),
+        onTap: ()=> Navigator.pushNamed(context,Routes.changeLanguageRoute),
+
         iconType: IconType.svg),
     SettingsModel(
         label: "Notification Settings",
