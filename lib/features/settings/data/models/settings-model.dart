@@ -1,4 +1,4 @@
-import '../../presentation/settings-page/utils/enums.dart';
+import '../../utils/enums.dart';
 
 class SettingsModel{
   final String label;
