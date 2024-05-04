@@ -4,7 +4,7 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/settings/data/models/settings-model.dart';
-import 'package:troco/features/settings/presentation/settings-page/utils/enums.dart';
+import '../../../utils/enums.dart';
 
 class SettingsTileWidget extends StatelessWidget {
   final SettingsModel setting;
