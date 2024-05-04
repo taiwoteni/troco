@@ -13,6 +13,7 @@ import 'package:troco/features/auth/presentation/register/views/add-pin-screen.d
 import 'package:troco/features/auth/presentation/register/views/add-profile-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/settings/presentation/edit-profile-page/views/edit-profile-screen.dart';
+import 'package:troco/features/settings/presentation/language/views/change-language-screen.dart';
 import 'package:troco/features/settings/presentation/password/views/change-password-screen.dart';
 import 'package:troco/features/settings/presentation/two-factor-authentication/views/two-factor-authentication-screen.dart';
 import 'package:troco/features/splash/presentation/splash-screen.dart';
@@ -60,6 +61,7 @@ class Routes {
   static const editProfileRoute = "/edit-profile";
   static const twoFactorAuthenticationRoute = "/two-factor-authentication";
   static const changePasswordRoute = "/change-password";
+  static const changeLanguageRoute = "/change-language";
 }
 
 class RouteGenerator {
@@ -183,6 +185,10 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const ChangePasswordScreen());
+      case Routes.changeLanguageRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const ChangeLanguageScreen());
       default:
         return MaterialPageRoute(
             settings: routeSettings,
