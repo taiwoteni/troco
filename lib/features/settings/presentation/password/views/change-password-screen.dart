@@ -116,7 +116,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           ),
           regularSpacer(),
           InputFormField(
-            label: '',
+            label: 'Type in your old password',
             isPassword: true,
             inputType: TextInputType.visiblePassword,
             validator: (value) {
@@ -153,7 +153,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           ),
           regularSpacer(),
           InputFormField(
-            label: '',
+            label: 'Type in the new password',
             isPassword: true,
             inputType: TextInputType.visiblePassword,
             validator: (value) {
@@ -215,7 +215,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           ),
           regularSpacer(),
           InputFormField(
-            label: '',
+                        label: 'Retype the new password',
+
             isPassword: true,
             inputType: TextInputType.visiblePassword,
             validator: (value) {
@@ -248,5 +249,4 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       margin: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
     );
   }
-
 }
