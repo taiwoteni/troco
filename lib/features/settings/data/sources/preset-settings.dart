@@ -24,6 +24,7 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
     SettingsModel(
         label: "Change Password",
         icon: AssetManager.svgFile(name: "padlock"),
+        onTap: ()=> Navigator.pushNamed(context,Routes.changePasswordRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Language",
