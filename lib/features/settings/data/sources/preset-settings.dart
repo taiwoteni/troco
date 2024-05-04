@@ -10,12 +10,13 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
     SettingsModel(
         label: "Edit Profile",
         icon: AssetManager.svgFile(name: "edit"),
-        onTap: ()=> Navigator.pushNamed(context,Routes.editProfileRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.editProfileRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Two Factor Authentication",
         icon: AssetManager.svgFile(name: "two-factor-authentication"),
-        onTap: ()=> Navigator.pushNamed(context,Routes.twoFactorAuthenticationRoute),
+        onTap: () =>
+            Navigator.pushNamed(context, Routes.twoFactorAuthenticationRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Pin",
@@ -24,13 +25,12 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
     SettingsModel(
         label: "Change Password",
         icon: AssetManager.svgFile(name: "padlock"),
-        onTap: ()=> Navigator.pushNamed(context,Routes.changePasswordRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.changePasswordRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Language",
         icon: AssetManager.svgFile(name: "language"),
-        onTap: ()=> Navigator.pushNamed(context,Routes.changeLanguageRoute),
-
+        onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Notification Settings",
