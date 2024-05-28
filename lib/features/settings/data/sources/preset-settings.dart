@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:troco/core/app/asset-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import '../../utils/enums.dart';
 
 import '../../../../core/app/routes-manager.dart';
@@ -20,14 +21,13 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Pin",
-        icon: AssetManager.svgFile(name: "change-pin"),
-    
+        icon: AssetManager.svgFile(name: "change-pin"),    
+        onTap: ()=> Navigator.pushNamed(context, Routes.changePinRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Password",
         icon: AssetManager.svgFile(name: "padlock"),
         onTap: () => Navigator.pushNamed(context, Routes.changePasswordRoute),
-
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Language",
@@ -41,6 +41,10 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
     SettingsModel(
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
+        onTap: (){
+          AppStorage.clear();
+          Navigator.pushNamedAndRemoveUntil(context, Routes.authRoute, (route) => false);
+        },
         grave: true,
         iconType: IconType.svg),
     SettingsModel(
