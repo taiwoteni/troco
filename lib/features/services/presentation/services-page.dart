@@ -15,11 +15,11 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
+      body: const SingleChildScrollView(
+        physics:BouncingScrollPhysics(),
         child: Column(
           children: [
-            
+
           ],
         ),
       ),

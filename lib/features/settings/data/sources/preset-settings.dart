@@ -8,6 +8,9 @@ import '../models/settings-model.dart';
 
 List<SettingsModel> presetSettings({required BuildContext context}) {
   return [
+
+    //Normal Settings
+    //settingType is normal by default so it can be omitted
     SettingsModel(
         label: "Edit Profile",
         icon: AssetManager.svgFile(name: "edit"),
@@ -38,6 +41,22 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
         label: "Notification Settings",
         icon: AssetManager.svgFile(name: "bell"),
         iconType: IconType.svg),
+
+    //Financial Settings.
+    SettingsModel(
+        label: "Payment Methods",
+        icon: AssetManager.svgFile(name: "payment"),
+        settingsType: SettingsType.financial,
+        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        iconType: IconType.svg),
+    SettingsModel(
+        label: "KYC Verification",
+        icon: AssetManager.svgFile(name: "verification"),
+        settingsType: SettingsType.financial,
+        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        iconType: IconType.svg),
+
+    //Grave Settings    
     SettingsModel(
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
@@ -45,12 +64,12 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
           AppStorage.clear();
           Navigator.pushNamedAndRemoveUntil(context, Routes.authRoute, (route) => false);
         },
-        grave: true,
+        settingsType: SettingsType.grave,
         iconType: IconType.svg),
     SettingsModel(
         label: "Delete Account",
         icon: AssetManager.svgFile(name: "trash"),
-        grave: true,
+        settingsType: SettingsType.grave,
         iconType: IconType.svg),
   ];
 }

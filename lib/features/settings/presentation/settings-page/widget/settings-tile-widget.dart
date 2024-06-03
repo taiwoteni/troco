@@ -12,6 +12,7 @@ class SettingsTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return ListTile(
       onTap: setting.onTap,
       dense: true,
@@ -24,7 +25,7 @@ class SettingsTileWidget extends StatelessWidget {
       horizontalTitleGap: SizeManager.large,
       title: Text(setting.label),
       titleTextStyle: TextStyle(
-          color: setting.grave ? Colors.red.shade600 : ColorManager.primary,
+          color: setting.settingsType == SettingsType.grave? Colors.red.shade600 : ColorManager.primary,
           fontFamily: 'quicksand',
           overflow: TextOverflow.ellipsis,
           fontSize: FontSizeManager.regular * 1.2,
@@ -32,29 +33,45 @@ class SettingsTileWidget extends StatelessWidget {
     );
   }
 
+  Color settingsPrimaryColor(){
+    switch(setting.settingsType){
+      case SettingsType.normal:
+        return ColorManager.accentColor;
+      case SettingsType.financial:
+        return Colors.orange;  
+      default:
+        return Colors.red.shade600;  
+    }
+  }
+
+  Color settingsSecondaryColor(){
+    switch(setting.settingsType){
+      case SettingsType.normal:
+        return ColorManager.accentColor.withOpacity(0.07);
+      case SettingsType.financial:
+        return Colors.orange.withOpacity(0.1);  
+      default:
+        return Colors.red.shade600.withOpacity(0.1);  
+    }
+  }
+
   Widget leading() {
     return Container(
       width: IconSizeManager.large,
       height: IconSizeManager.large,
       decoration: BoxDecoration(
-          color: setting.grave
-              ? Colors.red.shade600.withOpacity(0.1)
-              : ColorManager.accentColor.withOpacity(0.07),
+          color: settingsSecondaryColor(),
           borderRadius: BorderRadius.circular(SizeManager.regular)),
       alignment: Alignment.center,
       child: setting.iconType == IconType.icon
           ? Icon(
               setting.icon as IconData,
-              color: setting.grave
-                  ? Colors.red.shade600
-                  : ColorManager.accentColor,
+              color:settingsPrimaryColor(),
               size: IconSizeManager.regular * 1.2,
             )
           : SvgIcon(
               svgRes: setting.icon,
-              color: setting.grave
-                  ? Colors.red.shade600
-                  : ColorManager.accentColor,
+              color: settingsPrimaryColor(),
               size: const Size.square(IconSizeManager.regular * 1.2),
             ),
     );
@@ -65,14 +82,12 @@ class SettingsTileWidget extends StatelessWidget {
       width: IconSizeManager.medium * 1.3,
       height: IconSizeManager.medium * 1.3,
       decoration: BoxDecoration(
-          color: setting.grave
-              ? Colors.red.shade600.withOpacity(0.1)
-              : ColorManager.accentColor.withOpacity(0.07),
+          color: settingsSecondaryColor(),
           shape: BoxShape.circle),
       alignment: Alignment.center,
       child: Icon(
         Icons.arrow_forward_ios_rounded,
-        color: setting.grave ? Colors.red.shade600 : ColorManager.accentColor,
+        color: settingsPrimaryColor(),
         size: IconSizeManager.regular * 0.9,
       ),
     );
