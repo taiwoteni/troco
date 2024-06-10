@@ -211,6 +211,7 @@ class ChatWidget extends ConsumerWidget {
   }
 
   Widget stackedImages() {
+    final hasViews =  Random().nextInt(2) == 0;
     final images = <ImageProvider<Object>>[
       NetworkImage(ClientProvider.readOnlyClient!.profile),
       NetworkImage(ClientProvider.readOnlyClient!.profile),
@@ -222,7 +223,7 @@ class ChatWidget extends ConsumerWidget {
       duration: const Duration(milliseconds: 1000),
       padding: const EdgeInsets.only(top: SizeManager.small),
       curve: Curves.ease,
-      height: Random().nextInt(2) == 0 ? 22 + SizeManager.small : 0,
+      height: hasViews? 22 + SizeManager.small : 0,
       child: StackedImageListWidget(
         images: images,
         iconSize: 22,
