@@ -219,14 +219,22 @@ class ChatWidget extends ConsumerWidget {
           name: "product-image-demo", ext: Extension.jpg)),
     ];
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 1000),
-      padding: const EdgeInsets.only(top: SizeManager.small),
-      curve: Curves.ease,
-      height: hasViews? 22 + SizeManager.small : 0,
-      child: StackedImageListWidget(
-        images: images,
-        iconSize: 22,
+    return Visibility(
+      visible: hasViews,
+      /// we use maintain state and maintain animation inorder to 
+      /// still let the animation play even though it is triggered 
+      /// when the child is just getting visible
+      maintainAnimation: true,
+      maintainState: true,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 1000),
+        padding: const EdgeInsets.only(top: SizeManager.small),
+        curve: Curves.ease,
+        height: hasViews? 22 + SizeManager.small : 0,
+        child: StackedImageListWidget(
+          images: images,
+          iconSize: 22,
+        ),
       ),
     );
   }
