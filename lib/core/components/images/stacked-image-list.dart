@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/app/color-manager.dart';
 
 class StackedImageListWidget extends ConsumerWidget {
   /// The Icon Size of the icons in the list
@@ -17,23 +18,26 @@ class StackedImageListWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    const double borderSize = 2.25;
     return Row(
       mainAxisSize: MainAxisSize.min,
+      textDirection: TextDirection.rtl,
       children: [
         ...List.generate(
           images.length,
           (index) => Align(
             widthFactor: 0.8,
             child: Container(
-              width: iconSize,
-              height: iconSize,
-              decoration: const BoxDecoration(shape: BoxShape.circle),
-              child: Image(
-                image: images[index],
-                fit: BoxFit.cover,
-                width: iconSize,
-                height: iconSize,
-              ),
+              width: iconSize - borderSize,
+              height: iconSize - borderSize,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: ColorManager.tertiary,
+                      width: borderSize,
+                      strokeAlign: BorderSide.strokeAlignOutside),
+                  image:
+                      DecorationImage(fit: BoxFit.cover, image: images[index])),
             ),
           ),
         )

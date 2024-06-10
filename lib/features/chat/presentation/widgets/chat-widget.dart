@@ -1,6 +1,7 @@
 // ignore_for_file: unused_element
 
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -203,22 +204,29 @@ class ChatWidget extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           content(),
-          if(lastSender && isSender)
-          stackedImages(),
+          if (lastSender && isSender) stackedImages(),
         ],
       ),
     );
   }
 
-  Widget stackedImages(){
+  Widget stackedImages() {
     final images = <ImageProvider<Object>>[
       NetworkImage(ClientProvider.readOnlyClient!.profile),
-      AssetImage(AssetManager.imageFile(name: "profile_img")),
-      AssetImage(AssetManager.imageFile(name: "product-image-demo",ext: Extension.jpg)),
+      NetworkImage(ClientProvider.readOnlyClient!.profile),
+      AssetImage(AssetManager.imageFile(
+          name: "product-image-demo", ext: Extension.jpg)),
     ];
 
-
-
-    return StackedImageListWidget(images: images);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 1000),
+      padding: const EdgeInsets.only(top: SizeManager.small),
+      curve: Curves.ease,
+      height: Random().nextInt(2) == 0 ? 22 + SizeManager.small : 0,
+      child: StackedImageListWidget(
+        images: images,
+        iconSize: 22,
+      ),
+    );
   }
 }
