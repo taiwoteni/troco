@@ -172,7 +172,7 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
     final style = TextStyle(
       fontFamily: 'Lato',
       color: ColorManager.primary,
-      fontSize: FontSizeManager.regular,
+      fontSize: FontSizeManager.regular*1.1,
       fontWeight: FontWeightManager.semibold
     );
     final client = ClientProvider.readOnlyClient!;
