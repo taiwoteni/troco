@@ -17,9 +17,8 @@ class TwoFactorAuthenticationScreen extends ConsumerStatefulWidget {
       _TwoFactorAuthenticationPageState();
 }
 
-class _TwoFactorAuthenticationPageState
-    extends ConsumerState<TwoFactorAuthenticationScreen> {
-  bool twoFactorEnabled = false;
+class _TwoFactorAuthenticationPageState extends ConsumerState<TwoFactorAuthenticationScreen> {
+  bool twoFactorEnabled = true;
   bool otpEnabled = true;
   bool automaticallyLogoutDuringInactivity = true;
   bool autoLoginPinEnabled = true;

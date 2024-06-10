@@ -43,7 +43,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               children: [
                 largeSpacer(),
                 oldPassword(),
-                largeSpacer(),
+                mediumSpacer(),
+                forgotPassword(),
                 mediumSpacer(),
                 newPassword(),
                 mediumSpacer(),
@@ -136,6 +137,17 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     );
   }
 
+  Widget forgotPassword() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
+      child: InfoText(
+        text: "Forgot Password?",
+        alignment: Alignment.centerRight,
+        fontWeight: FontWeightManager.semibold,
+      ),
+    );
+  }
+
   Widget newPassword() {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -215,8 +227,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           ),
           regularSpacer(),
           InputFormField(
-                        label: 'Retype the new password',
-
+            label: 'Retype the new password',
             isPassword: true,
             inputType: TextInputType.visiblePassword,
             validator: (value) {
@@ -249,4 +260,5 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       margin: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
     );
   }
+
 }

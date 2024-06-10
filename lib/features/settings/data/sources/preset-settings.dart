@@ -8,7 +8,6 @@ import '../models/settings-model.dart';
 
 List<SettingsModel> presetSettings({required BuildContext context}) {
   return [
-
     //Normal Settings
     //settingType is normal by default so it can be omitted
     SettingsModel(
@@ -24,8 +23,8 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Pin",
-        icon: AssetManager.svgFile(name: "change-pin"),    
-        onTap: ()=> Navigator.pushNamed(context, Routes.changePinRoute),
+        icon: AssetManager.svgFile(name: "change-pin"),
+        onTap: () => Navigator.pushNamed(context, Routes.changePinRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Change Password",
@@ -42,33 +41,15 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
         icon: AssetManager.svgFile(name: "bell"),
         iconType: IconType.svg),
 
-    //Financial Settings.
-    SettingsModel(
-        label: "Payment Methods",
-        icon: AssetManager.svgFile(name: "payment"),
-        settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
-        iconType: IconType.svg),
-    SettingsModel(
-        label: "KYC Verification",
-        icon: AssetManager.svgFile(name: "verification"),
-        settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
-        iconType: IconType.svg),
-
-    //Grave Settings    
+    //Grave Settings
     SettingsModel(
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
-        onTap: (){
+        onTap: () {
           AppStorage.clear();
-          Navigator.pushNamedAndRemoveUntil(context, Routes.authRoute, (route) => false);
+          Navigator.pushNamedAndRemoveUntil(
+              context, Routes.authRoute, (route) => false);
         },
-        settingsType: SettingsType.grave,
-        iconType: IconType.svg),
-    SettingsModel(
-        label: "Delete Account",
-        icon: AssetManager.svgFile(name: "trash"),
         settingsType: SettingsType.grave,
         iconType: IconType.svg),
   ];

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
+import 'package:troco/features/auth/presentation/welcome-back/views/welcome-back-screen.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password-otp.dart';
@@ -30,6 +31,7 @@ import '../../features/transactions/presentation/create-transaction/views/create
 
 class Routes {
   static const splashRoute = "/";
+  static const welcomeBackRoute = "/welcome-back";
   static const onBoardingRoute = "/onboarding";
   static const authRoute = "/auth";
   static const loginRoute = "/login";
@@ -69,6 +71,10 @@ class Routes {
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
+       case Routes.welcomeBackRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const WelcomeBackScreen());
       case Routes.onBoardingRoute:
         return MaterialPageRoute(
             settings: routeSettings,

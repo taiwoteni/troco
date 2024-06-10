@@ -16,12 +16,13 @@ class ChangePinScreen extends ConsumerStatefulWidget {
   const ChangePinScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _ChangePinScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _ChangePinScreenState();
 }
 
 class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
-  String oldPin1 = "",oldPin2 = "",oldPin3 = "",oldPin4 = "";
-  String newPin1 = "",newPin2 = "",newPin3 = "",newPin4 = "";
+  String oldPin1 = "", oldPin2 = "", oldPin3 = "", oldPin4 = "";
+  String newPin1 = "", newPin2 = "", newPin3 = "", newPin4 = "";
 
   final UniqueKey buttonKey = UniqueKey();
 
@@ -29,11 +30,9 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      
       ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
     });
   }
-
 
   @override
   void setState(VoidCallback fn) {
@@ -55,7 +54,6 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,12 +65,12 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
           children: [
             largeSpacer(),
             oldPin(),
-            largeSpacer(),
+            mediumSpacer(),
+            forgotPin(),
             mediumSpacer(),
             newPin(),
             extraLargeSpacer(),
             button()
-
           ],
         ),
       ),
@@ -117,7 +115,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
     );
   }
 
-  Widget oldPin(){
+  Widget oldPin() {
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: SizeManager.medium, vertical: 0),
@@ -134,44 +132,43 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
           ),
           regularSpacer(),
           Form(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                OtpInputField(
-                  first: true,
-                  obscure: true,
-                  onEntered: (value){
-                    setState(()=> oldPin1 = value);
-                  },
-                ),
-                OtpInputField(
-                  obscure: true,
-                  onEntered: (value){
-                    setState(()=> oldPin2 = value);
-                  },
-                ),
-                OtpInputField(
-                  obscure: true,
-                  onEntered: (value){
-                    setState(()=> oldPin3 = value);
-                  },
-                ),
-                OtpInputField(
-                  last: true,
-                  obscure: true,
-                  onEntered: (value){
-                    setState(()=> oldPin4 = value);
-                  },
-                )
-              ],
-            ))
-
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              OtpInputField(
+                first: true,
+                obscure: true,
+                onEntered: (value) {
+                  setState(() => oldPin1 = value);
+                },
+              ),
+              OtpInputField(
+                obscure: true,
+                onEntered: (value) {
+                  setState(() => oldPin2 = value);
+                },
+              ),
+              OtpInputField(
+                obscure: true,
+                onEntered: (value) {
+                  setState(() => oldPin3 = value);
+                },
+              ),
+              OtpInputField(
+                last: true,
+                obscure: true,
+                onEntered: (value) {
+                  setState(() => oldPin4 = value);
+                },
+              )
+            ],
+          ))
         ],
       ),
     );
   }
-  
-  Widget newPin(){
+
+  Widget newPin() {
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: SizeManager.medium, vertical: 0),
@@ -188,49 +185,59 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
           ),
           regularSpacer(),
           Form(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                OtpInputField(
-                  first: true,
-                  obscure: true,
-                  onEntered: (value){
-                    setState(()=> newPin1 = value);
-                  },
-                ),
-                OtpInputField(
-                  obscure: true,
-                  onEntered: (value){
-                    setState(()=> newPin2 = value);
-                  },
-                ),
-                OtpInputField(
-                  obscure: true,
-                  onEntered: (value){
-                    setState(()=> newPin3 = value);
-                  },
-                ),
-                OtpInputField(
-                  last: true,
-                  obscure: true,
-                  onEntered: (value){
-                    setState(()=> newPin4 = value);
-                  },
-                )
-              ],
-            ))
-
+              child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              OtpInputField(
+                first: true,
+                obscure: true,
+                onEntered: (value) {
+                  setState(() => newPin1 = value);
+                },
+              ),
+              OtpInputField(
+                obscure: true,
+                onEntered: (value) {
+                  setState(() => newPin2 = value);
+                },
+              ),
+              OtpInputField(
+                obscure: true,
+                onEntered: (value) {
+                  setState(() => newPin3 = value);
+                },
+              ),
+              OtpInputField(
+                last: true,
+                obscure: true,
+                onEntered: (value) {
+                  setState(() => newPin4 = value);
+                },
+              )
+            ],
+          ))
         ],
       ),
     );
   }
 
-  Widget button(){
+  Widget forgotPin() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
+      child: InfoText(
+        text: "Forgot Pin?",
+        alignment: Alignment.centerRight,
+        fontWeight: FontWeightManager.semibold,
+      ),
+    );
+  }
+
+  Widget button() {
     return CustomButton(
       label: "Change Pin",
       usesProvider: true,
       buttonKey: buttonKey,
       margin: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-      );
+    );
   }
 }

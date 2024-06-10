@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
+import 'package:troco/core/components/images/stacked-image-list.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
@@ -120,25 +121,8 @@ class ChatWidget extends ConsumerWidget {
       );
     }
 
-    return Container(
-      width: double.maxFinite,
-      padding: EdgeInsets.only(
-        left: (lastSender ? lastSender : lastMessage) && !isSender ? 0 : 55,
-        right: SizeManager.medium,
-        // bottom: lastSender?,
-        top: sameSender
-
-            /// I removed lastSender from the [top: lastSender || sameSender]
-            /// because sameSender is always true if it is the lastSender.
-            ? (firstSender && lastSender)
-                ? SizeManager.medium * 1.05
-                : SizeManager.small * 0.95
-            : lastMessage
-                ? SizeManager.small * 0.95
-                : SizeManager.medium * 1.05,
-      ),
-      alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-      child: Row(
+    Widget content() {
+      return Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment:
             (chat.hasAttachment ? true : chat.message!.length >= 116)
@@ -149,9 +133,7 @@ class ChatWidget extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: chat.profile != "null"
-                  ? ProfileIcon(
-                      url: chat.profile,
-                      size: 35)
+                  ? ProfileIcon(url: chat.profile, size: 35)
                   : const UserProfileIcon(
                       size: 35,
                       showOnlyDefault: true,
@@ -195,7 +177,48 @@ class ChatWidget extends ConsumerWidget {
             ],
           ),
         ],
+      );
+    }
+
+    return Container(
+      width: double.maxFinite,
+      padding: EdgeInsets.only(
+        left: (lastSender ? lastSender : lastMessage) && !isSender ? 0 : 55,
+        right: SizeManager.medium,
+        // bottom: lastSender?,
+        top: sameSender
+
+            /// I removed lastSender from the [top: lastSender || sameSender]
+            /// because sameSender is always true if it is the lastSender.
+            ? (firstSender && lastSender)
+                ? SizeManager.medium * 1.05
+                : SizeManager.small * 0.95
+            : lastMessage
+                ? SizeManager.small * 0.95
+                : SizeManager.medium * 1.05,
+      ),
+      alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          content(),
+          if(lastSender && isSender)
+          stackedImages(),
+        ],
       ),
     );
+  }
+
+  Widget stackedImages(){
+    final images = <ImageProvider<Object>>[
+      NetworkImage(ClientProvider.readOnlyClient!.profile),
+      AssetImage(AssetManager.imageFile(name: "profile_img")),
+      AssetImage(AssetManager.imageFile(name: "product-image-demo",ext: Extension.jpg)),
+    ];
+
+
+
+    return StackedImageListWidget(images: images);
   }
 }

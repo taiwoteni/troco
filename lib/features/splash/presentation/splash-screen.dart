@@ -39,7 +39,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       await Future.delayed(const Duration(seconds: 5));
       final isLoggedIn = ref.watch(ClientProvider.userProvider) != null;
       Navigator.pushReplacementNamed(
-          context, isLoggedIn ? Routes.homeRoute : Routes.onBoardingRoute);
+          context, isLoggedIn ? Routes.welcomeBackRoute : Routes.onBoardingRoute);
     });
   }
 

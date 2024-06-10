@@ -11,11 +11,33 @@ class StackedImageListWidget extends ConsumerWidget {
   final List<ImageProvider<Object>> images;
 
   /// A Widget that displays a list of overlapped images like "instagram likes" images
-  /// ![](https://i.stack.imgur.com/6JZa6.jpg) 
-  const StackedImageListWidget({super.key, required this.images, this.iconSize = 45});
+  /// ![](https://i.stack.imgur.com/6JZa6.jpg)
+  const StackedImageListWidget(
+      {super.key, required this.images, this.iconSize = 35});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...List.generate(
+          images.length,
+          (index) => Align(
+            widthFactor: 0.8,
+            child: Container(
+              width: iconSize,
+              height: iconSize,
+              decoration: const BoxDecoration(shape: BoxShape.circle),
+              child: Image(
+                image: images[index],
+                fit: BoxFit.cover,
+                width: iconSize,
+                height: iconSize,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
   }
 }
