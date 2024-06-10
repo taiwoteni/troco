@@ -24,6 +24,8 @@ class Client extends Equatable {
   String get bustop => _json["nearestBustop"];
   String get transactionPin => _json["transactionPin"];
 
+  String? get password => _json["password"];
+
   Map<dynamic, dynamic> toJson() {
     return _json;
   }

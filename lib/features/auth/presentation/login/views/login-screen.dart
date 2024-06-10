@@ -296,9 +296,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         setState(() => errorText = null);
         Map<dynamic, dynamic> map = response.messageBody!["data"];
         map["id"] = map["_id"];
-        // We have to remove the "_v" && "password" key. Although not compulsory.
+        // We have to remove the "_v" key. Although not compulsory.
         map.remove("__v");
-        map.remove("password");
+        // map.remove("password");
         map.remove("groups");
 
         // We have to save user data first
