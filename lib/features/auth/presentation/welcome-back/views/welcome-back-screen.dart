@@ -38,9 +38,6 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
       
       // We're using Chat Ui overlay style because it has white status bar with black icons as well
       // as white nav bar with black nav bar item color
-
-      ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
-      // We disable the button from the onset since the textfield is empty.
     });
   }
 
