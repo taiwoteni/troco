@@ -64,8 +64,7 @@ class _LatestTransactionsListState
                   textAlign: TextAlign.start,
                 ),
                 const Spacer(),
-                if (false)
-                  TextButton(
+                TextButton(
                       onPressed: null,
                       child: Text(
                         "View All",
@@ -92,8 +91,7 @@ class _LatestTransactionsListState
                     thickness: 0.8,
                     color: ColorManager.secondary.withOpacity(0.08),
                   ),
-              itemCount:
-                  /**transactions.length >= 3 ? 3 : */ transactions.length)
+              itemCount:transactions.length >= 3 ? 3 : transactions.length)
         ],
       ),
     );

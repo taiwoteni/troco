@@ -56,7 +56,7 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
             Form(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: [     
                   title(),
                   extraLargeSpacer(),
                   regularSpacer(),
@@ -83,6 +83,7 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
     Navigator.pushReplacementNamed(context, Routes.homeRoute);
   }
 
+  
   Widget header() {
     return Container(
       width: double.maxFinite,
@@ -160,8 +161,7 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
         buttonKey: buttonKey,
         onPressed: signIn,
         usesProvider: true,
-        margin:
-            const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
+        margin: const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
         label: "Sign In");
   }
 
