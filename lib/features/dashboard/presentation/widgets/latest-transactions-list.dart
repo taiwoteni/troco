@@ -65,14 +65,20 @@ class _LatestTransactionsListState
                 ),
                 const Spacer(),
                 TextButton(
-                      onPressed: null,
-                      child: Text(
-                        "View All",
-                        style: defaultStyle.copyWith(
-                            color: ColorManager.accentColor,
-                            fontSize: FontSizeManager.regular * 0.9,
-                            fontWeight: FontWeightManager.medium),
-                      ))
+                    onPressed: null,
+                    style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                            ColorManager.accentColor.withOpacity(0.10)),
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(SizeManager.medium)))),
+                    child: Text(
+                      "View All",
+                      style: defaultStyle.copyWith(
+                          color: ColorManager.accentColor,
+                          fontSize: FontSizeManager.regular * 0.9,
+                          fontWeight: FontWeightManager.medium),
+                    ))
               ],
             ),
           ),
@@ -91,7 +97,7 @@ class _LatestTransactionsListState
                     thickness: 0.8,
                     color: ColorManager.secondary.withOpacity(0.08),
                   ),
-              itemCount:transactions.length >= 3 ? 3 : transactions.length)
+              itemCount: transactions.length >= 3 ? 3 : transactions.length)
         ],
       ),
     );
