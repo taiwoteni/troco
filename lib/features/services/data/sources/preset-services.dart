@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:troco/core/app/asset-manager.dart';
 
-import '../../../../core/app/routes-manager.dart';
+
 import '../../../settings/data/models/settings-model.dart';
 import '../../../settings/utils/enums.dart';
 

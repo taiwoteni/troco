@@ -11,7 +11,6 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
-import 'package:troco/core/components/animations/fade-in-up.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/images/svg.dart';
