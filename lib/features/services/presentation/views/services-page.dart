@@ -10,10 +10,10 @@ import 'package:troco/features/auth/presentation/providers/client-provider.dart'
 import 'package:troco/features/services/data/sources/preset-services.dart';
 import 'package:troco/features/services/utils/clipper.dart';
 
-import '../../../core/app/font-manager.dart';
-import '../../../core/app/size-manager.dart';
-import '../../settings/data/models/settings-model.dart';
-import '../../settings/presentation/settings-page/widget/settings-tile-widget.dart';
+import '../../../../core/app/font-manager.dart';
+import '../../../../core/app/size-manager.dart';
+import '../../../settings/data/models/settings-model.dart';
+import '../../../settings/presentation/settings-page/widget/settings-tile-widget.dart';
 
 class ServicesPage extends ConsumerStatefulWidget {
   const ServicesPage({super.key});
