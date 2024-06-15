@@ -1,16 +1,15 @@
+import 'package:equatable/equatable.dart';
 
-class PaymentMethod{
-  final String accountNumber;
-  final int cvc;
+abstract class PaymentMethod extends Equatable{
   final String bankName;
+  final String name;
 
-  const PaymentMethod({required this.accountNumber, required this.bankName, required this.cvc});
+  const PaymentMethod({required this.bankName, required this.name});
 
-  Map<dynamic,dynamic> toJson(){
-    return {
-      "accountNumber":accountNumber,
-      "cvc":cvc,
-      "bankName":bankName
-    };
-  }
+  String uuid();
+  Future<String?> validate();
+  Map<String,dynamic> toJson();
+  
+  @override
+  List<Object?> get props => [uuid()];
 }

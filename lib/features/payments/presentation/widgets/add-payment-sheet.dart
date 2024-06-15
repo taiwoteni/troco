@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,7 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/images/svg.dart';
+import 'package:troco/features/payments/data/models/payment-method-dataholder.dart';
 import 'package:troco/features/payments/utils/card-month-input-formatter.dart';
 import 'package:troco/features/payments/utils/uppercase-input-formatter.dart';
 
@@ -30,6 +33,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
   CardType cardType = CardType.Invalid;
+  
 
   @override
   void initState() {
@@ -63,9 +67,9 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
                 color: ColorManager.secondary.withOpacity(0.08),
               ),
               mediumSpacer(),
-              accountNumber(),
+              cardNumber(),
               mediumSpacer(),
-              name(),
+              cardHolderName(),
               mediumSpacer(),
               rest(),
               largeSpacer(),
@@ -115,12 +119,14 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
     );
   }
 
-  Widget accountNumber() {
+  Widget cardNumber() {
     return InputFormField(
-      label: 'Account Number',
+      label: 'Card Number',
       inputType: TextInputType.number,
       validator: CardUtils.validateCardNum,
-      onSaved: (value) {},
+      onSaved: (value) {
+        PaymentMethodDataHolder.cardNumber = value;
+      },
       onChanged: (value) {
         getCardTypeFrmNumber(value);
       },
@@ -156,9 +162,9 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
     );
   }
 
-  Widget name() {
+  Widget cardHolderName() {
     return InputFormField(
-      label: 'Name',
+      label: 'Cardholder Name',
       validator: (value) {
         if (value == null) {
           return "* enter name";
@@ -168,7 +174,9 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
         }
         return null;
       },
-      onSaved: (value) {},
+      onSaved: (value) {
+        PaymentMethodDataHolder.name = value;
+      },
       inputType: TextInputType.name,
       inputFormatters: [
         UpperCaseTextFormatter(),
@@ -202,7 +210,9 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
         }
         return null;
       },
-      onSaved: (value) {},
+      onSaved: (value) {
+        PaymentMethodDataHolder.cvv = value;
+      },
       prefixIcon: IconButton(
         onPressed: null,
         iconSize: IconSizeManager.regular,
@@ -226,7 +236,9 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
       label: 'MM/YY',
       inputType: TextInputType.number,
       validator: CardUtils.validateDate,
-      onSaved: (value) {},
+      onSaved: (value) {
+        PaymentMethodDataHolder.expDate = value;
+      },
       prefixIcon: IconButton(
         onPressed: null,
         iconSize: IconSizeManager.regular,
@@ -293,11 +305,11 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
     if(formKey.currentState!.validate()){
+      formKey.currentState!.save();
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      Navigator.pop(context, null);
-
-
-
+      final paymentMethod = PaymentMethodDataHolder.toPaymentMethod();
+      Navigator.pop(context, paymentMethod);
+      PaymentMethodDataHolder.clear();
     }
     else{
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
