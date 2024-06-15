@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -24,7 +25,7 @@ class _PinEntryScreenState extends State<PinEntryScreen>
   bool animatingRight = false;
 
   @override
-  void setState(VoidCallback fn){
+  void setState(VoidCallback fn) {
     super.setState(fn);
 
     if (transactionPin.length == 4) {
@@ -69,22 +70,23 @@ class _PinEntryScreenState extends State<PinEntryScreen>
           pinInputs(),
           extraLargeSpacer(),
           keyPad(),
+          extraLargeSpacer(),
+          changeAccount(),
         ],
       ),
     );
   }
 
-  Widget label(){
+  Widget label() {
     return const Text(
       "Enter Transaction Pin",
       textAlign: TextAlign.center,
       style: TextStyle(
-        fontFamily: 'lato',
-        color: Colors.white,
-        fontSize: FontSizeManager.medium,
-        fontWeight: FontWeightManager.semibold
-      ),
-      );
+          fontFamily: 'lato',
+          color: Colors.white,
+          fontSize: FontSizeManager.medium,
+          fontWeight: FontWeightManager.semibold),
+    );
   }
 
   Widget pinInputs() {
@@ -104,6 +106,33 @@ class _PinEntryScreenState extends State<PinEntryScreen>
           );
         },
         child: PinInputWidget(pinsEntered: transactionPin.length));
+  }
+
+  Widget changeAccount() {
+    const style = TextStyle(
+        fontFamily: 'lato',
+        color: Colors.white70,
+        fontSize: FontSizeManager.regular,
+        fontWeight: FontWeightManager.regular);
+
+    return RichText(
+      text: TextSpan(style: style, children: [
+        const TextSpan(text: "Not You?  "),
+        TextSpan(
+            text: "Change Account",
+            style: style.copyWith(
+                color: Colors.white, fontWeight: FontWeightManager.semibold),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  Routes.authRoute,
+                  (route) => false,
+                );
+              })
+      ]),
+      textAlign: TextAlign.center,
+    );
   }
 
   Widget keyPad() {
@@ -205,14 +234,14 @@ class _PinEntryScreenState extends State<PinEntryScreen>
       if (await Vibration.hasVibrator() ?? false) {
         controller.forward();
         Vibration.vibrate(duration: 100);
-        setState(() => transactionPin="");
+        setState(() => transactionPin = "");
       }
-    }
-    else{
-        Navigator.pushNamedAndRemoveUntil(context, Routes.homeRoute, (route) => false,);
-
+    } else {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        Routes.homeRoute,
+        (route) => false,
+      );
     }
   }
-
-
 }
