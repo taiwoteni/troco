@@ -6,13 +6,11 @@ class PinKeypadWidget extends StatelessWidget {
   const PinKeypadWidget({
     super.key,
     required this.text,
-    this.size = IconSizeManager.large,
     this.onTap,
   });
 
   final void Function()? onTap;
   final String text;
-  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -21,21 +19,23 @@ class PinKeypadWidget extends StatelessWidget {
       splashColor: Colors.white.withOpacity(0.8),
       customBorder: const CircleBorder(),
       child: Container(
-        width: size,
-        height: size,
+        padding: const EdgeInsets.all(SizeManager.large * 1.5),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.6),
-          shape: BoxShape.circle,
-        ),
+            shape: BoxShape.circle,
+            gradient: LinearGradient(colors: [
+              Colors.white.withOpacity(0.1),
+              Colors.white.withOpacity(0.2),
+            ], begin: Alignment.topCenter, end: Alignment.bottomRight)),
         alignment: Alignment.center,
         child: Text(
           text,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Colors.white,
-            fontSize: FontSizeManager.medium,
-            fontWeight: FontWeightManager.semibold,
-            fontFamily: 'lato'),),
+              color: Colors.white,
+              fontSize: FontSizeManager.large,
+              fontWeight: FontWeightManager.extrabold,
+              fontFamily: 'lato'),
+        ),
       ),
     );
   }
