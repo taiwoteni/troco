@@ -1,45 +1,31 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
-import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
-import 'package:troco/core/components/images/svg.dart';
-import 'package:troco/features/payments/data/models/payment-method-dataholder.dart';
-import 'package:troco/features/payments/utils/card-month-input-formatter.dart';
-import 'package:troco/features/payments/utils/uppercase-input-formatter.dart';
+import 'package:troco/features/payments/domain/entity/payment-method.dart';
+import 'package:troco/features/payments/presentation/widgets/account-details-sheet.dart';
+import 'package:troco/features/payments/presentation/widgets/card-details-sheet.dart';
+import 'package:troco/features/payments/presentation/widgets/select-payment-method-widget.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
+import '../../../../core/components/button/presentation/provider/button-provider.dart';
 import '../../../../core/components/others/drag-handle.dart';
 import '../../../../core/components/others/spacer.dart';
-import '../../../../core/components/texts/inputs/text-form-field.dart';
-import '../../utils/card-number-input-formatter.dart';
-import '../../utils/card-utils.dart';
-import '../../utils/enums.dart';
 
-class AddPaymentSheet extends ConsumerStatefulWidget {
-  const AddPaymentSheet({super.key});
+class AddPaymentMethod extends ConsumerStatefulWidget {
+  const AddPaymentMethod({super.key});
 
   @override
-  ConsumerState<AddPaymentSheet> createState() => _AddPaymentSheetState();
+  ConsumerState<AddPaymentMethod> createState() => _AddPaymentSheetState();
 }
 
-class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
-  bool loading = false;
+class _AddPaymentSheetState extends ConsumerState<AddPaymentMethod> {
+  bool account = false;
   final buttonKey = UniqueKey();
-  final formKey = GlobalKey<FormState>();
-  CardType cardType = CardType.Invalid;
-  
-
-  @override
-  void initState() {
-    getCardTypeFrmNumber("");
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,33 +36,24 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
           color: ColorManager.background,
           borderRadius: const BorderRadius.vertical(
               top: Radius.circular(SizeManager.extralarge))),
-      child: Form(
-        key: formKey,
-        child: SingleChildScrollView(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Column(
-            children: [
-              extraLargeSpacer(),
-              const DragHandle(),
-              largeSpacer(),
-              title(),
-              mediumSpacer(),
-              Divider(
-                thickness: 1,
-                color: ColorManager.secondary.withOpacity(0.08),
-              ),
-              mediumSpacer(),
-              cardNumber(),
-              mediumSpacer(),
-              cardHolderName(),
-              mediumSpacer(),
-              rest(),
-              largeSpacer(),
-              button(),
-              extraLargeSpacer(),
-            ],
-          ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            extraLargeSpacer(),
+            const DragHandle(),
+            largeSpacer(),
+            title(),
+            mediumSpacer(),
+            Divider(
+              thickness: 1,
+              color: ColorManager.secondary.withOpacity(0.08),
+            ),
+            mediumSpacer(),
+            row(),
+            largeSpacer(),
+            button(),
+            extraLargeSpacer(),
+          ],
         ),
       ),
     );
@@ -91,7 +68,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
           padding: const EdgeInsets.symmetric(vertical: SizeManager.small),
           alignment: Alignment.center,
           child: Text(
-            "Add Payment Method",
+            "Choose Payment Method",
             style: TextStyle(
                 color: ColorManager.primary,
                 fontWeight: FontWeightManager.bold,
@@ -104,7 +81,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
           height: SizeManager.extralarge * 1.1,
           right: SizeManager.regular,
           child: IconButton(
-              onPressed: () => loading ? null : Navigator.pop(context),
+              onPressed: () => Navigator.pop(context),
               style: ButtonStyle(
                   shape: const MaterialStatePropertyAll(CircleBorder()),
                   backgroundColor: MaterialStatePropertyAll(
@@ -119,201 +96,58 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
     );
   }
 
-  Widget cardNumber() {
-    return InputFormField(
-      label: 'Card Number',
-      inputType: TextInputType.number,
-      validator: CardUtils.validateCardNum,
-      onSaved: (value) {
-        PaymentMethodDataHolder.cardNumber = value;
-      },
-      onChanged: (value) {
-        getCardTypeFrmNumber(value);
-      },
-      prefixIcon: IconButton(
-        onPressed: null,
-        iconSize: IconSizeManager.regular,
-        icon: SvgIcon(
-          svgRes: AssetManager.svgFile(name: "bank-card"),
-          fit: BoxFit.cover,
-          color: ColorManager.secondary,
-          // size: const Size.square(IconSizeManager.regular),
-        ),
-      ),
-      suffixIcon: cardType == CardType.Invalid
-          ? IconButton(
-              onPressed: null,
-              iconSize: IconSizeManager.regular,
-              icon: SvgIcon(
-                svgRes: AssetManager.svgFile(name: "card"),
-                fit: BoxFit.cover,
-                color: ColorManager.secondary,
-                // size: const Size.square(IconSizeManager.regular),
-              ),
-            )
-          : cardTypeIcon(),
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(19,
-            maxLengthEnforcement:
-                MaxLengthEnforcement.truncateAfterCompositionEnds),
-        CardNumberInputFormatter(),
-      ],
-    );
-  }
-
-  Widget cardHolderName() {
-    return InputFormField(
-      label: 'Cardholder Name',
-      validator: (value) {
-        if (value == null) {
-          return "* enter name";
-        }
-        if (value.trim().isEmpty) {
-          return "* enter name";
-        }
-        return null;
-      },
-      onSaved: (value) {
-        PaymentMethodDataHolder.name = value;
-      },
-      inputType: TextInputType.name,
-      inputFormatters: [
-        UpperCaseTextFormatter(),
-      ],
-      prefixIcon: IconButton(
-        onPressed: null,
-        iconSize: IconSizeManager.regular,
-        icon: SvgIcon(
-          svgRes: AssetManager.svgFile(name: "person"),
-          fit: BoxFit.cover,
-          color: ColorManager.secondary,
-          // size: const Size.square(IconSizeManager.regular),
-        ),
-      ),
-    );
-  }
-
-  Widget cvv() {
-    return InputFormField(
-      label: 'CVC',
-      inputType: TextInputType.number,
-      validator: (value) {
-        if (value == null) {
-          return "* missing cvc";
-        }
-        if (value.trim().isEmpty) {
-          return "* missing cvc";
-        }
-        if (value.trim().length < 3) {
-          return "* enter valid cvc";
-        }
-        return null;
-      },
-      onSaved: (value) {
-        PaymentMethodDataHolder.cvv = value;
-      },
-      prefixIcon: IconButton(
-        onPressed: null,
-        iconSize: IconSizeManager.regular,
-        icon: SvgIcon(
-          svgRes: AssetManager.svgFile(name: "cvv"),
-          fit: BoxFit.cover,
-          color: ColorManager.secondary,
-          // size: const Size.square(IconSizeManager.regular),
-        ),
-      ),
-      inputFormatters: [
-        LengthLimitingTextInputFormatter(3,
-            maxLengthEnforcement:
-                MaxLengthEnforcement.truncateAfterCompositionEnds),
-      ],
-    );
-  }
-
-  Widget monthYear() {
-    return InputFormField(
-      label: 'MM/YY',
-      inputType: TextInputType.number,
-      validator: CardUtils.validateDate,
-      onSaved: (value) {
-        PaymentMethodDataHolder.expDate = value;
-      },
-      prefixIcon: IconButton(
-        onPressed: null,
-        iconSize: IconSizeManager.regular,
-        icon: SvgIcon(
-          svgRes: AssetManager.svgFile(name: "calendar"),
-          fit: BoxFit.cover,
-          color: ColorManager.secondary,
-          // size: const Size.square(IconSizeManager.regular),
-        ),
-      ),
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(4,
-            maxLengthEnforcement:
-                MaxLengthEnforcement.truncateAfterCompositionEnds),
-        CardMonthInputFormatter(),
-      ],
-    );
-  }
-
-  Widget rest() {
+  Widget row() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Expanded(child: cvv()),
+        SelectPaymentMethodWidget(
+            selected: !account,
+            onChecked: () => setState(() => account = false),
+            label: "Card",
+            lottie: AssetManager.lottieFile(name: "card-payment")),
         largeSpacer(),
-        Expanded(child: monthYear())
+        SelectPaymentMethodWidget(
+            selected: account,
+            onChecked: () => setState(() => account = true),
+            label: "Bank Account",
+            lottie: AssetManager.lottieFile(name: "bank-payment")),
       ],
     );
-  }
-
-  void getCardTypeFrmNumber(String card) {
-    if (card.length <= 6) {
-      String input = CardUtils.getCleanedNumber(card);
-      CardType type = CardUtils.getCardTypeFrmNumber(input);
-      if (type != cardType) {
-        setState(() {
-          cardType = type;
-        });
-      }
-    }
   }
 
   Widget button() {
     return CustomButton(
-      label: "Verify",
+      onPressed: onTap,
+      label: "Next",
       buttonKey: buttonKey,
       usesProvider: true,
     );
   }
 
-  Widget cardTypeIcon() {
-    return IconButton(
-      onPressed: null,
-      iconSize: IconSizeManager.regular,
-      icon: SvgIcon(
-        svgRes: CardUtils.getCardIcon(type: cardType),
-        fit: BoxFit.cover,
-        size: const Size.square(IconSizeManager.regular * 1.8),
-      ),
-    );
-  }
-
-  Future<void> validatePaymentDetails()async{
+  Future<void> onTap() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
-    if(formKey.currentState!.validate()){
-      formKey.currentState!.save();
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      final paymentMethod = PaymentMethodDataHolder.toPaymentMethod();
-      Navigator.pop(context, paymentMethod);
-      PaymentMethodDataHolder.clear();
-    }
-    else{
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
 
-    }
+    final paymentMethod = await method();
+
+    Navigator.pop(
+        context,
+        paymentMethod
+        );
+  }
+
+  Future<PaymentMethod?> method()async{
+    return await showModalBottomSheet<PaymentMethod?>(
+          isScrollControlled: true,
+          enableDrag: true,
+          useSafeArea: false,
+          isDismissible: false,
+          backgroundColor: ColorManager.background,
+          context: context,
+          builder: (context) =>
+              !account ? const AddCardDetails() : const AddAccountDetails(),
+        );
+
   }
 }

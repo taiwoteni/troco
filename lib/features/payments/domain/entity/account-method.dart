@@ -3,7 +3,7 @@ import 'payment-method.dart';
 class AccountMethod extends PaymentMethod{
   final String bankName, accountNumber, accountName;
 
-  const AccountMethod({required this.bankName, required this.accountNumber, required this.accountName}): super(bankName: bankName, name: accountName);
+  const AccountMethod({required this.bankName, required this.accountNumber, required this.accountName}): super(name: accountName);
 
 
   @override

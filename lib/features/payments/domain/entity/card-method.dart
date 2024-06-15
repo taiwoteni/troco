@@ -11,7 +11,7 @@ class CardMethod extends PaymentMethod{
     required this.cardNumber, 
     required this.cvv, 
     required this.expDate,
-    required this.bank}): super(name: cardHolderName, bankName: bank);
+    required this.bank}): super(name: cardHolderName);
 
   factory CardMethod.fromJson({required final Map<String,dynamic> json}){
     return CardMethod(

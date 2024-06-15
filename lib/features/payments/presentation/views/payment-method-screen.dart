@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/payments/presentation/widgets/add-payment-sheet.dart';
 import 'package:troco/features/payments/presentation/widgets/no-payment-methods-widget.dart';
 
@@ -10,7 +11,6 @@ import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/images/svg.dart';
 import '../../../../core/components/others/spacer.dart';
-import '../../domain/entity/payment-method.dart';
 
 class PaymentMethodsScreen extends ConsumerStatefulWidget {
   const PaymentMethodsScreen({super.key});
@@ -46,13 +46,14 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
   }
 
   Future<void> showPaymentSheet() async {
-    showModalBottomSheet<PaymentMethod?>(
+    final method = await showModalBottomSheet<PaymentMethod?>(
       isScrollControlled: true,
       enableDrag: true,
       useSafeArea: false,
+      isDismissible: false,
       backgroundColor: ColorManager.background,
       context: context,
-      builder: (context) => const AddPaymentSheet(),
+      builder: (context) => const AddPaymentMethod(),
     );
   }
 
