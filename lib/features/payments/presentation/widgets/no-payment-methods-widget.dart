@@ -18,10 +18,10 @@ class NoPaymentMethod extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           LottieWidget(
-            lottieRes: AssetManager.lottieFile(name: "card"), 
-            fit: BoxFit.cover,
-            loop: false,
-            size: const Size.square(IconSizeManager.extralarge * 2)),
+              lottieRes: AssetManager.lottieFile(name: "card"),
+              fit: BoxFit.cover,
+              loop: false,
+              size: const Size.square(IconSizeManager.extralarge * 3)),
           largeSpacer(),
           Text(
             "Add a payment Method.\nMake Life smooth.",
@@ -33,7 +33,6 @@ class NoPaymentMethod extends StatelessWidget {
               fontWeight: FontWeightManager.regular,
             ),
           )
-
         ],
       ),
     );

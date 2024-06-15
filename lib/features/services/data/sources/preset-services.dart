@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:troco/core/app/asset-manager.dart';
-
+import 'package:troco/core/app/routes-manager.dart';
 
 import '../../../settings/data/models/settings-model.dart';
 import '../../../settings/utils/enums.dart';
@@ -24,7 +24,7 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         label: "Payment Methods",
         icon: AssetManager.svgFile(name: "payment"),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.paymentMethodRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "KYC Verification",
@@ -50,13 +50,13 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         settingsType: SettingsType.financial,
         // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
         iconType: IconType.svg),
-        SettingsModel(
+    SettingsModel(
         label: "Contact  Us",
         icon: AssetManager.svgFile(name: "audio-call"),
         settingsType: SettingsType.financial,
         // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
         iconType: IconType.svg),
-        SettingsModel(
+    SettingsModel(
         label: "About  Us",
         icon: AssetManager.svgFile(name: "about"),
         settingsType: SettingsType.financial,

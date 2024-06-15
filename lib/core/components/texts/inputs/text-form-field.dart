@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -13,13 +14,14 @@ class InputFormField extends ConsumerStatefulWidget {
   final void Function(String? value)? onSaved;
   final void Function(String value)? onChanged;
   final Future<String?> Function()? onRedirect;
+  final List<TextInputFormatter>? inputFormatters;
   final String label;
   final int lines;
   final String? prefixText, errorText;
   final bool showtrailingIcon, readOnly;
   final TextInputType inputType;
   final bool isPassword;
-  final Widget? prefixIcon;
+  final Widget? prefixIcon, suffixIcon;
   const InputFormField({
     super.key,
     this.onChanged,
@@ -28,6 +30,8 @@ class InputFormField extends ConsumerStatefulWidget {
     this.prefixText,
     required this.label,
     required this.prefixIcon,
+    this.inputFormatters,
+    this.suffixIcon,
     this.lines = 1,
     this.errorText,
     this.inputType = TextInputType.text,
@@ -76,6 +80,7 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
               });
             }
           },
+          inputFormatters: widget.inputFormatters,
           // minLines: widget.lines,
           minLines: widget.lines == 1 ? 1 : widget.lines,
           maxLines: widget.lines == 1 ? 1 : null,
@@ -121,7 +126,7 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
                           color: ColorManager.themeColor,
                         ),
                       )
-                    : null,
+                    : widget.suffixIcon,
             contentPadding: const EdgeInsets.symmetric(
                 horizontal: SizeManager.medium * 1.2,
                 vertical: SizeManager.medium * 1.4),
