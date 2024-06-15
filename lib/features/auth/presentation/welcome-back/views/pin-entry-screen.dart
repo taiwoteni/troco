@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
@@ -23,19 +24,7 @@ class _PinEntryScreenState extends State<PinEntryScreen>
   bool animatingRight = false;
 
   @override
-  void setState(VoidCallback fn,
-      /// added this default named argument to differentiate
-      /// whether the VoidCallback has to do with transactionPin
-      {bool pinState = true}) {
-    if (!mounted) {
-      return;
-    }
-
-    // we use [pinState] to determine wether the state has to do with
-    // the transaction pin.
-    // So using this, we can check and prevent users from typing more than 4 digits.
-
-
+  void setState(VoidCallback fn){
     super.setState(fn);
 
     if (transactionPin.length == 4) {
@@ -52,10 +41,12 @@ class _PinEntryScreenState extends State<PinEntryScreen>
         .addPostFrameCallback((timeStamp) async {
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getSplashUiOverlayStyle());
+
+      // Logic to shake the pin row.
       controller.addStatusListener((status) async {
         if (status == AnimationStatus.completed && !animatingRight) {
           await controller.reverse();
-          setState(() => animatingRight = true, pinState: false);
+          setState(() => animatingRight = true);
           controller.forward();
         } else if (status == AnimationStatus.completed && animatingRight) {
           await controller.reverse();
@@ -73,12 +64,27 @@ class _PinEntryScreenState extends State<PinEntryScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          label(),
+          largeSpacer(),
           pinInputs(),
           extraLargeSpacer(),
           keyPad(),
         ],
       ),
     );
+  }
+
+  Widget label(){
+    return const Text(
+      "Enter Transaction Pin",
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'lato',
+        color: Colors.white,
+        fontSize: FontSizeManager.medium,
+        fontWeight: FontWeightManager.semibold
+      ),
+      );
   }
 
   Widget pinInputs() {
@@ -207,4 +213,6 @@ class _PinEntryScreenState extends State<PinEntryScreen>
 
     }
   }
+
+
 }
