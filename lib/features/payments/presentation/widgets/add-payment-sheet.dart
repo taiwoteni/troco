@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/payments/utils/card-month-input-formatter.dart';
+import 'package:troco/features/payments/utils/uppercase-input-formatter.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
@@ -15,14 +18,14 @@ import '../../utils/card-number-input-formatter.dart';
 import '../../utils/card-utils.dart';
 import '../../utils/enums.dart';
 
-class AddPaymentSheet extends StatefulWidget {
+class AddPaymentSheet extends ConsumerStatefulWidget {
   const AddPaymentSheet({super.key});
 
   @override
-  State<AddPaymentSheet> createState() => _AddPaymentSheetState();
+  ConsumerState<AddPaymentSheet> createState() => _AddPaymentSheetState();
 }
 
-class _AddPaymentSheetState extends State<AddPaymentSheet> {
+class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
   bool loading = false;
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
@@ -62,7 +65,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
               mediumSpacer(),
               accountNumber(),
               mediumSpacer(),
-              bankName(),
+              name(),
               mediumSpacer(),
               rest(),
               largeSpacer(),
@@ -116,18 +119,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
     return InputFormField(
       label: 'Account Number',
       inputType: TextInputType.number,
-      validator: (value) {
-        if (value == null) {
-          return "* enter an account number";
-        }
-        if (value.trim().isEmpty) {
-          return "* enter an account number";
-        }
-        if (value.trim().length <= 4) {
-          return "* enter a valid account number";
-        }
-        return null;
-      },
+      validator: CardUtils.validateCardNum,
       onSaved: (value) {},
       onChanged: (value) {
         getCardTypeFrmNumber(value);
@@ -164,25 +156,28 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
     );
   }
 
-  Widget bankName() {
+  Widget name() {
     return InputFormField(
-      label: 'Bank Name',
-      showtrailingIcon: true,
+      label: 'Name',
       validator: (value) {
         if (value == null) {
-          return "* select a bank";
+          return "* enter name";
         }
         if (value.trim().isEmpty) {
-          return "* select a bank";
+          return "* enter name";
         }
         return null;
       },
       onSaved: (value) {},
+      inputType: TextInputType.name,
+      inputFormatters: [
+        UpperCaseTextFormatter(),
+      ],
       prefixIcon: IconButton(
         onPressed: null,
         iconSize: IconSizeManager.regular,
         icon: SvgIcon(
-          svgRes: AssetManager.svgFile(name: "bank"),
+          svgRes: AssetManager.svgFile(name: "person"),
           fit: BoxFit.cover,
           color: ColorManager.secondary,
           // size: const Size.square(IconSizeManager.regular),
@@ -230,18 +225,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
     return InputFormField(
       label: 'MM/YY',
       inputType: TextInputType.number,
-      validator: (value) {
-        if (value == null) {
-          return "* missing date";
-        }
-        if (value.trim().isEmpty) {
-          return "* missing date";
-        }
-        if (value.trim().length < 5) {
-          return "* enter valid cvc";
-        }
-        return null;
-      },
+      validator: CardUtils.validateDate,
       onSaved: (value) {},
       prefixIcon: IconButton(
         onPressed: null,
@@ -303,5 +287,21 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
         size: const Size.square(IconSizeManager.regular * 1.8),
       ),
     );
+  }
+
+  Future<void> validatePaymentDetails()async{
+    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 3));
+    if(formKey.currentState!.validate()){
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      Navigator.pop(context, null);
+
+
+
+    }
+    else{
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+    }
   }
 }
