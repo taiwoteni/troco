@@ -28,6 +28,8 @@ import 'package:troco/features/transactions/presentation/view-transaction/views/
 import '../../features/auth/presentation/login/views/login-screen.dart';
 import '../../features/auth/presentation/register/views/register-screen.dart';
 import '../../features/auth/presentation/success/views/auth-success-screen.dart';
+import '../../features/kyc/presentation/views/kyc-verification-intro-screen.dart';
+import '../../features/kyc/presentation/views/kyc-verification-screen.dart';
 import '../../features/transactions/presentation/create-transaction/views/create-transaction-screen.dart';
 
 class Routes {
@@ -69,12 +71,15 @@ class Routes {
   static const changeLanguageRoute = "/change-language";
 
   static const paymentMethodRoute = "/payment-methods";
+
+  static const kycVerificationIntroRoute = "/kyc-verification";
+  static const kycVerificationRoute = "/kyc-verification-input";
 }
 
 class RouteGenerator {
   static Route<dynamic> getRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
-       case Routes.welcomeBackRoute:
+      case Routes.welcomeBackRoute:
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const WelcomeBackScreen());
@@ -204,10 +209,18 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const ChangeLanguageScreen());
-        case Routes.paymentMethodRoute:
+      case Routes.paymentMethodRoute:
         return MaterialPageRoute(
             settings: routeSettings,
-            builder: (context) => const PaymentMethodsScreen());     
+            builder: (context) => const PaymentMethodsScreen());
+      case Routes.kycVerificationRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const KycVerificationScreen());
+      case Routes.kycVerificationIntroRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const KycVerificationIntroScreen());
       default:
         return MaterialPageRoute(
             settings: routeSettings,
