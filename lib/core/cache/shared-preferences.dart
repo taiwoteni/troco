@@ -5,6 +5,9 @@ import 'dart:developer';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
+import 'package:troco/features/payments/domain/entity/account-method.dart';
+import 'package:troco/features/payments/domain/entity/card-method.dart';
+import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 
 import '../../features/chat/domain/entities/chat.dart';
@@ -18,13 +21,14 @@ class AppStorage {
 
   static const String USER_STORAGE_KEY = "userData";
   static const String GROUP_STORAGE_KEY = "groups";
+  static const String PAYMENT_METHODS_STORAGE_KEY = "paymentMethods";
+
   static const String NOTIFICATION_STORAGE_KEY = "notifications";
   static const String TRANSACTION_STORAGE_KEY = "transactions";
   static String CHAT_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.chats";
   static String GROUP_INVITATION_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.invitations";
-
   static Future<void> initialize() async {
     _pref = await _pref2;
   }
@@ -145,4 +149,24 @@ class AppStorage {
 
     _pref!.setString(NOTIFICATION_STORAGE_KEY, json.encode(notificationsJson));
   }
+
+  static List<PaymentMethod> getPaymentMethods() {
+    final jsonString = _pref!.getString(PAYMENT_METHODS_STORAGE_KEY);
+    if (jsonString == null) {
+      return [];
+    }
+    final List<Map<String,dynamic>> paymentMethodsJson = json.decode(jsonString);
+    return paymentMethodsJson
+        .map((e) => e.containsKey("cardNumber")? CardMethod.fromJson(json: e): AccountMethod.fromJson(json: e))
+        .toList();
+  }
+
+  static Future<void> savePaymentMethod(
+      {required final List<PaymentMethod> paymentMethods}) async {
+    List<Map<dynamic, dynamic>> paymentMethodsJson =
+        paymentMethods.map((e) => e.toJson()).toList();
+
+    _pref!.setString(PAYMENT_METHODS_STORAGE_KEY, json.encode(paymentMethodsJson));
+  }
+
 }
