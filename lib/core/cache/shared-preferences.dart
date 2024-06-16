@@ -155,9 +155,9 @@ class AppStorage {
     if (jsonString == null) {
       return [];
     }
-    final List<Map<String,dynamic>> paymentMethodsJson = json.decode(jsonString);
+    final List<dynamic> paymentMethodsJson = json.decode(jsonString) as List;
     return paymentMethodsJson
-        .map((e) => e.containsKey("cardNumber")? CardMethod.fromJson(json: e): AccountMethod.fromJson(json: e))
+        .map((e) => e["cardNumber"] != null? CardMethod.fromJson(json: e): AccountMethod.fromJson(json: e))
         .toList();
   }
 
