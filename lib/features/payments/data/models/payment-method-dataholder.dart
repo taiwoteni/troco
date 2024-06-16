@@ -31,8 +31,7 @@ class PaymentMethodDataHolder{
       cardHolderName: name!, 
       cardNumber: cardNumber!, 
       cvv: cvv!, 
-      expDate: expDate!, 
-      bank: bank!);
+      expDate: expDate!, );
 
   }
 }

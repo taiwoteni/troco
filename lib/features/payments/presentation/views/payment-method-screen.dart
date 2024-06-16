@@ -2,9 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
+import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import 'package:troco/features/payments/presentation/widgets/add-payment-sheet.dart';
 import 'package:troco/features/payments/presentation/widgets/no-payment-methods-widget.dart';
+import 'package:troco/features/payments/presentation/widgets/payment-methods-list.dart';
 
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/font-manager.dart';
@@ -27,7 +30,7 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
       appBar: appBar(),
-      body: const NoPaymentMethod(),
+      body: ref.watch(paymentMethodProvider).isEmpty? const NoPaymentMethod():PaymentMethodsList(methods: ref.watch(paymentMethodProvider)),
       floatingActionButton: FloatingActionButton(
         onPressed: addPaymentMethod,
         shape: const CircleBorder(),
@@ -55,6 +58,13 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
       context: context,
       builder: (context) => const AddPaymentMethod(),
     );
+    if(method != null){
+      ref.watch(paymentMethodProvider.notifier).state.add(method);
+      final paymentMethods = AppStorage.getPaymentMethods();
+      paymentMethods.add(method);
+      AppStorage.savePaymentMethod(paymentMethods: paymentMethods);
+      
+    }
   }
 
   PreferredSizeWidget appBar() {

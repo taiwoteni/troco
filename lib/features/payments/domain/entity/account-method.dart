@@ -5,6 +5,12 @@ class AccountMethod extends PaymentMethod{
 
   const AccountMethod({required this.bankName, required this.accountNumber, required this.accountName}): super(name: accountName);
 
+  factory AccountMethod.fromJson({required final Map<String,dynamic> json}){
+    return AccountMethod(
+      bankName: json["bank"],
+      accountNumber: json["accountNumber"],
+      accountName: json["accountName"]);
+  }
 
   @override
   Map<String, dynamic> toJson() {

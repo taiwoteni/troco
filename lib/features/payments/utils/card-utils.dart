@@ -7,6 +7,9 @@ class CardUtils {
     RegExp regExp = RegExp(r"[^0-9]");
     return text.replaceAll(regExp, '');
   }
+  static String formatCardNumber(String cardNumber) {
+    return cardNumber.replaceAllMapped(RegExp(r".{1,4}"), (match) => "${match.group(0)} ").trim();
+  }
 
   static CardType getCardTypeFrmNumber(String input) {
     CardType cardType;
