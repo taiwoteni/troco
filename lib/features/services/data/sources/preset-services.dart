@@ -30,7 +30,7 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         label: "KYC Verification",
         icon: AssetManager.svgFile(name: "verification"),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.kycVerificationIntroRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Share Troco",

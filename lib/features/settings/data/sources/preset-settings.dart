@@ -36,10 +36,10 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
         icon: AssetManager.svgFile(name: "language"),
         onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
         iconType: IconType.svg),
-    SettingsModel(
-        label: "Notification Settings",
-        icon: AssetManager.svgFile(name: "bell"),
-        iconType: IconType.svg),
+    // SettingsModel(
+    //     label: "Notification Settings",
+    //     icon: AssetManager.svgFile(name: "bell"),
+    //     iconType: IconType.svg),
 
     //Grave Settings
     SettingsModel(
