@@ -28,7 +28,7 @@ class _PaymentMethodsListState extends ConsumerState<PaymentMethodsList> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   return Transform.scale(
-                    scaleY: 0.8,
+                    scaleY: 0.9,
                     child: Container(
                         width: double.maxFinite,
                         padding: const EdgeInsets.symmetric(
