@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -148,6 +150,7 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
         }
         return null;
       },
+      showtrailingIcon: true,
       onSaved: (value) {
         PaymentMethodDataHolder.bank = value;
       },
@@ -169,21 +172,22 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
     );
   }
 
-
-
   Widget button() {
     return CustomButton(
+      onPressed: validatePaymentDetails,
       label: "Verify",
       buttonKey: buttonKey,
       usesProvider: true,
     );
   }
 
-   Future<void> validatePaymentDetails() async {
+  Future<void> validatePaymentDetails() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
-    if (formKey.currentState!.validate()) {
+    if (Random().nextBool()) {
       formKey.currentState!.save();
+      PaymentMethodDataHolder.name = "Teninlanimi David Taiwo";
+      PaymentMethodDataHolder.bank = "Access Bank";
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       final paymentMethod = PaymentMethodDataHolder.toPaymentMethod();
       Navigator.pop(context, paymentMethod);

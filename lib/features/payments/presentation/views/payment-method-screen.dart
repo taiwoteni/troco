@@ -30,7 +30,9 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
       appBar: appBar(),
-      body: ref.watch(paymentMethodProvider).isEmpty? const NoPaymentMethod():PaymentMethodsList(methods: ref.watch(paymentMethodProvider)),
+      body: ref.watch(paymentMethodProvider).isEmpty
+          ? const NoPaymentMethod()
+          : const PaymentMethodsList(),
       floatingActionButton: FloatingActionButton(
         onPressed: addPaymentMethod,
         shape: const CircleBorder(),
@@ -58,12 +60,13 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
       context: context,
       builder: (context) => const AddPaymentMethod(),
     );
-    if(method != null){
-      ref.watch(paymentMethodProvider.notifier).state.add(method);
+    if (method != null) {
       final paymentMethods = AppStorage.getPaymentMethods();
       paymentMethods.add(method);
       AppStorage.savePaymentMethod(paymentMethods: paymentMethods);
-      
+
+      ref.watch(paymentMethodProvider.notifier).state.add(method);
+
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:troco/core/app/asset-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 
 import 'enums.dart';
 
@@ -7,8 +8,11 @@ class CardUtils {
     RegExp regExp = RegExp(r"[^0-9]");
     return text.replaceAll(regExp, '');
   }
+
   static String formatCardNumber(String cardNumber) {
-    return cardNumber.replaceAllMapped(RegExp(r".{1,4}"), (match) => "${match.group(0)} ").trim();
+    return cardNumber
+        .replaceAllMapped(RegExp(r".{1,4}"), (match) => "${match.group(0)} ")
+        .trim();
   }
 
   static CardType getCardTypeFrmNumber(String input) {
@@ -47,13 +51,23 @@ class CardUtils {
     }
   }
 
-  static String? validateCardNum(String? input) {
+  static String? validateCardNum(String? input, bool? editting) {
     if (input == null || input.isEmpty) {
       return "* enter valid card";
     }
     input = getCleanedNumber(input);
     if (input.length < 8) {
       return "* enter valid card";
+    }
+    final paymentMethods = AppStorage.getPaymentMethods();
+    final bool duplicate = paymentMethods
+        .where(
+          (element) => getCleanedNumber(element.uuid()) == input,
+        )
+        .toList()
+        .isNotEmpty;
+    if (duplicate && !(editting ?? false)) {
+      return "* card already exists";
     }
     int sum = 0;
     int length = input.length;

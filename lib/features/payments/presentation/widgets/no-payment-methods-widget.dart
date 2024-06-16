@@ -22,7 +22,7 @@ class NoPaymentMethod extends StatelessWidget {
               fit: BoxFit.cover,
               loop: false,
               size: const Size.square(IconSizeManager.extralarge * 3)),
-          largeSpacer(),
+          smallSpacer(),
           Text(
             "Add a payment Method.\nMake Life smooth.",
             textAlign: TextAlign.center,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -8,18 +10,25 @@ import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
+import 'package:troco/features/payments/presentation/widgets/payment-method-actions-dialog.dart';
 import 'package:troco/features/payments/utils/card-utils.dart';
 import 'package:recase/recase.dart';
 
 class PaymentCard extends StatelessWidget {
   final PaymentMethod method;
-  const PaymentCard({super.key, required this.method});
+  final MaterialColor? primary;
+  final Color? secondary;
+  const PaymentCard(
+      {super.key, required this.method, this.primary, this.secondary});
 
   @override
   Widget build(BuildContext context) {
-    return method is AccountMethod
-        ? accountPaymentWidget()
-        : cardPaymentWidget();
+    return GestureDetector(
+      onTap: () => showActions(context),
+      child: method is AccountMethod
+          ? accountPaymentWidget()
+          : cardPaymentWidget(),
+    );
   }
 
   Widget cardPaymentWidget() {
@@ -31,10 +40,10 @@ class PaymentCard extends StatelessWidget {
           horizontal: SizeManager.large * 1.1),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(SizeManager.medium),
-          gradient: LinearGradient(
-              colors: [ColorManager.accentColor, ColorManager.themeColor],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight)),
+          gradient: LinearGradient(colors: [
+            primary ?? ColorManager.accentColor,
+            secondary ?? ColorManager.themeColor
+          ], begin: Alignment.centerLeft, end: Alignment.centerRight)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -145,7 +154,109 @@ class PaymentCard extends StatelessWidget {
     );
   }
 
+  Future<void> showActions(BuildContext context)async{
+    await showModalBottomSheet(
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: false,
+      isDismissible: false,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) => PaymentMethodAction(method: method),
+    );
+  }
+
   Widget accountPaymentWidget() {
-    return const SizedBox();
+    final account = method as AccountMethod;
+    return Container(
+      width: double.maxFinite,
+      padding: const EdgeInsets.symmetric(
+          vertical: SizeManager.medium * 1.3,
+          horizontal: SizeManager.large * 1.1),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(SizeManager.medium),
+          gradient: LinearGradient(colors: [
+            primary ?? ColorManager.accentColor,
+            secondary ?? ColorManager.themeColor
+          ], begin: Alignment.centerLeft, end: Alignment.centerRight)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                account.bankName.titleCase,
+                style: const TextStyle(
+                    fontFamily: 'lato',
+                    fontSize: FontSizeManager.medium,
+                    color: Colors.white,
+                    fontWeight: FontWeightManager.bold),
+              ),
+            ],
+          ),
+          smallSpacer(),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                "Bank Name",
+                style: TextStyle(
+                    fontFamily: 'lato',
+                    fontSize: FontSizeManager.small * 0.8,
+                    color: Colors.white,
+                    fontWeight: FontWeightManager.regular),
+              ),
+            ],
+          ),
+          mediumSpacer(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                account.accountNumber
+                    .substring(account.accountNumber.length - 4)
+                    .padLeft(account.accountNumber.length, '*'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'lato',
+                  fontWeight: FontWeightManager.extrabold,
+                  fontSize: FontSizeManager.large,
+                ),
+              ),
+            ],
+          ),
+          regularSpacer(),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                "Account Name",
+                style: TextStyle(
+                    fontFamily: 'lato',
+                    fontSize: FontSizeManager.small * 0.8,
+                    color: Colors.white,
+                    fontWeight: FontWeightManager.regular),
+              ),
+            ],
+          ),
+          regularSpacer(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                account.accountName.titleCase,
+                style: const TextStyle(
+                    fontFamily: 'lato',
+                    fontSize: FontSizeManager.medium,
+                    color: Colors.white,
+                    fontWeight: FontWeightManager.bold),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
   }
 }

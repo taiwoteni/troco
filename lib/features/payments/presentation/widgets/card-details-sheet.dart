@@ -17,12 +17,14 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/others/drag-handle.dart';
 import '../../../../core/components/others/spacer.dart';
 import '../../../../core/components/texts/inputs/text-form-field.dart';
+import '../../domain/entity/card-method.dart';
 import '../../utils/card-number-input-formatter.dart';
 import '../../utils/card-utils.dart';
 import '../../utils/enums.dart';
 
 class AddCardDetails extends ConsumerStatefulWidget {
-  const AddCardDetails({super.key});
+  final CardMethod? card;
+  const AddCardDetails({super.key, this.card});
 
   @override
   ConsumerState<AddCardDetails> createState() => _AddPaymentSheetState();
@@ -34,9 +36,16 @@ class _AddPaymentSheetState extends ConsumerState<AddCardDetails> {
   final formKey = GlobalKey<FormState>();
   CardType cardType = CardType.Invalid;
 
+  late TextEditingController cardNumberController,cardNameController,expDateController,cvvController;
+
   @override
   void initState() {
-    getCardTypeFrmNumber("");
+    cardNameController = TextEditingController(text: widget.card?.cardHolderName ?? "");
+    cardNumberController = TextEditingController(text: widget.card?.cardNumber ?? "");
+    expDateController = TextEditingController(text: widget.card?.expDate ?? "");
+    cvvController = TextEditingController(text: widget.card?.cvv ?? "");
+
+    getCardTypeFrmNumber(cardNumberController.text);
     super.initState();
   }
 
@@ -121,8 +130,9 @@ class _AddPaymentSheetState extends ConsumerState<AddCardDetails> {
   Widget cardNumber() {
     return InputFormField(
       label: 'Card Number',
+      controller: cardNumberController,
       inputType: TextInputType.number,
-      validator: CardUtils.validateCardNum,
+      validator: (value)=> CardUtils.validateCardNum(value, widget.card != null),
       onSaved: (value) {
         PaymentMethodDataHolder.cardNumber = value;
       },
@@ -164,6 +174,7 @@ class _AddPaymentSheetState extends ConsumerState<AddCardDetails> {
   Widget cardHolderName() {
     return InputFormField(
       label: 'Cardholder Name',
+      controller: cardNameController,
       validator: (value) {
         if (value == null) {
           return "* enter name";
@@ -196,6 +207,7 @@ class _AddPaymentSheetState extends ConsumerState<AddCardDetails> {
   Widget cvv() {
     return InputFormField(
       label: 'CVC',
+      controller: cvvController,
       inputType: TextInputType.number,
       validator: (value) {
         if (value == null) {
@@ -233,6 +245,7 @@ class _AddPaymentSheetState extends ConsumerState<AddCardDetails> {
   Widget monthYear() {
     return InputFormField(
       label: 'MM/YY',
+      controller: expDateController,
       inputType: TextInputType.number,
       validator: CardUtils.validateDate,
       onSaved: (value) {
