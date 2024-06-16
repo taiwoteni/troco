@@ -9,6 +9,7 @@ import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/payments/utils/card-utils.dart';
+import 'package:recase/recase.dart';
 
 class PaymentCard extends StatelessWidget {
   final PaymentMethod method;
@@ -122,7 +123,7 @@ class PaymentCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                card.cardHolderName,
+                card.cardHolderName.titleCase,
                 style: const TextStyle(
                     fontFamily: 'lato',
                     fontSize: FontSizeManager.medium,
