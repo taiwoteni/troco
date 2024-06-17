@@ -12,7 +12,7 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         label: "My Transactions",
         icon: AssetManager.svgFile(name: "transaction"),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.myTransactionsRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Fee Calculator",
