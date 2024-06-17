@@ -3,12 +3,15 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
+import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/others/spacer.dart';
 import '../../../transactions/domain/entities/transaction.dart';
@@ -65,19 +68,20 @@ class _LatestTransactionsListState
                 ),
                 const Spacer(),
                 TextButton(
-                    onPressed: null,
-                    style: ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(
-                            ColorManager.accentColor.withOpacity(0.10)),
-                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(SizeManager.medium)))),
+                    onPressed: () async {
+                      /// to wait for my transactions page to open, then later,
+                      /// then change it back to home Ui  overlay style
+                      await Navigator.pushNamed(
+                          context, Routes.myTransactionsRoute);
+                      SystemChrome.setSystemUIOverlayStyle(
+                          ThemeManager.getHomeUiOverlayStyle());
+                    },
                     child: Text(
                       "View All",
                       style: defaultStyle.copyWith(
                           color: ColorManager.accentColor,
                           fontSize: FontSizeManager.regular * 0.9,
-                          fontWeight: FontWeightManager.medium),
+                          fontWeight: FontWeightManager.semibold),
                     ))
               ],
             ),

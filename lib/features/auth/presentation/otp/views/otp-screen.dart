@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/texts/inputs/otp-input-field.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
@@ -22,8 +21,8 @@ import '../../../../../core/components/others/spacer.dart';
 import '../../../../../core/components/images/svg.dart';
 
 class OTPScreen extends ConsumerStatefulWidget {
-  final bool isFromLogin;
-  const OTPScreen({super.key, required this.isFromLogin});
+  final bool email;
+  const OTPScreen({super.key, required this.email});
 
   @override
   ConsumerState<OTPScreen> createState() => _OTPScreenState();
@@ -60,7 +59,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
     bool emailNull = LoginData.email == null;
     //TODO: For now, Finbarr only does Email
     bool emailEmpty = emailNull ? true : LoginData.email!.trim().isEmpty;
-    isEmail = /**widget.isFromLogin ? !emailEmpty : false*/ true;
+    isEmail = /**widget.isFromLogin ? !emailEmpty : false*/ widget.email;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
@@ -157,12 +156,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
     );
     log(response.body);
     if (!response.error) {
-      if (widget.isFromLogin) {
-        Navigator.pushNamedAndRemoveUntil(
-            context, Routes.authSuccessRoute, (route) => false);
-      } else {
-        Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
-      }
+      Navigator.pop(context, true);
     } else {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
 

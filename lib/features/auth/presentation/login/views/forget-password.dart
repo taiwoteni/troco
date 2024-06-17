@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_local_variable
 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
@@ -148,7 +148,7 @@ class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
       formKey.currentState!.save();
       await Future.delayed(const Duration(seconds: 2));
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      Navigator.pushNamed(context, Routes.otpForgotPasswordRoute);
+      final verified = Navigator.pushNamed(context, Routes.otpRoute);
     }
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
   }

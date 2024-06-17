@@ -1,11 +1,13 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 
@@ -14,7 +16,8 @@ import '../../../transactions/utils/transaction-status-converter.dart';
 
 class TransactionItemWidget extends StatelessWidget {
   final Transaction transaction;
-  const TransactionItemWidget({super.key, required this.transaction});
+  final bool? fromDarkStatusBar;
+  const TransactionItemWidget({super.key, required this.transaction, this.fromDarkStatusBar});
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +43,11 @@ class TransactionItemWidget extends StatelessWidget {
         child: ListTile(
           onTap: () async {
             await Future.delayed(const Duration(microseconds: 4));
-            Navigator.pushNamed(context, Routes.viewTransactionRoute,
+            await Navigator.pushNamed(context, Routes.viewTransactionRoute,
                 arguments: transaction);
+            if(fromDarkStatusBar??false){
+              SystemChrome.setSystemUIOverlayStyle(ThemeManager.getSettingsUiOverlayStyle());
+            }    
           },
           dense: true,
           tileColor: Colors.transparent,

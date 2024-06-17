@@ -10,7 +10,7 @@ import 'package:troco/core/components/images/pick-profile-widget.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
-import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
+import 'package:troco/features/settings/domain/repository/edit-profile-repository.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -186,7 +186,7 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
     if (profilePath != null) {
       ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
       log(LoginData.profile!);
-      final response = await AuthenticationRepo.uploadProfilePhoto(
+      final response = await EditProfileRepository.uploadProfilePhoto(
           userId: LoginData.id!, profilePath: profilePath!);
       if (response.error) {
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

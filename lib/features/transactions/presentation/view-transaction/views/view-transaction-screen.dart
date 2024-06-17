@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
-import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
@@ -49,25 +48,6 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     transaction = widget.transaction;
     log(transaction.toJson().toString());
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    // to know wether the page was opened from My Transactions Page.
-    // so that we can always change the ui overlay back to dark icons and (transparent/light) status bar.
-    final r = ModalRoute.of(context)
-        ?.settings
-        .name
-        ?.contains(Routes.myTransactionsRoute);
-    if (r ?? false) {
-      WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-        SystemChrome.setSystemUIOverlayStyle(
-          ThemeManager.getSettingsUiOverlayStyle());
-      });
-      
-    }
-
-    super.dispose();
   }
 
   @override

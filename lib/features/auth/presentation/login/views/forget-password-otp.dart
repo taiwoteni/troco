@@ -17,7 +17,7 @@ import '../../../../../core/components/button/presentation/provider/button-provi
 import '../../otp/providers/timer-provider.dart';
 
 class OTPForgetPasswordScreen extends ConsumerStatefulWidget {
-  final bool isFromLogin = true;
+  final bool email = true;
   const OTPForgetPasswordScreen({super.key});
 
   @override

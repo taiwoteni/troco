@@ -250,10 +250,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     if (!result.error) {
       log(result.body);
-      Navigator.pushNamed(context, Routes.otpRegisterRoute);
+      final verified =
+          (await Navigator.pushNamed(context, Routes.otpRoute)
+                  as bool? ??
+              false);
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      LoginData.id = result.messageBody!["data"]["_id"];
-      LoginData.otp = result.messageBody!["data"]["verificationPin"].toString();
+      if (verified) {
+        LoginData.id = result.messageBody!["data"]["_id"];
+        LoginData.otp =
+            result.messageBody!["data"]["verificationPin"].toString();
+        Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
+      }
     } else {
       log(result.code.toString());
       print(result.body);

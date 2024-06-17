@@ -7,6 +7,7 @@ import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../../core/components/others/spacer.dart';
+import '../../../../dashboard/presentation/widgets/transaction-item-widget.dart';
 import '../../../../groups/presentation/widgets/empty-screen.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../view-transaction/providers/transactions-provider.dart';
@@ -22,41 +23,48 @@ class MyTransactionsPage extends ConsumerStatefulWidget {
 class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
   late TextEditingController controller;
   List<Transaction> transactions = [];
+  bool searching = false;
+  late Widget searchBarWidget;
 
   @override
   void initState() {
+    transactions = AppStorage.getTransactions();
     controller = TextEditingController();
+    searchBarWidget = searchBar();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ref.watch(transactionsStreamProvider).when(
-      data: (transactions) {
-        this.transactions = transactions;
-        return transactions.isEmpty ? emptyBody() : body();
-      },
-      error: (error, stackTrace) {
-        transactions = AppStorage.getTransactions();
-        return transactions.isEmpty ? emptyBody() : body();
-      },
-      loading: () {
-        transactions = AppStorage.getTransactions();
-        return transactions.isEmpty ? emptyBody() : body();
-      },
-    );
+    listenToChanges();
+    return transactions.isEmpty ? emptyBody() : body();
+  }
+
+  Future<void> listenToChanges() async {
+    ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        value.sort(
+          (a, b) => (1.compareTo(0)),
+        );
+        if (!searching) {
+          setState(() {
+            transactions = value;
+          });
+        }
+      });
+    });
   }
 
   Widget emptyBody() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
+    return Container(
+      alignment: Alignment.center,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           extraLargeSpacer(),
           back(),
           mediumSpacer(),
-          title(),
+          Align(alignment: Alignment.centerLeft, child: title()),
+          if (searching) ...[largeSpacer(), mediumSpacer(), searchBarWidget],
           EmptyScreen(
             lottie: AssetManager.lottieFile(name: "empty-transactions"),
             scale: 1.5,
@@ -69,24 +77,48 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
   }
 
   Widget body() {
-    return SingleChildScrollView(
-      // padding: const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          extraLargeSpacer(),
-          back(),
-          mediumSpacer(),
-          title(),
-          largeSpacer(),
-          mediumSpacer(),
-          searchBar(),
-          largeSpacer(),
-          const MyTransactionsList(),
-          mediumSpacer(),
-        ],
+    return SizedBox.expand(
+      child: SingleChildScrollView(
+        // padding: const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            extraLargeSpacer(),
+            back(),
+            mediumSpacer(),
+            title(),
+            largeSpacer(),
+            mediumSpacer(),
+            searchBarWidget,
+            largeSpacer(),
+            searching ? querySearchList() : const MyTransactionsList(),
+            mediumSpacer(),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget querySearchList() {
+    return ListView.separated(
+        key: const Key("latestTransactionsList"),
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemBuilder: (context, index) => Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: SizeManager.medium),
+              child: TransactionItemWidget(
+                key: ObjectKey(transactions[index]),
+                transaction: transactions[index],
+                fromDarkStatusBar: true,
+              ),
+            ),
+        separatorBuilder: (context, index) => Divider(
+              thickness: 0.8,
+              color: ColorManager.secondary.withOpacity(0.08),
+            ),
+        itemCount: transactions.length);
   }
 
   Widget title() {
@@ -105,7 +137,8 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
   }
 
   Widget back() {
-    return Padding(
+    return Container(
+      alignment: Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
       child: Align(
         alignment: Alignment.centerRight,
@@ -130,7 +163,24 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
       child: TextFormField(
         controller: controller,
         maxLines: 1,
-        onChanged: (text) {},
+        onChanged: (text) {
+          final search = text.trim();
+
+          final transactions = this
+              .transactions
+              .where(
+                (transaction) => transaction.transactionName
+                    .toLowerCase()
+                    .contains(search.toLowerCase()),
+              )
+              .toList();
+
+          setState(() {
+            searching = search.isNotEmpty;
+            this.transactions =
+                search.isEmpty ? AppStorage.getTransactions() : transactions;
+          });
+        },
         cursorColor: ColorManager.themeColor,
         cursorRadius: const Radius.circular(SizeManager.medium),
         style: defaultStyle(),

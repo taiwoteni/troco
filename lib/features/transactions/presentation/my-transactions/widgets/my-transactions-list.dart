@@ -54,6 +54,7 @@ class _MyTransactionsListState extends ConsumerState<MyTransactionsList> {
               child: TransactionItemWidget(
                 key: ObjectKey(transactions[index]),
                 transaction: transactions[index],
+                fromDarkStatusBar: true,
               ),
             ),
         separatorBuilder: (context, index) => Divider(

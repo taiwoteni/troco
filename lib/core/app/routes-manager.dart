@@ -4,7 +4,6 @@ import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
 import 'package:troco/features/auth/presentation/welcome-back/views/welcome-back-screen.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/chat/presentation/views/chat-screen.dart';
-import 'package:troco/features/auth/presentation/login/views/forget-password-otp.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password.dart';
 import 'package:troco/features/home/presentation/views/home-screen.dart';
 import 'package:troco/features/notifications/presentation/views/notification-screen.dart';
@@ -40,9 +39,8 @@ class Routes {
   static const authRoute = "/auth";
   static const loginRoute = "/login";
   static const registerRoute = "/register";
-  static const otpLoginRoute = "/otp-login";
-  static const otpRegisterRoute = "/otp-register";
-  static const otpForgotPasswordRoute = "/otp-forget-password";
+  static const otpRoute = "/otp";
+  static const otpPhoneRoute = "/otp";
   static const forgotPasswordRoute = "/forgot-password";
   static const setupAccountRoute = '/setup-account';
   static const addProfileRoute = '/add-profile';
@@ -100,12 +98,14 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const RegisterScreen());
-      case Routes.otpRegisterRoute:
+      case Routes.otpRoute:
         return MaterialPageRoute(
             settings: routeSettings,
-            builder: (context) => const OTPScreen(
-                  isFromLogin: false,
-                ));
+            builder: (context) => const OTPScreen(email: true,));
+      case Routes.otpPhoneRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const OTPScreen(email: false,));      
       case Routes.setupAccountRoute:
         return MaterialPageRoute(
             settings: routeSettings,
@@ -128,20 +128,10 @@ class RouteGenerator {
         LoginData.clear();
         return MaterialPageRoute(
             settings: routeSettings, builder: (context) => const LoginScreen());
-      case Routes.otpLoginRoute:
-        return MaterialPageRoute(
-            settings: routeSettings,
-            builder: (context) => const OTPScreen(
-                  isFromLogin: true,
-                ));
       case Routes.forgotPasswordRoute:
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const ForgotPasswordScreen());
-      case Routes.otpForgotPasswordRoute:
-        return MaterialPageRoute(
-            settings: routeSettings,
-            builder: (context) => const OTPForgetPasswordScreen());
       case Routes.homeRoute:
         return MaterialPageRoute(
           settings: routeSettings,

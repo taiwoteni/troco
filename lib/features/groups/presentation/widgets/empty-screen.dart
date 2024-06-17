@@ -12,7 +12,11 @@ class EmptyScreen extends StatefulWidget {
   final bool expanded;
   final double scale;
   const EmptyScreen(
-      {super.key, this.scale = 1.0, this.expanded = false, this.lottie, this.label});
+      {super.key,
+      this.scale = 1.0,
+      this.expanded = false,
+      this.lottie,
+      this.label});
 
   @override
   State<EmptyScreen> createState() => _EmptyScreenState();
@@ -33,11 +37,13 @@ class _EmptyScreenState extends State<EmptyScreen> {
   Widget mainWidget() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Transform.scale(
           scale: widget.scale,
           child: LottieWidget(
-              lottieRes: widget.lottie ?? AssetManager.lottieFile(name: 'empty'),
+              lottieRes:
+                  widget.lottie ?? AssetManager.lottieFile(name: 'empty'),
               size: const Size.square(IconSizeManager.extralarge * 2)),
         ),
         mediumSpacer(),

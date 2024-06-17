@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/images/badge-icon.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
@@ -18,8 +21,10 @@ import '../../../../../core/app/value-manager.dart';
 import '../../../../../core/components/images/svg.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
+import '../../../../auth/domain/entities/client.dart';
 import '../../../../auth/presentation/register/widgets/search-place.dart';
 import '../../../../transactions/utils/enums.dart';
+import '../../../domain/repository/edit-profile-repository.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -58,7 +63,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   String? city = ClientProvider.readOnlyClient!.state;
   Category? role = ClientProvider.readOnlyClient!.accountCategory;
 
-  final GlobalKey formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   final UniqueKey buttonKey = UniqueKey();
 
   final Color infoColor = ColorManager.accentColor;
@@ -572,7 +577,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             if (value == null) {
               return "* enter ZipCode";
             }
-            return value.trim().isNotEmpty ? null : "* enter XIpCode";
+            return value.trim().isNotEmpty ? null : "* enter ZipCode";
           },
           onSaved: (value) {
             clientJson["zipcode"] = value;
@@ -616,6 +621,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   Widget button() {
     return CustomButton(
+      onPressed: updateUserAccount,
       label: "Save",
       buttonKey: buttonKey,
       usesProvider: true,
@@ -659,5 +665,36 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> updateUserAccount() async {
+    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+
+      // to know if anything was changed;
+      bool changed = false;
+      clientJson.forEach(
+        (key, value) {
+          if (value !=
+              ClientProvider.readOnlyClient!.toJson()[key.toString()]) {
+            changed = true;
+          }
+        },
+      );
+
+      if (changed) {
+        final response = await EditProfileRepository.updateUserProfile(
+            client: Client.fromJson(json: clientJson));
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+        log(response.body);
+      } else {
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      }
+    } else {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    }
   }
 }
