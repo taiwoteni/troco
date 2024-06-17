@@ -1,10 +1,5 @@
 // ignore_for_file: depend_on_referenced_packages, library_prefixes
 
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
-import "package:path/path.dart" as Path;
-import 'package:troco/core/api/data/model/multi-part-model.dart';
-
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
@@ -89,18 +84,7 @@ class AuthenticationRepo {
     return result;
   }
 
-  static Future<HttpResponseModel> uploadProfilePhoto(
-      {required final String userId, required final String profilePath}) async {
-    final file = await MultipartFile.fromPath("userImage", profilePath,
-        filename: Path.basename(profilePath),
-        contentType: MediaType('image', 'jpeg'));
-
-    final result = await ApiInterface.multipartPatchRequest(
-        multiparts: [MultiPartModel.file(file: file)],
-        url: 'updateUserImage/$userId',
-        headers: {"Content-Type": "multipart/form-data"});
-    return result;
-  }
+  
 
   static Future<HttpResponseModel> deleteUser(
       {required final String userId}) async {
