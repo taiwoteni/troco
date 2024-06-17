@@ -4,9 +4,6 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/features/transactions/data/datasources/my-transaction-tab-items.dart';
 import 'package:troco/features/transactions/presentation/my-transactions/providers/tab-provider.dart';
 import 'package:troco/features/transactions/presentation/my-transactions/widgets/bottom-bar.dart';
-import '../../../../../core/app/font-manager.dart';
-import '../../../../../core/app/size-manager.dart';
-import '../../../../../core/components/others/spacer.dart';
 
 class MyTransactionScreen extends ConsumerStatefulWidget {
   const MyTransactionScreen({super.key});
@@ -25,21 +22,7 @@ class _MyTransactionScreenState extends ConsumerState<MyTransactionScreen> {
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: SizeManager.large * 1.2),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    extraLargeSpacer(),
-                    back(),
-                    mediumSpacer(),
-                    title(),
-                    largeSpacer(),
-                    tabItems()[ref.watch(tabProvider)].page
-                  ],
-                ),
-              ),
+              child: tabItems()[ref.watch(tabProvider)].page
             ),
             const BottomBar(),
           ],
@@ -48,32 +31,4 @@ class _MyTransactionScreenState extends ConsumerState<MyTransactionScreen> {
     );
   }
 
-  Widget title() {
-    return Text(
-      ref.watch(tabProvider) == 0 ? "My Transactions" : "My Statistics",
-      textAlign: TextAlign.left,
-      style: TextStyle(
-          color: ColorManager.accentColor,
-          fontFamily: 'lato',
-          fontSize: FontSizeManager.large * 1.2,
-          fontWeight: FontWeightManager.extrabold),
-    );
   }
-
-  Widget back() {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: IconButton(
-          onPressed: () => Navigator.pop(context),
-          style: ButtonStyle(
-              shape: const MaterialStatePropertyAll(CircleBorder()),
-              backgroundColor: MaterialStatePropertyAll(
-                  ColorManager.accentColor.withOpacity(0.2))),
-          icon: Icon(
-            Icons.close_rounded,
-            color: ColorManager.accentColor,
-            size: IconSizeManager.small,
-          )),
-    );
-  }
-}
