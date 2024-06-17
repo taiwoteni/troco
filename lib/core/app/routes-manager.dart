@@ -22,6 +22,7 @@ import 'package:troco/features/settings/presentation/two-factor-authentication/v
 import 'package:troco/features/splash/presentation/splash-screen.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/views/transaction-success-screen.dart';
+import 'package:troco/features/transactions/presentation/my-transactions/views/my-transaction-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-products-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-transaction-screen.dart';
 
@@ -74,6 +75,8 @@ class Routes {
 
   static const kycVerificationIntroRoute = "/kyc-verification";
   static const kycVerificationRoute = "/kyc-verification-input";
+
+  static const myTransactionsRoute = "/my-transactions";
 }
 
 class RouteGenerator {
@@ -221,6 +224,10 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const KycVerificationIntroScreen());
+       case Routes.myTransactionsRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const MyTransactionScreen());      
       default:
         return MaterialPageRoute(
             settings: routeSettings,
