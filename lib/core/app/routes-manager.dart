@@ -30,6 +30,7 @@ import '../../features/auth/presentation/register/views/register-screen.dart';
 import '../../features/auth/presentation/success/views/auth-success-screen.dart';
 import '../../features/kyc/presentation/views/kyc-verification-intro-screen.dart';
 import '../../features/kyc/presentation/views/kyc-verification-screen.dart';
+import '../../features/services/presentation/calc/views/fee-calculator-screen.dart';
 import '../../features/transactions/presentation/create-transaction/views/create-transaction-screen.dart';
 
 class Routes {
@@ -75,6 +76,8 @@ class Routes {
   static const kycVerificationRoute = "/kyc-verification-input";
 
   static const myTransactionsRoute = "/my-transactions";
+
+  static const feeCalculator = "/fee-calculator";
 }
 
 class RouteGenerator {
@@ -217,7 +220,11 @@ class RouteGenerator {
        case Routes.myTransactionsRoute:
         return MaterialPageRoute(
             settings: routeSettings,
-            builder: (context) => const MyTransactionScreen());      
+            builder: (context) => const MyTransactionScreen());
+        case Routes.feeCalculator:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const FeeCalculatorScreen());               
       default:
         return MaterialPageRoute(
             settings: routeSettings,
