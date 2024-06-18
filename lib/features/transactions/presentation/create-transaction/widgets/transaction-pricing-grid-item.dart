@@ -8,13 +8,13 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
-
-import '../../../domain/entities/product.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 
 class TransactionPricingGridWidget extends ConsumerWidget {
-  final Product product;
+  final SalesItem item;
   final void Function()? onDelete;
-  const TransactionPricingGridWidget({super.key, required this.product, this.onDelete});
+  const TransactionPricingGridWidget(
+      {super.key, required this.item, this.onDelete});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,8 +46,7 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(SizeManager.regular)),
                   image: DecorationImage(
-                      image: FileImage(File(product.productImages[0])),
-                      fit: BoxFit.cover)),
+                      image: FileImage(File(item.image)), fit: BoxFit.cover)),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: SizeManager.small),
@@ -69,9 +68,9 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                       child: IconButton(
                         padding: EdgeInsets.zero,
                         iconSize: 0,
-                        onPressed: (){
+                        onPressed: () {
                           onDelete?.call();
-                          TransactionDataHolder.products!.remove(product);
+                          TransactionDataHolder.items!.remove(item);
                         },
                         icon: const Icon(
                           size: IconSizeManager.regular * 1.3,
@@ -85,7 +84,7 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(4),
                         child: Text(
-                          "${product.quantity} Qty",
+                          "${item.quantity} Qty",
                           textAlign: TextAlign.left,
                           style: const TextStyle(
                               fontFamily: 'quicksand',
@@ -108,7 +107,7 @@ class TransactionPricingGridWidget extends ConsumerWidget {
               children: [
                 smallSpacer(),
                 Text(
-                  product.productName,
+                  item.name,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                       fontFamily: 'quicksand',
@@ -127,7 +126,7 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                     ),
                     smallSpacer(),
                     Text(
-                      product.productPriceString,
+                      item.priceString,
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           fontFamily: 'quicksand',

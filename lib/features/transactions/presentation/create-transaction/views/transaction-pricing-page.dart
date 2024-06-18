@@ -7,6 +7,7 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -31,7 +32,7 @@ class _TransactionPricingPageState
     extends ConsumerState<TransactionPricingPage> {
   final formKey = GlobalKey<FormState>();
   final buttonKey = UniqueKey();
-  final List<Product> products = TransactionDataHolder.products ?? [];
+  final List<SalesItem> items = TransactionDataHolder.items ?? [];
   bool listAsGrid = false;
   bool error = false;
 
@@ -43,7 +44,7 @@ class _TransactionPricingPageState
       body: Padding(
         padding: const EdgeInsets.only(
             left: SizeManager.large, right: SizeManager.large),
-        child: products.isEmpty
+        child: items.isEmpty
             ? Column(
                 children: [
                   Expanded(child: body()),
@@ -115,7 +116,7 @@ class _TransactionPricingPageState
         TransactionDataHolder.transactionCategory ??
             TransactionCategory.Product;
 
-    if (products.isEmpty) {
+    if (items.isEmpty) {
       return EmptyScreen(
         label: error
             ? "\n\nDemonstrate your ${category.name.toLowerCase()}${category == TransactionCategory.Virtual ? "-service" : ""}(s) 🤨"
@@ -132,9 +133,9 @@ class _TransactionPricingPageState
         physics: const NeverScrollableScrollPhysics(),
         separatorBuilder: (context, index) =>
             const Gap(SizeManager.medium * 1.35),
-        itemCount: products.length,
+        itemCount: items.length,
         itemBuilder: (context, index) {
-          return TransactionPricingListWidget(product: products[index]);
+          return TransactionPricingListWidget(item: items[index]);
         },
       );
     }
@@ -143,13 +144,13 @@ class _TransactionPricingPageState
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: gridDelegate(),
-      itemCount: products.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
         return TransactionPricingGridWidget(
-          product: products[index],
+          item: items[index],
           onDelete: () {
             setState(() {
-              products.removeAt(index);
+              items.removeAt(index);
             });
           },
         );
@@ -166,7 +167,7 @@ class _TransactionPricingPageState
       onPressed: () async {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 3));
-        if (TransactionDataHolder.products?.isNotEmpty ?? false) {
+        if (TransactionDataHolder.items?.isNotEmpty ?? false) {
           ref.read(createTransactionPageController.notifier).state.nextPage(
               duration: const Duration(milliseconds: 450), curve: Curves.ease);
           ref.read(createTransactionProgressProvider.notifier).state = 3;
@@ -195,7 +196,7 @@ class _TransactionPricingPageState
         mediumSpacer(),
         regularSpacer(),
         pricingGrid(),
-        if (products.isNotEmpty) ...[mediumSpacer(), smallSpacer()]
+        if (items.isNotEmpty) ...[mediumSpacer(), smallSpacer()]
       ],
     );
   }
@@ -224,9 +225,9 @@ class _TransactionPricingPageState
               ).then((product) {
                 if (product != null) {
                   setState(() {
-                    products.add(product);
+                    items.add(product);
                   });
-                  TransactionDataHolder.products = products;
+                  TransactionDataHolder.items = items;
                 }
                 ref.read(productImagesProvider.notifier).state.clear();
               });

@@ -330,7 +330,7 @@ class _TransactionsDetailPageState
   }
 
   Widget numberOfProducts() {
-    final no = transaction.products.length;
+    final no = transaction.salesItem.length;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

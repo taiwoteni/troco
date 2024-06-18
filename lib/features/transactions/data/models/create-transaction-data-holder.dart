@@ -1,4 +1,4 @@
-import '../../domain/entities/product.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import '../../utils/enums.dart';
 
 class TransactionDataHolder {
@@ -7,7 +7,7 @@ class TransactionDataHolder {
   static String? aboutProduct;
   static int? inspectionDays;
   static bool? inspectionPeriod;
-  static List<Product>? products;
+  static List<SalesItem>? items;
   static String? date;
 
   static void clear() {
@@ -16,8 +16,7 @@ class TransactionDataHolder {
     aboutProduct = null;
     inspectionDays = null;
     inspectionPeriod = null;
-    products = null;
+    items = null;
     date = null;
-
   }
 }

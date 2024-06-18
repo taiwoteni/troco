@@ -11,6 +11,7 @@ import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 
@@ -43,8 +44,9 @@ class TransactionRepo {
     required final String transactionId,
     required final String groupId,
     required final String buyerId,
-    required final Product product,
+    required final SalesItem item,
   }) async {
+    final product = item as Product;
     var parsedfile = File(product.productImages[0]);
     var stream = ByteStream(parsedfile.openRead());
     var length = await parsedfile.length();
@@ -58,13 +60,13 @@ class TransactionRepo {
         multiparts: [
           const MultiPartModel.field(field: "category", value: "No Category"),
           MultiPartModel.field(
-              field: "productName", value: product.productName),
+              field: "productName", value: product.name),
           MultiPartModel.field(
               field: "productCondition",
               value: ProductConditionConverter.convertToString(
                   condition: product.productCondition)),
           MultiPartModel.field(field: "quantity", value: product.quantity),
-          MultiPartModel.field(field: "price", value: product.productPrice),
+          MultiPartModel.field(field: "price", value: product.price),
           MultiPartModel.file(file: file),
         ]);
     return result;

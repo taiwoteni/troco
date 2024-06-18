@@ -1,29 +1,25 @@
-import 'package:equatable/equatable.dart';
-import 'package:intl/intl.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
 
-class Product extends Equatable {
+class Product extends SalesItem {
   final Map<dynamic, dynamic> _json;
-  const Product.fromJson({required final Map<dynamic, dynamic> json})
-      : _json = json;
+  Product.fromJson({required final Map<dynamic, dynamic> json})
+      : _json = json,
+        super(
+          id: json["productId"] ?? json["_id"],
+          price: int.parse((json["productPrice"] ?? json["price"]).toString()),
+          name: json["productName"] ?? json["name"],
+          image: (json["productImages"] as List).map((e) => e.toString()).toList()[0],
+          quantity: int.parse(json["quantity"].toString()),
+        );
 
-  String get productId => _json["productId"] ?? _json["_id"];
-  String get productName => _json["productName"];
-  String get productPriceString =>
-      NumberFormat.currency(locale: "en_NG", decimalDigits: 2, symbol: "")
-          .format(productPrice);
-  int get productPrice =>
-      int.parse((_json["productPrice"] ?? _json["price"]).toString());
   ProductCondition get productCondition =>
       ProductConditionConverter.convertToEnum(
           condition: _json["productCondition"] ?? _json["condition"] ?? "new");
-  ProductQuality get productQuality =>
-      ProductQualityConverter.convertToEnum(
-          quality: _json["productQuality"] ?? _json["quality"] ?? "high quality");        
-  int get quantity => int.parse(_json["quantity"].toString());
-  String get productImage => _json["pricingImage"];
+  ProductQuality get productQuality => ProductQualityConverter.convertToEnum(
+      quality: _json["productQuality"] ?? _json["quality"] ?? "high quality");
   String get productCategory =>
       _json["category"] ??
       _json["productCategory"] ??
@@ -32,10 +28,9 @@ class Product extends Equatable {
   List<String> get productImages =>
       (_json["productImages"] as List).map((e) => e.toString()).toList();
 
-  Map<dynamic, dynamic> toJson() {
-    return _json;
-  }
+  @override
+  List<Object?> get props => [id];
 
   @override
-  List<Object?> get props => [productId];
+  Map toJson() => _json;
 }

@@ -15,6 +15,7 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/drag-handle.dart';
 import 'package:troco/core/components/others/onboarding-indicator.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-details-page.dart';
@@ -24,7 +25,6 @@ import 'package:troco/features/transactions/presentation/view-transaction/widget
 import 'package:troco/features/transactions/utils/transaction-status-converter.dart';
 
 import '../../../../../core/components/animations/lottie.dart';
-import '../../../domain/entities/product.dart';
 
 class ViewTransactionScreen extends ConsumerStatefulWidget {
   final Transaction transaction;
@@ -36,7 +36,7 @@ class ViewTransactionScreen extends ConsumerStatefulWidget {
 }
 
 class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
-  late List<Product> products;
+  late List<SalesItem> salesItems;
   late Transaction transaction;
   late PageController controller;
   int productIndex = 0;
@@ -44,7 +44,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   @override
   void initState() {
     controller = PageController();
-    products = widget.transaction.products;
+    salesItems = widget.transaction.salesItem;
     transaction = widget.transaction;
     log(transaction.toJson().toString());
     super.initState();
@@ -140,7 +140,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
         children: [
           slider(),
           Positioned(top: 0, right: 0, left: 0, child: controls()),
-          Positioned(top: 0, right: 0, left: 0, child: productName()),
+          Positioned(top: 0, right: 0, left: 0, child: itemName()),
           Positioned(
               left: 0,
               right: 0,
@@ -155,14 +155,14 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     return SizedBox.expand(
         child: PageView.builder(
       controller: controller,
-      itemCount: products.length,
+      itemCount: salesItems.length,
       onPageChanged: (value) {
         setState(() => productIndex = value);
       },
       itemBuilder: (context, index) {
-        final product = products[index];
+        final item = salesItems[index];
         return CachedNetworkImage(
-          imageUrl: product.productImage,
+          imageUrl: item.image,
           fit: BoxFit.cover,
           height: double.maxFinite,
           fadeInCurve: Curves.ease,
@@ -207,8 +207,8 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     );
   }
 
-  Widget productName() {
-    final product = products[productIndex];
+  Widget itemName() {
+    final item = salesItems[productIndex];
     return Container(
       width: double.maxFinite,
       alignment: Alignment.center,
@@ -217,7 +217,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
           bottom: SizeManager.extralarge * 1.5,
           top: SizeManager.extralarge),
       child: Text(
-        product.productName,
+        item.name,
         textAlign: TextAlign.center,
         style: const TextStyle(
             color: Colors.white,
@@ -250,7 +250,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ...List.generate(
-                products.length,
+                salesItems.length,
                 (index) => GestureDetector(
                       onTap: () {
                         controller.animateToPage(index,

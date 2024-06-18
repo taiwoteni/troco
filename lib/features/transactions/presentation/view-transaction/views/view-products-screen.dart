@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import 'package:troco/features/transactions/domain/entities/service.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 
 import '../../../../../core/app/asset-manager.dart';
@@ -25,14 +27,14 @@ class ViewProductScreen extends ConsumerStatefulWidget {
 }
 
 class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
-  late List<Product> products;
+  late List<SalesItem> items;
   late PageController controller;
   int productIndex = 0;
 
   @override
   void initState() {
     controller = PageController();
-    products = widget.transaction.products;
+    items = widget.transaction.salesItem;
     super.initState();
   }
 
@@ -75,7 +77,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ...List.generate(
-                products.length,
+                items.length,
                 (index) => GestureDetector(
                       onTap: () {
                         controller.animateToPage(index,
@@ -142,14 +144,14 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
     return SizedBox.expand(
         child: PageView.builder(
       controller: controller,
-      itemCount: products.length,
+      itemCount: items.length,
       onPageChanged: (value) {
         setState(() => productIndex = value);
       },
       itemBuilder: (context, index) {
-        final product = products[index];
+        final product = items[index];
         return CachedNetworkImage(
-          imageUrl: product.productImage,
+          imageUrl: product.image,
           fit: BoxFit.cover,
           height: double.maxFinite,
           fadeInCurve: Curves.ease,
@@ -180,12 +182,12 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   }
 
   Widget productName() {
-    final product = products[productIndex];
+    final product = items[productIndex];
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "${product.productName.substring(0, product.productName.length > 25 ? 23 : null)}${product.productName.length > 25 ? ".." : ""}",
+          "${product.name.substring(0, product.name.length > 25 ? 23 : null)}${product.name.length > 25 ? ".." : ""}",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
@@ -214,7 +216,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   }
 
   Widget productPrice() {
-    final product = products[productIndex];
+    final product = items[productIndex];
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -225,7 +227,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
         ),
         smallSpacer(),
         Text(
-          product.productPriceString,
+          product.priceString,
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.accentColor,
@@ -239,7 +241,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   }
 
   Widget productsQuantity() {
-    final product = products[productIndex];
+    final product = items[productIndex];
     final no = product.quantity;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -269,7 +271,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   }
 
   Widget productsCategory() {
-    final product = products[productIndex];
+    final product = items[productIndex] as Product;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -298,7 +300,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   }
 
   Widget productsCondition() {
-    final product = products[productIndex];
+    final product = items[productIndex] as Product;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -327,8 +329,39 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
     );
   }
 
+  Widget serviceRequirements() {
+    final service = items[productIndex] as Service;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Requirements: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.85),
+        ),
+        Text(
+          service.serviceRequirement.name,
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.92),
+        ),
+      ],
+    );
+  }
+
+
+
   Widget totalAmount() {
-    final product = products[productIndex];
+    final product = items[productIndex];
     final no = product.quantity;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -344,7 +377,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontSize: FontSizeManager.medium * 0.85),
         ),
         Text(
-          "${NumberFormat.currency(decimalDigits: 2, locale: 'en_NG', symbol: '').format(product.productPrice * no)} NG",
+          "${NumberFormat.currency(decimalDigits: 2, locale: 'en_NG', symbol: '').format(product.price * no)} NG",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.accentColor,

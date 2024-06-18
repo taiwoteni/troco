@@ -15,6 +15,8 @@ enum ProductCondition { New, ForeignUsed, NigerianUsed }
 
 enum ProductQuality {Good, Faulty, High, Low}
 
+enum ServiceRequirement{Produce, Repair, Replacement, Design, Create, Manufacture}
+
 enum InspectionPeriod { Hour, Day }
 
 enum TransactionStatus {

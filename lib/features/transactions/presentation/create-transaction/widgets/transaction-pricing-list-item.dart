@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
@@ -14,8 +15,8 @@ import '../../../../../core/components/images/svg.dart';
 import '../../../domain/entities/product.dart';
 
 class TransactionPricingListWidget extends ConsumerStatefulWidget {
-  final Product product;
-  const TransactionPricingListWidget({super.key, required this.product});
+  final SalesItem item;
+  const TransactionPricingListWidget({super.key, required this.item});
 
   @override
   ConsumerState<TransactionPricingListWidget> createState() =>
@@ -28,7 +29,7 @@ class _TransactionPricingListWidgetState
 
   @override
   void initState() {
-    quantity = widget.product.quantity;
+    quantity = widget.item.quantity;
     super.initState();
   }
 
@@ -73,7 +74,7 @@ class _TransactionPricingListWidgetState
           borderRadius: BorderRadius.circular(SizeManager.regular),
           image: DecorationImage(
             fit: BoxFit.cover,
-            image: FileImage(File(widget.product.productImages[0])),
+            image: FileImage(File(widget.item.image)),
           )),
     );
   }
@@ -84,7 +85,7 @@ class _TransactionPricingListWidgetState
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          widget.product.productName,
+          widget.item.name,
           style: TextStyle(
               fontFamily: 'quicksand',
               color: ColorManager.secondary,
@@ -93,7 +94,7 @@ class _TransactionPricingListWidgetState
         ),
         smallSpacer(),
         Text(
-          "${widget.product.productPriceString} NGN",
+          "${widget.item.priceString} NGN",
           style: TextStyle(
             fontFamily: 'quicksand',
             color: ColorManager.accentColor,
@@ -106,7 +107,7 @@ class _TransactionPricingListWidgetState
   }
 
   Widget quantityWidget() {
-    int quantity = widget.product.quantity;
+    int quantity = widget.item.quantity;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
@@ -120,9 +121,9 @@ class _TransactionPricingListWidgetState
               return;
             }
 
-            final products = TransactionDataHolder.products;
-            final currentProduct = products!.firstWhere(
-                (element) => element.productId == widget.product.productId);
+            final products = TransactionDataHolder.items;
+            final currentProduct =
+                products!.firstWhere((element) => element.id == widget.item.id);
             final currentProductJson = currentProduct.toJson();
             int formerQuantity = quantity;
             currentProductJson["quantity"] = --formerQuantity;
@@ -134,7 +135,7 @@ class _TransactionPricingListWidgetState
             products.insert(
                 formerIndex, Product.fromJson(json: currentProductJson));
             products.removeAt(formerIndex + 1);
-            TransactionDataHolder.products = products;
+            TransactionDataHolder.items = products;
           },
           icon: SvgIcon(
             svgRes: AssetManager.svgFile(name: "minus"),
@@ -157,9 +158,9 @@ class _TransactionPricingListWidgetState
             /// I get the products from transactionProductions.
             /// and overwite it by affecting changes there.
 
-            final products = TransactionDataHolder.products;
+            final products = TransactionDataHolder.items;
             final currentProduct = products!.firstWhere(
-                (element) => element.productId == widget.product.productId);
+                (element) => element.id == widget.item.id);
             final currentProductJson = currentProduct.toJson();
             int formerQuantity = quantity;
             currentProductJson["quantity"] = ++formerQuantity;
@@ -171,7 +172,7 @@ class _TransactionPricingListWidgetState
             products.insert(
                 formerIndex, Product.fromJson(json: currentProductJson));
             products.removeAt(formerIndex + 1);
-            TransactionDataHolder.products = products;
+            TransactionDataHolder.items = products;
           },
           icon: SvgIcon(
             svgRes: AssetManager.svgFile(name: "add"),

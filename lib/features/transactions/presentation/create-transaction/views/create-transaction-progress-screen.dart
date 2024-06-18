@@ -93,7 +93,7 @@ class _CreateTransactonProgressScreenState
   }
 
   Widget descriptionText() {
-    final products = TransactionDataHolder.products ?? [];
+    final products = TransactionDataHolder.items ?? [];
     String text = "Creating Transaction...";
 
     if (value >= 1 / (products.length + 1)) {
@@ -132,9 +132,9 @@ class _CreateTransactonProgressScreenState
       "transaction category":
           TransactionDataHolder.transactionCategory!.name.toLowerCase(),
     });
-    final day = TransactionDataHolder.date!.substring(0,2).padLeft(2,'0');
-    final month = TransactionDataHolder.date!.substring(3,5).padLeft(2,'0');
-    final year = TransactionDataHolder.date!.substring(6,10);
+    final day = TransactionDataHolder.date!.substring(0, 2).padLeft(2, '0');
+    final month = TransactionDataHolder.date!.substring(3, 5).padLeft(2, '0');
+    final year = TransactionDataHolder.date!.substring(6, 10);
 
     final response = await TransactionRepo.createTransaction(
         dateOfWork: "$year-$month-${day}T00:00:00Z",
@@ -147,7 +147,7 @@ class _CreateTransactonProgressScreenState
       });
       log(response.body);
     } else {
-      final products = TransactionDataHolder.products!;
+      final products = TransactionDataHolder.items!;
       setState(() {
         value = 1 / (products.length + 1);
       });
@@ -159,7 +159,7 @@ class _CreateTransactonProgressScreenState
 
   Future<void> addProducts({required final Transaction transaction}) async {
     final group = ModalRoute.of(context)!.settings.arguments! as Group;
-    final products = TransactionDataHolder.products!;
+    final products = TransactionDataHolder.items!;
     for (final product in products) {
       setState(() {
         value += 1 / (products.length + 1);
@@ -172,7 +172,7 @@ class _CreateTransactonProgressScreenState
               .firstWhere(
                   (element) => element.toString() != transaction.creator)
               .toString(),
-          product: product);
+          item: product);
 
       if (response.error) {
         log("Error:${response.body}");
