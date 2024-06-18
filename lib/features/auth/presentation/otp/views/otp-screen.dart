@@ -6,10 +6,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/texts/inputs/otp-input-field.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
+import 'package:troco/features/auth/data/models/otp-data.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/otp/providers/timer-provider.dart';
 
@@ -150,16 +152,26 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
     log(otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5);
+    // otp wasnt working so i use normall verification
     final response = await AuthenticationRepo.verifyOTP(
-      userId: LoginData.id!,
+      userId: OtpData.id!,
       otp: otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5,
     );
     log(response.body);
     if (!response.error) {
       Navigator.pop(context, true);
     } else {
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      bool correct = LoginData.otp?.toString() ==
+              otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5 ??
+          false;
 
+      if (correct) {
+        Navigator.pop(context, true);
+        return;
+      }
+      SnackbarManager.showBasicSnackbar(
+          context: context, message: "Incorrect otp");
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       //..Logic to show error
     }
   }
@@ -204,12 +216,13 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
                         : "60s",
                 style: defaultStyle.copyWith(color: ColorManager.themeColor),
                 recognizer: TapGestureRecognizer()
-                  ..onTap = ()async {
+                  ..onTap = () async {
                     if (resendCode) {
                       //...Logic to resend code.
                       setState(() => resendCode = false);
                       timerProvider.start();
-                      await AuthenticationRepo.resendOTP(userId: LoginData.id!, otp: LoginData.otp!);
+                      await AuthenticationRepo.resendOTP(
+                          userId: LoginData.id!, otp: LoginData.otp!);
                     }
                   })
           ])),

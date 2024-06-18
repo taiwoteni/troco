@@ -13,6 +13,7 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import '../../features/chat/domain/entities/chat.dart';
 import '../../features/groups/domain/entities/group.dart';
 import '../../features/notifications/domain/entities/notification.dart';
+import '../../features/settings/domain/entity/settings.dart';
 
 class AppStorage {
   static SharedPreferences? _pref;
@@ -25,6 +26,8 @@ class AppStorage {
 
   static const String NOTIFICATION_STORAGE_KEY = "notifications";
   static const String TRANSACTION_STORAGE_KEY = "transactions";
+  static const String SETTINGS_STORAGE_KEY = "transactions";
+
   static String CHAT_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.chats";
   static String GROUP_INVITATION_STORAGE_KEY({required String groupId}) =>
@@ -169,4 +172,21 @@ class AppStorage {
     _pref!.setString(PAYMENT_METHODS_STORAGE_KEY, json.encode(paymentMethodsJson));
   }
 
+  static Future<void> saveSettings({required List<Settings> settings})async{
+    List<Map<dynamic, dynamic>> settingsJson =
+        settings.map((e) => {"name":e.name, "value": e.value}).toList();
+
+    _pref!.setString(SETTINGS_STORAGE_KEY, json.encode(settingsJson));
+  }
+
+  static List<Settings> getSettings(){
+    final jsonString = _pref!.getString(SETTINGS_STORAGE_KEY);
+    if (jsonString == null) {
+      return [];
+    }
+    final List<dynamic> settingsJson = json.decode(jsonString);
+    return settingsJson
+        .map((e) => Settings(name: e["name"], value: e["value"]))
+        .toList();
+  }
 }

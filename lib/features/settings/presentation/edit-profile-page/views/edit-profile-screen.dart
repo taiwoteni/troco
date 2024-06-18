@@ -1,9 +1,8 @@
-import 'dart:developer';
-
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/images/badge-icon.dart';
@@ -689,7 +688,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         final response = await EditProfileRepository.updateUserProfile(
             client: Client.fromJson(json: clientJson));
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-        log(response.body);
+        if (!response.error) {
+          ClientProvider.saveUserData(ref: ref, json: clientJson);
+          ref.watch(clientProvider.notifier).state =
+              ClientProvider.readOnlyClient!;
+          SnackbarManager.showBasicSnackbar(
+              context: context, message: "Edited Profile");
+        } else {
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              mode: ContentType.failure,
+              message: "Unable to edit profile. Check internet.");
+        }
       } else {
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       }

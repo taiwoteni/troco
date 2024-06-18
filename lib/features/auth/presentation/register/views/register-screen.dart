@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -16,6 +17,7 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/texts/inputs/text-form-field.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
+import 'package:troco/features/auth/data/models/otp-data.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 
 import '../../../../../core/app/routes-manager.dart';
@@ -99,6 +101,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         }
                         if (phoneNumbers.contains(value.trim())) {
                           return "* phone number already exists.";
+                        }
+                        if (value.startsWith("+234") && value.length != 14) {
+                          return "* enter valid phone number";
+                        }
+                        if (value.length != 11) {
+                          return "* enter valid phone number";
                         }
                         return validatePhoneNumber(value.trim())
                             ? null
@@ -238,33 +246,38 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     log(LoginData.phoneNumber!.toString());
     log(LoginData.email!.toString());
     log(LoginData.password!.toString());
-    if (LoginData.id != null) {
+
+    // if user has already created account and verified;
+    if (LoginData.id != null && !OtpData.isVerifying()) {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       Navigator.pushNamed(context, Routes.setupAccountRoute);
       return;
     }
 
-    final result = await AuthenticationRepo.registerUser(
-        email: LoginData.email!,
-        phoneNumber: LoginData.phoneNumber!,
-        password: LoginData.password!);
-
-    if (!result.error) {
-      log(result.body);
-      final verified =
-          (await Navigator.pushNamed(context, Routes.otpRoute)
-                  as bool? ??
-              false);
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      if (verified) {
-        LoginData.id = result.messageBody!["data"]["_id"];
-        LoginData.otp =
-            result.messageBody!["data"]["verificationPin"].toString();
-        Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
-      }
+    // if user had created this account but is still verfying
+    if (OtpData.isVerifying()) {
+      verify(result: OtpData.model!);
     } else {
-      log(result.code.toString());
-      print(result.body);
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      final result = await AuthenticationRepo.registerUser(
+          email: LoginData.email!,
+          phoneNumber: LoginData.phoneNumber!,
+          password: LoginData.password!);
+      log(result.body);
+
+      if (!result.error) {
+        OtpData.id = result.messageBody!["data"]["_id"];
+        OtpData.email = LoginData.email;
+        OtpData.phoneNumber = LoginData.phoneNumber;
+        OtpData.password = LoginData.password;
+        OtpData.model = result;
+        LoginData.otp = result.messageBody!["data"]["verificationPin"];
+        log(OtpData.id!);
+        verify(result: result);
+      } else {
+        log(result.code.toString());
+        print(result.body);
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      }
     }
   }
 
@@ -279,11 +292,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
   }
 
-  Future<void> getEmailsandPhones() async {
-    // ..Logic to get all emails && phone numbers through Finbar's API.
-    // ..Numbers should be gotten in 10-digit form.
-    // ..Due to prefix text. NOTE !!!
-    // ..It should be called durring init state
+  Future<void> verify({required final HttpResponseModel result}) async {
+    final verified =
+        (await Navigator.pushNamed(context, Routes.otpRoute) as bool? ?? false);
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    if (verified) {
+      LoginData.id = result.messageBody!["data"]["_id"];
+      LoginData.otp = result.messageBody!["data"]["verificationPin"].toString();
+      OtpData.clear();
+      Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
+    }
   }
 
   PreferredSizeWidget appBar() {

@@ -281,8 +281,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
-      final response = await AuthenticationRepo.loginUserEmail(
-          email: LoginData.email!, password: LoginData.password!);
+      final response = await (LoginData.email != null
+          ? AuthenticationRepo.loginUserEmail(
+              email: LoginData.email!, password: LoginData.password!)
+          : AuthenticationRepo.loginUserPhone(
+              phoneNumber: LoginData.phoneNumber!,
+              password: LoginData.password!));
       log("login:${response.body}");
 
       if (response.error) {

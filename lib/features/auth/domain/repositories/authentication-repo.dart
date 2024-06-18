@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages, library_prefixes
 
 import 'package:troco/core/api/data/repositories/api-interface.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
 
@@ -23,6 +24,17 @@ class AuthenticationRepo {
         data: {"phoneNumber": phoneNumber, "password": password});
     return result;
   }
+
+  static Future<HttpResponseModel> verifyTransactionPin(
+      {required final String phoneNumber,
+      final Map<String, String>? header}) async {
+    final result = await ApiInterface.postRequest(
+        url: "verifytransactionPin/${ClientProvider.readOnlyClient!.userId}",
+        data: {"phoneNumber": phoneNumber});
+    return result;
+  }
+
+
 
   static Future<HttpResponseModel> registerUser(
       {required final String email,
