@@ -132,9 +132,9 @@ class _CreateTransactonProgressScreenState
       "transaction category":
           TransactionDataHolder.transactionCategory!.name.toLowerCase(),
     });
-    final day = TransactionDataHolder.day!.toString().padLeft(2, '0');
-    final month = TransactionDataHolder.month!.toString().padLeft(2, '0');
-    final year = TransactionDataHolder.year!.toString();
+    final day = TransactionDataHolder.date!.split("/").first.padLeft(2,'0');
+    final month = TransactionDataHolder.date!.split("/")[1].padLeft(2,'0');
+    final year = TransactionDataHolder.date!.split("/").last;
 
     final response = await TransactionRepo.createTransaction(
         dateOfWork: "$year-$month-${day}T00:00:00Z",

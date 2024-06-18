@@ -13,6 +13,8 @@ enum TransactionCategory { Product, Service, Virtual }
 
 enum ProductCondition { New, ForeignUsed, NigerianUsed }
 
+enum ProductQuality {Good, Faulty, High, Low}
+
 enum InspectionPeriod { Hour, Day }
 
 enum TransactionStatus {
