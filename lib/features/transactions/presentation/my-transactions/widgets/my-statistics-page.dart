@@ -6,9 +6,13 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/transactions/presentation/my-transactions/widgets/transactions-pie-chart.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
+import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/others/spacer.dart';
+import '../../../../groups/presentation/widgets/empty-screen.dart';
+import '../../../domain/entities/transaction.dart';
+import '../../view-transaction/providers/transactions-provider.dart';
 
 class MyStatisticsPage extends ConsumerStatefulWidget {
   const MyStatisticsPage({super.key});
@@ -19,8 +23,44 @@ class MyStatisticsPage extends ConsumerStatefulWidget {
 }
 
 class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
+  List<Transaction> transactions = [];
+
+  @override
+  void initState() {
+    transactions = AppStorage.getTransactions();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    listenToChanges();
+    return transactions.isEmpty ? emptyBody() : body();
+  }
+
+  Widget emptyBody() {
+    return Container(
+        alignment: Alignment.center,
+        child: Column(children: [
+          extraLargeSpacer(),
+          Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: SizeManager.large * 1.2),
+              child: back()),
+          mediumSpacer(),
+          Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: SizeManager.large * 1.2),
+              child: Align(alignment: Alignment.centerLeft, child: title())),
+          EmptyScreen(
+            lottie: AssetManager.lottieFile(name: "empty-transactions"),
+            scale: 1.5,
+            label: "You do not have any transactions.",
+            expanded: true,
+          ),
+        ]));
+  }
+
+  Widget body() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
       child: Column(
@@ -222,5 +262,18 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
           fontSize: FontSizeManager.regular * 0.75,
           fontWeight: FontWeightManager.regular),
     );
+  }
+
+  Future<void> listenToChanges() async {
+    ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        value.sort(
+          (a, b) => (1.compareTo(0)),
+        );
+        setState(() {
+          transactions = value;
+        });
+      });
+    });
   }
 }

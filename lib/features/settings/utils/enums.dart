@@ -11,3 +11,6 @@ enum IconType{icon,svg}
 /// 
 /// Then [SettingsType.grave] settings are used for hazardous actions
 enum SettingsType{normal, financial, grave}
+
+enum TwoFactorMethod {Pin,Otp}
+enum AppEntryMethod {Pin,Password}

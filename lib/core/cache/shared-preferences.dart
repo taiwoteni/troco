@@ -160,7 +160,9 @@ class AppStorage {
     }
     final List<dynamic> paymentMethodsJson = json.decode(jsonString) as List;
     return paymentMethodsJson
-        .map((e) => e["cardNumber"] != null? CardMethod.fromJson(json: e): AccountMethod.fromJson(json: e))
+        .map((e) => e["cardNumber"] != null
+            ? CardMethod.fromJson(json: e)
+            : AccountMethod.fromJson(json: e))
         .toList();
   }
 
@@ -169,24 +171,35 @@ class AppStorage {
     List<Map<dynamic, dynamic>> paymentMethodsJson =
         paymentMethods.map((e) => e.toJson()).toList();
 
-    _pref!.setString(PAYMENT_METHODS_STORAGE_KEY, json.encode(paymentMethodsJson));
+    _pref!.setString(
+        PAYMENT_METHODS_STORAGE_KEY, json.encode(paymentMethodsJson));
   }
 
-  static Future<void> saveSettings({required List<Settings> settings})async{
-    List<Map<dynamic, dynamic>> settingsJson =
-        settings.map((e) => {"name":e.name, "value": e.value}).toList();
-
-    _pref!.setString(SETTINGS_STORAGE_KEY, json.encode(settingsJson));
+  static Future<void> saveSettings({required Settings settings}) async {
+    _pref!.setString(SETTINGS_STORAGE_KEY, json.encode(settings.toJson()));
   }
 
-  static List<Settings> getSettings(){
+  static Settings getSettings() {
     final jsonString = _pref!.getString(SETTINGS_STORAGE_KEY);
     if (jsonString == null) {
-      return [];
+      return Settings.fromJson(map: {
+        "two-factor-enabled": false,
+        "two-factor-method": "otp",
+        "auto-logout": true,
+        "app-entry-method": "password"
+      });
     }
-    final List<dynamic> settingsJson = json.decode(jsonString);
-    return settingsJson
-        .map((e) => Settings(name: e["name"], value: e["value"]))
-        .toList();
+
+    try {
+      final settingsJson = json.decode(jsonString);
+      return Settings.fromJson(map: settingsJson);
+    } on TypeError {
+      return Settings.fromJson(map: {
+        "two-factor-enabled": false,
+        "two-factor-method": "otp",
+        "auto-logout": true,
+        "app-entry-method": "password"
+      });
+    }
   }
 }

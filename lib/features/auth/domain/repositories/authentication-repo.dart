@@ -26,15 +26,13 @@ class AuthenticationRepo {
   }
 
   static Future<HttpResponseModel> verifyTransactionPin(
-      {required final String phoneNumber,
+      {required final String transactionPin,
       final Map<String, String>? header}) async {
     final result = await ApiInterface.postRequest(
         url: "verifytransactionPin/${ClientProvider.readOnlyClient!.userId}",
-        data: {"phoneNumber": phoneNumber});
+        data: {"transactionPin": transactionPin});
     return result;
   }
-
-
 
   static Future<HttpResponseModel> registerUser(
       {required final String email,
@@ -95,8 +93,6 @@ class AuthenticationRepo {
         });
     return result;
   }
-
-  
 
   static Future<HttpResponseModel> deleteUser(
       {required final String userId}) async {

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/settings/domain/entity/settings.dart';
+import 'package:troco/features/settings/presentation/settings-page/providers/settings-provider.dart';
+import 'package:troco/features/settings/utils/enums.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
@@ -17,11 +21,12 @@ class TwoFactorAuthenticationScreen extends ConsumerStatefulWidget {
       _TwoFactorAuthenticationPageState();
 }
 
-class _TwoFactorAuthenticationPageState extends ConsumerState<TwoFactorAuthenticationScreen> {
-  bool twoFactorEnabled = true;
-  bool otpEnabled = true;
-  bool automaticallyLogoutDuringInactivity = true;
-  bool autoLoginPinEnabled = true;
+class _TwoFactorAuthenticationPageState
+    extends ConsumerState<TwoFactorAuthenticationScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,108 +85,153 @@ class _TwoFactorAuthenticationPageState extends ConsumerState<TwoFactorAuthentic
 
   Widget enableTwoFactorAuthentication() {
     return ListTile(
-      onTap: () {
-        setState(() => twoFactorEnabled = !twoFactorEnabled);
-      },
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(
-          vertical: SizeManager.regular, horizontal: SizeManager.medium),
-      horizontalTitleGap: SizeManager.large,
-      leading: leading(subAssetString: "two-factor-authentication"),
-      title: const Text("Two Factor Authentication"),
-      titleTextStyle: TextStyle(
-          color: ColorManager.primary,
-          fontFamily: 'quicksand',
-          overflow: TextOverflow.ellipsis,
-          fontSize: FontSizeManager.regular * 1.2,
-          fontWeight: FontWeightManager.extrabold),
-      trailing: switchWidget(
-          enabled: twoFactorEnabled,
-          onChanged: (value) => setState(() => twoFactorEnabled = value)),
-    );
+        onTap: () {
+          final settingsJson = ref.read(settingsProvider).toJson();
+          settingsJson["two-factor-enabled"] =
+              !ref.watch(settingsProvider).twoFactorEnabled;
+          ref.watch(settingsProvider.notifier).state =
+              Settings.fromJson(map: settingsJson);
+          AppStorage.saveSettings(
+              settings: Settings.fromJson(map: settingsJson));
+        },
+        dense: true,
+        contentPadding: const EdgeInsets.symmetric(
+            vertical: SizeManager.regular, horizontal: SizeManager.medium),
+        horizontalTitleGap: SizeManager.large,
+        leading: leading(subAssetString: "two-factor-authentication"),
+        title: const Text("Two Factor Authentication"),
+        titleTextStyle: TextStyle(
+            color: ColorManager.primary,
+            fontFamily: 'quicksand',
+            overflow: TextOverflow.ellipsis,
+            fontSize: FontSizeManager.regular * 1.2,
+            fontWeight: FontWeightManager.extrabold),
+        trailing: switchWidget(
+          enabled: ref.watch(settingsProvider).twoFactorEnabled,
+          onChanged: (value) {
+            final settingsJson = ref.read(settingsProvider).toJson();
+            settingsJson["two-factor-enabled"] = value;
+            ref.watch(settingsProvider.notifier).state =
+                Settings.fromJson(map: settingsJson);
+            AppStorage.saveSettings(
+                settings: Settings.fromJson(map: settingsJson));
+          },
+        ));
   }
 
   Widget autoLogoutDuringInactivity() {
     return AnimatedOpacity(
-      opacity: twoFactorEnabled ? 1 : 0.5,
+      opacity: 1,
       duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
       child: ListTile(
-        onTap: () {
-          if (!twoFactorEnabled) {
-            return;
-          }
-          setState(() => automaticallyLogoutDuringInactivity =
-              !automaticallyLogoutDuringInactivity);
-        },
-        dense: true,
-        contentPadding: const EdgeInsets.symmetric(
-            vertical: SizeManager.regular, horizontal: SizeManager.medium),
-        horizontalTitleGap: SizeManager.large,
-        leading: leading(subAssetString: "logout"),
-        title: const Text("Auto Logout after Inactivity"),
-        titleTextStyle: TextStyle(
-            color: ColorManager.primary,
-            fontFamily: 'quicksand',
-            overflow: TextOverflow.ellipsis,
-            fontSize: FontSizeManager.regular * 1.2,
-            fontWeight: FontWeightManager.extrabold),
-        trailing: switchWidget(
-            enabled: automaticallyLogoutDuringInactivity,
-            onChanged: (value) => !twoFactorEnabled
-                ? null
-                : setState(() => automaticallyLogoutDuringInactivity = value)),
-      ),
+          onTap: () {
+            final settingsJson = ref.read(settingsProvider).toJson();
+            settingsJson["auto-logout"] =
+                !ref.read(settingsProvider).autoLogout;
+            ref.watch(settingsProvider.notifier).state =
+                Settings.fromJson(map: settingsJson);
+            AppStorage.saveSettings(
+                settings: Settings.fromJson(map: settingsJson));
+          },
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(
+              vertical: SizeManager.regular, horizontal: SizeManager.medium),
+          horizontalTitleGap: SizeManager.large,
+          leading: leading(subAssetString: "logout"),
+          title: const Text("Auto Logout after Inactivity"),
+          titleTextStyle: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              overflow: TextOverflow.ellipsis,
+              fontSize: FontSizeManager.regular * 1.2,
+              fontWeight: FontWeightManager.extrabold),
+          trailing: switchWidget(
+            enabled: ref.watch(settingsProvider).autoLogout,
+            onChanged: (value) {
+              final settingsJson = ref.read(settingsProvider).toJson();
+              settingsJson["auto-logout"] = value;
+              ref.watch(settingsProvider.notifier).state =
+                  Settings.fromJson(map: settingsJson);
+              AppStorage.saveSettings(
+                  settings: Settings.fromJson(map: settingsJson));
+            },
+          )),
     );
   }
 
   Widget pinMethod() {
+    final automaticallyLogoutDuringInactivity =
+        ref.watch(settingsProvider).autoLogout;
+    final autoLoginPinEnabled =
+        ref.watch(settingsProvider).appEntryMethod == AppEntryMethod.Pin;
     return AnimatedOpacity(
-      opacity:
-          twoFactorEnabled && automaticallyLogoutDuringInactivity ? 1 : 0.5,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.ease,
-      child: ListTile(
-        onTap: () {
-          if (!(twoFactorEnabled && automaticallyLogoutDuringInactivity)) {
-            return;
-          }
-          setState(() => autoLoginPinEnabled = !autoLoginPinEnabled);
-        },
-        dense: true,
-        contentPadding: const EdgeInsets.symmetric(
-            vertical: SizeManager.regular, horizontal: SizeManager.medium),
-        horizontalTitleGap: SizeManager.large,
-        leading: leading(subAssetString: "change-pin"),
-        title: const Text("Transaction Pin"),
-        titleTextStyle: TextStyle(
-            color: ColorManager.primary,
-            fontFamily: 'quicksand',
-            overflow: TextOverflow.ellipsis,
-            fontSize: FontSizeManager.regular * 1.2,
-            fontWeight: FontWeightManager.extrabold),
-        trailing: switchWidget(
+        opacity: automaticallyLogoutDuringInactivity ? 1 : 0.5,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+        child: ListTile(
+          onTap: () {
+            if (!automaticallyLogoutDuringInactivity) {
+              return;
+            }
+            final settingsJson = ref.read(settingsProvider).toJson();
+            settingsJson["app-entry-method"] =
+                autoLoginPinEnabled ? "password" : "pin";
+            ref.watch(settingsProvider.notifier).state =
+                Settings.fromJson(map: settingsJson);
+            AppStorage.saveSettings(
+                settings: Settings.fromJson(map: settingsJson));
+          },
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(
+              vertical: SizeManager.regular, horizontal: SizeManager.medium),
+          horizontalTitleGap: SizeManager.large,
+          leading: leading(subAssetString: "change-pin"),
+          title: const Text("Transaction Pin"),
+          titleTextStyle: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              overflow: TextOverflow.ellipsis,
+              fontSize: FontSizeManager.regular * 1.2,
+              fontWeight: FontWeightManager.extrabold),
+          trailing: switchWidget(
             enabled: autoLoginPinEnabled,
-            onChanged: (value) =>
-                !(twoFactorEnabled && automaticallyLogoutDuringInactivity)
-                    ? null
-                    : setState(() => autoLoginPinEnabled = value)),
-      ),
-    );
+            onChanged: (value) {
+              if (automaticallyLogoutDuringInactivity) {
+                final settingsJson = ref.read(settingsProvider).toJson();
+                settingsJson["app-entry-method"] =
+                    autoLoginPinEnabled ? "password" : "pin";
+                ref.watch(settingsProvider.notifier).state =
+                    Settings.fromJson(map: settingsJson);
+                AppStorage.saveSettings(
+                    settings: Settings.fromJson(map: settingsJson));
+              }
+            },
+          ),
+        ));
   }
 
   Widget passwordMethod() {
+    final automaticallyLogoutDuringInactivity =
+        ref.watch(settingsProvider).autoLogout;
+    final autoLoginPinEnabled =
+        ref.watch(settingsProvider).appEntryMethod == AppEntryMethod.Pin;
     return AnimatedOpacity(
-      opacity:
-          twoFactorEnabled && automaticallyLogoutDuringInactivity ? 1 : 0.5,
+      opacity:automaticallyLogoutDuringInactivity ? 1 : 0.5,
       duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
       child: ListTile(
         onTap: () {
-          if (!(twoFactorEnabled && automaticallyLogoutDuringInactivity)) {
+          if (!automaticallyLogoutDuringInactivity) {
             return;
           }
-          setState(() => autoLoginPinEnabled = !autoLoginPinEnabled);
+          final settingsJson = ref.read(settingsProvider).toJson();
+          settingsJson["app-entry-method"] =
+              autoLoginPinEnabled ? "password" : "pin";
+          ref.watch(settingsProvider.notifier).state =
+              Settings.fromJson(map: settingsJson);
+          AppStorage.saveSettings(
+              settings: Settings.fromJson(map: settingsJson));
         },
         dense: true,
         contentPadding: const EdgeInsets.symmetric(
@@ -196,77 +246,119 @@ class _TwoFactorAuthenticationPageState extends ConsumerState<TwoFactorAuthentic
             fontSize: FontSizeManager.regular * 1.2,
             fontWeight: FontWeightManager.extrabold),
         trailing: switchWidget(
-            enabled: !autoLoginPinEnabled,
-            onChanged: (value) =>
-                !(twoFactorEnabled && automaticallyLogoutDuringInactivity)
-                    ? null
-                    : setState(() => autoLoginPinEnabled = !value)),
+          enabled: !autoLoginPinEnabled,
+          onChanged: (value) {
+            if (automaticallyLogoutDuringInactivity) {
+              final settingsJson = ref.read(settingsProvider).toJson();
+              settingsJson["app-entry-method"] =
+                  autoLoginPinEnabled ? "password" : "pin";
+              ref.watch(settingsProvider.notifier).state =
+                  Settings.fromJson(map: settingsJson);
+              AppStorage.saveSettings(
+                  settings: Settings.fromJson(map: settingsJson));
+            }
+          },
+        ),
       ),
     );
   }
 
   Widget loginOtpMethod() {
+    final twoFactorEnabled = ref.watch(settingsProvider).twoFactorEnabled;
+    final otpEnabled =
+        ref.watch(settingsProvider).appEntryMethod == AppEntryMethod.Pin;
     return AnimatedOpacity(
       opacity: twoFactorEnabled ? 1 : 0.5,
       duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
       child: ListTile(
-        onTap: () {
-          if (!twoFactorEnabled) {
-            return;
-          }
-          setState(() => otpEnabled = !otpEnabled);
-        },
-        dense: true,
-        contentPadding: const EdgeInsets.symmetric(
-            vertical: SizeManager.regular, horizontal: SizeManager.medium),
-        horizontalTitleGap: SizeManager.large,
-        leading: leading(subAssetString: "otp"),
-        title: const Text("Otp Authentication"),
-        titleTextStyle: TextStyle(
-            color: ColorManager.primary,
-            fontFamily: 'quicksand',
-            overflow: TextOverflow.ellipsis,
-            fontSize: FontSizeManager.regular * 1.2,
-            fontWeight: FontWeightManager.extrabold),
-        trailing: switchWidget(
-            enabled: otpEnabled,
-            onChanged: (value) =>
-                !twoFactorEnabled ? null : setState(() => otpEnabled = value)),
-      ),
+          onTap: () {
+            if (!twoFactorEnabled) {
+              return;
+            }
+            final settingsJson = ref.read(settingsProvider).toJson();
+            settingsJson["two-factor-method"] = !otpEnabled ? "otp" : "pin";
+            ref.watch(settingsProvider.notifier).state =
+                Settings.fromJson(map: settingsJson);
+            AppStorage.saveSettings(
+                settings: Settings.fromJson(map: settingsJson));
+          },
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(
+              vertical: SizeManager.regular, horizontal: SizeManager.medium),
+          horizontalTitleGap: SizeManager.large,
+          leading: leading(subAssetString: "otp"),
+          title: const Text("Otp Authentication"),
+          titleTextStyle: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              overflow: TextOverflow.ellipsis,
+              fontSize: FontSizeManager.regular * 1.2,
+              fontWeight: FontWeightManager.extrabold),
+          trailing: switchWidget(
+              enabled: otpEnabled,
+              onChanged: (value) {
+                if (!twoFactorEnabled) {
+                  return;
+                }
+                final settingsJson = ref.read(settingsProvider).toJson();
+                settingsJson["two-factor-method"] = !otpEnabled ? "otp" : "pin";
+                ref.watch(settingsProvider.notifier).state =
+                    Settings.fromJson(map: settingsJson);
+                AppStorage.saveSettings(
+                    settings: Settings.fromJson(map: settingsJson));
+              })),
     );
   }
 
   Widget loginPinMethod() {
+    final twoFactorEnabled = ref.watch(settingsProvider).twoFactorEnabled;
+    final otpEnabled =
+        ref.watch(settingsProvider).appEntryMethod == AppEntryMethod.Pin;
+
     return AnimatedOpacity(
-      opacity: twoFactorEnabled ? 1 : 0.5,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.ease,
-      child: ListTile(
-        onTap: () {
-          if (!twoFactorEnabled) {
-            return;
-          }
-          setState(() => otpEnabled = !otpEnabled);
-        },
-        dense: true,
-        contentPadding: const EdgeInsets.symmetric(
-            vertical: SizeManager.regular, horizontal: SizeManager.medium),
-        horizontalTitleGap: SizeManager.large,
-        leading: leading(subAssetString: "change-pin"),
-        title: const Text("Transaction Pin"),
-        titleTextStyle: TextStyle(
-            color: ColorManager.primary,
-            fontFamily: 'quicksand',
-            overflow: TextOverflow.ellipsis,
-            fontSize: FontSizeManager.regular * 1.2,
-            fontWeight: FontWeightManager.extrabold),
-        trailing: switchWidget(
+        opacity: twoFactorEnabled ? 1 : 0.5,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+        child: ListTile(
+          onTap: () {
+            if (!twoFactorEnabled) {
+              return;
+            }
+            final settingsJson = ref.read(settingsProvider).toJson();
+            settingsJson["two-factor-method"] = !otpEnabled ? "otp" : "pin";
+            ref.watch(settingsProvider.notifier).state =
+                Settings.fromJson(map: settingsJson);
+            AppStorage.saveSettings(
+                settings: Settings.fromJson(map: settingsJson));
+          },
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(
+              vertical: SizeManager.regular, horizontal: SizeManager.medium),
+          horizontalTitleGap: SizeManager.large,
+          leading: leading(subAssetString: "change-pin"),
+          title: const Text("Transaction Pin"),
+          titleTextStyle: TextStyle(
+              color: ColorManager.primary,
+              fontFamily: 'quicksand',
+              overflow: TextOverflow.ellipsis,
+              fontSize: FontSizeManager.regular * 1.2,
+              fontWeight: FontWeightManager.extrabold),
+          trailing: switchWidget(
             enabled: !otpEnabled,
-            onChanged: (value) =>
-                !twoFactorEnabled ? null : setState(() => otpEnabled = !value)),
-      ),
-    );
+            onChanged: (value) {
+              if (!twoFactorEnabled) {
+                return;
+              }
+              final settingsJson = ref.read(settingsProvider).toJson();
+              settingsJson["two-factor-method"] = !otpEnabled ? "otp" : "pin";
+              ref.watch(settingsProvider.notifier).state =
+                  Settings.fromJson(map: settingsJson);
+              AppStorage.saveSettings(
+                  settings: Settings.fromJson(map: settingsJson));
+            },
+          ),
+        ));
   }
 
   Widget leading({required final String subAssetString}) {

@@ -1,28 +1,36 @@
+import 'dart:developer';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
+import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/auth/presentation/welcome-back/provider/loading-provider.dart';
 import 'package:troco/features/auth/presentation/welcome-back/widgets/pin-input-widget.dart';
 import 'package:troco/features/auth/presentation/welcome-back/widgets/pin-keypad-widget.dart';
 import 'package:vibration/vibration.dart';
 
-class PinEntryScreen extends StatefulWidget {
+class PinEntryScreen extends ConsumerStatefulWidget {
   const PinEntryScreen({super.key});
 
   @override
-  State<PinEntryScreen> createState() => _PinEntryScreenState();
+  ConsumerState<PinEntryScreen> createState() => _PinEntryScreenState();
 }
 
-class _PinEntryScreenState extends State<PinEntryScreen>
-    with SingleTickerProviderStateMixin {
+class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
+    with TickerProviderStateMixin {
   String transactionPin = "";
   late AnimationController controller;
   bool animatingRight = false;
+  bool loading = false;
 
   @override
   void setState(VoidCallback fn) {
@@ -228,8 +236,25 @@ class _PinEntryScreenState extends State<PinEntryScreen>
   }
 
   Future<void> validate() async {
-    bool theSame = transactionPin.trim() == "2911";
-    if (!theSame) {
+    bool theSame = false;
+    if (ClientProvider.readOnlyClient!.transactionPin == null) {
+      ref.watch(loadingProvider.notifier).state!.repeat(reverse: true);
+      final response = await AuthenticationRepo.verifyTransactionPin(
+          transactionPin: transactionPin);
+      log(response.body);
+      ref.watch(loadingProvider)!.reset();
+      theSame = !response.error;
+      if (theSame) {
+        final json = ClientProvider.readOnlyClient!.toJson();
+        json["transactionPin"] = transactionPin;
+        ClientProvider.saveUserData(ref: ref, json: json);
+        ref.watch(clientProvider.notifier).state = Client.fromJson(json: json);
+      }
+    } else {
+      theSame = transactionPin == ClientProvider.readOnlyClient!.transactionPin;
+    }
+
+    if (theSame) {
       // vibrate
       if (await Vibration.hasVibrator() ?? false) {
         controller.forward();

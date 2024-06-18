@@ -22,7 +22,7 @@ class Client extends Equatable {
   String get state => _json["state"];
   String get zipcode => _json["zipcode"];
   String get bustop => _json["nearestBustop"];
-  String get transactionPin => _json["transactionPin"];
+  String? get transactionPin => _json["transactionPin"];
 
   String? get password => _json["password"];
 
