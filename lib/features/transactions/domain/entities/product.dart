@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
+import 'package:troco/features/transactions/utils/product-quality-converter.dart';
 
 class Product extends Equatable {
   final Map<dynamic, dynamic> _json;
@@ -18,6 +19,9 @@ class Product extends Equatable {
   ProductCondition get productCondition =>
       ProductConditionConverter.convertToEnum(
           condition: _json["productCondition"] ?? _json["condition"] ?? "new");
+  ProductQuality get productQuality =>
+      ProductQualityConverter.convertToEnum(
+          quality: _json["productQuality"] ?? _json["quality"] ?? "high quality");        
   int get quantity => int.parse(_json["quantity"].toString());
   String get productImage => _json["pricingImage"];
   String get productCategory =>

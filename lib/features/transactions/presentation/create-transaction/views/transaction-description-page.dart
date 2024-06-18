@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/texts/inputs/text-form-field.dart';
@@ -30,8 +31,8 @@ class _TransactionDescriptionPageState
       TextEditingController(text: TransactionDataHolder.transactionName ?? "");
   final TextEditingController aboutProductController =
       TextEditingController(text: TransactionDataHolder.aboutProduct ?? "");
-  final TextEditingController dateController = TextEditingController(
-      text: TransactionDataHolder.date?.toString().replaceAll("/", "") ?? "");
+  final TextEditingController dateController =
+      TextEditingController(text: TransactionDataHolder.date?.toString() ?? "");
   final formKey = GlobalKey<FormState>();
   bool inspectByDay = TransactionDataHolder.inspectionPeriod ?? true;
   int inspectionDay = TransactionDataHolder.inspectionDays ?? 1;
@@ -352,7 +353,13 @@ class _TransactionDescriptionPageState
           controller: dateController,
           label: 'DD/MM/YYYY',
           inputType: TextInputType.datetime,
-          inputFormatters: [DateInputFormatter()],
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(10,
+                maxLengthEnforcement:
+                    MaxLengthEnforcement.truncateAfterCompositionEnds),
+            DateInputFormatter(),
+          ],
           validator: (value) {
             if (value == null) {
               return "* enter date";
@@ -360,8 +367,8 @@ class _TransactionDescriptionPageState
             if (value.trim().isEmpty) {
               return "* enter date";
             }
-            if (DateValidator.isValidDate(value.trim())) {
-              return "* day";
+            if (!DateValidator.isValidDate(value.trim(), expritation: true)) {
+              return "* enter valid date";
             }
             return null;
           },

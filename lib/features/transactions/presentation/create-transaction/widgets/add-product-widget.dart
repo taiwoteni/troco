@@ -14,6 +14,7 @@ import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
+import 'package:troco/features/transactions/utils/product-quality-converter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../../core/app/color-manager.dart';
@@ -38,6 +39,8 @@ class AddProductWidget extends ConsumerStatefulWidget {
 
 class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   ProductCondition? selectedProductCondition;
+  ProductQuality? selectedProductQuality;
+
   int quantity = 1;
   bool productImageError = false;
   final buttonKey = UniqueKey();
@@ -90,6 +93,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
               mediumSpacer(),
               regularSpacer(),
               productCondition(),
+              mediumSpacer(),
+              regularSpacer(),
+              productQuality(),
               mediumSpacer(),
               regularSpacer(),
               productPrice(),
@@ -185,14 +191,10 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget productCondition() {
-    final TransactionCategory category =
-        TransactionDataHolder.transactionCategory ??
-            TransactionCategory.Product;
     return Column(
       children: [
         InfoText(
-          text:
-              " ${category.name}${category == TransactionCategory.Virtual ? "-Service" : ""} Condition",
+          text: "Product Condition",
           color: ColorManager.primary,
           fontWeight: FontWeightManager.medium,
         ),
@@ -202,12 +204,26 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
               .map((e) =>
                   ProductConditionConverter.convertToString(condition: e))
               .toList(),
-          value: selectedProductCondition == null? "": ProductConditionConverter.convertToString(
-              condition: selectedProductCondition!),
+          value: selectedProductCondition == null
+              ? ""
+              : ProductConditionConverter.convertToString(
+                  condition: selectedProductCondition!),
           onChanged: (value) {
             if (value != null) {
-              setState(() => selectedProductCondition =
-                  ProductConditionConverter.convertToEnum(condition: value));
+              final condition =
+                  ProductConditionConverter.convertToEnum(condition: value);
+              // To know wether selected value was truly changed or not
+              if (condition != selectedProductCondition) {
+                setState(() {
+                  selectedProductCondition = condition;
+                });
+                if (![
+                  ProductCondition.ForeignUsed,
+                  ProductCondition.NigerianUsed
+                ].contains(selectedProductCondition)) {
+                  setState(() => selectedProductQuality = null);
+                }
+              }
             }
           },
           hint: 'e.g "New"',
@@ -217,6 +233,59 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             }
             if (value.trim().isEmpty) {
               return "* enter a category";
+            }
+            return null;
+          },
+          prefixIcon: null,
+        ),
+      ],
+    );
+  }
+
+  Widget productQuality() {
+    final bool used = [
+      ProductCondition.ForeignUsed,
+      ProductCondition.NigerianUsed
+    ].contains(selectedProductCondition);
+    final List<ProductQuality> list = used
+        ? [ProductQuality.Good, ProductQuality.Faulty]
+        : [ProductQuality.High, ProductQuality.Low];
+    return Column(
+      children: [
+        InfoText(
+          text: "Product Quality",
+          color: ColorManager.primary,
+          fontWeight: FontWeightManager.medium,
+        ),
+        regularSpacer(),
+        DropdownInputFormField(
+          items: selectedProductCondition == null
+              ? []
+              : list
+                  .map(
+                    (e) => ProductQualityConverter.convertToString(quality: e),
+                  )
+                  .toList(),
+          value: selectedProductQuality == null
+              ? ""
+              : ProductQualityConverter.convertToString(
+                  quality: selectedProductQuality!),
+          onChanged: (value) {
+            if (value != null) {
+              final quality =
+                  ProductQualityConverter.convertToEnum(quality: value);
+              setState(() {
+                selectedProductQuality = quality;
+              });
+            }
+          },
+          hint: used ? 'e.g "High"' : 'e.g "Good"',
+          onValidate: (value) {
+            if (value == null) {
+              return "* enter a quality";
+            }
+            if (value.trim().isEmpty) {
+              return "* enter a quality";
             }
             return null;
           },
@@ -385,12 +454,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget button() {
-    final TransactionCategory category =
-        TransactionDataHolder.transactionCategory ??
-            TransactionCategory.Product;
     return CustomButton.medium(
-      label:
-          "Add ${category.name}${category == TransactionCategory.Virtual ? "-Service" : ""}",
+      label: "Add Product",
       usesProvider: true,
       buttonKey: buttonKey,
       color: ColorManager.themeColor,
@@ -412,6 +477,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             "productPrice": int.parse(price),
             "productCondition": ProductConditionConverter.convertToString(
                 condition: selectedProductCondition!),
+            "productQuality": ProductQualityConverter.convertToString(
+                quality: selectedProductQuality!),
             "quantity": quantity,
             "productImages": productImages,
           };
