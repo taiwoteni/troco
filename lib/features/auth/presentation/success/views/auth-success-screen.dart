@@ -90,6 +90,7 @@ class _AuthSuccessScreenState extends ConsumerState<AuthSuccessScreen> {
           bottom: SizeManager.extralarge),
       child: CustomButton(
         onPressed: () {
+          
           ClientProvider.saveUserData(ref: ref, json: LoginData.toClientJson());
           Navigator.pushNamedAndRemoveUntil(
               context, Routes.homeRoute, (route) => false);

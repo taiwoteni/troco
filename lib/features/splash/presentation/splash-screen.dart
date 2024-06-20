@@ -86,9 +86,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           alignment: Alignment.bottomCenter,
           padding: const EdgeInsets.only(bottom: SizeManager.extralarge * 1.5),
           child: LottieWidget(
-            lottieRes: AssetManager.lottieFile(name: 'troco-horse'),
+            lottieRes: AssetManager.lottieFile(name: 'loading-label'),
             color: Colors.white,
-            size: const Size.square(SizeManager.extralarge * 3.5),
+            size: const Size.square(SizeManager.extralarge * 2),
             fit: BoxFit.cover,
           ),
         )

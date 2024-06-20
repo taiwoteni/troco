@@ -29,6 +29,7 @@ import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
+import '../../../../settings/domain/entity/settings.dart';
 import '../../../utils/phone-number-converter.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -317,6 +318,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         map.remove("__v");
         // map.remove("password");
         map.remove("groups");
+        AppStorage.clear();
+
+        AppStorage.saveSettings(settings: Settings.fromJson(
+          map: {
+            "two-factor-enabled":map["two_factor_auth"],
+            "two-factor-method":map["two_fctor_type"] == "None"?"otp":map["two_fctor_type"].toString().toLowerCase(),
+            "app-entry-method":"pin",
+            "auto-logout":true,
+          }));
 
         // We have to save user data first
         ClientProvider.saveUserData(ref: ref, json: map);
