@@ -245,8 +245,7 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
       ref.watch(loadingProvider)!.reset();
       theSame =
           response.messageBody?["message"].toString().toLowerCase().trim() ==
-                  "validated... correct pin passed" ??
-              false;
+                  "validated... correct pin passed";
       if (theSame) {
         final json = ClientProvider.readOnlyClient!.toJson();
         json["transactionPin"] = transactionPin;

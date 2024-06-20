@@ -162,8 +162,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
       Navigator.pop(context, true);
     } else {
       bool correct = LoginData.otp?.toString() ==
-              otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5 ??
-          false;
+              otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5;
 
       if (correct) {
         Navigator.pop(context, true);
