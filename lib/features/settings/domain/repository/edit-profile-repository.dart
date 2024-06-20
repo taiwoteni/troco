@@ -16,6 +16,7 @@ class EditProfileRepository{
     return response;  
 
   }
+
   static Future<HttpResponseModel> uploadProfilePhoto(
       {required final String userId, required final String profilePath}) async {
     final file = await http.MultipartFile.fromPath("userImage", profilePath,

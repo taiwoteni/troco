@@ -24,6 +24,7 @@ class AuthenticationRepo {
         data: {"emailOrPhone": phoneNumber, "password": password});
     return result;
   }
+  
 
   static Future<HttpResponseModel> verifyTransactionPin(
       {required final String transactionPin,

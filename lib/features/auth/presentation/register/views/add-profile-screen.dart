@@ -31,8 +31,23 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized()
-        .addPostFrameCallback((timeStamp) {});
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
+    });
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    if (!mounted) {
+      return;
+    }
+    super.setState(fn);
+
+    if (profilePath == null) {
+      ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
+    } else {
+      ButtonProvider.enable(buttonKey: buttonKey, ref: ref);
+    }
   }
 
   @override
@@ -173,7 +188,7 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
     return CustomButton(
       buttonKey: buttonKey,
       onPressed: uploadProfile,
-      label: profilePath == null ? "SKIP" : "NEXT",
+      label: "NEXT",
       usesProvider: true,
       margin: const EdgeInsets.symmetric(
           horizontal: SizeManager.large, vertical: SizeManager.medium),
@@ -191,7 +206,7 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
       if (response.error) {
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
         log(response.body);
-        
+
         return;
       }
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

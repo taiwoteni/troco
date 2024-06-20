@@ -1,7 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/settings/domain/entity/settings.dart';
+import 'package:troco/features/settings/domain/repository/settings-repository.dart';
 import 'package:troco/features/settings/presentation/settings-page/providers/settings-provider.dart';
 import 'package:troco/features/settings/utils/enums.dart';
 
@@ -21,43 +26,53 @@ class TwoFactorAuthenticationScreen extends ConsumerStatefulWidget {
       _TwoFactorAuthenticationPageState();
 }
 
-class _TwoFactorAuthenticationPageState
-    extends ConsumerState<TwoFactorAuthenticationScreen> {
+class _TwoFactorAuthenticationPageState extends ConsumerState<TwoFactorAuthenticationScreen> {
+
+  late Settings initialSettings;
   @override
   void initState() {
+    initialSettings = AppStorage.getSettings();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar(),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            largeSpacer(),
-            sectionText(text: "Enable Two Factor"),
-            regularSpacer(),
-            enableTwoFactorAuthentication(),
-            extraLargeSpacer(),
-            sectionText(text: "Login Two-Factor Method"),
-            regularSpacer(),
-            loginOtpMethod(),
-            divider(),
-            loginPinMethod(),
-            extraLargeSpacer(),
-            sectionText(text: "App Inactivity"),
-            regularSpacer(),
-            autoLogoutDuringInactivity(),
-            extraLargeSpacer(),
-            sectionText(text: "App Entry Method"),
-            regularSpacer(),
-            pinMethod(),
-            divider(),
-            passwordMethod()
-          ],
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
+        if(didPop){
+          saveSettings();
+        }
+      },
+      child: Scaffold(
+        appBar: appBar(),
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              largeSpacer(),
+              sectionText(text: "Enable Two Factor"),
+              regularSpacer(),
+              enableTwoFactorAuthentication(),
+              extraLargeSpacer(),
+              sectionText(text: "Login Two-Factor Method"),
+              regularSpacer(),
+              loginOtpMethod(),
+              divider(),
+              loginPinMethod(),
+              extraLargeSpacer(),
+              sectionText(text: "App Inactivity"),
+              regularSpacer(),
+              autoLogoutDuringInactivity(),
+              extraLargeSpacer(),
+              sectionText(text: "App Entry Method"),
+              regularSpacer(),
+              pinMethod(),
+              divider(),
+              passwordMethod()
+            ],
+          ),
         ),
       ),
     );
@@ -429,5 +444,57 @@ class _TwoFactorAuthenticationPageState
         ],
       ),
     );
+  }
+
+  Future<void> saveSettings()async{
+    final latestSettings = AppStorage.getSettings();
+    
+    final changedTwoFactorEnabled = latestSettings.twoFactorEnabled == initialSettings.twoFactorEnabled;
+    final changedTwoFactorMethod =  latestSettings.twoFactorMethod == initialSettings.twoFactorMethod;
+
+    if(changedTwoFactorMethod || changedTwoFactorEnabled){
+        log("Changed Two Factor Settings On-Device");
+      final newMethod = latestSettings.twoFactorMethod;
+
+      HttpResponseModel? response;
+      /// First, we check if the two factor authentication was changed.
+      if(changedTwoFactorEnabled){
+
+        /// It was changed, now we either disable or enable it.
+        if(latestSettings.twoFactorEnabled){
+          response = await SettingsRepository.setTwoFactorMethod(
+            userId: ClientProvider.readOnlyClient!.userId,
+            method: newMethod);
+        }else{
+          response = await SettingsRepository.disableTwoFactor(userId: ClientProvider.readOnlyClient!.userId);
+        }
+      }
+      else{
+        /// two factor authentication did not change, but its method might have changed
+        /// Concerns may arise based on the fact that it could be disabled yet
+        /// the method might have changed. It's not possible as such were prevented.
+        if(changedTwoFactorMethod){
+          response = await SettingsRepository.setTwoFactorMethod(
+            userId: ClientProvider.readOnlyClient!.userId,
+            method: newMethod);
+        }
+      }
+
+      if(response!=null){
+        log(response.body);
+
+        if(!response.error){
+          // SnackbarManager.showBasicSnackbar(
+          //   context: context,
+          //   message: "Updated settings");
+        }
+        else{
+          // SnackbarManager.showBasicSnackbar(
+          //   context: context,
+          //   mode: ContentType.failure,
+          //   message: "Could not update settings");
+        }
+      }
+    }
   }
 }

@@ -30,52 +30,44 @@ class _PinInputWidgetState extends ConsumerState<PinInputWidget>
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
       (timeStamp) {
         ref.watch(loadingProvider.notifier).state = controller;
-        //   animations ??= List.generate(widget.maxPin, (index) {
-        //   final start = index * 0.2;
-        //   final end = (index==0?0:index) + 0.6;
-        //   return Tween<double>(begin: 0, end: 10).animate(
-        //     CurvedAnimation(
-        //       parent: ref.watch(loadingProvider)!,
-        //       curve: Interval(start, end, curve: Curves.easeInOut),
-        //     ),
-        //   );
-        // });
+        setState(() {
+          animations ??= List.generate(widget.maxPin, (index) {
+            final start = index * 0.2;
+            final end = start + 0.2;
+            return Tween<double>(begin: 0.0, end: 10).animate(
+              CurvedAnimation(
+                parent: ref.watch(loadingProvider) ?? controller,
+                curve: Interval(start, end, curve: Curves.easeInOut),
+              ),
+            );
+          });
+        });
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    animations ??= List.generate(widget.maxPin, (index) {
-      final start = index * 0.2;
-      final end = start + 0.2;
-      return Tween<double>(begin: 0.0, end: 10).animate(
-        CurvedAnimation(
-          parent: ref.watch(loadingProvider)!,
-          curve: Interval(start, end, curve: Curves.easeInOut),
-        ),
-      );
-    });
     return Container(
       height:
           /** Size of the input decorator plus half the highest possible value when animating */ SizeManager
                       .regular *
                   1.5 +
               5,
-              alignment: Alignment.center,
+      alignment: Alignment.center,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(
           widget.maxPin,
           (index) {
-            return AnimatedBuilder(
+            return animations==null? inputIndicator(entered: widget.pinsEntered - 1 < index):AnimatedBuilder(
               animation: animations![index],
               builder: (context, child) {
                 return Padding(
                   padding: EdgeInsets.only(
                       right: SizeManager.regular,
                       left: SizeManager.regular,
-                      bottom: animations![index].value+index),
+                      bottom: animations![index].value + index),
                   child: child,
                 );
               },

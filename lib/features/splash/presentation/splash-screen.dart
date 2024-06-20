@@ -85,11 +85,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           color: Colors.transparent,
           alignment: Alignment.bottomCenter,
           padding: const EdgeInsets.only(bottom: SizeManager.extralarge * 1.5),
-          child: LottieWidget(
-            lottieRes: AssetManager.lottieFile(name: 'loading-label'),
-            color: Colors.white,
-            size: const Size.square(SizeManager.extralarge * 2),
-            fit: BoxFit.cover,
+          child: Transform.translate(
+            offset: Offset(-(SizeManager.extralarge/1.5), 0),
+            child: LottieWidget(
+              //duration of this lottie is 3 secs
+              lottieRes: AssetManager.lottieFile(name: 'loading-label'),
+              color: Colors.white,
+              size: const Size.square(SizeManager.extralarge * 2.1),
+              fit: BoxFit.cover,
+            ),
           ),
         )
       ],

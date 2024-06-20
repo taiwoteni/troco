@@ -391,7 +391,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(style: defaultStyle, children: [
-            const TextSpan(text: "By registering, you agree to Estaco's "),
+            const TextSpan(text: "By registering, you agree to Escrow's "),
             TextSpan(
                 text: "Terms of using the Troco Platform",
                 style: highlightStyle,

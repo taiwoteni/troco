@@ -66,21 +66,24 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.maxFinite,
-      height: double.maxFinite,
-      color: ColorManager.themeColor,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          label(),
-          largeSpacer(),
-          pinInputs(),
-          extraLargeSpacer(),
-          keyPad(),
-          extraLargeSpacer(),
-          changeAccount(),
-        ],
+    return Scaffold(
+      backgroundColor: ColorManager.themeColor,
+      body: Container(
+        width: double.maxFinite,
+        height: double.maxFinite,
+        color: ColorManager.themeColor,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            label(),
+            largeSpacer(),
+            pinInputs(),
+            extraLargeSpacer(),
+            keyPad(),
+            extraLargeSpacer(),
+            changeAccount(),
+          ],
+        ),
       ),
     );
   }
@@ -245,7 +248,7 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
       ref.watch(loadingProvider)!.reset();
       theSame =
           response.messageBody?["message"].toString().toLowerCase().trim() ==
-                  "validated... correct pin passed";
+              "validated... correct pin passed";
       if (theSame) {
         final json = ClientProvider.readOnlyClient!.toJson();
         json["transactionPin"] = transactionPin;

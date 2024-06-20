@@ -87,7 +87,7 @@ class ApiInterface {
       Map<String, String>? headers}) async {
     try {
       final Uri uri = Uri.parse("$_serverUrl/$url");
-      final jsonData = json.encode(data);
+      final jsonData = data == null ? null : json.encode(data);
       final request = http.Request('PATCH', uri);
       request.headers['Content-Type'] = 'application/json';
       request.headers['accept'] = '*/*';
@@ -96,7 +96,9 @@ class ApiInterface {
           request.headers[key] = value;
         });
       }
-      request.body = jsonData;
+      if (jsonData != null) {
+        request.body = jsonData;
+      }
       final response = await http.Client().send(request);
 
       final String body = await response.stream.bytesToString();
@@ -166,7 +168,6 @@ class ApiInterface {
       final Uri uri = Uri.parse("$_serverUrl/$url");
       final request = http.MultipartRequest('POST', uri);
       request.headers['Content-Type'] = 'multipart/form-data';
-      
 
       request.headers['accept'] = '*/*';
       // if (headers != null) {
@@ -178,7 +179,7 @@ class ApiInterface {
       for (int i = 0; i < multiparts.length; i++) {
         final model = multiparts[i];
         if (!model.isFileType) {
-          final value =  model.value!.toString();
+          final value = model.value!.toString();
           request.fields[model.field!.toString()] = value;
           // log("added field : ${model.field!}: ${model.value}");
         } else {
@@ -188,7 +189,7 @@ class ApiInterface {
       }
 
       log(request.fields.toString());
-      log(request.files.map((e) => {"${e.field}":e.filename}).toString());
+      log(request.files.map((e) => {"${e.field}": e.filename}).toString());
 
       final response = await request.send();
       log("sent");

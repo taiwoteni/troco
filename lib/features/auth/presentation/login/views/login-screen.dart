@@ -6,6 +6,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/api/data/repositories/api-interface.dart';
@@ -19,14 +20,18 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
+import 'package:troco/features/auth/data/models/otp-data.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/auth/presentation/welcome-back/views/pin-entry-screen.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
+import 'package:troco/features/settings/utils/enums.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/app/theme-manager.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../settings/domain/entity/settings.dart';
@@ -303,12 +308,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         setState(() => errorText = null);
         Map<dynamic, dynamic> map = response.messageBody!["data"];
 
-        if (map["firstName"] == null) {
+        if (map["firstName"] == null ||
+            map["userImage"] == null ||
+            map["transactionPin"] == null) {
           /// then user did not complete registration
 
           /// email and password were already collected at the beginning when validating :)
           LoginData.id = map["_id"];
+          LoginData.email = map["email"];
+          LoginData.phoneNumber = map["phoneNumber"];
+          if (map["userImage"] == null) {
+            if (map["firstName"] == null) {
+              Navigator.pushNamed(context, Routes.setupAccountRoute);
+              return;
+            }
+            Navigator.pushNamed(context, Routes.addProfileRoute);
+            return;
+          }
+          if (map["transactionPin"] == null) {
+            Navigator.pushNamed(context, Routes.addTransactionPinRoute);
+            return;
+          }
           Navigator.pushNamed(context, Routes.setupAccountRoute);
+
           return;
         }
 
@@ -320,24 +342,58 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         map.remove("groups");
         AppStorage.clear();
 
-        AppStorage.saveSettings(settings: Settings.fromJson(
-          map: {
-            "two-factor-enabled":map["two_factor_auth"],
-            "two-factor-method":map["two_fctor_type"] == "None"?"otp":map["two_fctor_type"].toString().toLowerCase(),
-            "app-entry-method":"pin",
-            "auto-logout":true,
-          }));
+        AppStorage.saveSettings(
+            settings: Settings.fromJson(map: {
+          "two-factor-enabled": map["two_factor_auth"],
+          "two-factor-method": map["two_fctor_type"] == "None"
+              ? "otp"
+              : map["two_fctor_type"].toString().toLowerCase().contains("pin")
+                  ? "pin"
+                  : "otp",
+          "app-entry-method": "pin",
+          "auto-logout": true,
+        }));
+        final settings = await AppStorage.getSettings();
 
-        // We have to save user data first
-        ClientProvider.saveUserData(ref: ref, json: map);
+        if (settings.twoFactorEnabled) {
+          if (settings.twoFactorMethod == TwoFactorMethod.Otp) {
+            /// The otp screen only returns true after verifying.
+            OtpData.id = map["_id"];
+            LoginData.otp = map["verificationPin"];
+            LoginData.email = map["email"];
+            LoginData.phoneNumber = map["phoneNumber"];
 
-        // We have to locally store all the groups and it's respective chats.
-        await saveGroupsAndChats(userId: map["_id"]);
-        // We have to save transactions
-        await saveTransactions();
+            final verified =
+                (await Navigator.pushNamed(context, Routes.otpRoute)
+                        as bool?) ??
+                    false;
 
-        Navigator.pushNamedAndRemoveUntil(
-            context, Routes.homeRoute, (route) => false);
+            if (verified) {
+              await saveAndNavigate(map: map);
+            }
+          } else {
+            /// Unlike otp screen that only returns true after verifying,
+            /// the pin entry screen is different, clients only return back if the
+            /// pin never went through 😂😂
+            /// so if they ever come back, we clear the app storage, meaning they could not verify themselves
+            await save(map: map);
+            await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PinEntryScreen(),
+                ));
+
+            /// we also have to change the ui back to light status bar
+            WidgetsFlutterBinding.ensureInitialized()
+                .addPostFrameCallback((timeStamp) {
+              SystemChrome.setSystemUIOverlayStyle(
+                  ThemeManager.getSystemUiOverlayStyle());
+            });
+            AppStorage.clear();
+          }
+        } else {
+          await saveAndNavigate(map: map);
+        }
       }
     }
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
@@ -432,5 +488,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ..onTap = () => Navigator.pushReplacementNamed(
                     context, Routes.registerRoute))
         ]));
+  }
+
+  Future<void> saveAndNavigate(
+      {required final Map<dynamic, dynamic> map}) async {
+    await save(map: map);
+    Navigator.pushNamedAndRemoveUntil(
+        context, Routes.homeRoute, (route) => false);
+  }
+
+  Future<void> save({required final Map<dynamic, dynamic> map}) async {
+    // We have to save user data first
+    ClientProvider.saveUserData(ref: ref, json: map);
+
+    // We have to locally store all the groups and it's respective chats.
+    await saveGroupsAndChats(userId: map["_id"]);
+    // We have to save transactions
+    await saveTransactions();
   }
 }
