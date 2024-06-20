@@ -116,7 +116,7 @@ class _UserProfileIconState extends ConsumerState<UserProfileIcon> {
               !widget.showOnlyDefault
           ? ProfileIcon(
               size: double.maxFinite,
-              url: ref.read(ClientProvider.userProvider)!.profile,
+              url: ref.watch(clientProvider)!.profile,
             )
           : Container(
               width: double.maxFinite,

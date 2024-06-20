@@ -1,12 +1,15 @@
+import 'dart:developer';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
-import 'package:troco/core/components/images/badge-icon.dart';
-import 'package:troco/core/components/images/profile-icon.dart';
+import 'package:troco/core/components/images/pick-profile-widget.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
@@ -23,7 +26,7 @@ import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../auth/domain/entities/client.dart';
 import '../../../../auth/presentation/register/widgets/search-place.dart';
 import '../../../../transactions/utils/enums.dart';
-import '../../../domain/repository/edit-profile-repository.dart';
+import '../../../../settings/domain/repository/edit-profile-repository.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -601,20 +604,36 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Widget profileWidget() {
-    return Align(
-      child: ProfileIcon(
-        size: IconSizeManager.extralarge * 1.7,
-        url: ClientProvider.readOnlyClient!.profile,
-        badge: Positioned(
-            bottom: 2,
-            right: -2,
-            child: BadgeIcon(
-              stroke: 3,
-              size: IconSizeManager.medium * 1.1,
-              iconType: BadgeIconType.icon,
-              iconData: Icons.edit_rounded,
-            )),
+    final decorImage = DecorationImage(
+      image: CachedNetworkImageProvider(
+        ClientProvider.readOnlyClient!.profile,
       ),
+      fit: BoxFit.cover,
+    );
+    // GestureDetector(
+    //   child: ProfileIcon(
+    //     size: IconSizeManager.extralarge * 1.7,
+    //     url: ClientProvider.readOnlyClient!.profile,
+    //     badge: Positioned(
+    //         bottom: 2,
+    //         right: -2,
+    //         child: BadgeIcon(
+    //           stroke: 3,
+    //           size: IconSizeManager.medium * 1.1,
+    //           iconType: BadgeIconType.icon,
+    //           iconData: Icons.edit_rounded,
+    //         )),
+    //   ),
+    // ),
+    return PickProfileIcon(
+      size: IconSizeManager.extralarge * 1.7,
+      previousImage: decorImage,
+      canDelete: false,
+      onPicked: (path) {
+        setState(() {
+          clientJson["userImage"] = path;
+        });
+      },
     );
   }
 
@@ -675,6 +694,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       // to know if anything was changed;
       bool changed = false;
+      bool profileChanged =
+          ClientProvider.readOnlyClient!.profile != clientJson["userImage"];
       clientJson.forEach(
         (key, value) {
           if (value !=
@@ -684,14 +705,34 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         },
       );
 
+      //we want to update profile photo first.
+      //Naturally, after updating photo, it will still update user cos
+      //that means changed is true since the user profile has already changed;
+      if (profileChanged) {
+        final response = await changePickProfile();
+        log(response.body);
+
+        if (!response.error) {
+          /// cos we will have to update the userImage to the url
+          /// if not, when the userProfile is updated after calling updateUserProfile route
+          /// the Client's userImage will be a file path.
+          clientJson["userImage"] = response.messageBody!["data"]["userImage"];
+        } else {
+          /// we revert back since it was unsuccessful.
+          clientJson["userImage"] = ClientProvider.readOnlyClient!.profile;
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              mode: ContentType.failure,
+              message: "Unable to upload photo");
+        }
+      }
+
       if (changed) {
         final response = await EditProfileRepository.updateUserProfile(
             client: Client.fromJson(json: clientJson));
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
         if (!response.error) {
           ClientProvider.saveUserData(ref: ref, json: clientJson);
-          ref.watch(clientProvider.notifier).state =
-              ClientProvider.readOnlyClient!;
           SnackbarManager.showBasicSnackbar(
               context: context, message: "Edited Profile");
         } else {
@@ -706,5 +747,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } else {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     }
+  }
+
+  Future<HttpResponseModel> changePickProfile() async {
+    final response = await EditProfileRepository.uploadProfilePhoto(
+        userId: ClientProvider.readOnlyClient!.userId,
+        profilePath: clientJson["userImage"]);
+
+    return response;
   }
 }

@@ -69,7 +69,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             Positioned(
                 child: ProfileIcon(
-              url: ClientProvider.readOnlyClient!.profile,
+              url: ref.watch(clientProvider)!.profile,
               size: IconSizeManager.extralarge * 1.2,
             )),
             Positioned(

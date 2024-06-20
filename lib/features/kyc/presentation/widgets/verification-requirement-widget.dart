@@ -27,7 +27,16 @@ class VerificationRequirementWidget extends ConsumerStatefulWidget {
       _VerificationRequirementWidgetState();
 }
 
-class _VerificationRequirementWidgetState extends ConsumerState<VerificationRequirementWidget> {
+class _VerificationRequirementWidgetState
+    extends ConsumerState<VerificationRequirementWidget> {
+  final key = GlobalKey();
+  double height = 123.0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DottedBorder(
@@ -38,17 +47,16 @@ class _VerificationRequirementWidgetState extends ConsumerState<VerificationRequ
       radius: const Radius.circular(SizeManager.regular),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-            vertical: SizeManager.medium,
-            horizontal: SizeManager.medium),
+            vertical: SizeManager.medium, horizontal: SizeManager.medium),
         child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            
-            children: [
-              texts(),
-              widget.icon,
-            ],
-          ),
+          key: key,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            texts(),
+            widget.icon,
+          ],
         ),
+      ),
     );
   }
 

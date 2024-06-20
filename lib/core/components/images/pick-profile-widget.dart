@@ -21,10 +21,12 @@ class PickProfileIcon extends StatefulWidget {
   final DecorationImage? previousImage;
   final void Function(String? path) onPicked;
   final double size;
+  final bool? canDelete;
   const PickProfileIcon(
       {super.key,
       required this.size,
       this.previousImage,
+      this.canDelete,
       required this.onPicked});
 
   @override
@@ -53,6 +55,8 @@ class _PickProfileIconState extends State<PickProfileIcon> {
           child: Stack(
             children: [
               Container(
+                width: widget.size,
+                height: widget.size,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: profileImage != null ? null : ColorManager.accentColor,
@@ -104,6 +108,7 @@ class _PickProfileIconState extends State<PickProfileIcon> {
           Navigator.pop(context);
         },
       ),
+      if(widget.canDelete ?? true)
       DialogMenuItem(
         icon: Icons.delete_rounded,
         color: Colors.red,
@@ -177,7 +182,6 @@ class _PickProfileIconState extends State<PickProfileIcon> {
           ),
         );
       },
-      
     );
   }
 
@@ -200,7 +204,7 @@ class _PickProfileIconState extends State<PickProfileIcon> {
 
   Future<void> cropProfile() async {
     final croppedProfile = await showCupertinoImageCropper(context,
-        heroTag: "profile-photo", imageProvider: FileImage(File(profilePath!)));
+        heroTag: "profile-photo", imageProvider: profileImage!.image);
 
     // final croppedProfile = await CropScreen.showCustomCropper(
     //   context,

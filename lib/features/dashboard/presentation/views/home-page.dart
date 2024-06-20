@@ -220,7 +220,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget carouselWidget() {
     // final bo ongoingTransactionBool = element.transactionStatus != TransactionStatus.Pending;
     final int totalTransactions = transactions
-    .map((e) => e.transactionAmount)
+        .map((e) => e.transactionAmount)
         .fold(0, (previousValue, element) => (previousValue + element).toInt());
     const defaultStyle = TextStyle(
         fontFamily: 'Quicksand',

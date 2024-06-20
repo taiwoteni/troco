@@ -102,7 +102,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           wordSpacing: 1.2,
                           color: ColorManager.secondary,
                           fontSize: FontSizeManager.medium,
-                          fontWeight: FontWeightManager.semibold),
+                          fontWeight: FontWeightManager.medium),
                     ),
                   ),
                   mediumSpacer(),

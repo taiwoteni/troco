@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../../core/components/images/svg.dart';
@@ -138,9 +139,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   }
 
   Widget forgotPassword() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
       child: InfoText(
+        onPressed: () =>
+            Navigator.pushNamed(context, Routes.forgotPasswordRoute),
         text: "Forgot Password?",
         alignment: Alignment.centerRight,
         fontWeight: FontWeightManager.semibold,
@@ -260,5 +263,4 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       margin: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
     );
   }
-
 }

@@ -162,23 +162,26 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
     return [
       VerificationRequirementWidget(
         title: "Upload Formal Picture",
-        description: "Informal, Illicit or\nAI-generated images are NOT accepted.",
+        description:
+            "Informal, Illicit or\nAI-generated images are NOT accepted.",
         icon: SvgIcon(
           svgRes: AssetManager.svgFile(name: "upload-photo"),
           size: const Size.square(IconSizeManager.extralarge),
         ),
       ),
       VerificationRequirementWidget(
-        title: "Upload Identity Document",
-        description: "ONLY National ID Card, Driver's Licence,\nVoter's card or Passport IS accepted.",
+        title: "Identity Document",
+        description:
+            "ONLY National ID Card,\nDriver's Licence,\nVoter's card or Passport IS accepted.",
         icon: SvgIcon(
           svgRes: AssetManager.svgFile(name: "identity-document"),
-          size: const Size.square(IconSizeManager.extralarge),
+          size: const Size.square(IconSizeManager.large),
         ),
       ),
       VerificationRequirementWidget(
         title: "Verify Residential Address",
-        description: "Enter a VALID residential address\nfor proof of verification.",
+        description:
+            "Enter a VALID residential address\nfor proof of verification.",
         icon: SvgIcon(
           svgRes: AssetManager.svgFile(name: "residential-address"),
           size: const Size.square(IconSizeManager.extralarge),

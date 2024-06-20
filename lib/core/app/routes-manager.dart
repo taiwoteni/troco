@@ -13,7 +13,7 @@ import 'package:troco/features/auth/presentation/register/views/add-pin-screen.d
 import 'package:troco/features/auth/presentation/register/views/add-profile-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/payments/presentation/views/payment-method-screen.dart';
-import 'package:troco/features/settings/presentation/edit-profile-page/views/edit-profile-screen.dart';
+import 'package:troco/features/profile/presentation/edit-profile/views/edit-profile-screen.dart';
 import 'package:troco/features/settings/presentation/language/views/change-language-screen.dart';
 import 'package:troco/features/settings/presentation/password/views/change-password-screen.dart';
 import 'package:troco/features/settings/presentation/pin/views/change-pin-screen.dart';
