@@ -15,59 +15,76 @@ class PinInputWidget extends ConsumerStatefulWidget {
   ConsumerState<PinInputWidget> createState() => _PinInputWidgetState();
 }
 
-class _PinInputWidgetState extends ConsumerState<PinInputWidget> with SingleTickerProviderStateMixin{
+class _PinInputWidgetState extends ConsumerState<PinInputWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController controller;
+  List<Animation<double>>? animations;
 
   @override
   void initState() {
     controller = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 1000),
-        reverseDuration: const Duration(milliseconds: 1000));
+        duration: const Duration(milliseconds: 400),
+        reverseDuration: const Duration(milliseconds: 400));
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      ref.watch(loadingProvider.notifier).state = controller;
-    },);
-
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        ref.watch(loadingProvider.notifier).state = controller;
+        //   animations ??= List.generate(widget.maxPin, (index) {
+        //   final start = index * 0.2;
+        //   final end = (index==0?0:index) + 0.6;
+        //   return Tween<double>(begin: 0, end: 10).animate(
+        //     CurvedAnimation(
+        //       parent: ref.watch(loadingProvider)!,
+        //       curve: Interval(start, end, curve: Curves.easeInOut),
+        //     ),
+        //   );
+        // });
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(
-        widget.maxPin,
-        (index) {
-          int factor = index+1;
-          return AnimatedBuilder(
-            animation: ref.watch(loadingProvider)??controller,
-            builder: (context, child) {
-              return FutureBuilder(
-                future: wait(index),
-                initialData: 0,
-                builder: (context,snapshot) {
-                  final int value = snapshot.hasData?1:0;
-                  return Padding(
-                    padding: EdgeInsets.only(
+    animations ??= List.generate(widget.maxPin, (index) {
+      final start = index * 0.2;
+      final end = start + 0.2;
+      return Tween<double>(begin: 0.0, end: 10).animate(
+        CurvedAnimation(
+          parent: ref.watch(loadingProvider)!,
+          curve: Interval(start, end, curve: Curves.easeInOut),
+        ),
+      );
+    });
+    return Container(
+      height:
+          /** Size of the input decorator plus half the highest possible value when animating */ SizeManager
+                      .regular *
+                  1.5 +
+              5,
+              alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          widget.maxPin,
+          (index) {
+            return AnimatedBuilder(
+              animation: animations![index],
+              builder: (context, child) {
+                return Padding(
+                  padding: EdgeInsets.only(
                       right: SizeManager.regular,
                       left: SizeManager.regular,
-                      bottom: SizeManager.regular* (ref.watch(loadingProvider)?.value ?? controller.value) * value * factor 
-                    ),
-                    child: child,
-                  );
-                }
-              );
-            },
-            child: inputIndicator(entered: widget.pinsEntered-1 < index),
-          );
-        },
-      ).toList(),
+                      bottom: animations![index].value+index),
+                  child: child,
+                );
+              },
+              child: inputIndicator(entered: widget.pinsEntered - 1 < index),
+            );
+          },
+        ).toList(),
+      ),
     );
-  }
-
-  Future<int> wait(int index)async{
-    await Future.delayed(Duration(milliseconds: 250 * (index+1)));
-    return 1;
   }
 
   Widget inputIndicator({required bool entered}) {

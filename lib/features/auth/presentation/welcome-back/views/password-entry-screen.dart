@@ -23,6 +23,7 @@ class PasswordEntryScreen extends ConsumerStatefulWidget {
 
 class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
   final buttonKey = UniqueKey();
+  final formKey = GlobalKey<FormState>();
 
   
   @override
@@ -38,6 +39,7 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
                 left: SizeManager.extralarge,
                 child: header()),
             Form(
+              key: formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [     
@@ -64,7 +66,9 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    if(formKey.currentState!.validate()){
     Navigator.pushReplacementNamed(context, Routes.homeRoute);
+    }
   }
 
   
@@ -113,6 +117,18 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
           } else {
             ButtonProvider.enable(buttonKey: buttonKey, ref: ref);
           }
+        },
+        validator: (value) {
+          if(value == null){
+            return "* enter password";
+          }
+          if(value.trim().isEmpty){
+            return "* enter password";
+          }
+          if(value.trim() != ClientProvider.readOnlyClient!.password){
+            return "* wrong password";
+          }
+          return null;
         },
         prefixIcon: IconButton(
           onPressed: null,

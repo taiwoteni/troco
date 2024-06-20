@@ -217,7 +217,7 @@ class _TwoFactorAuthenticationPageState
     final autoLoginPinEnabled =
         ref.watch(settingsProvider).appEntryMethod == AppEntryMethod.Pin;
     return AnimatedOpacity(
-      opacity:automaticallyLogoutDuringInactivity ? 1 : 0.5,
+      opacity: automaticallyLogoutDuringInactivity ? 1 : 0.5,
       duration: const Duration(milliseconds: 300),
       curve: Curves.ease,
       child: ListTile(
@@ -266,7 +266,7 @@ class _TwoFactorAuthenticationPageState
   Widget loginOtpMethod() {
     final twoFactorEnabled = ref.watch(settingsProvider).twoFactorEnabled;
     final otpEnabled =
-        ref.watch(settingsProvider).appEntryMethod == AppEntryMethod.Pin;
+        ref.watch(settingsProvider).twoFactorMethod == TwoFactorMethod.Otp;
     return AnimatedOpacity(
       opacity: twoFactorEnabled ? 1 : 0.5,
       duration: const Duration(milliseconds: 300),
@@ -314,7 +314,7 @@ class _TwoFactorAuthenticationPageState
   Widget loginPinMethod() {
     final twoFactorEnabled = ref.watch(settingsProvider).twoFactorEnabled;
     final otpEnabled =
-        ref.watch(settingsProvider).appEntryMethod == AppEntryMethod.Pin;
+        ref.watch(settingsProvider).twoFactorMethod == TwoFactorMethod.Otp;
 
     return AnimatedOpacity(
         opacity: twoFactorEnabled ? 1 : 0.5,

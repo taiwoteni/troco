@@ -26,7 +26,7 @@ class AppStorage {
 
   static const String NOTIFICATION_STORAGE_KEY = "notifications";
   static const String TRANSACTION_STORAGE_KEY = "transactions";
-  static const String SETTINGS_STORAGE_KEY = "transactions";
+  static const String SETTINGS_STORAGE_KEY = "settings";
 
   static String CHAT_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.chats";
@@ -119,7 +119,8 @@ class AppStorage {
       log("No Transactions stored.");
       return [];
     }
-    final List<dynamic> transactionsJson = json.decode(jsonString);
+    log("transactions are :$jsonString");
+    final List<dynamic> transactionsJson = json.decode(jsonString) as List;
     return transactionsJson
         .where((element) => (element["pricing"] as List).isNotEmpty)
         .map((e) => Transaction.fromJson(json: e))

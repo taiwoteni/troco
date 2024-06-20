@@ -237,30 +237,33 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
 
   Future<void> validate() async {
     bool theSame = false;
-    if (ClientProvider.readOnlyClient!.transactionPin == null) {
+    if (ClientProvider.readOnlyClient!.transactionPin != null) {
       ref.watch(loadingProvider.notifier).state!.repeat(reverse: true);
       final response = await AuthenticationRepo.verifyTransactionPin(
           transactionPin: transactionPin);
       log(response.body);
       ref.watch(loadingProvider)!.reset();
-      theSame = !response.error;
+      theSame =
+          response.messageBody?["message"].toString().toLowerCase().trim() ==
+                  "validated... correct pin passed" ??
+              false;
       if (theSame) {
         final json = ClientProvider.readOnlyClient!.toJson();
         json["transactionPin"] = transactionPin;
         ClientProvider.saveUserData(ref: ref, json: json);
         ref.watch(clientProvider.notifier).state = Client.fromJson(json: json);
-      }
+      } else {}
     } else {
       theSame = transactionPin == ClientProvider.readOnlyClient!.transactionPin;
     }
 
-    if (theSame) {
+    if (!theSame) {
       // vibrate
       if (await Vibration.hasVibrator() ?? false) {
         controller.forward();
         Vibration.vibrate(duration: 100);
-        setState(() => transactionPin = "");
       }
+      setState(() => transactionPin = "");
     } else {
       Navigator.pushNamedAndRemoveUntil(
         context,

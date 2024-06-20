@@ -159,7 +159,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             : "* enter a valid password.";
                       },
                       onSaved: (value) {
-                        LoginData.password = value;
+                        LoginData.password = value!;
                       },
                       prefixIcon: IconButton(
                         onPressed: null,
@@ -290,16 +290,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       log("login:${response.body}");
 
       if (response.error) {
-        if (response.returnHeaderType.contains("json")) {
-          SnackbarManager.showBasicSnackbar(
-              context: context, message: response.messageBody!["message"]);
-        }
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
         setState(() => errorText = "*${response.messageBody!["message"]}");
       } else {
+        /// ok now we logged in.
+        /// But there's still a slight problem :(
+        /// in some cases, users may have registered accounts
+        /// but may not have created it completely & successfully
+        /// so as an anointed developer, i should check that and then
+        /// redirect to the other data page if possible
         setState(() => errorText = null);
         Map<dynamic, dynamic> map = response.messageBody!["data"];
+
+        if (map["firstName"] == null) {
+          /// then user did not complete registration
+
+          /// email and password were already collected at the beginning when validating :)
+          LoginData.id = map["_id"];
+          Navigator.pushNamed(context, Routes.setupAccountRoute);
+          return;
+        }
+
         map["id"] = map["_id"];
+        map["password"] = LoginData.password;
         // We have to remove the "_v" key. Although not compulsory.
         map.remove("__v");
         // map.remove("password");

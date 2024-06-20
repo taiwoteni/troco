@@ -34,6 +34,9 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
+
+  // used to indicate wether the error message was based on the email or phone number
+  String? phoneError, emailError;
   bool primaryPasswordError = false;
   List<String> emails = [];
   List<String> phoneNumbers = [];
@@ -68,6 +71,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         }
                         if (emails.contains(value.trim())) {
                           return "* email already exists.";
+                        }
+                        if (emailError != null) {
+                          return emailError;
                         }
                         return EmailValidator.validate(value) &&
                                 value.isNotEmpty
@@ -107,6 +113,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         }
                         if (value.length != 11) {
                           return "* enter valid phone number";
+                        }
+                        if (phoneError != null) {
+                          return phoneError;
                         }
                         return validatePhoneNumber(value.trim())
                             ? null
@@ -276,6 +285,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       } else {
         log(result.code.toString());
         print(result.body);
+        if (result.messageBody!["error"].toString().contains("duplicate")) {
+          setState(() {
+            if (result.messageBody!["error"]
+                .toString()
+                .contains("phoneNumber")) {
+              phoneError = "* phone number already exists";
+            } else {
+              phoneError = null;
+            }
+            if (result.messageBody!["error"].toString().contains("email")) {
+              emailError = "* email already exists";
+            } else {
+              emailError = null;
+            }
+          });
+          formKey.currentState!.validate();
+
+          /// we only use those bools in the validator for error showing purposes
+          /// if left after validate() is called, registration will not hold
+          /// cos the validate() function in the if statement will be false
+          setState(() {
+            phoneError = null;
+            emailError = null;
+          });
+        }
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       }
     }

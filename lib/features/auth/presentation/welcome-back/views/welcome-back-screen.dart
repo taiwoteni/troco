@@ -36,8 +36,7 @@ class _WelcomeBackScreenState extends ConsumerState<WelcomeBackScreen> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: ColorManager.background,
-        body:
-            ref.read(settingsProvider).appEntryMethod == AppEntryMethod.Password
+        body:ref.read(settingsProvider).appEntryMethod == AppEntryMethod.Password
                 ? const PasswordEntryScreen()
                 : const PinEntryScreen());
   }

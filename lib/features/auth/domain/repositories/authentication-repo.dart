@@ -11,7 +11,7 @@ class AuthenticationRepo {
       required final String password,
       final Map<String, String>? header}) async {
     final result = await ApiInterface.postRequest(
-        url: "loginuser", data: {"email": email, "password": password});
+        url: "loginuser", data: {"emailOrPhone": email, "password": password});
     return result;
   }
 
@@ -21,7 +21,7 @@ class AuthenticationRepo {
       final Map<String, String>? header}) async {
     final result = await ApiInterface.postRequest(
         url: "loginuser",
-        data: {"phoneNumber": phoneNumber, "password": password});
+        data: {"emailOrPhone": phoneNumber, "password": password});
     return result;
   }
 
