@@ -59,6 +59,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     group = widget.group;
     chats = AppStorage.getChats(groupId: group.groupId);
     isCreator = group.members.first == ClientProvider.readOnlyClient!.userId;
+    log(group.toJson().toString());
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
@@ -430,7 +431,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void addGroupMember() {
-    if (group.members.length >= 2) {
+    if (group.members.length < 2) {
       SnackbarManager.showBasicSnackbar(
         context: context,
         message: "You already have a buyer",

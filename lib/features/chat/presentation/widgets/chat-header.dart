@@ -1,7 +1,10 @@
 // ignore_for_file: dead_code
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/app/asset-manager.dart';
+import 'package:troco/core/components/images/stacked-image-list.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
 import '../../../../core/app/color-manager.dart';
@@ -174,15 +177,34 @@ class ChatHeader extends ConsumerWidget {
             ),
           ),
           regularSpacer(),
-          Text(
-            "${group.members.length} member${group.members.length == 1 ? "" : "s"}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: ColorManager.primary,
-              fontFamily: 'Lato',
-              fontWeight: FontWeightManager.light,
-              fontSize: FontSizeManager.small,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              StackedImageListWidget(
+                images: membersIcon(),
+                iconSize: 20,
+              ),
+              regularSpacer(),
+              Text(
+                "${group.members.length} member${group.members.length == 1 ? "" : "s"}",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: ColorManager.accentColor,
+                  fontFamily: 'Lato',
+                  fontWeight: FontWeightManager.medium,
+                  fontSize: FontSizeManager.small,
+                ),
+              ),
+              Transform.translate(
+                offset: const Offset(0, 2),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  color: ColorManager.accentColor,
+                  size: IconSizeManager.small,
+                ),
+              ),
+            ],
           ),
           regularSpacer(),
         ],
@@ -245,5 +267,19 @@ class ChatHeader extends ConsumerWidget {
         }
       });
     });
+  }
+
+  List<ImageProvider<Object>> membersIcon() {
+    return group.sortedMembers.map<ImageProvider<Object>>(
+      (member) {
+        if (member.profile == "null") {
+          return AssetImage(
+              AssetManager.imageFile(name: "no_profile", ext: Extension.webp));
+        }
+        return CachedNetworkImageProvider(
+          member.profile,
+        );
+      },
+    ).toList();
   }
 }
