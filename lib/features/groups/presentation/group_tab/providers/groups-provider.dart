@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
-
 import '../../../../chat/domain/entities/chat.dart';
 
 /// This is a state Provider, responsible for returning and refreshing
@@ -79,6 +78,7 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
           log("");
           log("Values have changed");
           log("");
+        
 
           // Only if Data is not the same
 
