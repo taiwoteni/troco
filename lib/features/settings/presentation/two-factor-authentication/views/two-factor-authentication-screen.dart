@@ -449,8 +449,8 @@ class _TwoFactorAuthenticationPageState extends ConsumerState<TwoFactorAuthentic
   Future<void> saveSettings()async{
     final latestSettings = AppStorage.getSettings();
     
-    final changedTwoFactorEnabled = latestSettings.twoFactorEnabled == initialSettings.twoFactorEnabled;
-    final changedTwoFactorMethod =  latestSettings.twoFactorMethod == initialSettings.twoFactorMethod;
+    final changedTwoFactorEnabled = latestSettings.twoFactorEnabled != initialSettings.twoFactorEnabled;
+    final changedTwoFactorMethod =  latestSettings.twoFactorMethod != initialSettings.twoFactorMethod;
 
     if(changedTwoFactorMethod || changedTwoFactorEnabled){
         log("Changed Two Factor Settings On-Device");
