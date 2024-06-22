@@ -12,7 +12,7 @@ import '../animations/lottie.dart';
 
 /// If [badge] is given, [showOnline] and [online] will be overriden
 class ProfileIcon extends ConsumerStatefulWidget {
-  final String url;
+  final String? url;
   final bool showOnline;
   final bool online;
   final Positioned? badge;
@@ -45,9 +45,16 @@ class _ProfileIconState extends ConsumerState<ProfileIcon> {
             width: widget.size ?? IconSizeManager.medium,
             height: widget.size ?? IconSizeManager.medium,
             decoration: const BoxDecoration(shape: BoxShape.circle),
-            child: CachedNetworkImage(
+            child: widget.url == null? 
+            Image.asset(
+              AssetManager.imageFile(name: "profile_img"),
+              fit: BoxFit.cover,
               width: double.maxFinite,
-              imageUrl: widget.url,
+              height: double.maxFinite,
+            )
+            : CachedNetworkImage(
+              width: double.maxFinite,
+              imageUrl: widget.url!,
               fit: BoxFit.cover,
               height: double.maxFinite,
               fadeInCurve: Curves.ease,
