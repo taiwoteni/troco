@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/texts/inputs/otp-input-field.dart';
+import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -105,14 +107,29 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
       usesProvider: true,
       buttonKey: buttonKey,
       color: ColorManager.themeColor,
-      onPressed: () async {
-        ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
-        await Future.delayed(const Duration(seconds: 3));
-        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-        if (mounted) {
-          Navigator.pop(context, true);
-        }
-      },
+      onPressed: verifyPin,
     );
+  }
+
+  Future<void> verifyPin() async {
+    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 3));
+    final response = await AuthenticationRepo.verifyTransactionPin(
+        transactionPin: "$pin1$pin2$pin3$pin4");
+
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+    if (!response.error) {
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
+    } else {
+      if (mounted) {
+        Navigator.pop(context, false);
+      }
+      SnackbarManager.showBasicSnackbar(
+        context: context,
+        message: "Incorrect Pin or Internet Error");
+    }
   }
 }

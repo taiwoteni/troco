@@ -43,7 +43,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
     text = widget.group.members.contains(client.userId) ? "Added" : "Add";
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      if (text == "Added" || widget.group.members.length >= 2) {
+      if (text == "Added" || widget.group.members.length >= 3) {
         ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
       }
     });

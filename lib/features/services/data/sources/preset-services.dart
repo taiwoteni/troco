@@ -18,7 +18,7 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         label: "Fee Calculator",
         icon: AssetManager.svgFile(name: "calculator"),
         settingsType: SettingsType.financial,
-        onTap: () => Navigator.pushNamed(context, Routes.feeCalculator),
+        onTap: () => Navigator.pushNamed(context, Routes.feeCalculatorRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Payment Methods",
@@ -30,7 +30,8 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         label: "KYC Verification",
         icon: AssetManager.svgFile(name: "verification"),
         settingsType: SettingsType.financial,
-        onTap: () => Navigator.pushNamed(context, Routes.kycVerificationIntroRoute),
+        onTap: () =>
+            Navigator.pushNamed(context, Routes.kycVerificationIntroRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Share Troco",

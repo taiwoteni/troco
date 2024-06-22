@@ -1,7 +1,13 @@
+import "dart:developer";
+
+import "package:awesome_snackbar_content/awesome_snackbar_content.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:troco/core/app/snackbar-manager.dart";
 import "package:troco/core/components/button/presentation/widget/button.dart";
 import "package:troco/core/components/texts/inputs/otp-input-field.dart";
+import "package:troco/features/auth/presentation/providers/client-provider.dart";
+import "package:troco/features/settings/domain/repository/settings-repository.dart";
 
 import "../../../../../core/app/asset-manager.dart";
 import "../../../../../core/app/color-manager.dart";
@@ -234,10 +240,44 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
 
   Widget button() {
     return CustomButton(
+      onPressed: changePin,
       label: "Change Pin",
       usesProvider: true,
       buttonKey: buttonKey,
       margin: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
     );
+  }
+
+  Future<void> changePin() async {
+    final oldPin = oldPin1 + oldPin2 + oldPin3 + oldPin4;
+    final newPin = newPin1 + newPin2 + newPin3 + newPin4;
+
+    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 3));
+
+    log(oldPin);
+    log(newPin);
+    final response = await SettingsRepository.updateTransactionPin(
+        userId: ClientProvider.readOnlyClient!.userId,
+        oldPin: oldPin,
+        newPin: newPin);
+    log(response.body);
+
+    if (!response.error) {
+      final json = ClientProvider.readOnlyClient!.toJson();
+      json["transactionPin"] = newPin;
+      ClientProvider.saveUserData(ref: ref, json: json);
+
+      SnackbarManager.showBasicSnackbar(
+          context: context, message: "Updated Transaction Pin!");
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      Navigator.pop(context);
+    } else {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Could not update pin");
+    }
   }
 }

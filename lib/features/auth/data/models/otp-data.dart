@@ -8,6 +8,7 @@ class OtpData {
   static String? id,phoneNumber,
       email,
       password;
+  static bool emailMethod = true;    
   static HttpResponseModel? model;    
 
   static void clear() {

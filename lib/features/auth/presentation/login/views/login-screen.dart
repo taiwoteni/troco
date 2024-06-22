@@ -353,7 +353,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           "app-entry-method": "pin",
           "auto-logout": true,
         }));
-        final settings = await AppStorage.getSettings();
+        final settings = AppStorage.getSettings();
 
         if (settings.twoFactorEnabled) {
           if (settings.twoFactorMethod == TwoFactorMethod.Otp) {
