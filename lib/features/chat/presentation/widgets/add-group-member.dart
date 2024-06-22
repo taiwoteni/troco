@@ -58,12 +58,14 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
     textController.dispose();
     super.dispose();
   }
+  // data[index]._id,profile
 
   Future<void> fetchAll() async {
     List<Client> invitedClients =
         await AppStorage.getInvitedClients(groupId: group.groupId);
     List<Client> allClients = [];
     final result = await ApiInterface.searchUser(query: "");
+    log(result.body);
     if (!result.error) {
       final List<dynamic> clientsJson = result.messageBody!["data"];
       allClients = clientsJson
