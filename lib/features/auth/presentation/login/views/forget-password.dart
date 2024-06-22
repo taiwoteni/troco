@@ -1,5 +1,8 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable
 
+import 'dart:developer';
+
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,45 +11,45 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
+import 'package:troco/features/auth/data/models/otp-data.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
+import '../../../../settings/domain/repository/settings-repository.dart';
 import '../../../utils/phone-number-converter.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  ConsumerState<ForgotPasswordScreen> createState() => _LoginScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final UniqueKey buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
   bool isNumber = false;
   bool primaryPasswordError = false;
-  List<String> emails = [];
-  List<String> phoneNumbers = ["+2349068345482"];
 
   @override
   void initState() {
-    getEmails();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-          top: MediaQuery.of(context).viewPadding.top,
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: ColorManager.background,
@@ -98,20 +101,16 @@ class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
     bool isPhone = isPhoneNumberOrPlus(value);
     bool validated =
         isPhone ? validatePhoneNumber(value) : EmailValidator.validate(value);
-    bool exists = !isPhone
-        ? emails.contains(value.trim())
-        : phoneNumbers
-            .contains(PhoneNumberConverter.convertToFull(value.trim()));
+    // bool exists = !isPhone
+    //     ? emails.contains(value.trim())
+    //     : phoneNumbers
+    //         .contains(PhoneNumberConverter.convertToFull(value.trim()));
 
-    return validated && exists
+    return validated
         ? null
         : isPhone
-            ? !validated
-                ? "* enter a valid phone number."
-                : "* not a registered number"
-            : !validated
-                ? "* enter a valid email"
-                : "* not a registered email";
+            ? "* enter a valid phone number."
+            : "* enter a valid email";
   }
 
   bool isPhoneNumberOrPlus(String input) {
@@ -136,21 +135,52 @@ class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
     return regExp.hasMatch(input);
   }
 
-  Future<void> getEmails() async {
-    //... Logic to get all emails
-    //... And throw error when emails could not be fetched.
-  }
-
   Future<void> next() async {
     LoginData.clear();
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
-    if (formKey.currentState!.validate()) {
+    await Future.delayed(const Duration(seconds: 3));
+    if (formKey.currentState!.validate() && !primaryPasswordError) {
       formKey.currentState!.save();
-      await Future.delayed(const Duration(seconds: 2));
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      final verified = Navigator.pushNamed(context, Routes.otpRoute);
+      await requestPasswordReset();
     }
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+  }
+
+  Future<void> changePassword() async {
+    final response = await SettingsRepository.resetPassword(
+      email: LoginData.email!,
+      newPassword: LoginData.password!);
+    log(response.body);  
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+  }
+  Future<void> verifyOtp() async {
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    final verified =
+        (await Navigator.pushNamed(context, Routes.otpRoute)) as bool? ?? false;
+    if (verified) {
+    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+
+      await changePassword();
+    }
+  }
+
+  Future<void> requestPasswordReset() async {
+    final response =
+        await SettingsRepository.requestPasswordReset(email: LoginData.email!);
+    log(response.body);
+    OtpData.id = response.messageBody!["data"]["_id"];
+    OtpData.email = response.messageBody!["data"]["email"];
+    LoginData.otp = response.messageBody!["data"]["verificationPin"];
+
+    if (!response.error) {
+      await verifyOtp();
+    } else {
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Internet error occured");
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    }
   }
 
   // Widgets.
@@ -182,7 +212,7 @@ class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
         vertical: SizeManager.regular,
       ),
       child: Text(
-        "Forgot Password? No Fear!\nEnter your account email or phone number and type in the new password.",
+        "Enter your account email or\nphone number and type in the new password.",
         textAlign: TextAlign.left,
         style: TextStyle(
             fontFamily: 'Lato',
@@ -190,7 +220,7 @@ class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
             wordSpacing: 1.2,
             color: ColorManager.secondary,
             fontSize: FontSizeManager.medium,
-            fontWeight: FontWeightManager.semibold),
+            fontWeight: FontWeightManager.regular),
       ),
     );
   }
@@ -241,7 +271,7 @@ class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
             setState(() {
               primaryPasswordError = true;
             });
-            return "";
+            return null;
           }
           LoginData.password = value.trim();
 
@@ -301,9 +331,12 @@ class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
         label: "confirm new password",
         validator: (value) {
           if (value == null) {
-            return "* enter a valid password.";
+            return "* confirm new password.";
           }
-          return LoginData.password == value.trim() && value.isNotEmpty
+          if (value.trim().isEmpty) {
+            return "* confirm new password";
+          }
+          return LoginData.password == value.trim()
               ? null
               : "* passwords don't match";
         },
@@ -347,7 +380,7 @@ class _LoginScreenState extends ConsumerState<ForgotPasswordScreen> {
     return PreferredSize(
       preferredSize: const Size.fromHeight(72),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),

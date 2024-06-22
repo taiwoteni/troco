@@ -25,8 +25,7 @@ class OTPForgetPasswordScreen extends ConsumerStatefulWidget {
       _OTPForgetPasswordScreenState();
 }
 
-class _OTPForgetPasswordScreenState
-    extends ConsumerState<OTPForgetPasswordScreen> {
+class _OTPForgetPasswordScreenState extends ConsumerState<OTPForgetPasswordScreen> {
   final UniqueKey buttonKey = UniqueKey();
   late bool isEmail;
   bool timerIntialized = false;
