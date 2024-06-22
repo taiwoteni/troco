@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
 import 'package:troco/features/auth/presentation/welcome-back/views/welcome-back-screen.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
@@ -14,6 +15,7 @@ import 'package:troco/features/auth/presentation/register/views/add-profile-scre
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/payments/presentation/views/payment-method-screen.dart';
 import 'package:troco/features/profile/presentation/edit-profile/views/edit-profile-screen.dart';
+import 'package:troco/features/profile/presentation/view-profile/views/view-profile-screen.dart';
 import 'package:troco/features/settings/presentation/language/views/change-language-screen.dart';
 import 'package:troco/features/settings/presentation/password/views/change-password-screen.dart';
 import 'package:troco/features/settings/presentation/pin/views/change-pin-screen.dart';
@@ -77,7 +79,8 @@ class Routes {
 
   static const myTransactionsRoute = "/my-transactions";
 
-  static const feeCalculator = "/fee-calculator";
+  static const feeCalculatorRoute = "/fee-calculator";
+  static const viewProfileRoute = "/view-profile";
 }
 
 class RouteGenerator {
@@ -104,11 +107,15 @@ class RouteGenerator {
       case Routes.otpRoute:
         return MaterialPageRoute(
             settings: routeSettings,
-            builder: (context) => const OTPScreen(email: true,));
+            builder: (context) => const OTPScreen(
+                  email: true,
+                ));
       case Routes.otpPhoneRoute:
         return MaterialPageRoute(
             settings: routeSettings,
-            builder: (context) => const OTPScreen(email: false,));      
+            builder: (context) => const OTPScreen(
+                  email: false,
+                ));
       case Routes.setupAccountRoute:
         return MaterialPageRoute(
             settings: routeSettings,
@@ -217,14 +224,24 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const KycVerificationIntroScreen());
-       case Routes.myTransactionsRoute:
+      case Routes.myTransactionsRoute:
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const MyTransactionScreen());
-        case Routes.feeCalculator:
+      case Routes.feeCalculatorRoute:
         return MaterialPageRoute(
             settings: routeSettings,
-            builder: (context) => const FeeCalculatorScreen());               
+            builder: (context) => const FeeCalculatorScreen());
+      case Routes.viewProfileRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) {
+              final client = routeSettings.arguments! as Client;
+              return ViewProfileScreen(
+                client: client,
+              );
+            });
+
       default:
         return MaterialPageRoute(
             settings: routeSettings,
