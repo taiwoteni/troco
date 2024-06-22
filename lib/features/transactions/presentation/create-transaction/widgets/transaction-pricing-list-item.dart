@@ -7,12 +7,15 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/images/svg.dart';
 import '../../../domain/entities/product.dart';
+import '../../../domain/entities/service.dart';
 
 class TransactionPricingListWidget extends ConsumerStatefulWidget {
   final SalesItem item;
@@ -117,25 +120,27 @@ class _TransactionPricingListWidgetState
             /// I get the products from transactionProductions.
             /// and overwite it by affecting changes there.
 
-            if (quantity == 1) {
-              return;
-            }
-
-            final products = TransactionDataHolder.items;
-            final currentProduct =
-                products!.firstWhere((element) => element.id == widget.item.id);
-            final currentProductJson = currentProduct.toJson();
-            int formerQuantity = quantity;
-            currentProductJson["quantity"] = --formerQuantity;
+            final items = TransactionDataHolder.items;
+            final currentItem =
+                items!.firstWhere((element) => element.id == widget.item.id);
+            final currentItemJson = currentItem.toJson();
+            final int formerQuantity = quantity;
+            currentItemJson["quantity"] = formerQuantity - 1;
             setState(() {
               quantity -= 1;
             });
 
-            final formerIndex = products.indexOf(currentProduct);
-            products.insert(
-                formerIndex, Product.fromJson(json: currentProductJson));
-            products.removeAt(formerIndex + 1);
-            TransactionDataHolder.items = products;
+            final formerIndex = items.indexOf(currentItem);
+            final itemObject = TransactionDataHolder.transactionCategory ==
+                    TransactionCategory.Service
+                ? Service.fromJson(json: currentItemJson)
+                : TransactionDataHolder.transactionCategory ==
+                        TransactionCategory.Virtual
+                    ? VirtualService.fromJson(json: currentItemJson)
+                    : Product.fromJson(json: currentItemJson);
+            items.insert(formerIndex, itemObject);
+            items.removeAt(formerIndex + 1);
+            TransactionDataHolder.items = items;
           },
           icon: SvgIcon(
             svgRes: AssetManager.svgFile(name: "minus"),
@@ -158,21 +163,27 @@ class _TransactionPricingListWidgetState
             /// I get the products from transactionProductions.
             /// and overwite it by affecting changes there.
 
-            final products = TransactionDataHolder.items;
-            final currentProduct = products!.firstWhere(
-                (element) => element.id == widget.item.id);
-            final currentProductJson = currentProduct.toJson();
-            int formerQuantity = quantity;
-            currentProductJson["quantity"] = ++formerQuantity;
+            final items = TransactionDataHolder.items;
+            final currentItem =
+                items!.firstWhere((element) => element.id == widget.item.id);
+            final currentItemJson = currentItem.toJson();
+            final int formerQuantity = quantity;
+            currentItemJson["quantity"] = formerQuantity + 1;
             setState(() {
               quantity += 1;
             });
 
-            final formerIndex = products.indexOf(currentProduct);
-            products.insert(
-                formerIndex, Product.fromJson(json: currentProductJson));
-            products.removeAt(formerIndex + 1);
-            TransactionDataHolder.items = products;
+            final formerIndex = items.indexOf(currentItem);
+            final itemObject = TransactionDataHolder.transactionCategory ==
+                    TransactionCategory.Service
+                ? Service.fromJson(json: currentItemJson)
+                : TransactionDataHolder.transactionCategory ==
+                        TransactionCategory.Virtual
+                    ? VirtualService.fromJson(json: currentItemJson)
+                    : Product.fromJson(json: currentItemJson);
+            items.insert(formerIndex, itemObject);
+            items.removeAt(formerIndex + 1);
+            TransactionDataHolder.items = items;
           },
           icon: SvgIcon(
             svgRes: AssetManager.svgFile(name: "add"),

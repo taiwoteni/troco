@@ -8,7 +8,11 @@ import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import 'package:troco/features/transactions/domain/entities/service.dart';
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/widgets/add-service-widget.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/widgets/add-virtual-service-widget.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/button/presentation/provider/button-provider.dart';
@@ -212,26 +216,7 @@ class _TransactionPricingPageState
           Expanded(child: button()),
           mediumSpacer(),
           FloatingActionButton(
-            onPressed: () {
-              showModalBottomSheet<Product>(
-                isScrollControlled: true,
-                enableDrag: true,
-                useSafeArea: false,
-                backgroundColor: ColorManager.background,
-                context: context,
-                builder: (context) {
-                  return const AddProductWidget();
-                },
-              ).then((product) {
-                if (product != null) {
-                  setState(() {
-                    items.add(product);
-                  });
-                  TransactionDataHolder.items = items;
-                }
-                ref.read(productImagesProvider.notifier).state.clear();
-              });
-            },
+            onPressed: addItems,
             elevation: 0,
             backgroundColor: ColorManager.themeColor,
             // foregroundColor: Colors.white,
@@ -244,5 +229,54 @@ class _TransactionPricingPageState
         ],
       ),
     );
+  }
+
+  Future<void> addItems() async {
+    SalesItem? item;
+    if (TransactionDataHolder.transactionCategory ==
+        TransactionCategory.Product) {
+      item = await showModalBottomSheet<Product>(
+        isScrollControlled: true,
+        enableDrag: true,
+        useSafeArea: false,
+        backgroundColor: ColorManager.background,
+        context: context,
+        builder: (context) {
+          return const AddProductWidget();
+        },
+      );
+    } else {
+      if (TransactionDataHolder.transactionCategory ==
+          TransactionCategory.Virtual) {
+        item = await showModalBottomSheet<VirtualService>(
+          isScrollControlled: true,
+          enableDrag: true,
+          useSafeArea: false,
+          backgroundColor: ColorManager.background,
+          context: context,
+          builder: (context) {
+            return const AddVirtualServiceWidget();
+          },
+        );
+      } else {
+        item = await showModalBottomSheet<Service>(
+          isScrollControlled: true,
+          enableDrag: true,
+          useSafeArea: false,
+          backgroundColor: ColorManager.background,
+          context: context,
+          builder: (context) {
+            return const AddServiceWidget();
+          },
+        );
+      }
+    }
+    if (item != null) {
+      setState(() {
+        items.add(item!);
+      });
+      TransactionDataHolder.items = items;
+    }
+    ref.read(productImagesProvider.notifier).state.clear();
   }
 }

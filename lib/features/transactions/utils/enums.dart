@@ -17,6 +17,8 @@ enum ProductQuality {Good, Faulty, High, Low}
 
 enum ServiceRequirement{Produce, Repair, Replacement, Design, Create, Manufacture}
 
+enum VirtualServiceRequirement{Create,Exchange,Develop,Buying,Selling,Design}
+
 enum InspectionPeriod { Hour, Day }
 
 enum TransactionStatus {

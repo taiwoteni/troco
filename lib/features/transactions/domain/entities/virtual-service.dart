@@ -1,11 +1,12 @@
 import 'package:troco/features/transactions/utils/enums.dart';
-import 'package:troco/features/transactions/utils/service-requirement-converter.dart';
+import 'package:troco/features/transactions/utils/virtual-service-requirement-converter.dart';
 
 import 'sales-item.dart';
 
-class Service extends SalesItem {
+class VirtualService extends SalesItem {
   final Map<dynamic, dynamic> _json;
-  Service.fromJson({required final Map<dynamic, dynamic> json})
+
+  VirtualService.fromJson({required final Map<dynamic, dynamic> json})
       : _json = json,
         super(
             id: json["serviceId"] ?? json["_id"],
@@ -17,12 +18,11 @@ class Service extends SalesItem {
                 .toList()[0],
             quantity: int.parse(json["quantity"].toString()));
 
-  ServiceRequirement get serviceRequirement =>
-      ServiceRequirementsConverter.convertToEnum(
+
+   VirtualServiceRequirement get serviceRequirement =>
+      VirtualServiceRequirementsConverter.convertToEnum(
           requirement:
-              _json["serviceRequirement"] ?? _json["requirement"] ?? "design");
-  List<String> get serviceImages =>
-      (_json["serviceImages"] as List).map((e) => e.toString()).toList();
+              _json["serviceRequirement"] ?? _json["requirement"] ?? "design");        
 
   @override
   Map toJson() {
