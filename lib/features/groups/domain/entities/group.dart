@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 
 class Group extends Equatable {
   final Map<dynamic, dynamic> _json;
@@ -30,10 +31,24 @@ class Group extends Equatable {
         )
         .toList();
   }
+  List<Client> get sortedMembers {
+    final sortedMembersJson = _json["sortedMembers"];
+    if(sortedMembersJson == null){
+      return [];
+    }
+    else{
+      final clientList = (_json["sortedMembers"] as List).map((e) => Client.fromJson(json: e),).toList();
+      return clientList;
+
+    }
+
+  }
 
   String get groupId => _json["id"] ?? _json["_id"];
   String get creator => members.first;
-  String get adminId => _json["adminId"];
+  String get adminId => _json["adminId"]??"abc";
+
+  
 
   Map<dynamic, dynamic> toJson() {
     return _json;
