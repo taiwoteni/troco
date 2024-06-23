@@ -11,6 +11,7 @@ import 'package:troco/features/groups/presentation/group_tab/providers/groups-pr
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
+import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/button/presentation/widget/button.dart';
 import '../../../auth/domain/entities/client.dart';
@@ -61,24 +62,14 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
         bottom: SizeManager.small,
       ),
       horizontalTitleGap: SizeManager.medium * 0.8,
-      leading: client.profile != "null"
-          ? ProfileIcon(
-              size: IconSizeManager.large,
-              url: client.profile,
-            )
-          : Container(
-              width: IconSizeManager.large,
-              height: IconSizeManager.large,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color.fromARGB(255, 223, 218, 218)),
-              child: const Icon(
-                CupertinoIcons.person_solid,
-                color: Colors.white,
-                size: (IconSizeManager.medium) * 0.65,
-              ),
-            ),
+      leading: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, Routes.viewProfileRoute,
+            arguments: client),
+        child: ProfileIcon(
+          size: IconSizeManager.large,
+          url: client.profile,
+        ),
+      ),
       title: Text(
         client.fullName,
         style: TextStyle(

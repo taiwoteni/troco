@@ -90,6 +90,20 @@ class GroupRepo {
         sortedGroupsList.add(Group.fromJson(json: groupJson));
       }
 
+      // /// Now i want to also locally store transactions from a group
+      // for(int i=0; i<sortedGroupsList.length; i++){
+      //   final group = groupsList[i];
+      //   final groupJson = group.toJson();
+      //   if(group.hasTransaction){
+      //     final transactionResponse = await TransactionRepo.getOneTransaction(transactionId: groupJson["transactions"][0]);
+          
+      //     if(!transactionResponse.error){
+      //       groupJson["transaction"]=transactionResponse.messageBody!["data"];
+      //     }
+      //     sortedGroupsList[i] = Group.fromJson(json: groupJson);
+      //   }
+      // }
+
       // log(userJson.toString());
       return sortedGroupsList
           .map(

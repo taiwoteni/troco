@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -38,9 +40,9 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
         SnackbarManager.showBasicSnackbar(
             context: context,
             message:
-                "An unknown error occured. Check your internet connection.");
+                "An unknown error occurred. Check your internet connection.");
       }
-      log("Error occured in group listener in build method: $error");
+      log("Error occurred in group listener in build method: $error");
       final groups = AppStorage.getGroups();
       groups.sort(
         (a, b) => b.createdTime.compareTo(a.createdTime),

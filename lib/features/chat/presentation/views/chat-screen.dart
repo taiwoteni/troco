@@ -376,7 +376,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             children: [
               regularSpacer(),
               Text(
-                path == null ? "" : Path.basename(path!),
+                getFileName(),
                 textAlign: TextAlign.start,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -774,5 +774,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final kbString = "${(size / (1024)).toStringAsFixed(0)}KB";
 
     return mb ? mbString : kbString;
+  }
+
+  String getFileName() {
+    if (path == null) {
+      return "";
+    }
+    return "TROCO-Image${Path.extension(path!)}";
   }
 }

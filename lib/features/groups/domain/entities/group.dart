@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
+
+import '../../../transactions/domain/entities/transaction.dart';
 
 class Group extends Equatable {
   final Map<dynamic, dynamic> _json;
@@ -24,13 +27,22 @@ class Group extends Equatable {
         .toList();
   }
 
-  List<String> get transactions {
+  List<String> get _transactions {
     return (_json["transactions"] as List)
         .map(
           (e) => e.toString(),
         )
         .toList();
   }
+  bool get hasTransaction => _transactions.isNotEmpty;
+
+  Transaction get transaction{
+    final transactions = AppStorage.getTransactions();
+    final _transaction = transactions.firstWhere((transaction) => transaction.transactionId==_transactions[0]);
+    return _transaction;
+  }
+
+
   List<Client> get sortedMembers {
     final sortedMembersJson = _json["sortedMembers"];
     if(sortedMembersJson == null){
