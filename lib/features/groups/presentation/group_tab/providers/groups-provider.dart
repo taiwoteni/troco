@@ -31,7 +31,7 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
   (ref) {
     final streamController = StreamController<List<Group>>();
 
-    final periodic = Timer.periodic(const Duration(seconds: 3), (_) {
+    final periodic = Timer.periodic(const Duration(seconds: 2), (_) {
       ref.watch(groupsFutureProvider).when(
         data: (groupsJson) {
           /// First of all we have to compare and contrast between the

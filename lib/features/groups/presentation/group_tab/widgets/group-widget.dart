@@ -8,11 +8,11 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
-import 'package:troco/features/chat/presentation/providers/pending-chat-list-provider.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../chat/domain/entities/chat.dart';
@@ -38,13 +38,12 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
   @override
   Widget build(BuildContext context) {
     Color color = ColorManager.accentColor;
-    if (ref.watch(pendingChatListProvider(group.groupId)).isEmpty) {
-      chats = (group.toJson()["messages"] as List)
-          .map((e) => Chat.fromJson(json: e))
-          .toList();
-    } else {
-      chats = ref.watch(pendingChatListProvider(group.groupId));
-    }
+    chats = [
+      ...(group.toJson()["messages"] as List)
+          .map((e) => Chat.fromJson(json: e)),
+      ...AppStorage.getUnsentChats(groupId: group.groupId)
+    ];
+
     final messageStyle = TextStyle(
         color: color,
         fontFamily: 'Quicksand',
@@ -73,125 +72,112 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
     Chat? lastChat = chatIsEmpty ? null : chats.last;
 
     listenToChatChanges();
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(SizeManager.medium),
-      child: Container(
-          width: double.maxFinite,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(SizeManager.medium),
-          ),
-          child: ListTile(
-              onTap: () {
-                ref.watch(chatsGroupProvider.notifier).state = group.groupId;
-                Navigator.pushNamed(context, Routes.chatRoute,
-                    arguments: widget.group);
-              },
-              dense: true,
-              tileColor: Colors.transparent,
-              contentPadding: const EdgeInsets.only(
-                left: SizeManager.medium,
-                right: SizeManager.medium,
-                top: SizeManager.small,
-                bottom: SizeManager.small,
-              ),
-              horizontalTitleGap: SizeManager.medium * 0.8,
-              title: Column(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        group.groupName,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      regularSpacer(),
-                      Text(
-                        "•",
-                        style: TextStyle(
-                            color: ColorManager.secondary,
-                            fontSize: FontSizeManager.small * 0.5),
-                      ),
-                      regularSpacer(),
-                      Text(
-                        chatIsEmpty
-                            ? chatTimeFormatter(time: group.createdTime)
-                            : chatTimeFormatter(time: chats.last.time),
-                        style: TextStyle(
-                            color: ColorManager.secondary,
-                            fontFamily: 'Quicksand',
-                            fontSize: FontSizeManager.small,
-                            fontWeight: FontWeightManager.regular),
-                      )
-                    ],
-                  ),
-                  const Gap(SizeManager.small),
-                ],
-              ),
-              titleTextStyle: TextStyle(
+    return ListTile(
+        onTap: () {
+          ref.watch(chatsGroupProvider.notifier).state = group.groupId;
+          Navigator.pushNamed(context, Routes.chatRoute,
+              arguments: widget.group);
+        },
+        dense: true,
+        tileColor: Colors.transparent,
+        contentPadding: const EdgeInsets.only(
+          left: SizeManager.medium,
+          right: SizeManager.medium,
+          top: SizeManager.small,
+          bottom: SizeManager.small,
+        ),
+        horizontalTitleGap: SizeManager.medium * 0.8,
+        title: Column(
+          children: [
+            Row(
+              children: [
+                Text(
+                  group.groupName,
                   overflow: TextOverflow.ellipsis,
-                  color: ColorManager.primary,
-                  fontFamily: 'Lato',
-                  fontSize: FontSizeManager.medium * 1.1,
-                  fontWeight: FontWeightManager.semibold),
-              subtitle: RichText(
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(style: messageStyle, children: [
-                    TextSpan(
-                        text: chatIsEmpty
-                            ? null
-                            : lastChat!.senderId ==
-                                    ClientProvider.readOnlyClient!.userId
-                                ? "You: "
-                                : null,
-                        style: messageStyle.copyWith(
-                            color: clientIsLastSender
-                                ? ColorManager.secondary
-                                : null,
-                            fontWeight: FontWeightManager.semibold)),
-                    if (!chatIsEmpty && lastChat!.loading) ...[
-                      WidgetSpan(
-                          child: Icon(
-                        Icons.access_time_rounded,
-                        size: IconSizeManager.small * 0.9,
-                        color: color,
-                      )),
-                      const TextSpan(text: " "),
-                    ],
-                    TextSpan(
-                        text: chatIsEmpty
-                            ? '"${group.groupName}" was created'
-                            : lastChat!.message,
-                        style: messageStyle.copyWith(
-                          fontWeight: unseenMessages == 0
-                              ? null
-                              : FontWeightManager.semibold,
-                          color: clientIsLastSender
-                              ? ColorManager.secondary
-                              : null,
-                        )),
-                  ])),
-              leading: const GroupProfileIcon(
-                size: 53,
-              ),
-              trailing: chatIsEmpty || unseenMessages == 0
-                  ? null
-                  : Container(
-                      height: 25,
-                      width: 25,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: ColorManager.accentColor,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Text(
-                        unseenMessages.toString(),
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Lato',
-                            fontSize: FontSizeManager.medium * 0.7,
-                            fontWeight: FontWeightManager.extrabold),
-                      ),
-                    ))),
-    );
+                ),
+                regularSpacer(),
+                Text(
+                  "•",
+                  style: TextStyle(
+                      color: ColorManager.secondary,
+                      fontSize: FontSizeManager.small * 0.5),
+                ),
+                regularSpacer(),
+                Text(
+                  chatIsEmpty
+                      ? chatTimeFormatter(time: group.createdTime)
+                      : chatTimeFormatter(time: chats.last.time),
+                  style: TextStyle(
+                      color: ColorManager.secondary,
+                      fontFamily: 'Quicksand',
+                      fontSize: FontSizeManager.small,
+                      fontWeight: FontWeightManager.regular),
+                )
+              ],
+            ),
+            const Gap(SizeManager.small),
+          ],
+        ),
+        titleTextStyle: TextStyle(
+            overflow: TextOverflow.ellipsis,
+            color: ColorManager.primary,
+            fontFamily: 'Lato',
+            fontSize: FontSizeManager.medium * 1.1,
+            fontWeight: FontWeightManager.semibold),
+        subtitle: RichText(
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(style: messageStyle, children: [
+              TextSpan(
+                  text: chatIsEmpty
+                      ? null
+                      : lastChat!.senderId ==
+                              ClientProvider.readOnlyClient!.userId
+                          ? "You: "
+                          : null,
+                  style: messageStyle.copyWith(
+                      color: clientIsLastSender ? ColorManager.secondary : null,
+                      fontWeight: FontWeightManager.semibold)),
+              if (!chatIsEmpty && lastChat!.loading) ...[
+                WidgetSpan(
+                    child: Icon(
+                  Icons.access_time_rounded,
+                  size: IconSizeManager.small * 0.9,
+                  color: ColorManager.secondary,
+                )),
+                const TextSpan(text: " "),
+              ],
+              TextSpan(
+                  text: chatIsEmpty
+                      ? '"${group.groupName}" was created'
+                      : lastChat!.message,
+                  style: messageStyle.copyWith(
+                    fontWeight:
+                        unseenMessages == 0 ? null : FontWeightManager.semibold,
+                    color: clientIsLastSender ? ColorManager.secondary : null,
+                  )),
+            ])),
+        leading: const GroupProfileIcon(
+          size: 53,
+        ),
+        trailing: chatIsEmpty || unseenMessages == 0
+            ? null
+            : Container(
+                height: 25,
+                width: 25,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: ColorManager.accentColor,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  unseenMessages.toString(),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Lato',
+                      fontSize: FontSizeManager.medium * 0.7,
+                      fontWeight: FontWeightManager.extrabold),
+                ),
+              ));
   }
 
   String chatTimeFormatter({required DateTime time}) {

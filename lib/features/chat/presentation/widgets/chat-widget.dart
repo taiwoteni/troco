@@ -1,7 +1,6 @@
 // ignore_for_file: unused_element
 
-import 'dart:io';
-import 'dart:math';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -9,9 +8,9 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/images/stacked-image-list.dart';
+import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
-import 'package:troco/features/auth/domain/entities/client.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
@@ -19,12 +18,11 @@ import '../../../../core/components/animations/lottie.dart';
 
 class ChatWidget extends ConsumerWidget {
   final Chat chat;
-  final Client deviceClient;
-  final bool firstSender, lastSender, sameSender, lastMessage;
+  final bool firstSender, lastSender, sameSender, lastMessage, lastSent;
   const ChatWidget(
       {super.key,
       required this.chat,
-      required this.deviceClient,
+      this.lastSent = false,
       this.lastMessage = false,
       this.firstSender = true,
       this.sameSender = false,
@@ -34,22 +32,13 @@ class ChatWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     bool isSender =
         ref.watch(ClientProvider.userProvider)!.userId == chat.senderId;
+    final alignViewsBottom =
+        !(chat.hasAttachment ? true : chat.message!.length >= 116);
+
+    final showViews = (lastMessage ? true : lastSent) && isSender;
 
     BorderRadius generalBubble() {
-      return BorderRadius.only(
-        topLeft: !isSender
-            ? const Radius.circular(SizeManager.large)
-            : const Radius.circular(SizeManager.large),
-        bottomLeft: !isSender
-            ? const Radius.circular(SizeManager.large)
-            : const Radius.circular(SizeManager.large),
-        topRight: isSender
-            ? const Radius.circular(SizeManager.large)
-            : const Radius.circular(SizeManager.large),
-        bottomRight: isSender
-            ? const Radius.circular(SizeManager.large)
-            : const Radius.circular(SizeManager.large),
-      );
+      return BorderRadius.circular(SizeManager.large);
     }
 
     BorderRadius lastBubble({required final bool isSender}) {
@@ -87,25 +76,11 @@ class ChatWidget extends ConsumerWidget {
     }
 
     Widget informationWidget() {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (chat.hasAttachment)
-            Container(
-              width: 250,
-              constraints: const BoxConstraints(
-                minHeight: 100,
-                maxHeight: 250,
-              ),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  // TODO: ONCE FINBAR GIVES API, CHANGE TO NETWORK IMAGE
-                  image: DecorationImage(
-                      image: FileImage(File(chat.attachment!)),
-                      fit: BoxFit.cover)),
-            ),
-          if (chat.hasMessage)
-            Padding(
+      return !chat.hasMessage
+          ? const SizedBox.square(
+              dimension: 0,
+            )
+          : Padding(
               padding: const EdgeInsets.symmetric(
                   horizontal: SizeManager.regular,
                   vertical: SizeManager.small * 0.7),
@@ -117,67 +92,23 @@ class ChatWidget extends ConsumerWidget {
                     fontSize: FontSizeManager.regular * 0.95,
                     fontWeight: FontWeightManager.medium),
               ),
-            )
-        ],
-      );
+            );
     }
 
     Widget content() {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment:
-            (chat.hasAttachment ? true : chat.message!.length >= 116)
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.center,
-        children: [
-          if ((lastSender ? lastSender : lastMessage) && !isSender)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: chat.profile != "null"
-                  ? ProfileIcon(url: chat.profile, size: 35)
-                  : const UserProfileIcon(
-                      size: 35,
-                      showOnlyDefault: true,
-                    ),
-            ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.65,
-                ),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: SizeManager.regular * 1.3,
-                    vertical: SizeManager.regular * 1),
-                decoration: BoxDecoration(
-                  color: isSender
-                      ? chat.read
-                          ? ColorManager.accentColor
-                          : ColorManager.themeColor
-                      : ColorManager.background,
-                  borderRadius: border,
-                ),
-                child: informationWidget(),
-              ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.ease,
-                width: chat.loading
-                    ? IconSizeManager.regular + SizeManager.small
-                    : 0,
-                alignment: Alignment.centerRight,
-                child: Transform.scale(
-                  scale: 1.6,
-                  child: LottieWidget(
-                      lottieRes: AssetManager.lottieFile(name: "loading"),
-                      size: const Size.square(IconSizeManager.regular),
-                      color: ColorManager.secondary),
-                ),
-              ),
-            ],
-          ),
-        ],
+      return Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: SizeManager.regular * 1.3,
+            vertical: SizeManager.regular * 1),
+        decoration: BoxDecoration(
+          color: isSender
+              ? chat.read
+                  ? ColorManager.accentColor
+                  : ColorManager.themeColor
+              : ColorManager.background,
+          borderRadius: border,
+        ),
+        child: informationWidget(),
       );
     }
 
@@ -203,26 +134,106 @@ class ChatWidget extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          content(),
-          if (lastSender && isSender) stackedImages(),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            textDirection: isSender ? TextDirection.ltr : TextDirection.rtl,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: alignViewsBottom
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.center,
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * .6),
+                child: Column(
+                  crossAxisAlignment: isSender
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: [
+                    if (chat.hasAttachment) ...[
+                      attachmentWidget(),
+                      smallSpacer(),
+                    ],
+                    content(),
+                  ],
+                ),
+              ),
+              profileIcon(isSender: isSender),
+              loadingWidget(),
+            ],
+          ),
+          if (showViews) stackedImages(),
         ],
       ),
     );
   }
 
+  Widget profileIcon({required final bool isSender}) {
+    return ((lastSender ? lastSender : lastMessage) && !isSender)
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: ProfileIcon(url: chat.profile, size: 35),
+          )
+        : const SizedBox.square(
+            dimension: 0,
+          );
+  }
+
+  Widget loadingWidget() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.ease,
+      width: chat.loading ? IconSizeManager.regular + SizeManager.small : 0,
+      alignment: Alignment.centerRight,
+      child: Transform.scale(
+        scale: 1.6,
+        child: LottieWidget(
+            lottieRes: AssetManager.lottieFile(name: "loading"),
+            size: const Size.square(IconSizeManager.regular),
+            color: ColorManager.secondary),
+      ),
+    );
+  }
+
+  Widget attachmentWidget() {
+    return Container(
+      width: double.maxFinite,
+      constraints: const BoxConstraints(
+        minHeight: 100,
+        maxHeight: 250,
+      ),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          // TODO: ONCE FINBAR GIVES API, CHANGE TO NETWORK IMAGE
+          image: DecorationImage(
+              image: CachedNetworkImageProvider(chat.profile),
+              fit: BoxFit.cover)),
+    );
+  }
+
   Widget stackedImages() {
-    final hasViews =  Random().nextInt(2) == 0;
-    final images = <ImageProvider<Object>>[
-      NetworkImage(ClientProvider.readOnlyClient!.profile),
-      NetworkImage(ClientProvider.readOnlyClient!.profile),
-      AssetImage(AssetManager.imageFile(
-          name: "product-image-demo", ext: Extension.jpg)),
-    ];
+    final List<ImageProvider<Object>> images = chat.loading
+        ? []
+        : [
+            NetworkImage(ClientProvider.readOnlyClient!.profile),
+            NetworkImage(ClientProvider.readOnlyClient!.profile),
+            AssetImage(AssetManager.imageFile(
+                name: "product-image-demo", ext: Extension.jpg)),
+          ];
+
+    /// Logic to ensure chat views only show at the last message
+    /// or last sent message has been done, therefore the read list
+    /// will only be visible during those times as well as in cases
+    /// whereby, only 1 sender's chat is in the group or all current chats are unsent chat
+    /// so before we show, we have to know whether the read lists are actually
+    /// not empty due to the two scenarios given above.
+    final hasViews = images.isNotEmpty;
 
     return Visibility(
       visible: hasViews,
-      /// we use maintain state and maintain animation inorder to 
-      /// still let the animation play even though it is triggered 
+
+      /// we use maintain state and maintain animation inorder to
+      /// still let the animation play even though it is triggered
       /// when the child is just getting visible
       maintainAnimation: true,
       maintainState: true,
@@ -230,10 +241,34 @@ class ChatWidget extends ConsumerWidget {
         duration: const Duration(milliseconds: 1000),
         padding: const EdgeInsets.only(top: SizeManager.small),
         curve: Curves.ease,
-        height: hasViews? 22 + SizeManager.small : 0,
-        child: StackedImageListWidget(
-          images: images,
-          iconSize: 22,
+        height: hasViews ? 22 + SizeManager.small : 0,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            StackedImageListWidget(
+              images: images,
+              iconSize: 18,
+            ),
+            regularSpacer(),
+            Text(
+              "${images.length} view${images.length == 1 ? "" : "s"}",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: ColorManager.secondary,
+                fontFamily: 'Lato',
+                fontWeight: FontWeightManager.medium,
+                fontSize: FontSizeManager.small * 0.9,
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(0, 2),
+              child: Icon(
+                Icons.chevron_right_rounded,
+                color: ColorManager.secondary,
+                size: IconSizeManager.small,
+              ),
+            ),
+          ],
         ),
       ),
     );

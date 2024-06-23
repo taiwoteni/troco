@@ -6,7 +6,6 @@ import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../core/app/size-manager.dart';
-import '../../../auth/presentation/providers/client-provider.dart';
 import '../../domain/entities/chat.dart';
 import 'chat-widget.dart';
 
@@ -33,7 +32,7 @@ class _ChatListsState extends ConsumerState<ChatLists> {
 
         final bool isFirstMessage = index == 0;
         final bool isLastMessage = index == widget.chats.length - 1;
-        bool sameSender = false, firstTimeSender = true, lastTimeSender = false;
+        bool sameSender = false, firstTimeSender = true, lastTimeSender = false,lastSent=false;
 
         if (!isFirstMessage && !isLastMessage) {
           sameSender = currentChat.senderId == widget.chats[index - 1].senderId;
@@ -52,6 +51,11 @@ class _ChatListsState extends ConsumerState<ChatLists> {
           }
         }
 
+        final lastSentChat = widget.chats.lastWhere((chat) => !chat.loading,orElse: () => widget.chats.last,);
+        lastSent = currentChat==lastSentChat;
+
+
+
         return Column(
           key: ObjectKey(widget.chats[index]),
           mainAxisSize: MainAxisSize.min,
@@ -62,8 +66,8 @@ class _ChatListsState extends ConsumerState<ChatLists> {
               padding: EdgeInsets.only(
                   bottom: isLastMessage ? SizeManager.large : 0),
               child: ChatWidget(
-                deviceClient: ref.read(ClientProvider.userProvider)!,
                 chat: currentChat,
+                lastSent: lastSent,
                 firstSender: firstTimeSender,
                 lastSender: lastTimeSender,
                 sameSender: sameSender,

@@ -11,8 +11,6 @@ import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
-import 'pending-chat-list-provider.dart';
-
 
 /// This is a state Provider, responsible for returning and refreshing
 /// the Chat Repo class. Inorder reload to be on the safer side when looking for changes.
@@ -49,8 +47,10 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
       ref.watch(chatsListProvider(groupId)).whenData((chatsJson){
 
         final _chatsList = AppStorage.getChats(groupId: groupId).map((e) => e.toJson()).toList();
+        final _pendingChatsList = AppStorage.getUnsentChats(groupId: groupId);
         
-        final bool chatsAreDifferent = json.encode(_chatsList) != json.encode(chatsJson);
+        final bool chatsAreDifferent = json.encode(_chatsList) != json.encode(chatsJson)
+        || _pendingChatsList.isNotEmpty;
         List chatsListJson = chatsJson;
         List<Chat> chatsList = chatsListJson.map((e) => Chat.fromJson(json: e)).toList();
 
@@ -74,20 +74,21 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
           /// internet or expections from back end could messages from sending.
           /// 
           /// So we compare and contrasts the lengths of the two arrays: liveFromApi or unsentChats
-          /// If unsent chats has more chats,that means that there are chats that failed to send
+          /// If the amount of unsent chats isn't the same as sent chats,that means that there are chats that failed to send
           /// and we will have to send each of them again
           
-          if(AppStorage.getUnsentChats(groupId: groupId).length>chatsList.length){
-            for(final chat in AppStorage.getUnsentChats(groupId: groupId).where((chat) => chat.loading,)){
-              ChatRepo.sendChat(groupId: groupId, userId: ClientProvider.readOnlyClient!.userId, message: chat.message!);
+          
+          if(_pendingChatsList.isNotEmpty){
+            for(final chat in _pendingChatsList.where((chat) => chat.loading,).toList()){
+              ChatRepo.sendChat(groupId: groupId, userId: ClientProvider.readOnlyClient!.userId, message: chat.message!)
+              .then((value) {
+                if(!value.error){
+                  _pendingChatsList.removeLast();
+                  AppStorage.saveUnsentChats(chats:_pendingChatsList, groupId: groupId);
+                }
+              });
             }
           }
-          else{
-          AppStorage.saveUnsentChats(chats: [], groupId: groupId);
-          }
-
-
-          ref.watch(pendingChatListProvider(groupId).notifier).state = [];
           streamController.sink.add(chatsList);
         }
         ref.read(chatsRepoProvider.notifier).state = ChatRepo();
@@ -103,3 +104,5 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
     });
   return streamController.stream;
 },);
+
+

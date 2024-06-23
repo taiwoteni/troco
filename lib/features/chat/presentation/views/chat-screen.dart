@@ -21,7 +21,6 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
-import 'package:troco/features/chat/presentation/providers/pending-chat-list-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/add-group-member.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
@@ -56,7 +55,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     group = widget.group;
-    chats = AppStorage.getChats(groupId: group.groupId);
+    chats = [...AppStorage.getChats(groupId: group.groupId), ...AppStorage.getUnsentChats(groupId: group.groupId)];
     isCreator = group.members.first == ClientProvider.readOnlyClient!.userId;
     log(group.toJson().toString());
     super.initState();
@@ -141,9 +140,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             controller: scrollController,
             child: Column(
               children: [
-                if (ref.watch(pendingChatListProvider(group.groupId)).isEmpty
-                    ? chats.isEmpty
-                    : ref.watch(pendingChatListProvider(group.groupId)).isEmpty)
+                if (chats.isEmpty)
                   Column(
                     children: [
                       Gap(75 + MediaQuery.of(context).viewPadding.top),
@@ -151,13 +148,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ],
                   )
                 else
-                  ChatLists(
-                      chats: ref
-                              .watch(pendingChatListProvider(group.groupId))
-                              .isEmpty
-                          ? chats
-                          : ref.watch(pendingChatListProvider(group.groupId)),
-                      group: group)
+                  ChatLists(chats: chats, group: group)
               ],
             ),
           ),
@@ -312,11 +303,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   /// The AppBar contains the Groups icon, action button
   /// And business Days
   PreferredSizeWidget appBar() {
-    /// Not using the usual [DateTime.day]- [Now.day] because of
-    /// Situations whereby the days may not be of the same month.
-    /// becos [DateTime.day] is the day of the month.
-    final String daysRemaining =
-        "${group.transactionTime.difference(group.createdTime).inDays + 1}";
+    final bool hasExpired = group.transactionTime.isBefore(DateTime.now());
+
+    final String daysRemaining = hasExpired
+        ? ""
+        : "${group.transactionTime.difference(DateTime.now()).inDays}";
     return PreferredSize(
       preferredSize:
           Size.fromHeight(75 + MediaQuery.of(context).viewPadding.top),
@@ -407,10 +398,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     icon: SvgIcon(
                       svgRes: AssetManager.svgFile(
                           name: isCreator ? "delivery" : "buy"),
-                      color:
-                          group.members.length < 2 || group.transactions.isEmpty
-                              ? ColorManager.secondary
-                              : ColorManager.accentColor,
+                      color: group.members.length < 2 || group.hasTransaction
+                          ? ColorManager.secondary
+                          : ColorManager.accentColor,
                       size: const Size.square(IconSizeManager.regular * 1.3),
                     ),
                   ),
@@ -498,6 +488,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// We would add the loading attribute to specify that it's loading.
     /// Then after we know that it was sent, We would update it that it's not loading.
     final String chatMessage = controller.text.trim();
+    final chatId = "chat-${Math.Random().nextInt(1000) + 2000}";
 
     // We create a List of Chats Named Pending Chats and equate it to the one
     // used in the _ChatScreenState class in addition to the new chat that os about to be created.
@@ -505,7 +496,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // Asign a random id, with all necessary attributes with the loading set to
     // false.
     final pendingChatJson = {
-      "_id": "chat-${Math.Random().nextInt(1000) + 2000}",
+      "_id": chatId,
       "content": chatMessage,
       "sender": ClientProvider.readOnlyClient!.userId,
       "profile": ClientProvider.readOnlyClient!.profile,
@@ -515,14 +506,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } as Map<dynamic, dynamic>;
 
     // Add it to the List Chats fro, the [pendingChatListProvider].
-    ref
-        .watch(pendingChatListProvider(group.groupId).notifier)
-        .state
-        .addAll([...chats, Chat.fromJson(json: pendingChatJson)]);
+    final chat = Chat.fromJson(json: pendingChatJson);
+    final _chats = [...chats, chat];
+    setState(
+      () => chats = _chats,
+    );
+    if (scrollController.position.pixels >=
+        scrollController.position.maxScrollExtent) {
+      WidgetsFlutterBinding.ensureInitialized()
+          .addPostFrameCallback((timeStamp) async {
+        setState(() => isScrolling = true);
+        await scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.ease);
+        setState(() => isScrolling = false);
+      });
+    }
 
-    AppStorage.saveUnsentChats(
-        chats: [...chats, Chat.fromJson(json: pendingChatJson)],
-        groupId: group.groupId);
+    final unsentChats = AppStorage.getUnsentChats(groupId: group.groupId);
+    unsentChats.add(chat);
+    AppStorage.saveUnsentChats(chats: unsentChats, groupId: group.groupId);
 
     controller.text = "";
 
@@ -532,24 +536,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         userId: ref.read(ClientProvider.userProvider)!.userId,
         message: chatMessage);
 
-    if (response.error) {
-      log("Error When Sending Chat: ${response.body}");
-    } else {
-      /// If the Chat is added Successfully we change the loading value to false.
-      pendingChatJson["loading"] = false;
-      final pendingChat = ref
-          .watch(pendingChatListProvider(group.groupId))
-          .firstWhere((element) => element.chatId == pendingChatJson["_id"]);
-      final index = ref
-          .watch(pendingChatListProvider(group.groupId))
-          .indexOf(pendingChat);
-      ref.watch(pendingChatListProvider(group.groupId).notifier).state[index] =
-          Chat.fromJson(json: pendingChatJson);
-
-      AppStorage.saveUnsentChats(
-          chats: [...chats, Chat.fromJson(json: pendingChatJson)],
-          groupId: group.groupId);
+    if (!response.error) {
+      final chats = AppStorage.getUnsentChats(groupId: group.groupId);
+      chats.removeLast();
+      AppStorage.saveUnsentChats(chats: chats, groupId: group.groupId);
     }
+    // else {
+    //   if (ref.watch(pendingChatListProvider(group.groupId)).isNotEmpty &&
+    //       ref.watch(pendingChatListProvider(group.groupId)).last.chatId ==
+    //           chatId) {
+    //     /// If the Chat is added Successfully we change the loading value to false.
+    //     pendingChatJson["loading"] = false;
+    //     final pendingChat = ref
+    //         .watch(pendingChatListProvider(group.groupId))
+    //         .firstWhere((element) => element.chatId == pendingChatJson["_id"]);
+    //     final index = ref
+    //         .watch(pendingChatListProvider(group.groupId))
+    //         .indexOf(pendingChat);
+    //     ref
+    //         .watch(pendingChatListProvider(group.groupId).notifier)
+    //         .state[index] = Chat.fromJson(json: pendingChatJson);
+    //   }
+    // }
   }
 
   Future<void> listenToChatChanges() async {
@@ -557,8 +565,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     ref.listen(chatsStreamProvider, (previous, next) {
       next.when(
         data: (data) {
+          final unsentChats = AppStorage.getUnsentChats(groupId: group.groupId);
           setState(() {
-            chats = data;
+            chats = unsentChats.isNotEmpty ? [...data, ...unsentChats] : data;
             newMessage = data.isEmpty
                 ? false
                 : !chats.last.read &&

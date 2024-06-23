@@ -24,7 +24,7 @@ class ChatHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    bool hasTransaction = group.transactions.isNotEmpty;
+    bool hasTransaction = group.hasTransaction;
     listenToGroupChanges(ref, hasTransaction);
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -256,7 +256,7 @@ class ChatHeader extends ConsumerWidget {
       ref.watch(groupsStreamProvider).whenData((value) {
         final group = value
             .singleWhere((element) => element.groupId == this.group.groupId);
-        if (group.transactions.isNotEmpty) {
+        if (group.hasTransaction) {
           if (hasTransactions == false) {
             hasTransactions = true;
           } else {
