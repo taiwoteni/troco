@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
-import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/notifications/presentation/providers/notification-provider.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-item-widget.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-menu-button.dart';
@@ -14,6 +13,7 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/app/theme-manager.dart';
 import '../../../../core/components/images/svg.dart';
 import '../../../../core/components/others/spacer.dart';
+import '../../../groups/presentation/groups_page/widgets/empty-screen.dart';
 import '../../domain/entities/notification.dart' as n;
 import '../../utils/enums.dart';
 

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -21,9 +20,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:troco/core/components/clippers/bottom-rounded.dart';
 import 'package:troco/features/dashboard/presentation/widgets/latest-transactions-list.dart';
 import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
-import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 
+import '../../../groups/presentation/groups_page/widgets/empty-screen.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 
 class HomePage extends ConsumerStatefulWidget {

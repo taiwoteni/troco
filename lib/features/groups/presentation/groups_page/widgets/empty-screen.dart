@@ -4,8 +4,8 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/core/components/others/spacer.dart';
 
-import '../../../../core/app/color-manager.dart';
-import '../../../../core/app/font-manager.dart';
+import '../../../../../core/app/color-manager.dart';
+import '../../../../../core/app/font-manager.dart';
 
 class EmptyScreen extends StatefulWidget {
   final String? lottie, label;

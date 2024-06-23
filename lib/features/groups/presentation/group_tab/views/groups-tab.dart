@@ -10,7 +10,7 @@ import 'package:troco/features/groups/domain/entities/group.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../chat/domain/entities/chat.dart';
-import '../../widgets/empty-screen.dart';
+import '../../groups_page/widgets/empty-screen.dart';
 import '../widgets/group-widget.dart';
 import '../providers/groups-provider.dart';
 

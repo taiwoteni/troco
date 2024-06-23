@@ -8,7 +8,6 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/client-widget.dart';
-import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
@@ -16,6 +15,7 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/images/svg.dart';
 import '../../../../core/components/others/spacer.dart';
 import '../../../groups/domain/entities/group.dart';
+import '../../../groups/presentation/groups_page/widgets/empty-screen.dart';
 
 class AddGroupMemberWidget extends ConsumerStatefulWidget {
   final Group group;

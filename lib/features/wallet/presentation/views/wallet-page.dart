@@ -12,11 +12,12 @@ import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/images/svg.dart';
-import 'package:troco/features/groups/presentation/widgets/empty-screen.dart';
 import 'package:troco/features/wallet/presentation/widgets/wallet-transaction-item-widget.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/wallet/data/models/wallet-menu-item-model.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+
+import '../../../groups/presentation/groups_page/widgets/empty-screen.dart';
 
 class WalletPage extends ConsumerStatefulWidget {
   const WalletPage({super.key});
