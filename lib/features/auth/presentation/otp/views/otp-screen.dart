@@ -101,9 +101,8 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-          top: MediaQuery.of(context).viewPadding.top,
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: ColorManager.background,
@@ -162,7 +161,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
       Navigator.pop(context, true);
     } else {
       bool correct = LoginData.otp?.toString() ==
-              otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5;
+          otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5;
 
       if (correct) {
         Navigator.pop(context, true);
@@ -264,7 +263,9 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
 
   PreferredSizeWidget appBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(72),
+      preferredSize: Size.fromHeight(
+        72 + MediaQuery.of(context).viewPadding.top,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

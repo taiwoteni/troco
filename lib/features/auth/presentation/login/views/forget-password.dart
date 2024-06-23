@@ -150,17 +150,35 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final response = await SettingsRepository.resetPassword(
       email: LoginData.email!,
       newPassword: LoginData.password!);
-    log(response.body);  
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    if(!response.error){
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          message: "Successfully reset password");
+      Navigator.pop(context);
+    }else{
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Couldn't reset password.");
+    }
+    log(response.body);  
   }
+  
   Future<void> verifyOtp() async {
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     final verified =
         (await Navigator.pushNamed(context, Routes.otpRoute)) as bool? ?? false;
     if (verified) {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
-
-      await changePassword();
+    await changePassword();
+    }
+    else{
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Couldn't verify ${isNumber? "phone number":"email"}");
+      
     }
   }
 
