@@ -165,7 +165,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                             mediumSpacer(),
                             regularSpacer(),
                             GestureDetector(
-                              onTap: () => Navigator.pushNamed(context,Routes.viewProfileRoute,arguments: ClientProvider.readOnlyClient!),
+                              onTap: () => Navigator.pushNamed(
+                                  context, Routes.viewProfileRoute,
+                                  arguments: ref.watch(clientProvider)!),
                               child: const UserProfileIcon(
                                 size: IconSizeManager.medium * 1.2,
                               ),

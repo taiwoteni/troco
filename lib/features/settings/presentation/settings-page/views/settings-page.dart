@@ -14,6 +14,8 @@ import 'package:troco/features/settings/data/sources/preset-settings.dart';
 import 'package:troco/features/settings/presentation/settings-page/widget/settings-header-clipper.dart';
 import 'package:troco/features/settings/presentation/settings-page/widget/settings-tile-widget.dart';
 
+import '../../../../../core/app/routes-manager.dart';
+
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
@@ -95,13 +97,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget showDetailsText() {
-    return Text(
-      "Show Details",
-      style: TextStyle(
-          color: ColorManager.themeColor,
-          fontFamily: "quicksand",
-          fontSize: FontSizeManager.regular,
-          fontWeight: FontWeightManager.extrabold),
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, Routes.viewProfileRoute,
+          arguments: ref.watch(clientProvider)!),
+      child: Text(
+        "Show Details",
+        style: TextStyle(
+            color: ColorManager.themeColor,
+            fontFamily: "quicksand",
+            fontSize: FontSizeManager.regular,
+            fontWeight: FontWeightManager.extrabold),
+      ),
     );
   }
 

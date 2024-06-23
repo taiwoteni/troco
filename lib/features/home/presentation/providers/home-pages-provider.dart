@@ -5,7 +5,7 @@ import 'package:troco/features/dashboard/presentation/views/home-page.dart';
 import 'package:troco/features/settings/presentation/settings-page/views/settings-page.dart';
 import 'package:troco/features/wallet/presentation/views/wallet-page.dart';
 
-import '../../../groups/presentation/views/group-page.dart';
+import '../../../groups/presentation/groups_page/views/group-page.dart';
 import '../../../services/presentation/core/views/services-page.dart';
 
 List<HomeItemModel> homeItems = [

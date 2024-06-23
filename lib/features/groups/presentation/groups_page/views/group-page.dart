@@ -11,9 +11,9 @@ import 'package:troco/core/components/clippers/inward-bottom-rounded-clipper.dar
 import 'package:troco/features/groups/presentation/group_tab/widgets/create-group-sheet.dart';
 import 'package:troco/features/groups/presentation/group_tab/views/groups-tab.dart';
 
-import '../../../../core/app/font-manager.dart';
-import '../../../../core/components/images/profile-icon.dart';
-import '../../../../core/components/others/spacer.dart';
+import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/components/images/profile-icon.dart';
+import '../../../../../core/components/others/spacer.dart';
 
 class GroupPage extends ConsumerStatefulWidget {
   const GroupPage({super.key});
