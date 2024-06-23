@@ -9,6 +9,7 @@ import 'package:troco/features/groups/presentation/group_tab/providers/groups-pr
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
+import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/images/profile-icon.dart';
 import '../../../../core/components/others/spacer.dart';
@@ -30,7 +31,7 @@ class ChatHeader extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         mediumSpacer(),
-        groupDetailsWidget(hasTransaction: hasTransaction),
+        groupDetailsWidget(context: context, hasTransaction: hasTransaction),
         groupCreationTime(),
         if (false) adminJoinedWidget(),
         addedWidget(),
@@ -132,7 +133,9 @@ class ChatHeader extends ConsumerWidget {
     );
   }
 
-  Widget groupDetailsWidget({required final bool hasTransaction}) {
+  Widget groupDetailsWidget(
+      {required final BuildContext context,
+      required final bool hasTransaction}) {
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.symmetric(
@@ -177,34 +180,40 @@ class ChatHeader extends ConsumerWidget {
             ),
           ),
           regularSpacer(),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              StackedImageListWidget(
-                images: membersIcon(),
-                iconSize: 20,
-              ),
-              regularSpacer(),
-              Text(
-                "${group.members.length} member${group.members.length == 1 ? "" : "s"}",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: ColorManager.accentColor,
-                  fontFamily: 'Lato',
-                  fontWeight: FontWeightManager.medium,
-                  fontSize: FontSizeManager.small,
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, Routes.viewGroupRoute,
+                  arguments: group);
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                StackedImageListWidget(
+                  images: membersIcon(),
+                  iconSize: 20,
                 ),
-              ),
-              Transform.translate(
-                offset: const Offset(0, 2),
-                child: Icon(
-                  Icons.chevron_right_rounded,
-                  color: ColorManager.accentColor,
-                  size: IconSizeManager.small,
+                regularSpacer(),
+                Text(
+                  "${group.members.length} member${group.members.length == 1 ? "" : "s"}",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: ColorManager.accentColor,
+                    fontFamily: 'Lato',
+                    fontWeight: FontWeightManager.medium,
+                    fontSize: FontSizeManager.small,
+                  ),
                 ),
-              ),
-            ],
+                Transform.translate(
+                  offset: const Offset(0, 2),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    color: ColorManager.accentColor,
+                    size: IconSizeManager.small,
+                  ),
+                ),
+              ],
+            ),
           ),
           regularSpacer(),
         ],
