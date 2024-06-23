@@ -112,7 +112,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget settingsList() {
-    final List<SettingsModel> settings = presetSettings(context: context);
+    final List<SettingsModel> settings = presetSettings(context: context, ref: ref);
     return ListView.separated(
         padding: EdgeInsets.zero,
         shrinkWrap: true,

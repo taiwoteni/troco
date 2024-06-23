@@ -1,12 +1,12 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
-import 'package:troco/core/cache/shared-preferences.dart';
 import '../../utils/enums.dart';
 
 import '../../../../core/app/routes-manager.dart';
 import '../models/settings-model.dart';
 
-List<SettingsModel> presetSettings({required BuildContext context}) {
+List<SettingsModel> presetSettings({required BuildContext context, required final WidgetRef ref}) {
   return [
     //Normal Settings
     //settingType is normal by default so it can be omitted
@@ -45,8 +45,7 @@ List<SettingsModel> presetSettings({required BuildContext context}) {
     SettingsModel(
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
-        onTap: () {
-          AppStorage.clear();
+        onTap: () async{
           Navigator.pushNamedAndRemoveUntil(
               context, Routes.authRoute, (route) => false);
         },
