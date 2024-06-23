@@ -30,6 +30,8 @@ class AppStorage {
 
   static String CHAT_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.chats";
+  static String UNSENT_CHAT_STORAGE_KEY({required String groupId}) =>
+      "groups.$groupId.unsent-chats";    
   static String GROUP_INVITATION_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.invitations";
   static Future<void> initialize() async {
@@ -94,6 +96,27 @@ class AppStorage {
     _pref!
         .setString(CHAT_STORAGE_KEY(groupId: groupId), json.encode(chatsJson));
   }
+
+  static List<Chat> getUnsentChats({required final String groupId}) {
+    final jsonString = _pref!.getString(UNSENT_CHAT_STORAGE_KEY(groupId: groupId));
+    if (jsonString == null) {
+      log("No Chats stored in this group");
+      return [];
+    }
+    final List<dynamic> chatsJson = json.decode(jsonString);
+    return chatsJson.map((e) => Chat.fromJson(json: e)).toList();
+  }
+
+  static Future<void> saveUnsentChats(
+      {required final List<Chat> chats, required final String groupId}) async {
+    List<Map<dynamic, dynamic>> chatsJson =
+        chats.map((e) => e.toJson()).toList();
+
+    _pref!
+        .setString(UNSENT_CHAT_STORAGE_KEY(groupId: groupId), json.encode(chatsJson));
+  }
+
+
 
   static Future<List<Client>> getInvitedClients(
       {required final String groupId}) async {

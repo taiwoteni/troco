@@ -12,6 +12,7 @@ import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
+import 'package:troco/features/chat/presentation/providers/pending-chat-list-provider.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../chat/domain/entities/chat.dart';
@@ -31,15 +32,19 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
   @override
   void initState() {
     group = widget.group;
-    chats = (group.toJson()["messages"] as List)
-        .map((e) => Chat.fromJson(json: e))
-        .toList();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     Color color = ColorManager.accentColor;
+    if (ref.watch(pendingChatListProvider(group.groupId)).isEmpty) {
+      chats = (group.toJson()["messages"] as List)
+          .map((e) => Chat.fromJson(json: e))
+          .toList();
+    } else {
+      chats = ref.watch(pendingChatListProvider(group.groupId));
+    }
     final messageStyle = TextStyle(
         color: color,
         fontFamily: 'Quicksand',
@@ -67,6 +72,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
             1;
     Chat? lastChat = chatIsEmpty ? null : chats.last;
 
+    listenToChatChanges();
     return ClipRRect(
       borderRadius: BorderRadius.circular(SizeManager.medium),
       child: Container(
@@ -141,6 +147,15 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                                 ? ColorManager.secondary
                                 : null,
                             fontWeight: FontWeightManager.semibold)),
+                    if (!chatIsEmpty && lastChat!.loading) ...[
+                      WidgetSpan(
+                          child: Icon(
+                        Icons.access_time_rounded,
+                        size: IconSizeManager.small * 0.9,
+                        color: color,
+                      )),
+                      const TextSpan(text: " "),
+                    ],
                     TextSpan(
                         text: chatIsEmpty
                             ? '"${group.groupName}" was created'
@@ -189,7 +204,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
     final bool isYesterday = DateTime.now().day - 1 == time.day && !isSameDay;
 
     if (isSameDay) {
-    final DateTime date = time.copyWith(hour:time.hour+1);
+      final DateTime date = time.copyWith(hour: time.hour + 1);
 
       return isSameTime ? "now" : DateFormat.jm().format(date);
     } else {
@@ -199,5 +214,19 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
         return "${DateFormat.E().format(time)}, ${DateFormat.MMMd().format(time)}";
       }
     }
+  }
+
+  Future<void> listenToChatChanges() async {
+    ref.listen(chatsStreamProvider, (previous, next) {
+      next.when(
+        data: (data) {
+          setState(() {
+            chats = data;
+          });
+        },
+        error: (error, stackTrace) => null,
+        loading: () => null,
+      );
+    });
   }
 }

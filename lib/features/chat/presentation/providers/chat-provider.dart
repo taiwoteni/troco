@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
@@ -67,6 +68,24 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>((ref) {
           // log("Are the chats now in sync ? ${chatsList.map((e) => e.message).toList() == AppStorage.getChats(groupId: groupId).map((e) => e.message).toList()}");
           
           AppStorage.saveChats(chats: chatsList, groupId: groupId);
+
+          /// before we clear all the unsent chats, there are certain times when
+          /// not all unsent chats are currently sending as timeout errors through
+          /// internet or expections from back end could messages from sending.
+          /// 
+          /// So we compare and contrasts the lengths of the two arrays: liveFromApi or unsentChats
+          /// If unsent chats has more chats,that means that there are chats that failed to send
+          /// and we will have to send each of them again
+          
+          if(AppStorage.getUnsentChats(groupId: groupId).length>chatsList.length){
+            for(final chat in AppStorage.getUnsentChats(groupId: groupId).where((chat) => chat.loading,)){
+              ChatRepo.sendChat(groupId: groupId, userId: ClientProvider.readOnlyClient!.userId, message: chat.message!);
+            }
+          }
+          else{
+          AppStorage.saveUnsentChats(chats: [], groupId: groupId);
+          }
+
 
           ref.watch(pendingChatListProvider(groupId).notifier).state = [];
           streamController.sink.add(chatsList);

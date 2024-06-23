@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
@@ -10,9 +12,9 @@ import 'chat-widget.dart';
 
 /// The Containing the Chats Listview
 class ChatLists extends ConsumerStatefulWidget {
-  final List<Chat> chats;
+  List<Chat> chats;
   final Group group;
-  const ChatLists({super.key, required this.chats, required this.group});
+  ChatLists({super.key, required this.chats, required this.group});
 
   @override
   ConsumerState<ChatLists> createState() => _ChatListsState();

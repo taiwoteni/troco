@@ -46,7 +46,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final FocusNode messageNode = FocusNode();
   final ScrollController scrollController = ScrollController();
   final TextEditingController controller = TextEditingController();
-  late StreamSubscription chatStreamSubscription;
   bool isCreator = false;
   late List<Chat> chats;
   bool sending = false;
@@ -123,6 +122,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// Do not remove from here.
     listenToChatChanges();
     listenToGroupChanges();
+
     return Padding(
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -141,7 +141,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             controller: scrollController,
             child: Column(
               children: [
-                if (chats.isEmpty)
+                if (ref.watch(pendingChatListProvider(group.groupId)).isEmpty
+                    ? chats.isEmpty
+                    : ref.watch(pendingChatListProvider(group.groupId)).isEmpty)
                   Column(
                     children: [
                       Gap(75 + MediaQuery.of(context).viewPadding.top),
@@ -149,7 +151,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ],
                   )
                 else
-                  ChatLists(chats: chats, group: group)
+                  ChatLists(
+                      chats: ref
+                              .watch(pendingChatListProvider(group.groupId))
+                              .isEmpty
+                          ? chats
+                          : ref.watch(pendingChatListProvider(group.groupId)),
+                      group: group)
               ],
             ),
           ),
@@ -491,13 +499,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// Then after we know that it was sent, We would update it that it's not loading.
     final String chatMessage = controller.text.trim();
 
-    setState(() => sending = true);
+    // We create a List of Chats Named Pending Chats and equate it to the one
+    // used in the _ChatScreenState class in addition to the new chat that os about to be created.
 
-    /// We create a List of Chats Named Pending Chats and equate it to the one
-    /// used in the _ChatScreenState class.
-
-    /// Asign a random id, with all necessary attributes with the loading set to
-    /// false.
+    // Asign a random id, with all necessary attributes with the loading set to
+    // false.
     final pendingChatJson = {
       "_id": "chat-${Math.Random().nextInt(1000) + 2000}",
       "content": chatMessage,
@@ -508,11 +514,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       "timestamp": DateTime.now().toUtc().toIso8601String()
     } as Map<dynamic, dynamic>;
 
-    /// Add it to the List Chats fro, the [pendingChatListProvider].
+    // Add it to the List Chats fro, the [pendingChatListProvider].
     ref
         .watch(pendingChatListProvider(group.groupId).notifier)
         .state
-        .add(Chat.fromJson(json: pendingChatJson));
+        .addAll([...chats, Chat.fromJson(json: pendingChatJson)]);
+
+    AppStorage.saveUnsentChats(
+        chats: [...chats, Chat.fromJson(json: pendingChatJson)],
+        groupId: group.groupId);
+
     controller.text = "";
 
     /// We send the Chat through the API.
@@ -521,13 +532,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         userId: ref.read(ClientProvider.userProvider)!.userId,
         message: chatMessage);
 
-    setState(() {
-      sending = false;
-    });
     if (response.error) {
       log("Error When Sending Chat: ${response.body}");
     } else {
       /// If the Chat is added Successfully we change the loading value to false.
+      pendingChatJson["loading"] = false;
       final pendingChat = ref
           .watch(pendingChatListProvider(group.groupId))
           .firstWhere((element) => element.chatId == pendingChatJson["_id"]);
@@ -536,6 +545,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           .indexOf(pendingChat);
       ref.watch(pendingChatListProvider(group.groupId).notifier).state[index] =
           Chat.fromJson(json: pendingChatJson);
+
+      AppStorage.saveUnsentChats(
+          chats: [...chats, Chat.fromJson(json: pendingChatJson)],
+          groupId: group.groupId);
     }
   }
 

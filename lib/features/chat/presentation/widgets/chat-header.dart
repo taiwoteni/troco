@@ -1,4 +1,4 @@
-// ignore_for_file: dead_code
+// ignore_for_file: dead_code, must_be_immutable
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +18,9 @@ import '../../domain/entities/chat.dart';
 /// This Widget contains all the header details.
 /// From the Group's details, to the other chat details
 class ChatHeader extends ConsumerWidget {
-  final List<Chat> chats;
-  final Group group;
-  const ChatHeader({super.key, required this.chats, required this.group});
+  List<Chat> chats;
+  Group group;
+  ChatHeader({super.key, required this.chats, required this.group});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
