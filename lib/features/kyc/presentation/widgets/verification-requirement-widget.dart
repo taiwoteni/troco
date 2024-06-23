@@ -6,19 +6,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/kyc/utils/enums.dart';
+
+import '../../../../core/app/asset-manager.dart';
 
 class VerificationRequirementWidget extends ConsumerStatefulWidget {
-  VerificationRequirementWidget({
-    super.key,
-    required this.title,
-    required this.description,
-    required this.icon,
-    this.met = false,
-  });
+  VerificationRequirementWidget(
+      {super.key,
+      required this.title,
+      required this.description,
+      required this.icon,
+      this.process,
+      this.size = IconSizeManager.extralarge,
+      this.met = false,
+      this.onTap});
 
+  final void Function()? onTap;
   final String title;
   final String description;
+  final double size;
+  VerificationProcess? process;
   final Widget icon;
   bool met;
 
@@ -39,23 +48,67 @@ class _VerificationRequirementWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return DottedBorder(
-      color: ColorManager.accentColor,
-      strokeWidth: 2,
-      borderType: BorderType.RRect,
-      dashPattern: const [5, 6],
-      radius: const Radius.circular(SizeManager.regular),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            vertical: SizeManager.medium, horizontal: SizeManager.medium),
-        child: Row(
-          key: key,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            texts(),
-            widget.icon,
-          ],
+    return GestureDetector(
+      onTap: (){
+        if(widget.met && widget.onTap != null){
+          widget.onTap!();
+        }
+      },
+      child: DottedBorder(
+        color: ColorManager.accentColor,
+        strokeWidth: 2,
+        borderType: BorderType.RRect,
+        dashPattern: const [5, 6],
+        radius: const Radius.circular(SizeManager.regular),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              vertical: SizeManager.medium, horizontal: SizeManager.medium),
+          child: Row(
+            key: key,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              texts(),
+              widget.met
+                  ? verified()
+                  : widget.process == null
+                      ? SizedBox.square(
+                          dimension: widget.size,
+                          child:
+                              FittedBox(fit: BoxFit.cover, child: widget.icon))
+                      : animation(process: widget.process!),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget verified() {
+    return Transform.scale(
+      scale: 1.1,
+      child: LottieWidget(
+          lottieRes: AssetManager.lottieFile(name: "verified"),
+          fit: BoxFit.cover,
+          loop: false,
+          size: Size.square(widget.size)),
+    );
+  }
+
+  Widget animation({required VerificationProcess process}) {
+    return Transform.scale(
+      scale: [VerificationProcess.Processing, VerificationProcess.Uploading]
+              .contains(process)
+          ? 2
+          : 1.25,
+      child: LottieWidget(
+        lottieRes: AssetManager.lottieFile(
+            name: process == VerificationProcess.Processing
+                ? "kyc-scanning"
+                : process == VerificationProcess.Uploading
+                    ? "kyc-uploading"
+                    : "kyc-document"),
+        size: Size.square(widget.size),
+        fit: BoxFit.cover,
       ),
     );
   }

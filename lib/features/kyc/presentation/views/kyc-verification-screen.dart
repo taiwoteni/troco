@@ -9,6 +9,7 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/button/presentation/provider/button-provider.dart';
 import '../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../core/components/images/svg.dart';
+import '../../utils/enums.dart';
 
 class KycVerificationScreen extends ConsumerStatefulWidget {
   const KycVerificationScreen({super.key});
@@ -24,6 +25,8 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
   final buttonKey = UniqueKey();
   bool verified = false;
   int index = 0;
+  String? path;
+  VerificationTier? tier;
 
   @override
   void initState() {
@@ -162,6 +165,7 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
     return [
       VerificationRequirementWidget(
         title: "Upload Formal Picture",
+        met: tier != null,
         description:
             "Informal, Illicit or\nAI-generated images are NOT accepted.",
         icon: SvgIcon(
@@ -171,8 +175,12 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
       ),
       VerificationRequirementWidget(
         title: "Identity Document",
+        met: tier == null
+            ? false
+            : [VerificationTier.Tier2, VerificationTier.Tier3].contains(tier!),
         description:
             "ONLY National ID Card,\nDriver's Licence,\nVoter's card or Passport IS accepted.",
+        size: IconSizeManager.large,
         icon: SvgIcon(
           svgRes: AssetManager.svgFile(name: "identity-document"),
           size: const Size.square(IconSizeManager.large),
@@ -180,6 +188,7 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
       ),
       VerificationRequirementWidget(
         title: "Verify Residential Address",
+        met: tier == VerificationTier.Tier3,
         description:
             "Enter a VALID residential address\nfor proof of verification.",
         icon: SvgIcon(
