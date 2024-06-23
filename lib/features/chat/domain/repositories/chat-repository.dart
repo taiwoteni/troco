@@ -1,3 +1,8 @@
+import 'dart:io';
+import 'package:path/path.dart' as Path;
+
+import 'package:http/http.dart';
+import 'package:troco/core/api/data/model/multi-part-model.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
@@ -21,7 +26,6 @@ class ChatRepo {
 
   static Future<HttpResponseModel> sendChat({
     required final String groupId,
-    required final String userId,
     required final String message,
   }) async {
     final result = await ApiInterface.postRequest(
@@ -32,9 +36,33 @@ class ChatRepo {
 
         data: {
           "groupId": groupId,
-          "userId": userId,
+          "userId": ClientProvider.readOnlyClient!.userId,
           "content": message,
         });
+
+    return result;
+  }
+
+  static Future<HttpResponseModel> sendAttachment({
+    required final String groupId,
+    required final String? message,
+    required final String attachment,
+  })async{
+    var parsedfile = File(attachment);
+    var stream = ByteStream(parsedfile.openRead());
+    var length = await parsedfile.length();
+
+    final file = MultipartFile("attachment", stream, length,
+        filename: Path.basename(attachment));
+
+    final result = await ApiInterface.multipartPostRequest(
+      url: "addattachment",
+      multiparts: [
+        MultiPartModel.field(field: "userId", value: ClientProvider.readOnlyClient!.userId),
+        MultiPartModel.field(field: "groupId", value: groupId),
+        MultiPartModel.field(field: "content", value: message),
+        MultiPartModel.file(file: file)
+      ]);
 
     return result;
   }

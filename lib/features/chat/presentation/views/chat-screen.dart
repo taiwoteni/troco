@@ -50,7 +50,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController controller = TextEditingController();
   bool isCreator = false;
   String? path;
-  FileStat? fileState;
+  FileStat? fileStat;
   late List<Chat> chats;
   bool sending = false;
   bool newMessage = false;
@@ -346,7 +346,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       child: Row(
         children: [
           Container(
-            width: SizeManager.small * 1.1,
+            width: SizeManager.small * 1.3,
             height: double.maxFinite,
             decoration: BoxDecoration(
                 color: ColorManager.accentColor,
@@ -629,10 +629,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // false.
     final pendingChatJson = {
       "_id": chatId,
-      "content": chatMessage.isEmpty? null:chatMessage,
+      "content": chatMessage.isEmpty ? null : chatMessage,
       "sender": ClientProvider.readOnlyClient!.userId,
       "profile": ClientProvider.readOnlyClient!.profile,
-      "attachment":path,
+      "attachment": path,
       "read": false,
       "loading": true,
       "timestamp": DateTime.now().toUtc().toIso8601String()
@@ -660,10 +660,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     controller.text = "";
 
     /// We send the Chat through the API.
-    final response = await ChatRepo.sendChat(
-        groupId: group.groupId,
-        userId: ref.read(ClientProvider.userProvider)!.userId,
-        message: chatMessage);
+    final response = await (path == null
+        ? ChatRepo.sendChat(groupId: group.groupId, message: chatMessage)
+        : ChatRepo.sendAttachment(
+            groupId: group.groupId, message: chatMessage, attachment: path!));
+    log(response.body);
+    setState(() {
+      path = null;
+      fileStat = null;
+    });
 
     if (!response.error) {
       // final chats = AppStorage.getUnsentChats(groupId: group.groupId);
@@ -747,7 +752,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> pickFile() async {
     final file = await FileManager.pickMedia();
     if (file != null) {
-      fileState = await File(file.path).stat();
+      fileStat = await File(file.path).stat();
       setState(() => path = file.path);
     }
   }
@@ -762,7 +767,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   String getFileSize() {
-    final size = fileState == null ? 0 : fileState!.size;
+    final size = fileStat == null ? 0 : fileStat!.size;
     bool mb = size >= (1024 * 1024);
 
     final mbString = "${(size / (1024 * 1024)).toStringAsFixed(0)}MB";

@@ -1,5 +1,7 @@
 // ignore_for_file: unused_element
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +35,7 @@ class ChatWidget extends ConsumerWidget {
     bool isSender =
         ref.watch(ClientProvider.userProvider)!.userId == chat.senderId;
     final alignViewsBottom =
-        !(chat.hasAttachment ? true : chat.message!.length >= 116);
+        (chat.hasAttachment ? true : chat.message!.length >= 116);
 
     final showViews = (lastMessage ? true : lastSent) && isSender;
 
@@ -196,6 +198,8 @@ class ChatWidget extends ConsumerWidget {
   }
 
   Widget attachmentWidget() {
+    bool isUrl = chat.attachment!.startsWith("https://");
+    final attachment = chat.attachment!;
     return Container(
       width: double.maxFinite,
       constraints: const BoxConstraints(
@@ -206,7 +210,9 @@ class ChatWidget extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           // TODO: ONCE FINBAR GIVES API, CHANGE TO NETWORK IMAGE
           image: DecorationImage(
-              image: CachedNetworkImageProvider(chat.profile),
+              image: isUrl
+                  ? CachedNetworkImageProvider(attachment)
+                  : FileImage(File(attachment)),
               fit: BoxFit.cover)),
     );
   }

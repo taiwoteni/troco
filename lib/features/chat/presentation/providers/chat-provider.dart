@@ -5,7 +5,6 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
@@ -82,16 +81,16 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>(
           /// and we will have to send each of them again
 
           if (_pendingChatsList.isNotEmpty) {
-            for (final chat in _pendingChatsList
-                .where(
-                  (chat) => chat.loading,
-                )
-                .toList()) {
-              ChatRepo.sendChat(
+            for (final chat
+                in _pendingChatsList.where((chat) => chat.loading).toList()) {
+              final future = chat.hasAttachment
+                  ? ChatRepo.sendAttachment(
                       groupId: groupId,
-                      userId: ClientProvider.readOnlyClient!.userId,
-                      message: chat.message!)
-                  .then((value) {
+                      message: chat.message ?? "",
+                      attachment: chat.attachment!)
+                  : ChatRepo.sendChat(groupId: groupId, message: chat.message!);
+
+              future.then((value) {
                 if (!value.error) {
                   _pendingChatsList.removeLast();
                   AppStorage.saveUnsentChats(

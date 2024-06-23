@@ -2,26 +2,29 @@
 
 import 'package:equatable/equatable.dart';
 
+class Chat extends Equatable {
+  final Map<dynamic, dynamic> _json;
+  const Chat.fromJson({required final Map<dynamic, dynamic> json})
+      : _json = json;
 
-class Chat extends Equatable{
-  final Map<dynamic,dynamic> _json;
-  const Chat.fromJson({required final Map<dynamic,dynamic> json}): _json = json;
-
-  bool get hasAttachment => _json.containsKey("attachment"); 
-  bool get hasMessage => _json.containsKey("message") || _json.containsKey("content"); 
+  bool get hasAttachment =>
+      _json.containsKey("attachment") && _json["attachment"] != null;
+  bool get hasMessage =>
+      _json.containsKey("message") || (_json.containsKey("content") && _json["content"].toString().trim().isNotEmpty);
   DateTime get time => DateTime.parse(_json["time"] ?? _json["timestamp"]);
   String? get message => _json["message"] ?? _json["content"];
   String? get attachment => _json["attachment"];
   String get senderId => _json["sender id"] ?? _json["sender"];
   String get chatId => _json["id"] ?? _json["chatId"] ?? _json["_id"];
-  String get profile =>_json["profile"]??"null";
+  String get profile => _json["profile"] ?? "null";
   bool get read => _json["read"] ?? false;
   bool get loading => _json["loading"] ?? false;
-  DateTime get readTime => _json.containsKey("read time")? DateTime.parse(_json["read time"] ?? DateTime.now().toIso8601String()): DateTime.now();
+  DateTime get readTime => _json.containsKey("read time")
+      ? DateTime.parse(_json["read time"] ?? DateTime.now().toIso8601String())
+      : DateTime.now();
 
-  Map<dynamic,dynamic> toJson()=> _json;
-  
+  Map<dynamic, dynamic> toJson() => _json;
+
   @override
   List<Object?> get props => [chatId];
-
 }
