@@ -79,7 +79,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
       child: Container(
         width: double.maxFinite,
         height: double.maxFinite,
-        color: ColorManager.themeColor.withOpacity(0.8),
+        color: ColorManager.themeColor.withOpacity(0.3),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

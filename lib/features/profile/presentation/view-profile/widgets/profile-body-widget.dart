@@ -7,6 +7,7 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/widgets/groups-in-common-widget.dart';
 
 class ProfileBody extends ConsumerStatefulWidget {
@@ -45,11 +46,22 @@ class _ProfileBodyWidgetState extends ConsumerState<ProfileBody> {
           subtTitle(name: "state", value: client.state),
           mediumSpacer(),
           extraLargeSpacer(),
-          title(titleText: "Groups in common"),
+          title(
+              titleText: widget.client == ClientProvider.readOnlyClient!
+                  ? "Business Groups"
+                  : "Groups in common"),
           regularSpacer(),
-          ...AppStorage.getGroups().map(
-            (group) => GroupsInCommonWidget(group: group, client: client),
-          ),
+          if (client == ClientProvider.readOnlyClient!)
+            ...AppStorage.getGroups().map(
+                (group) => GroupsInCommonWidget(group: group, client: client))
+          else
+            ...AppStorage.getGroups()
+                .where(
+                  (group) => group.members.contains(client.userId),
+                )
+                .map(
+                  (group) => GroupsInCommonWidget(group: group, client: client),
+                ),
           extraLargeSpacer(),
         ],
       ),
