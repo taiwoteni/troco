@@ -126,7 +126,7 @@ class TransactionRepo {
     final response = await getAllTransactions();
 
     if (response.error) {
-      log("error fetching transactions from provider");
+      log("error fetching transactions from repo");
       return AppStorage.getTransactions();
     } else {
       final transactionsList = (json.decode(response.body) as List)

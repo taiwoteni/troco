@@ -136,10 +136,10 @@ class AppStorage {
   static List<Transaction> getTransactions() {
     final jsonString = _pref!.getString(TRANSACTION_STORAGE_KEY);
     if (jsonString == null) {
-      log("No Transactions stored.");
+      // log("No Transactions stored.");
       return [];
     }
-    log("transactions are :$jsonString");
+    // log("transactions are :$jsonString");
     final List<dynamic> transactionsJson = json.decode(jsonString) as List;
     return transactionsJson
         .where((element) => (element["pricing"] as List).isNotEmpty)
