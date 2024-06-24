@@ -1,6 +1,5 @@
 // ignore_for_file: unused_element
 
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -199,7 +198,7 @@ class ChatWidget extends ConsumerWidget {
   Widget attachmentWidget() {
     bool isUrl = chat.attachment!.startsWith("https://");
     final attachment = chat.attachment!;
-    log(attachment);
+    // log(attachment);
     return Container(
         width: double.maxFinite,
         constraints: const BoxConstraints(
