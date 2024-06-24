@@ -30,6 +30,7 @@ import 'package:troco/features/transactions/presentation/view-transaction/views/
 import '../../features/auth/presentation/login/views/login-screen.dart';
 import '../../features/auth/presentation/register/views/register-screen.dart';
 import '../../features/auth/presentation/success/views/auth-success-screen.dart';
+import '../../features/groups/presentation/view-group/views/view-group-screen.dart';
 import '../../features/kyc/presentation/views/kyc-verification-intro-screen.dart';
 import '../../features/kyc/presentation/views/kyc-verification-screen.dart';
 import '../../features/services/presentation/calc/views/fee-calculator-screen.dart';
@@ -81,6 +82,7 @@ class Routes {
 
   static const feeCalculatorRoute = "/fee-calculator";
   static const viewProfileRoute = "/view-profile";
+  static const viewGroupRoute = "/view-group";
 }
 
 class RouteGenerator {
@@ -239,6 +241,15 @@ class RouteGenerator {
               final client = routeSettings.arguments! as Client;
               return ViewProfileScreen(
                 client: client,
+              );
+            });
+      case Routes.viewGroupRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) {
+              final group = routeSettings.arguments! as Group;
+              return ViewGroupScreen(
+                group: group,
               );
             });
 
