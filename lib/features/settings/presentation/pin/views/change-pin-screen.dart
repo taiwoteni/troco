@@ -72,7 +72,6 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
             largeSpacer(),
             oldPin(),
             mediumSpacer(),
-            forgotPin(),
             mediumSpacer(),
             newPin(),
             extraLargeSpacer(),
@@ -227,16 +226,16 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
     );
   }
 
-  Widget forgotPin() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
-      child: InfoText(
-        text: "Forgot Pin?",
-        alignment: Alignment.centerRight,
-        fontWeight: FontWeightManager.semibold,
-      ),
-    );
-  }
+  // Widget forgotPin() {
+  //   return const Padding(
+  //     padding: EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
+  //     child: InfoText(
+  //       text: "Forgot Pin?",
+  //       alignment: Alignment.centerRight,
+  //       fontWeight: FontWeightManager.semibold,
+  //     ),
+  //   );
+  // }
 
   Widget button() {
     return CustomButton(
