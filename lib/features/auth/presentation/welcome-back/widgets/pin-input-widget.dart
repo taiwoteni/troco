@@ -49,11 +49,7 @@ class _PinInputWidgetState extends ConsumerState<PinInputWidget>
   @override
   Widget build(BuildContext context) {
     return Container(
-      height:
-          /** Size of the input decorator plus half the highest possible value when animating */ SizeManager
-                      .regular *
-                  1.5 +
-              5,
+      height:SizeManager.extralarge,
       alignment: Alignment.center,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

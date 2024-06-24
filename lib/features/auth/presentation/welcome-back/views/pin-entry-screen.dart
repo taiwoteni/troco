@@ -33,10 +33,10 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
   bool loading = false;
 
   @override
-  void setState(VoidCallback fn) {
+  void setState(VoidCallback fn, {final bool? sensitive}) {
     super.setState(fn);
 
-    if (transactionPin.length == 4) {
+    if (transactionPin.length == 4 && !(sensitive??false)) {
       validate();
     }
   }
@@ -197,7 +197,11 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
                       backgroundColor:
                           WidgetStatePropertyAll(Colors.transparent),
                       shape: WidgetStatePropertyAll(CircleBorder())),
-                  onPressed: () => setState(() => transactionPin = ""),
+                  onPressed: () {
+                    if (!loading) {
+                      setState(() => transactionPin = "");
+                    }
+                  },
                   icon: const Icon(
                     Icons.clear_rounded,
                     color: Colors.white,
@@ -213,11 +217,15 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
                       backgroundColor:
                           WidgetStatePropertyAll(Colors.transparent),
                       shape: WidgetStatePropertyAll(CircleBorder())),
-                  onPressed: () => setState(() => transactionPin =
-                      transactionPin.trim().isEmpty
-                          ? ""
-                          : transactionPin.substring(
-                              0, transactionPin.length - 1)),
+                  onPressed: () {
+                    if (!loading) {
+                      setState(() => transactionPin =
+                          transactionPin.trim().isEmpty
+                              ? ""
+                              : transactionPin.substring(
+                                  0, transactionPin.length - 1));
+                    }
+                  },
                   icon: const Icon(
                     Icons.backspace_rounded,
                     color: Colors.white,
@@ -242,8 +250,10 @@ class _PinEntryScreenState extends ConsumerState<PinEntryScreen>
     bool theSame = false;
     if (ClientProvider.readOnlyClient!.transactionPin != null) {
       ref.watch(loadingProvider.notifier).state!.repeat(reverse: true);
+      setState(() => loading = true, sensitive: true);
       final response = await AuthenticationRepo.verifyTransactionPin(
           transactionPin: transactionPin);
+      setState(() => loading =false, sensitive: true);
       log(response.body);
       ref.watch(loadingProvider)!.reset();
       theSame =
