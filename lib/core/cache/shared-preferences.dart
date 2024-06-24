@@ -5,6 +5,7 @@ import 'dart:developer';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
@@ -60,7 +61,13 @@ class AppStorage {
       return [];
     }
     final List<dynamic> groupsJson = json.decode(jsonString);
-    return groupsJson.map((e) => Group.fromJson(json: e)).toList();
+    return groupsJson
+        .map((e) => Group.fromJson(json: e))
+        .where(
+          (element) =>
+              element.members.contains(ClientProvider.readOnlyClient!.userId),
+        )
+        .toList();
   }
 
   static Future<void> saveGroups({required final List<Group> groups}) async {

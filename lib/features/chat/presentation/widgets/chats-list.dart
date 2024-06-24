@@ -35,9 +35,9 @@ class _ChatListsState extends ConsumerState<ChatLists> {
       itemBuilder: (context, index) {
         final Chat currentChat = widget.chats[index];
 
-
         final bool isFirstMessage = index == 0;
         final bool isLastMessage = index == widget.chats.length - 1;
+
         /// By default all this values are false except for firstTimeSender;
         bool sameSender = false,
             firstTimeSender = true,
@@ -52,7 +52,7 @@ class _ChatListsState extends ConsumerState<ChatLists> {
           sameSender = currentChat.senderId == widget.chats[index - 1].senderId;
         }
 
-        /// If it isn't the first message, the firstTimeSender is 
+        /// If it isn't the first message, the firstTimeSender is
         /// if the sender of the previous message is not the same as the currentMessage
         /// Hence, durning the firstMessage firstTimeSender is true,
         /// but messages after that, firstTimeSender is only true, IF its the currentMessage
@@ -67,15 +67,13 @@ class _ChatListsState extends ConsumerState<ChatLists> {
         /// the nextMessage.
         /// Hence, if it isn't the lastMessage, it is false (for now)
         /// or if it is the same sender as the nextMessage, it is false also.
-        /// 
+        ///
         /// This is to know wether this is the last message sent by the sender
         /// directly before a message by the receiver or admin
         if (!isLastMessage) {
           lastTimeSender =
               currentChat.senderId != widget.chats[index + 1].senderId;
-        }
-        else {
-
+        } else {
           ///
           if (!isFirstMessage) {
             lastTimeSender =
@@ -88,6 +86,20 @@ class _ChatListsState extends ConsumerState<ChatLists> {
           orElse: () => widget.chats.last,
         );
         lastSent = currentChat == lastSentChat;
+        final readBy = widget.group.sortedMembers
+            .where(
+              (element) => currentChat.readReceipts.contains(element.userId),
+            )
+            .map(
+              (e) => e == widget.group.seller
+                  ? "Seller"
+                  : e == widget.group.admin
+                      ? "admin"
+                      : "buyer",
+            )
+            .toList();
+
+        log(readBy.toString());
 
         return Column(
           key: ObjectKey(widget.chats[index]),
@@ -130,8 +142,7 @@ class _ChatListsState extends ConsumerState<ChatLists> {
 
   Future<void> markAsRead({required final Chat chat}) async {
     final result = await ChatRepo.markAsRead(
-        groupId: widget.group.groupId,
-        messageId: chat.chatId);
+        groupId: widget.group.groupId, messageId: chat.chatId);
 
     log(result.body);
   }

@@ -92,9 +92,11 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>(
 
               future.then((value) {
                 if (!value.error) {
-                  _pendingChatsList.removeLast();
+                  final pendingChats =
+                      AppStorage.getUnsentChats(groupId: groupId);
+                  pendingChats.removeLast();
                   AppStorage.saveUnsentChats(
-                      chats: _pendingChatsList, groupId: groupId);
+                      chats: pendingChats, groupId: groupId);
                 }
               });
             }

@@ -72,7 +72,7 @@ class ChatRepo {
       {required final String groupId, required final String messageId}) async {
     final result = await ApiInterface.patchRequest(url: "readrecipts", data: {
       "userId": ClientProvider.readOnlyClient!.userId,
-      "grouId": groupId,
+      "groupId": groupId,
       "messageId": messageId,
     });
 

@@ -60,6 +60,21 @@ class Group extends Equatable {
   String get creator => members.first;
   String get adminId => _json["adminId"]??"abc";
 
+  Client get seller {
+    return sortedMembers.firstWhere((element) => element.userId == members.first,);
+  }
+
+  Client get admin{
+    return sortedMembers.firstWhere((element) => element.userId == adminId,);
+  }
+
+  Client? get buyer{
+    if(members.length <3){
+      return null;
+    }
+    return sortedMembers.firstWhere((element) => [seller.userId, admin.userId].contains(element.userId));
+  }
+
   
 
   Map<dynamic, dynamic> toJson() {

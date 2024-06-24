@@ -86,7 +86,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           }
         }
       });
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+
+      final read = chats.every(
+        (element) => element.read,
+      );
+      if (read) {
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      } else {
+        final firstUnreadChat = chats.firstWhere(
+          (element) => !element.read,
+        );
+        final fraction = chats.indexOf(firstUnreadChat) / chats.length;
+        scrollController
+            .jumpTo(scrollController.position.maxScrollExtent * fraction);
+      }
       setState(
         () => canUsePixels = true,
       );
@@ -620,6 +633,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// Then after we know that it was sent, We would update it that it's not loading.
     final String chatMessage = controller.text.trim();
     final chatId = "chat-${Math.Random().nextInt(1000) + 2000}";
+    final attachmentPath = path;
 
     // We create a List of Chats Named Pending Chats and equate it to the one
     // used in the _ChatScreenState class in addition to the new chat that os about to be created.
@@ -631,7 +645,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       "content": chatMessage.isEmpty ? null : chatMessage,
       "sender": ClientProvider.readOnlyClient!.userId,
       "profile": ClientProvider.readOnlyClient!.profile,
-      "attachment": path,
+      "attachment": attachmentPath,
       "read": false,
       "loading": true,
       "timestamp": DateTime.now().toUtc().toIso8601String()
@@ -655,19 +669,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         setState(() => isScrolling = false);
       });
     }
-
-    controller.text = "";
-
-    /// We send the Chat through the API.
-    final response = await (path == null
-        ? ChatRepo.sendChat(groupId: group.groupId, message: chatMessage)
-        : ChatRepo.sendAttachment(
-            groupId: group.groupId, message: chatMessage, attachment: path!));
-    log(response.body);
     setState(() {
       path = null;
       fileStat = null;
     });
+    controller.text = "";
+
+    /// We send the Chat through the API.
+    final response = await (attachmentPath == null
+        ? ChatRepo.sendChat(groupId: group.groupId, message: chatMessage)
+        : ChatRepo.sendAttachment(
+            groupId: group.groupId,
+            message: chatMessage,
+            attachment: attachmentPath));
+    log(response.body);
 
     if (!response.error) {
       // final chats = AppStorage.getUnsentChats(groupId: group.groupId);
@@ -751,18 +766,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> pickFile() async {
     final file = await FileManager.pickMedia();
     if (file != null) {
-      fileStat = await File(file.path).stat();
-      setState(() => path = file.path);
+      if (["Video", "Image"].contains(getMimeType(path: file.path))) {
+        fileStat = await File(file.path).stat();
+        setState(() => path = file.path);
+      } else {
+        SnackbarManager.showBasicSnackbar(
+            context: context, message: "Only Select Image or Video");
+      }
     }
   }
 
-  String getMimeType() {
-    return path == null
+  String getMimeType({final String? path}) {
+    if ((path ?? this.path) == null) {
+      return "";
+    }
+
+    final extension =
+        Path.extension(path ?? this.path!).substring(1).toLowerCase();
+    return (path ?? this.path) == null
         ? ""
-        : ["jpeg", "jpg", "img", "png","bmp"]
-                .contains(Path.extension(path!).substring(1).toLowerCase())
+        : ["jpeg", "jpg", "img", "png", "bmp", "gif"].contains(extension)
             ? "Image"
-            : "Video";
+            : ["mp4", "mov", "vid"].contains(extension)
+                ? "Video"
+                : "Document";
   }
 
   String getFileSize() {
