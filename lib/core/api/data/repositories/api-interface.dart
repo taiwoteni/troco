@@ -137,7 +137,11 @@ class ApiInterface {
         if (model.isFileType) {
           request.files.add(await model.file!);
         } else {
-          request.fields[model.field!] = model.value!;
+          if (model.value != null) {
+            final value = model.value!.toString();
+            request.fields[model.field!.toString()] = value;
+            // log("added field : ${model.field!}: ${model.value}");
+          }
         }
       }
 
@@ -178,10 +182,12 @@ class ApiInterface {
 
       for (int i = 0; i < multiparts.length; i++) {
         final model = multiparts[i];
-        if (!model.isFileType && model.value != null) {
-          final value = model.value!.toString();
-          request.fields[model.field!.toString()] = value;
-          // log("added field : ${model.field!}: ${model.value}");
+        if (!model.isFileType) {
+          if (model.value != null) {
+            final value = model.value!.toString();
+            request.fields[model.field!.toString()] = value;
+            // log("added field : ${model.field!}: ${model.value}");
+          }
         } else {
           request.files.add(model.file!);
           // log("added file: ${model.file!.field}: ${model.file!.filename}");
