@@ -10,7 +10,10 @@ class Chat extends Equatable {
 
   bool get hasAttachment =>
       _json.containsKey("attachment") && _json["attachment"] != null;
-  bool get isImage => hasAttachment && ["jpeg", "jpg", "img", "bmp", "png"].contains(attachment!.substring(attachment!.lastIndexOf(".")).toString());    
+  bool get isImage =>
+      hasAttachment &&
+      ["jpeg", "jpg", "img", "bmp", "png"].contains(
+          attachment!.substring(attachment!.lastIndexOf(".") + 1).toString());
   bool get hasMessage =>
       (_json.containsKey("message") && _json["message"] != null) ||
       (_json.containsKey("content") &&

@@ -1,5 +1,6 @@
 // ignore_for_file: dead_code
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:flutter/material.dart';
@@ -53,22 +54,14 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
     bool clientIsLastSender = chats.isEmpty
         ? false
         : chats.last.senderId == ClientProvider.readOnlyClient!.userId;
-    int indexOfLastTimeClientChatted = chats.lastIndexWhere(
-        (chat) => chat.senderId == ClientProvider.readOnlyClient!.userId);
-    var listOfMessagesFromLastTimeYouSent = clientIsLastSender
-        ? chats
-        : chats.isEmpty
-            ? []
-            : chats.sublist(indexOfLastTimeClientChatted == -1
-                ? 0
-                : indexOfLastTimeClientChatted);
-    int unseenMessages = clientIsLastSender || chats.isEmpty
-        ? 0
-        : listOfMessagesFromLastTimeYouSent
-                .where((chat) => !chat.read)
-                .toList()
-                .length -
-            1;
+    int unseenMessages = chats
+        .where(
+          (chat) =>
+              !chat.read &&
+              chat.senderId != ClientProvider.readOnlyClient!.userId,
+        )
+        .toList()
+        .length;
     Chat? lastChat = chatIsEmpty ? null : chats.last;
 
     listenToChatChanges();
@@ -132,24 +125,38 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                       ? null
                       : lastChat!.senderId ==
                               ClientProvider.readOnlyClient!.userId
-                          ? "You: "
-                          : null,
+                          ? "You:  "
+                          : lastChat.senderId != group.adminId
+                              ? "Buyer"
+                              : "Admin",
                   style: messageStyle.copyWith(
                       color: clientIsLastSender ? ColorManager.secondary : null,
                       fontWeight: FontWeightManager.semibold)),
-              if (!chatIsEmpty && lastChat!.loading) ...[
+              if ((!chatIsEmpty && lastChat!.loading) ||
+                  (lastChat != null && lastChat.hasAttachment)) ...[
                 WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
                     child: Icon(
-                  Icons.access_time_rounded,
-                  size: IconSizeManager.small * 0.9,
-                  color: ColorManager.secondary,
-                )),
+                      lastChat.loading
+                          ? Icons.access_time_rounded
+                          : lastChat.isImage
+                              ? CupertinoIcons.photo_fill
+                              : CupertinoIcons.play_rectangle_fill,
+                      size: IconSizeManager.small * 0.85,
+                      color: (lastChat.hasAttachment && !clientIsLastSender)
+                          ? ColorManager.accentColor
+                          : ColorManager.secondary,
+                    )),
                 const TextSpan(text: " "),
               ],
               TextSpan(
                   text: chatIsEmpty
                       ? '"${group.groupName}" was created'
-                      : lastChat!.message,
+                      : !lastChat!.hasMessage
+                          ? lastChat.isImage
+                              ? "Photo"
+                              : "Video"
+                          : lastChat.message,
                   style: messageStyle.copyWith(
                     fontWeight:
                         unseenMessages == 0 ? null : FontWeightManager.semibold,
