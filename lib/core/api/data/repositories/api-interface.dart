@@ -178,7 +178,7 @@ class ApiInterface {
 
       for (int i = 0; i < multiparts.length; i++) {
         final model = multiparts[i];
-        if (!model.isFileType) {
+        if (!model.isFileType && model.value != null) {
           final value = model.value!.toString();
           request.fields[model.field!.toString()] = value;
           // log("added field : ${model.field!}: ${model.value}");
@@ -188,11 +188,11 @@ class ApiInterface {
         }
       }
 
-      log(request.fields.toString());
-      log(request.files.map((e) => {"${e.field}": e.filename}).toString());
+      // log(request.fields.toString());
+      // log(request.files.map((e) => {"${e.field}": e.filename}).toString());
 
       final response = await request.send();
-      log("sent");
+      // log("sent");
 
       final String body = await response.stream.bytesToString();
       final responseModel = HttpResponseModel(

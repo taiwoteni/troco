@@ -65,7 +65,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ...AppStorage.getUnsentChats(groupId: group.groupId)
     ];
     isCreator = group.members.first == ClientProvider.readOnlyClient!.userId;
-    log(group.toJson().toString());
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
@@ -760,7 +759,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   String getMimeType() {
     return path == null
         ? ""
-        : ["jpeg", "jpg", "img", "png"]
+        : ["jpeg", "jpg", "img", "png","bmp"]
                 .contains(Path.extension(path!).substring(1).toLowerCase())
             ? "Image"
             : "Video";

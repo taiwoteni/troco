@@ -47,7 +47,7 @@ class ChatRepo {
     required final String groupId,
     required final String? message,
     required final String attachment,
-  })async{
+  }) async {
     var parsedfile = File(attachment);
     var stream = ByteStream(parsedfile.openRead());
     var length = await parsedfile.length();
@@ -56,13 +56,25 @@ class ChatRepo {
         filename: Path.basename(attachment));
 
     final result = await ApiInterface.multipartPostRequest(
-      url: "addattachment",
-      multiparts: [
-        MultiPartModel.field(field: "userId", value: ClientProvider.readOnlyClient!.userId),
-        MultiPartModel.field(field: "groupId", value: groupId),
-        MultiPartModel.field(field: "content", value: message),
-        MultiPartModel.file(file: file)
-      ]);
+        url: "addattachment",
+        multiparts: [
+          MultiPartModel.field(
+              field: "userId", value: ClientProvider.readOnlyClient!.userId),
+          MultiPartModel.field(field: "groupId", value: groupId),
+          MultiPartModel.field(field: "content", value: message),
+          MultiPartModel.file(file: file)
+        ]);
+
+    return result;
+  }
+
+  static Future<HttpResponseModel> markAsRead(
+      {required final String groupId, required final String messageId}) async {
+    final result = await ApiInterface.patchRequest(url: "readrecipts", data: {
+      "userId": ClientProvider.readOnlyClient!.userId,
+      "grouId": groupId,
+      "messageId": messageId,
+    });
 
     return result;
   }

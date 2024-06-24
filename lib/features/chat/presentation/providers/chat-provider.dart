@@ -86,7 +86,7 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>(
               final future = chat.hasAttachment
                   ? ChatRepo.sendAttachment(
                       groupId: groupId,
-                      message: chat.message ?? "",
+                      message: chat.message,
                       attachment: chat.attachment!)
                   : ChatRepo.sendChat(groupId: groupId, message: chat.message!);
 

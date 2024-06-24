@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:equatable/equatable.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 class Chat extends Equatable {
   final Map<dynamic, dynamic> _json;
@@ -9,20 +10,30 @@ class Chat extends Equatable {
 
   bool get hasAttachment =>
       _json.containsKey("attachment") && _json["attachment"] != null;
+  bool get isImage => hasAttachment && ["jpeg", "jpg", "img", "bmp", "png"].contains(attachment!.substring(attachment!.lastIndexOf(".")).toString());    
   bool get hasMessage =>
-      _json.containsKey("message") || (_json.containsKey("content") && _json["content"].toString().trim().isNotEmpty);
+      (_json.containsKey("message") && _json["message"] != null) ||
+      (_json.containsKey("content") &&
+          (_json["content"] != null
+              ? _json["content"].toString().trim().isNotEmpty
+              : false));
   DateTime get time => DateTime.parse(_json["time"] ?? _json["timestamp"]);
   String? get message => _json["message"] ?? _json["content"];
   String? get attachment => _json["attachment"];
   String get senderId => _json["sender id"] ?? _json["sender"];
   String get chatId => _json["id"] ?? _json["chatId"] ?? _json["_id"];
   String get profile => _json["profile"] ?? "null";
-  bool get read => _json["read"] ?? false;
+  bool get read => readReceipts.contains(ClientProvider.readOnlyClient!.userId);
+  List<String> get readReceipts => ((_json["readBy"] ?? []) as List)
+      .where(
+        (element) =>
+            element.toString() != ClientProvider.readOnlyClient!.userId,
+      )
+      .map(
+        (e) => e.toString(),
+      )
+      .toList();
   bool get loading => _json["loading"] ?? false;
-  DateTime get readTime => _json.containsKey("read time")
-      ? DateTime.parse(_json["read time"] ?? DateTime.now().toIso8601String())
-      : DateTime.now();
-
   Map<dynamic, dynamic> toJson() => _json;
 
   @override

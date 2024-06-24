@@ -1,5 +1,6 @@
 // ignore_for_file: unused_element
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -17,6 +18,7 @@ import 'package:troco/features/chat/domain/entities/chat.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/animations/lottie.dart';
+import '../../../groups/domain/entities/group.dart';
 
 class ChatWidget extends ConsumerWidget {
   final Chat chat;
@@ -117,20 +119,17 @@ class ChatWidget extends ConsumerWidget {
     return Container(
       width: double.maxFinite,
       padding: EdgeInsets.only(
-        left: (lastSender ? lastSender : lastMessage) && !isSender ? 0 : 55,
-        right: SizeManager.medium,
-        // bottom: lastSender?,
-        top: sameSender
+          left: (lastSender ? lastSender : lastMessage) && !isSender ? 0 : 55,
+          right: SizeManager.medium,
+          // bottom: lastSender?,
+          top: sameSender
 
-            /// I removed lastSender from the [top: lastSender || sameSender]
-            /// because sameSender is always true if it is the lastSender.
-            ? (firstSender && lastSender)
-                ? SizeManager.medium * 1.05
-                : SizeManager.small * 0.95
-            : lastMessage
-                ? SizeManager.small * 0.95
-                : SizeManager.medium * 1.05,
-      ),
+              /// I removed lastSender from the [top: lastSender || sameSender]
+              /// because sameSender is always true if it is the lastSender.
+              ? SizeManager.small * 0.85
+              : firstSender
+                  ? SizeManager.medium * 1.2
+                  : SizeManager.small * 0.85),
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -156,7 +155,7 @@ class ChatWidget extends ConsumerWidget {
                       attachmentWidget(),
                       smallSpacer(),
                     ],
-                    content(),
+                    if (chat.hasMessage) content(),
                   ],
                 ),
               ),
@@ -164,7 +163,7 @@ class ChatWidget extends ConsumerWidget {
               loadingWidget(),
             ],
           ),
-          if (showViews) stackedImages(),
+          if (showViews) stackedImages(context: context),
         ],
       ),
     );
@@ -200,32 +199,72 @@ class ChatWidget extends ConsumerWidget {
   Widget attachmentWidget() {
     bool isUrl = chat.attachment!.startsWith("https://");
     final attachment = chat.attachment!;
+    log(attachment);
     return Container(
-      width: double.maxFinite,
-      constraints: const BoxConstraints(
-        minHeight: 100,
-        maxHeight: 250,
-      ),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          // TODO: ONCE FINBAR GIVES API, CHANGE TO NETWORK IMAGE
-          image: DecorationImage(
-              image: isUrl
-                  ? CachedNetworkImageProvider(attachment)
-                  : FileImage(File(attachment)),
-              fit: BoxFit.cover)),
-    );
+        width: double.maxFinite,
+        constraints: const BoxConstraints(
+          minHeight: 100,
+          maxHeight: 250,
+        ),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(SizeManager.large),
+            image: !isUrl
+                ? DecorationImage(
+                    fit: BoxFit.cover, image: FileImage(File(attachment)))
+                : null),
+        child: isUrl
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(SizeManager.large),
+                child: CachedNetworkImage(
+                  width: double.maxFinite,
+                  imageUrl: attachment,
+                  fit: BoxFit.cover,
+                  height: double.maxFinite,
+                  fadeInCurve: Curves.ease,
+                  fadeOutCurve: Curves.ease,
+                  placeholder: (context, url) {
+                    return Container(
+                      width: double.maxFinite,
+                      height: double.maxFinite,
+                      color: ColorManager.lottieLoading,
+                      child: LottieWidget(
+                          lottieRes:
+                              AssetManager.lottieFile(name: "loading-image"),
+                          size: const Size.square(IconSizeManager.extralarge)),
+                    );
+                  },
+                  errorWidget: (context, url, error) {
+                    return Container(
+                      width: double.maxFinite,
+                      height: double.maxFinite,
+                      color: ColorManager.lottieLoading,
+                      child: LottieWidget(
+                          lottieRes:
+                              AssetManager.lottieFile(name: "loading-image"),
+                          size: const Size.square(IconSizeManager.extralarge)),
+                    );
+                  },
+                ),
+              )
+            : null);
   }
 
-  Widget stackedImages() {
+  Widget stackedImages({required BuildContext context}) {
+    final group = ModalRoute.of(context)!.settings.arguments as Group;
+    final members = group.sortedMembers;
     final List<ImageProvider<Object>> images = chat.loading
         ? []
-        : [
-            NetworkImage(ClientProvider.readOnlyClient!.profile),
-            NetworkImage(ClientProvider.readOnlyClient!.profile),
-            AssetImage(AssetManager.imageFile(
-                name: "product-image-demo", ext: Extension.jpg)),
-          ];
+        : members
+            .where((member) =>
+                chat.readReceipts.contains(member.userId) &&
+                member.userId != chat.senderId)
+            .map<ImageProvider<Object>>(
+              (e) => e.userId == group.adminId
+                  ? AssetImage(AssetManager.imageFile(
+                      name: "product-image-demo", ext: Extension.jpg))
+                  : CachedNetworkImageProvider(e.profile),
+            )
+            .toList();
 
     /// Logic to ensure chat views only show at the last message
     /// or last sent message has been done, therefore the read list
