@@ -26,7 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final result = await ApiInterface.findUser(userId: ClientProvider.readOnlyClient!.userId);
 
       if(!result.error){
-        log(result.messageBody!["data"]["notifications"]?.toString() ?? "Structure wrong");
+        log("Got Notifications");
       }
     });
   }
