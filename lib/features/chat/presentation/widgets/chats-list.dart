@@ -86,21 +86,6 @@ class _ChatListsState extends ConsumerState<ChatLists> {
           orElse: () => widget.chats.last,
         );
         lastSent = currentChat == lastSentChat;
-        final readBy = widget.group.sortedMembers
-            .where(
-              (element) => currentChat.readReceipts.contains(element.userId),
-            )
-            .map(
-              (e) => e == widget.group.seller
-                  ? "Seller"
-                  : e == widget.group.admin
-                      ? "admin"
-                      : "buyer",
-            )
-            .toList();
-
-        log(readBy.toString());
-
         return Column(
           key: ObjectKey(widget.chats[index]),
           mainAxisSize: MainAxisSize.min,
