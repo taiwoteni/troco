@@ -133,13 +133,15 @@ class _TransactionPricingPageState
 
     if (listAsGrid == false) {
       return ListView.separated(
+        key: const Key("pricing-list"),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         separatorBuilder: (context, index) =>
             const Gap(SizeManager.medium * 1.35),
         itemCount: items.length,
         itemBuilder: (context, index) {
-          return TransactionPricingListWidget(item: items[index]);
+          return TransactionPricingListWidget(
+              key: ObjectKey(items[index]), item: items[index]);
         },
       );
     }

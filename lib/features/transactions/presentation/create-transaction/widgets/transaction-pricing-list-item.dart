@@ -110,7 +110,6 @@ class _TransactionPricingListWidgetState
   }
 
   Widget quantityWidget() {
-    int quantity = widget.item.quantity;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
@@ -125,9 +124,10 @@ class _TransactionPricingListWidgetState
                 items!.firstWhere((element) => element.id == widget.item.id);
             final currentItemJson = currentItem.toJson();
             final int formerQuantity = quantity;
-            currentItemJson["quantity"] = formerQuantity - 1;
+            currentItemJson["quantity"] =
+                formerQuantity == 1 ? 1 : formerQuantity - 1;
             setState(() {
-              quantity -= 1;
+              quantity = quantity == 1 ? 1 : quantity - 1;
             });
 
             final formerIndex = items.indexOf(currentItem);
@@ -170,7 +170,7 @@ class _TransactionPricingListWidgetState
             final int formerQuantity = quantity;
             currentItemJson["quantity"] = formerQuantity + 1;
             setState(() {
-              quantity += 1;
+              quantity = quantity + 1;
             });
 
             final formerIndex = items.indexOf(currentItem);
