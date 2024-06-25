@@ -27,6 +27,7 @@ import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/add-group-member.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
+import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
 import '../../../../core/app/font-manager.dart';
@@ -56,6 +57,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool newMessage = false;
   bool fullScroll = true;
   bool isScrolling = false;
+  bool deleting = false;
 
   @override
   void initState() {
@@ -494,7 +496,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   const GroupProfileIcon(
                     size: 47,
                   ),
-
                 ],
               ),
               title: Text(group.groupName),
@@ -519,7 +520,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: openTransactionPage,
+                    onPressed:
+                        group.complete ? openTransactionPage : addGroupMember,
                     highlightColor: ColorManager.accentColor.withOpacity(0.15),
                     style: const ButtonStyle(
                         splashFactory: InkRipple.splashFactory),
@@ -541,21 +543,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   smallSpacer(),
-                  if (group.creator ==
-                      ClientProvider.readOnlyClient!.userId) ...[
-                    IconButton(
-                      onPressed: addGroupMember,
-                      highlightColor:
-                          ColorManager.accentColor.withOpacity(0.15),
-                      style: const ButtonStyle(
-                          splashFactory: InkRipple.splashFactory),
-                      icon: SvgIcon(
-                        svgRes: AssetManager.svgFile(name: "add-member"),
-                        color: ColorManager.accentColor,
-                        size: const Size.square(IconSizeManager.regular * 1.3),
-                      ),
-                    )
-                  ]
+                  IconButton(
+                    onPressed: deleteGroup,
+                    highlightColor: ColorManager.accentColor.withOpacity(0.15),
+                    style: const ButtonStyle(
+                        splashFactory: InkRipple.splashFactory),
+                    icon: deleting
+                        ? Transform.scale(
+                            scale: 1.5,
+                            child: LottieWidget(
+                                lottieRes:
+                                    AssetManager.lottieFile(name: "loading"),
+                                color: Colors.red,
+                                size: const Size.square(
+                                    IconSizeManager.regular * 1.3)),
+                          )
+                        : const Icon(
+                            CupertinoIcons.delete_solid,
+                            color: Colors.red,
+                            size: IconSizeManager.regular * 1.3,
+                          ),
+                  )
                 ],
               ),
             ),
@@ -563,7 +571,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  
+  Future<void> deleteGroup() async {
+    setState(() => deleting = true);
+    final result = await GroupRepo.deleteGroup(
+        userId: ClientProvider.readOnlyClient!.userId, groupId: group.groupId);
+    log(result.body);
+    setState(() => deleting = !result.error);
+
+    if (result.error) {
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Could not delete group");
+    } else {
+      SnackbarManager.showBasicSnackbar(
+          context: context, mode: ContentType.help, message: "Deleted group");
+      Navigator.pop(context);
+    }
+  }
 
   void openTransactionPage() {
     if (isCreator) {
@@ -822,5 +847,4 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     return "TROCO-Image${Path.extension(path!)}";
   }
-
 }

@@ -4,8 +4,6 @@ import 'package:troco/features/auth/presentation/providers/client-provider.dart'
 
 import '../../../../core/api/data/model/response-model.dart';
 import '../../../auth/domain/entities/client.dart';
-import '../../../chat/domain/entities/chat.dart';
-import '../../../chat/domain/repositories/chat-repository.dart';
 import '../entities/group.dart';
 
 class GroupRepo {
@@ -66,29 +64,7 @@ class GroupRepo {
       /// We are trying to get and save all the firstName,lastName,userImage and Id;
       /// And also send all unsent Chats in a group
       for (final group in groupsList) {
-        ///To send unsent chats
-
-        final unsentChats = List<Chat>.from(AppStorage.getUnsentChats(groupId: group.groupId));
-
-        if (unsentChats.isNotEmpty) {
-          for (final chat in unsentChats) {
-            final future = chat.hasAttachment
-                ? ChatRepo.sendAttachment(
-                    groupId: group.groupId,
-                    message: chat.message,
-                    attachment: chat.attachment!)
-                : ChatRepo.sendChat(
-                    groupId: group.groupId, message: chat.message!);
-            final chatResponse = await future;
-            if (!chatResponse.error) {
-              final unsentChats0 = List<Chat>.from(unsentChats);
-              unsentChats0.remove(chat);
-              AppStorage.saveUnsentChats(
-                  chats: unsentChats0, groupId: group.groupId);
-            }
-          }
-        }
-
+        
         Group g = group;
 
         /// Now, im trying to save the user's details seperately on my end.

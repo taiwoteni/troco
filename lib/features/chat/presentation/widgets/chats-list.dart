@@ -1,13 +1,11 @@
 // ignore_for_file: must_be_immutable
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../../core/app/size-manager.dart';
 import '../../../auth/presentation/providers/client-provider.dart';
@@ -27,6 +25,13 @@ class ChatLists extends ConsumerStatefulWidget {
 class _ChatListsState extends ConsumerState<ChatLists> {
   @override
   Widget build(BuildContext context) {
+    for (final currentChat in widget.chats) {
+      if (currentChat.senderId != ClientProvider.readOnlyClient!.userId) {
+        if (!currentChat.read) {
+          markAsRead(chat: currentChat);
+        }
+      }
+    }
     return ListView.builder(
       key: Key("${widget.group.groupId}-chats-list"),
       shrinkWrap: true,
@@ -95,26 +100,14 @@ class _ChatListsState extends ConsumerState<ChatLists> {
             Padding(
               padding: EdgeInsets.only(
                   bottom: isLastMessage ? SizeManager.large : 0),
-              child: VisibilityDetector(
-                key: ObjectKey(currentChat),
-                onVisibilityChanged: (info) {
-                  if (info.visibleFraction > 0.25) {
-                    if (currentChat.senderId !=
-                        ClientProvider.readOnlyClient!.userId) {
-                      if (!currentChat.read) {
-                        markAsRead(chat: currentChat);
-                      }
-                    }
-                  }
-                },
-                child: ChatWidget(
-                  chat: currentChat,
-                  lastSent: lastSent,
-                  firstSender: firstTimeSender,
-                  lastSender: lastTimeSender,
-                  sameSender: sameSender,
-                  lastMessage: isLastMessage,
-                ),
+              child: ChatWidget(
+                group: widget.group,
+                chat: currentChat,
+                lastSent: lastSent,
+                firstSender: firstTimeSender,
+                lastSender: lastTimeSender,
+                sameSender: sameSender,
+                lastMessage: isLastMessage,
               ),
             ),
             // for (Chat chat in ref.watch(pendingChatListProvider(widget.group.groupId)))
@@ -125,10 +118,20 @@ class _ChatListsState extends ConsumerState<ChatLists> {
     );
   }
 
-  Future<void> markAsRead({required final Chat chat}) async {
-    final result = await ChatRepo.markAsRead(
-        groupId: widget.group.groupId, messageId: chat.chatId);
+  void markAsRead({required final Chat chat}) {
+    //For those who may go offline.
+    //Just like whatsapp, as u open a chat and close it, it's all marked as read.
 
-    log(result.body);
+    final chats =
+        List<Chat>.from(AppStorage.getChats(groupId: widget.group.groupId));
+    final savedChats = <Chat>[];
+    for (final cachedChat in chats) {
+      final json = cachedChat.toJson();
+      (json["readBy"] as List).add(ClientProvider.readOnlyClient!.userId);
+      savedChats.add(Chat.fromJson(json: json));
+    }
+    AppStorage.saveChats(chats: chats, groupId: widget.group.groupId);
+
+    ChatRepo.markAsRead(groupId: widget.group.groupId, messageId: chat.chatId);
   }
 }
