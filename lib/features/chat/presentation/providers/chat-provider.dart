@@ -49,11 +49,9 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>(
         final _chatsList = AppStorage.getChats(groupId: groupId)
             .map((e) => e.toJson())
             .toList();
-        final _pendingChatsList = AppStorage.getUnsentChats(groupId: groupId);
 
         final bool chatsAreDifferent =
-            json.encode(_chatsList) != json.encode(chatsJson) ||
-                _pendingChatsList.isNotEmpty;
+            json.encode(_chatsList) != json.encode(chatsJson);
         List chatsListJson = chatsJson;
         List<Chat> chatsList =
             chatsListJson.map((e) => Chat.fromJson(json: e)).toList();
@@ -72,35 +70,6 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>(
 
           AppStorage.saveChats(chats: chatsList, groupId: groupId);
 
-          /// before we clear all the unsent chats, there are certain times when
-          /// not all unsent chats are currently sending as timeout errors through
-          /// internet or expections from back end could messages from sending.
-          ///
-          /// So we compare and contrasts the lengths of the two arrays: liveFromApi or unsentChats
-          /// If the amount of unsent chats isn't the same as sent chats,that means that there are chats that failed to send
-          /// and we will have to send each of them again
-
-          if (_pendingChatsList.isNotEmpty) {
-            for (final chat
-                in _pendingChatsList.where((chat) => chat.loading).toList()) {
-              final future = chat.hasAttachment
-                  ? ChatRepo.sendAttachment(
-                      groupId: groupId,
-                      message: chat.message,
-                      attachment: chat.attachment!)
-                  : ChatRepo.sendChat(groupId: groupId, message: chat.message!);
-
-              future.then((value) {
-                if (!value.error) {
-                  final pendingChats =
-                      AppStorage.getUnsentChats(groupId: groupId);
-                  pendingChats.removeLast();
-                  AppStorage.saveUnsentChats(
-                      chats: pendingChats, groupId: groupId);
-                }
-              });
-            }
-          }
           streamController.sink.add(chatsList);
         }
         ref.read(chatsRepoProvider.notifier).state = ChatRepo();

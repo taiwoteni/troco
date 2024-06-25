@@ -494,6 +494,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   const GroupProfileIcon(
                     size: 47,
                   ),
+
                 ],
               ),
               title: Text(group.groupName),
@@ -518,34 +519,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () {
-                      if (isCreator) {
-                        if (group.members.length >= 2) {
-                          Navigator.pushNamed(
-                              context, Routes.createTransactionRoute,
-                              arguments: group);
-                        } else {
-                          SnackbarManager.showBasicSnackbar(
-                              context: context,
-                              message: "Add a buyer",
-                              mode: ContentType.warning);
-                        }
-                      } else {
-                        SnackbarManager.showBasicSnackbar(
-                            context: context,
-                            message: "Under maintenance for buyers",
-                            mode: ContentType.warning);
-                      }
-                    },
+                    onPressed: openTransactionPage,
                     highlightColor: ColorManager.accentColor.withOpacity(0.15),
                     style: const ButtonStyle(
                         splashFactory: InkRipple.splashFactory),
                     icon: SvgIcon(
                       svgRes: AssetManager.svgFile(
-                          name: isCreator ? "delivery" : "buy"),
-                      color: group.members.length < 2 || group.hasTransaction
-                          ? ColorManager.secondary
-                          : ColorManager.accentColor,
+                          name: !group.complete
+                              ? "add-member"
+                              : isCreator
+                                  ? "delivery"
+                                  : "buy"),
+                      color: !group.complete
+                          ? ColorManager.accentColor
+                          : (group.hasTransaction
+                              ? (isCreator
+                                  ? ColorManager.accentColor
+                                  : Colors.red)
+                              : ColorManager.secondary),
                       size: const Size.square(IconSizeManager.regular * 1.3),
                     ),
                   ),
@@ -570,6 +561,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           )),
     );
+  }
+
+  
+
+  void openTransactionPage() {
+    if (isCreator) {
+      if (group.members.length >= 2) {
+        Navigator.pushNamed(context, Routes.createTransactionRoute,
+            arguments: group);
+      } else {
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            message: "Add a buyer",
+            mode: ContentType.warning);
+      }
+    } else {
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          message: "Under maintenance for buyers",
+          mode: ContentType.warning);
+    }
   }
 
   void addGroupMember() {
@@ -771,7 +783,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         setState(() => path = file.path);
       } else {
         SnackbarManager.showBasicSnackbar(
-            context: context, message: "Only Select Image or Video");
+            context: context,
+            mode: ContentType.failure,
+            message: "Only Select Image or Video");
       }
     }
   }
@@ -808,4 +822,5 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     return "TROCO-Image${Path.extension(path!)}";
   }
+
 }

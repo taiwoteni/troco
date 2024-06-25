@@ -105,7 +105,7 @@ class ChatWidget extends ConsumerWidget {
             vertical: SizeManager.regular * 1),
         decoration: BoxDecoration(
           color: isSender
-              ? chat.read
+              ? chat.readByOthers
                   ? ColorManager.accentColor
                   : ColorManager.themeColor
               : ColorManager.background,

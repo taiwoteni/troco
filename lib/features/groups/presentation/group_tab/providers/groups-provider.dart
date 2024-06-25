@@ -34,71 +34,81 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
 
     final periodic = Timer.periodic(const Duration(seconds: 2), (_) {
       ref.watch(groupsFutureProvider).when(
-        data: (groupsJson) {
-          /// First of all we have to compare and contrast between the
-        /// values gotten from the APIs and saved on the Device Cache.
-        ///
-        /// We compare and contrast the group itself, it's messages and it's members
-        /// since that's what we're watching for.
-        ///
-        /// We extract the Lists. Lists starting with underscores ('_') are from the Cache.
-        /// While the others are from the [groupsJson];
+          data: (groupsJson) {
+            /// First of all we have to compare and contrast between the
+            /// values gotten from the APIs and saved on the Device Cache.
+            ///
+            /// We compare and contrast the group itself, it's messages and it's members
+            /// since that's what we're watching for.
+            ///
+            /// We extract the Lists. Lists starting with underscores ('_') are from the Cache.
+            /// While the others are from the [groupsJson];
 
-        /// We get the groupsList from the Cache
-        final _groupList =
-            AppStorage.getGroups().map((e) => e.toJson()).toList();
+            /// We get the groupsList from the Cache
+            final _groupList =
+                AppStorage.getGroups().map((e) => e.toJson()).toList();
 
-        /// We get the messages list from both the cache and the api's json data
-        final _messagesList = _groupList.map((e) => e["messages"]).toList();
-        final messagesList = groupsJson.map((e) => e["messages"]).toList();
+            /// We get the messages list from both the cache and the api's json data
+            final _messagesList = _groupList.map((e) => e["messages"]).toList();
+            final messagesList = groupsJson.map((e) => e["messages"]).toList();
 
-        /// We get the members list from both the cache and the api's json data
-        final _membersList = _groupList.map((e) => e["members"]).toList();
-        final membersList = groupsJson.map((e) => e["members"]).toList();
+            /// We get the members list from both the cache and the api's json data
+            final _membersList = _groupList.map((e) => e["members"]).toList();
+            final membersList = groupsJson.map((e) => e["members"]).toList();
 
-        /// Then We contrast.
-        final bool groupsDifferent =
-            json.encode(_groupList) != json.encode(groupsJson);
-        final bool messagesDifferent =
-            json.encode(_messagesList) != json.encode(messagesList);
-        final bool membersDifferent =
-            json.encode(_membersList) != json.encode(membersList);
+            /// Then We contrast.
+            final bool groupsDifferent =
+                json.encode(_groupList) != json.encode(groupsJson);
+            final bool messagesDifferent =
+                json.encode(_messagesList) != json.encode(messagesList);
+            final bool membersDifferent =
+                json.encode(_membersList) != json.encode(membersList);
 
-        final valuesAreDifferent =
-            groupsDifferent || messagesDifferent || membersDifferent;
+            final valuesAreDifferent =
+                groupsDifferent || messagesDifferent || membersDifferent;
 
-        List<Group> groupsList =
-            groupsJson.map((e) => Group.fromJson(json: e)).where((group) => group.members.contains(ClientProvider.readOnlyClient!.userId),).toList();
+            List<Group> groupsList = groupsJson
+                .map((e) => Group.fromJson(json: e))
+                .where(
+                  (group) => group.members
+                      .contains(ClientProvider.readOnlyClient!.userId),
+                )
+                .toList();
 
-        // log("Data Group Names from API: ${groupsList.map((e) => e.groupName).toList()}");
-        // log("Data Group Names from Cache: ${AppStorage.getGroups().map((e) => e.groupName).toList()}/n");
+            // log("Data Group Names from API: ${groupsList.map((e) => e.groupName).toList()}");
+            // log("Data Group Names from Cache: ${AppStorage.getGroups().map((e) => e.groupName).toList()}/n");
 
-        // log("Data is different : $groupsDifferent");
+            // log("Data is different : $groupsDifferent");
 
-        if (valuesAreDifferent) {
-          log("");
-          log("Values have changed");
-          log("");
-        
+            if (valuesAreDifferent) {
+              log("");
+              log("Values have changed");
+              log("");
 
-          // Only if Data is not the same
+              // Only if Data is not the same
 
-          // log("New Groups from API ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
-          // log("Groups Newly Saved to Cache ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
-          // log("Are the groups now in sync ? ${groupsList.map((e) => e.groupName).toList() == AppStorage.getGroups().map((e) => e.groupName).toList()}");
-          AppStorage.saveGroups(groups: groupsList);
-          for (final group in groupsList){
-            final groupJson = group.toJson();
-            final chats = (groupJson["messages"] as List).map((e) => Chat.fromJson(json: e)).toList();
-            AppStorage.saveChats(chats: chats, groupId: group.groupId);
-          }
-          streamController.sink.add(groupsList);
-        }
-        ref.watch(groupRepoProvider.notifier).state = GroupRepo();
-        // log("==================");
-        },
-        error: (error, stackTrace) => log("Error occured when getting groups from api $error"),
-        loading: () => null);
+              // log("New Groups from API ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
+              // log("Groups Newly Saved to Cache ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
+              // log("Are the groups now in sync ? ${groupsList.map((e) => e.groupName).toList() == AppStorage.getGroups().map((e) => e.groupName).toList()}");
+              AppStorage.saveGroups(groups: groupsList);
+              for (final group in groupsList) {
+                final groupJson = group.toJson();
+                final chats = (groupJson["messages"] as List)
+                    .map((e) => Chat.fromJson(json: e))
+                    .toList();
+                AppStorage.saveChats(chats: chats, groupId: group.groupId);
+              }
+              streamController.sink.add(groupsList);
+            }
+            ref.watch(groupRepoProvider.notifier).state = GroupRepo();
+            // log("==================");
+          },
+          error: (error, stackTrace) {
+            // log("Error occured when getting groups from api $error");
+            log("Error occured when getting groups from api $error",
+                stackTrace: stackTrace);
+          },
+          loading: () => null);
     });
 
     ref.onDispose(() {

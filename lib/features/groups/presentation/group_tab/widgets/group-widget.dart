@@ -66,10 +66,12 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
 
     listenToChatChanges();
     return ListTile(
-        onTap: () {
+        onTap: () async{
           ref.watch(chatsGroupProvider.notifier).state = group.groupId;
-          Navigator.pushNamed(context, Routes.chatRoute,
+          await Navigator.pushNamed(context, Routes.chatRoute,
               arguments: widget.group);
+          setState(() {});
+              
         },
         dense: true,
         tileColor: Colors.transparent,

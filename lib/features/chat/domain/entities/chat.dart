@@ -29,6 +29,11 @@ class Chat extends Equatable {
   bool get read =>
       readReceipts.contains(ClientProvider.readOnlyClient!.userId) ||
       senderId == ClientProvider.readOnlyClient!.userId;
+  bool get readByOthers => readReceipts
+      .where(
+        (element) => element.toString() != senderId,
+      )
+      .isNotEmpty;
   List<String> get readReceipts => ((_json["readBy"] ?? []) as List)
       .map(
         (e) => e.toString(),

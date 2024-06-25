@@ -4,6 +4,8 @@ import 'package:troco/features/auth/presentation/providers/client-provider.dart'
 
 import '../../../../core/api/data/model/response-model.dart';
 import '../../../auth/domain/entities/client.dart';
+import '../../../chat/domain/entities/chat.dart';
+import '../../../chat/domain/repositories/chat-repository.dart';
 import '../entities/group.dart';
 
 class GroupRepo {
@@ -36,13 +38,22 @@ class GroupRepo {
     return result;
   }
 
+  static Future<HttpResponseModel> deleteGroup({
+    required final String userId,
+    required final String groupId,
+  }) async {
+    final request =
+        await ApiInterface.deleteRequest(url: "deletegroup/$userId/$groupId");
+
+    return request;
+  }
+
   Future<List<dynamic>> getGroupsJson() async {
     final result = await ApiInterface.getRequest(
         url: 'findoneuser/${ClientProvider.readOnlyClient!.userId}');
     if (!result.error) {
       Map<dynamic, dynamic> userJson = result.messageBody!["data"];
       List userGroupsList = userJson["groups"];
-      // log(userGroupsList.toString());
 
       final groupsList = userGroupsList
           .map(
@@ -50,61 +61,68 @@ class GroupRepo {
           )
           .toList();
       final sortedGroupsList = <Group>[];
+      final cachedGroupsList = AppStorage.getGroups();
 
       /// We are trying to get and save all the firstName,lastName,userImage and Id;
+      /// And also send all unsent Chats in a group
       for (final group in groupsList) {
-        /// Now, im trying to save the user's details seperately on my end.
-        final fullMembersList = <Client>[];
-        final membersList = group.members
-            .where((element) => element.toString() != group.adminId)
-            .toList();
-        for (final userId in membersList) {
-          final searchResponse = await ApiInterface.findUser(userId: userId);
-          // log(searchResponse.body);
-          if (!searchResponse.error) {
-            final userJson = searchResponse.messageBody!["data"];
-            final clientJson = {
-              "id": userJson["_id"],
-              "firstName": userJson["firstName"],
-              "lastName": userJson["lastName"],
-              "userImage": userJson["userImage"]
-            };
-            fullMembersList.add(Client.fromJson(json: clientJson));
+        ///To send unsent chats
+
+        final unsentChats = List<Chat>.from(AppStorage.getUnsentChats(groupId: group.groupId));
+
+        if (unsentChats.isNotEmpty) {
+          for (final chat in unsentChats) {
+            final future = chat.hasAttachment
+                ? ChatRepo.sendAttachment(
+                    groupId: group.groupId,
+                    message: chat.message,
+                    attachment: chat.attachment!)
+                : ChatRepo.sendChat(
+                    groupId: group.groupId, message: chat.message!);
+            final chatResponse = await future;
+            if (!chatResponse.error) {
+              final unsentChats0 = List<Chat>.from(unsentChats);
+              unsentChats0.remove(chat);
+              AppStorage.saveUnsentChats(
+                  chats: unsentChats0, groupId: group.groupId);
+            }
           }
         }
-        // We add the admin as a client as well. Although it's wrong :)
-        fullMembersList.add(Client.fromJson(json: {
-          "id": group.adminId,
-          "firstName": "Admin",
-          "lastName": "",
-          "userImage": null
-        }));
 
-        final groupJson = group.toJson();
-        groupJson["sortedMembers"] = fullMembersList
-            .map(
-              (e) => e.toJson(),
-            )
-            .toList();
+        Group g = group;
 
-        sortedGroupsList.add(Group.fromJson(json: groupJson));
+        /// Now, im trying to save the user's details seperately on my end.
+        /// Only if the members have changed
+        /// First check if the cachedGroupsList contains this group
+
+        final containsGroup =
+            cachedGroupsList.map((e) => e.groupId).contains(group.groupId);
+        if (containsGroup) {
+          final cachedGroup = cachedGroupsList.firstWhere(
+            (element) => element.groupId == group.groupId,
+          );
+
+          /// If it contains this group, we then check if the members are the same;
+          final sameMembers = cachedGroup.members.every(
+            (element) => group.members.contains(element),
+          );
+
+          /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.
+          if (sameMembers) {
+            // Intentionaly not assign it directly as, messages (chats) may differ
+            final gJson = g.toJson();
+            gJson["sortedMembers"] = cachedGroup.toJson()["sortedMembers"];
+            g = Group.fromJson(json: gJson);
+          } else {
+            g = await _getMembersDetailsInGroup(group: group);
+          }
+        } else {
+          g = await _getMembersDetailsInGroup(group: group);
+        }
+
+        sortedGroupsList.add(g);
       }
 
-      // /// Now i want to also locally store transactions from a group
-      // for(int i=0; i<sortedGroupsList.length; i++){
-      //   final group = groupsList[i];
-      //   final groupJson = group.toJson();
-      //   if(group.hasTransaction){
-      //     final transactionResponse = await TransactionRepo.getOneTransaction(transactionId: groupJson["transactions"][0]);
-          
-      //     if(!transactionResponse.error){
-      //       groupJson["transaction"]=transactionResponse.messageBody!["data"];
-      //     }
-      //     sortedGroupsList[i] = Group.fromJson(json: groupJson);
-      //   }
-      // }
-
-      // log(userJson.toString());
       return sortedGroupsList
           .map(
             (e) => e.toJson(),
@@ -113,5 +131,44 @@ class GroupRepo {
     }
     // log(result.body.toString());
     return AppStorage.getGroups().map((e) => e.toJson()).toList();
+  }
+
+  Future<Group> _getMembersDetailsInGroup({required final Group group}) async {
+    final fullMembersList = <Client>[];
+    final membersList = group.members
+        .where((element) => element.toString() != group.adminId)
+        .toList();
+    for (final userId in membersList) {
+      final searchResponse = await ApiInterface.findUser(userId: userId);
+      // log(searchResponse.body);
+      if (!searchResponse.error) {
+        final userJson = searchResponse.messageBody!["data"];
+        final clientJson = {
+          "id": userJson["_id"],
+          "firstName": userJson["firstName"],
+          "lastName": userJson["lastName"],
+          "userImage": userJson["userImage"]
+        };
+        fullMembersList.add(Client.fromJson(json: clientJson));
+      }
+    }
+    // We add the admin as a client as well. Although it's wrong :)
+    fullMembersList.add(Client.fromJson(json: {
+      "id": group.adminId,
+      "firstName": "Admin",
+      "lastName": "",
+      "userImage": null
+    }));
+
+    final groupJson = group.toJson();
+    groupJson["sortedMembers"] = fullMembersList
+        .map(
+          (e) => e.toJson(),
+        )
+        .toList();
+
+    final sortedGroup = Group.fromJson(json: groupJson);
+
+    return sortedGroup;
   }
 }

@@ -14,6 +14,7 @@ class Group extends Equatable {
       DateTime.parse(_json["transactionTime"] ?? _json["deadlineTime"]);
   DateTime get createdTime => DateTime.parse(_json["creationTime"]);
   bool get usingDelivery => _json["useDelivery"];
+  bool get complete => members.length>=3;
 
   List<String> get members {
     // List<dynamic> membersJson = json.decode(_json["members"] ?? "[]");
