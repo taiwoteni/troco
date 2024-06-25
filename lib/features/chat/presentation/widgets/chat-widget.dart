@@ -58,18 +58,13 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
     lastSender = widget.lastSender;
     sameSender = widget.sameSender;
     lastMessage = widget.lastMessage;
-    lastSender = widget.lastSent;
+    lastSent = widget.lastSent;
     isSender = ClientProvider.readOnlyClient!.userId == chat.senderId;
     alignViewsBottom = chat.hasAttachment ? true : chat.message!.length >= 116;
     failed = chat.loading &&
         AppStorage.getUnsentChats(groupId: groupId).contains(chat);
     showViews = (lastMessage ? true : lastSent) && isSender;
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
-      (timeStamp) {
-        setState(() {});
-      },
-    );
   }
 
   @override

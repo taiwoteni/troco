@@ -112,13 +112,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           }
         }
       });
-    });
 
-    /// Inorder to help the send buttons and action buttons
-    /// rebuild their state.
-    controller.addListener(() => setState(
-          () {},
-        ));
+      /// Inorder to help the send buttons and action buttons
+      /// rebuild their state.
+      controller.addListener(() => setState(
+            () {},
+          ));
+    });
   }
 
   @override
