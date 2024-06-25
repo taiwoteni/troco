@@ -162,6 +162,7 @@ class _CreateTransactonProgressScreenState
   Future<void> addPricing({required final Transaction transaction}) async {
     final group = ModalRoute.of(context)!.settings.arguments! as Group;
     final items = TransactionDataHolder.items!;
+    log(items.length.toString());
     for (final item in items) {
       setState(() {
         value += 1 / (items.length + 1);

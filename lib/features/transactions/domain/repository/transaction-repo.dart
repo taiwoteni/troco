@@ -58,7 +58,6 @@ class TransactionRepo {
     var parsedfile = File(item.image);
     var stream = ByteStream(parsedfile.openRead());
     var length = await parsedfile.length();
-
     final file = MultipartFile("pricingImage", stream, length,
         filename: Path.basename(item.image.toString()));
 

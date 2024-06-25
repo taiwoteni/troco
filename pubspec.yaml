@@ -67,6 +67,7 @@ dependencies:
   gif: ^2.3.0
   flutter_native_splash: ^2.4.0
   visibility_detector: ^0.4.0+2
+  video_thumbnail: ^0.5.3
 
 dev_dependencies:
   flutter_test:

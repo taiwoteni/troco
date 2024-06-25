@@ -29,6 +29,7 @@ import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/snackbar-manager.dart';
@@ -51,6 +52,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController controller = TextEditingController();
   bool isCreator = false;
   String? path;
+  Uint8List? thumbnail;
   FileStat? fileStat;
   late List<Chat> chats;
   bool sending = false;
@@ -381,8 +383,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   image: path == null
                       ? AssetImage(AssetManager.imageFile(
                           name: "nike-shoe-sample", ext: Extension.jpeg))
-                      : FileImage(File(path!))),
+                      : thumbnail != null
+                          ? MemoryImage(thumbnail!)
+                          : FileImage(File(path!))),
             ),
+            child: Visibility(
+                visible: path != null && getMimeType().toLowerCase() == "video",
+                child: const Icon(
+                  CupertinoIcons.play_fill,
+                  color: Colors.white,
+                  size: IconSizeManager.regular,
+                )),
           ),
           mediumSpacer(),
           Column(
@@ -805,6 +816,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (file != null) {
       if (["Video", "Image"].contains(getMimeType(path: file.path))) {
         fileStat = await File(file.path).stat();
+        if (getMimeType(path: file.path).toLowerCase() == "video") {
+          await _generateThumbnail(filePath: file.path);
+        }
+        else{
+          setState(()=> thumbnail = null);
+        }
         setState(() => path = file.path);
       } else {
         SnackbarManager.showBasicSnackbar(
@@ -845,6 +862,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (path == null) {
       return "";
     }
-    return "TROCO-Image${Path.extension(path!)}";
+    return "TROCO-${getMimeType()}${Path.extension(path!)}";
+  }
+
+  Future<void> _generateThumbnail({required final String filePath}) async {
+    final _thumbnail = await VideoThumbnail.thumbnailData(
+      video: filePath,
+      imageFormat: ImageFormat.JPEG,
+      maxWidth:
+          128, // specify the width of the thumbnail, let the height auto-scaled to keep the source aspect ratio
+      quality: 25,
+    );
+
+    setState(() {
+      thumbnail = _thumbnail;
+    });
   }
 }
