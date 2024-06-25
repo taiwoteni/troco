@@ -33,6 +33,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         style: const TextStyle(
             fontFamily: 'Lato',
             color: Colors.white,
+            decorationColor: Colors.transparent,
             fontSize: FontSizeManager.regular,
             fontWeight: FontWeightManager.semibold),
         onChanged: widget.onChanged,

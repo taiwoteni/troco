@@ -4,6 +4,10 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
+import 'package:troco/features/transactions/utils/product-quality-converter.dart';
+
+import '../entities/service.dart';
 import "package:path/path.dart" as Path;
 import 'package:http/http.dart';
 import 'package:troco/core/api/data/model/multi-part-model.dart';
@@ -13,6 +17,7 @@ import 'package:troco/features/auth/presentation/providers/client-provider.dart'
 import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
@@ -41,34 +46,86 @@ class TransactionRepo {
   }
 
   static Future<HttpResponseModel> createPricing({
+    required final TransactionCategory type,
     required final String transactionId,
     required final String groupId,
     required final String buyerId,
     required final SalesItem item,
   }) async {
-    final product = item as Product;
-    var parsedfile = File(product.productImages[0]);
+    /// As we all know, there are 3 types of Transactions.
+    /// Virtual, Service and Product
+
+    var parsedfile = File(item.image);
     var stream = ByteStream(parsedfile.openRead());
     var length = await parsedfile.length();
 
     final file = MultipartFile("pricingImage", stream, length,
-        filename: Path.basename(product.productImages[0].toString()));
+        filename: Path.basename(item.image.toString()));
+
+    /// We start with the default fields like,
+    /// 'price', 'quantity', 'pricingImage'
+    final multiparts = <MultiPartModel>[];
+    multiparts.add(MultiPartModel.file(file: file));
+    multiparts.add(MultiPartModel.field(field: "price", value: item.price));
+    multiparts
+        .add(MultiPartModel.field(field: "quantity", value: item.quantity));
+
+    ///Now we go the interesting parts;
+    /// For Product Transactions, we have:
+    /// 'productName', 'productCondition', 'category' (Which is now quality. Finbarr's laziness. :|)
+
+    if (type == TransactionCategory.Product) {
+      final product = item as Product;
+      final productName =
+          MultiPartModel.field(field: "productName", value: product.name);
+      final productQuality = MultiPartModel.field(
+          field: "category",
+          value: ProductQualityConverter.convertToString(
+              quality: product.productQuality));
+      final productCondition = MultiPartModel.field(
+          field: "productCondition",
+          value: ProductConditionConverter.convertToString(
+              condition: product.productCondition));
+
+      multiparts.add(productName);
+      multiparts.add(productQuality);
+      multiparts.add(productCondition);
+    }
+
+    /// For Service Transactions, we have:
+    /// 'serviceName', 'serviceRequirement'
+    if (type == TransactionCategory.Service) {
+      final service = item as Service;
+
+      final serviceName =
+          MultiPartModel.field(field: "serviceName", value: service.name);
+      final serviceRequirement = MultiPartModel.field(
+          field: "serviceRequirement",
+          value: service.serviceRequirement.name.toLowerCase());
+
+      multiparts.add(serviceName);
+      multiparts.add(serviceRequirement);
+    }
+
+    /// For Virtual Service Transactions, we have:
+    /// 'virtualName', 'virtualRequirement'
+    if (type == TransactionCategory.Virtual) {
+      final virtual = item as VirtualService;
+
+      final virtualName =
+          MultiPartModel.field(field: "virtualName", value: virtual.name);
+      final virtualRequirement = MultiPartModel.field(
+          field: "virtualRequirement",
+          value: virtual.serviceRequirement.name.toLowerCase());
+
+      multiparts.add(virtualName);
+      multiparts.add(virtualRequirement);
+    }
 
     final result = await ApiInterface.multipartPostRequest(
         url:
             "createpricing/${ClientProvider.readOnlyClient!.userId}/$groupId/$transactionId/$buyerId",
-        multiparts: [
-          const MultiPartModel.field(field: "category", value: "No Category"),
-          MultiPartModel.field(
-              field: "productName", value: product.name),
-          MultiPartModel.field(
-              field: "productCondition",
-              value: ProductConditionConverter.convertToString(
-                  condition: product.productCondition)),
-          MultiPartModel.field(field: "quantity", value: product.quantity),
-          MultiPartModel.field(field: "price", value: product.price),
-          MultiPartModel.file(file: file),
-        ]);
+        multiparts: multiparts);
     return result;
   }
 
@@ -97,6 +154,7 @@ class TransactionRepo {
     }
 
     final transactionsJson = result.messageBody!["data"]["transactions"];
+    // log(transactionsJson.toString());
 
     final List<String> transactionsId =
         (transactionsJson as List).map((e) => e["_id"].toString()).toList();
@@ -104,6 +162,7 @@ class TransactionRepo {
     List<Map<dynamic, dynamic>> jsonData = [];
     for (final String id in transactionsId) {
       final response = await getOneTransaction(transactionId: id);
+      // log(response.body);
       if (response.error) {
         return HttpResponseModel(
             error: response.error, body: response.body, code: response.code);

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
-import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/services/data/sources/preset-services.dart';
 import 'package:troco/features/services/utils/clipper.dart';
 
@@ -14,6 +13,7 @@ import '../../../../../../core/app/font-manager.dart';
 import '../../../../../../core/app/size-manager.dart';
 import '../../../../settings/data/models/settings-model.dart';
 import '../../../../settings/presentation/settings-page/widget/settings-tile-widget.dart';
+
 class ServicesPage extends ConsumerStatefulWidget {
   const ServicesPage({super.key});
 
@@ -71,9 +71,9 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
                   Colors.transparent,
                   Colors.transparent,
                   Colors.transparent,
-                  Colors.purple.withOpacity(0.15),
-                  Colors.purple.withOpacity(0.3),
-                  Colors.purple.withOpacity(0.4),
+                  ColorManager.themeColor.withOpacity(0.15),
+                  ColorManager.themeColor.withOpacity(0.3),
+                  ColorManager.themeColor.withOpacity(0.4),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -87,9 +87,15 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
           ),
           Positioned(
             bottom: SizeManager.regular,
-            child: ProfileIcon(
-              url: ClientProvider.readOnlyClient!.profile,
-              size: IconSizeManager.extralarge * 1.55,
+            child: Container(
+              height: IconSizeManager.extralarge * 1.55,
+              width: IconSizeManager.extralarge * 1.55,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: AssetImage(AssetManager.imageFile(
+                          name: "escrow", ext: Extension.jpg)))),
             ),
           )
         ],

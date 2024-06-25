@@ -5,6 +5,7 @@ import 'package:troco/features/transactions/domain/entities/driver.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/service.dart';
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/utils/inspection-period-converter.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
@@ -61,12 +62,14 @@ class Transaction extends Equatable {
 
   /// We have to think these through as a transaction can have many products.
   List<SalesItem> get salesItem {
-    return ((_json["products"] ?? _json["pricing"]) as List)
-        .map((e){
-          var product = transactionCategory==TransactionCategory.Product;
-          return product? Product.fromJson(json: e):Service.fromJson(json: e);
-        })
-        .toList();
+    return ((_json["products"] ?? _json["pricing"]) as List).map((e) {
+      var product = transactionCategory == TransactionCategory.Product;
+      return product
+          ? Product.fromJson(json: e)
+          : transactionCategory == TransactionCategory.Virtual
+              ? VirtualService.fromJson(json: e)
+              : Service.fromJson(json: e);
+    }).toList();
   }
 
   String? get adminId => _json["adminId"];

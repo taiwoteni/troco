@@ -93,14 +93,14 @@ class _CreateTransactonProgressScreenState
   }
 
   Widget descriptionText() {
-    final products = TransactionDataHolder.items ?? [];
+    final items = TransactionDataHolder.items ?? [];
     String text = "Creating Transaction...";
 
-    if (value >= 1 / (products.length + 1)) {
-      final productNo = (value * (products.length + 1)).toInt() - 1;
-      text = "Adding Product $productNo...";
+    if (value >= 1 / (items.length + 1)) {
+      final itemNo = (value * (items.length + 1)).toInt() - 1;
+      text = "Adding Product $itemNo...";
     }
-    if (value == 1 || products.isEmpty) {
+    if (value == 1 || items.isEmpty) {
       text = "Created transaction !";
     }
     if (error) {
@@ -140,6 +140,8 @@ class _CreateTransactonProgressScreenState
         dateOfWork: "$year-$month-${day}T00:00:00Z",
         groupId: group.groupId,
         transaction: transaction);
+      log(response.body);
+
 
     if (response.error) {
       setState(() {
@@ -152,27 +154,26 @@ class _CreateTransactonProgressScreenState
         value = 1 / (products.length + 1);
       });
       final transactionJson = response.messageBody!["data"];
-      await addProducts(
+      await addPricing(
           transaction: Transaction.fromJson(json: transactionJson));
     }
   }
 
-  Future<void> addProducts({required final Transaction transaction}) async {
+  Future<void> addPricing({required final Transaction transaction}) async {
     final group = ModalRoute.of(context)!.settings.arguments! as Group;
-    final products = TransactionDataHolder.items!;
-    for (final product in products) {
+    final items = TransactionDataHolder.items!;
+    for (final item in items) {
       setState(() {
-        value += 1 / (products.length + 1);
+        value += 1 / (items.length + 1);
         canPop = value == 1;
       });
       final response = await TransactionRepo.createPricing(
+        type: transaction.transactionCategory,
           transactionId: transaction.transactionId,
           groupId: group.groupId,
-          buyerId: group.members
-              .firstWhere(
-                  (element) => element.toString() != transaction.creator)
-              .toString(),
-          item: product);
+          buyerId: group.buyer!.userId,
+          item: item);
+      log(response.body);    
 
       if (response.error) {
         log("Error:${response.body}");
@@ -181,7 +182,7 @@ class _CreateTransactonProgressScreenState
         });
         break;
       } else {
-        if (products.last == product) {
+        if (items.last == item) {
           setState(() {
             error = false;
           });

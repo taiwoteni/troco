@@ -37,9 +37,8 @@ class SettingsTileWidget extends StatelessWidget {
   Color settingsPrimaryColor() {
     switch (setting.settingsType) {
       case SettingsType.normal:
-        return ColorManager.accentColor;
       case SettingsType.financial:
-        return Colors.purple.shade700;
+        return ColorManager.accentColor;
       default:
         return Colors.red.shade600;
     }
@@ -48,9 +47,8 @@ class SettingsTileWidget extends StatelessWidget {
   Color settingsSecondaryColor() {
     switch (setting.settingsType) {
       case SettingsType.normal:
-        return ColorManager.accentColor.withOpacity(0.07);
       case SettingsType.financial:
-        return Colors.purple.withOpacity(0.2);
+        return ColorManager.accentColor.withOpacity(0.07);
       default:
         return Colors.red.shade600.withOpacity(0.1);
     }

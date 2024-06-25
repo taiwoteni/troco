@@ -94,7 +94,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "My Business",
+                "My Groups",
                 style: TextStyle(
                     fontFamily: 'Lato',
                     color: Colors.white,

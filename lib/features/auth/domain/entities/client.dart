@@ -16,7 +16,7 @@ class Client extends Equatable {
   String get phoneNumber => _json["phoneNumber"];
   String get businessName => _json["businessName"] ?? "$firstName Ventures";
   Category get accountCategory => CategoryConverter.convertToCategory(
-      category: _json["category"] ?? "merchant");
+      category: _json["category"] ?? "personal");
   String get address => _json["address"];
   String get city => _json["city"];
   String get state => _json["state"];

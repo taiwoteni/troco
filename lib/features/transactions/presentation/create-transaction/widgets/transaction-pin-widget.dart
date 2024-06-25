@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
@@ -81,20 +83,28 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
           OtpInputField(
             first: true,
             obscure: true,
-            onEntered: (value) {},
+            onEntered: (value) {
+              setState(() => pin1 = value);
+            },
           ),
           OtpInputField(
             obscure: true,
-            onEntered: (value) {},
+            onEntered: (value) {
+              setState(() => pin2 = value);
+            },
           ),
           OtpInputField(
             obscure: true,
-            onEntered: (value) {},
+            onEntered: (value) {
+              setState(() => pin3 = value);
+            },
           ),
           OtpInputField(
             obscure: true,
             last: true,
-            onEntered: (value) {},
+            onEntered: (value) {
+              setState(() => pin4 = value);
+            },
           )
         ],
       ),
@@ -116,10 +126,15 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
     await Future.delayed(const Duration(seconds: 3));
     final response = await AuthenticationRepo.verifyTransactionPin(
         transactionPin: "$pin1$pin2$pin3$pin4");
+    log(response.body.toString());
 
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
 
-    if (!response.error) {
+    final theSame =
+        response.messageBody?["message"].toString().toLowerCase().trim() ==
+            "validated... correct pin passed";
+
+    if (theSame) {
       if (mounted) {
         Navigator.pop(context, true);
       }
@@ -128,8 +143,7 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
         Navigator.pop(context, false);
       }
       SnackbarManager.showBasicSnackbar(
-        context: context,
-        message: "Incorrect Pin or Internet Error");
+          context: context, message: "Incorrect Pin or Internet Error");
     }
   }
 }

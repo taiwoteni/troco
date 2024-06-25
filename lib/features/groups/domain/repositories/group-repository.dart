@@ -79,8 +79,8 @@ class GroupRepo {
           );
 
           /// If it contains this group, we then check if the members are the same;
-          final sameMembers = cachedGroup.members.every(
-            (element) => group.members.contains(element),
+          final sameMembers = group.members.every(
+            (element) => cachedGroup.sortedMembers.map((e) => e.userId).contains(element),
           );
 
           /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.

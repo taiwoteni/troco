@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import '../../utils/enums.dart';
 
 import '../../../../core/app/routes-manager.dart';
@@ -46,6 +47,7 @@ List<SettingsModel> presetSettings({required BuildContext context, required fina
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
         onTap: () async{
+          await AppStorage.clear();
           Navigator.pushNamedAndRemoveUntil(
               context, Routes.authRoute, (route) => false);
         },

@@ -30,7 +30,6 @@ class _OtpInputFieldState extends ConsumerState<OtpInputField> {
         maxLength: 1,
         obscureText: widget.obscure,
         showCursor: false,
-        textCapitalization: TextCapitalization.characters,
         cursorColor: ColorManager.themeColor,
         cursorRadius: const Radius.circular(SizeManager.large),
         style: TextStyle(
@@ -39,8 +38,6 @@ class _OtpInputFieldState extends ConsumerState<OtpInputField> {
             fontWeight: FontWeightManager.bold,
             fontSize: FontSizeManager.large),
         textAlign: TextAlign.center,
-        textInputAction:
-            widget.last ? TextInputAction.go : TextInputAction.next,
         onChanged: (value) {
           if (widget.onEntered != null) {
             widget.onEntered!(value);
