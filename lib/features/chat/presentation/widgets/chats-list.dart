@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
+import 'package:troco/features/chat/presentation/widgets/admin-chat-widget.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 
@@ -100,15 +101,25 @@ class _ChatListsState extends ConsumerState<ChatLists> {
             Padding(
               padding: EdgeInsets.only(
                   bottom: isLastMessage ? SizeManager.large : 0),
-              child: ChatWidget(
-                group: widget.group,
-                chat: currentChat,
-                lastSent: lastSent,
-                firstSender: firstTimeSender,
-                lastSender: lastTimeSender,
-                sameSender: sameSender,
-                lastMessage: isLastMessage,
-              ),
+              child: currentChat.senderId == widget.group.adminId
+                  ? AdminChatWidget(
+                      group: widget.group,
+                      chat: currentChat,
+                      lastSent: lastSent,
+                      firstSender: firstTimeSender,
+                      lastSender: lastTimeSender,
+                      sameSender: sameSender,
+                      lastMessage: isLastMessage,
+                    )
+                  : ChatWidget(
+                      group: widget.group,
+                      chat: currentChat,
+                      lastSent: lastSent,
+                      firstSender: firstTimeSender,
+                      lastSender: lastTimeSender,
+                      sameSender: sameSender,
+                      lastMessage: isLastMessage,
+                    ),
             ),
             // for (Chat chat in ref.watch(pendingChatListProvider(widget.group.groupId)))
             //   ChatWidget(chat: chat, deviceClient: deviceClient)

@@ -1,5 +1,6 @@
 // ignore_for_file: unused_element
 
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -240,6 +241,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
             attachment: chat.attachment!)
         : ChatRepo.sendChat(
             groupId: ref.watch(chatsGroupProvider), message: chat.message!));
+    log(response.body);
     setState(() {
       failed = response.error;
     });

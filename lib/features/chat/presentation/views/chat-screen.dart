@@ -801,7 +801,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Future<void> listenToGroupChanges() async {
     ref.listen(groupsStreamProvider, (previous, next) {
-      ref.watch(groupsStreamProvider).whenData((value) {
+      next.whenData((value) {
         if (value.map((e) => e.groupId).contains(group.groupId)) {
           final singleGroup =
               value.firstWhere((element) => element.groupId == group.groupId);

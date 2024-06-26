@@ -18,20 +18,36 @@ import '../../domain/entities/chat.dart';
 
 /// This Widget contains all the header details.
 /// From the Group's details, to the other chat details
-class ChatHeader extends ConsumerWidget {
+class ChatHeader extends ConsumerStatefulWidget {
   List<Chat> chats;
   Group group;
   ChatHeader({super.key, required this.chats, required this.group});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    bool hasTransaction = group.hasTransaction;
-    listenToGroupChanges(ref, hasTransaction);
+  ConsumerState<ChatHeader> createState() => _ChatHeaderState();
+}
+
+class _ChatHeaderState extends ConsumerState<ChatHeader> {
+  late List<Chat> chats;
+  late Group group;
+  bool hasTransaction = false;
+
+  @override
+  void initState() {
+    chats = widget.chats;
+    group = widget.group;
+    hasTransaction = group.hasTransaction;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    listenToGroupChanges();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         mediumSpacer(),
-        groupDetailsWidget(context: context, hasTransaction: hasTransaction),
+        groupDetailsWidget(),
         groupCreationTime(),
         if (false) adminJoinedWidget(),
         addedWidget(),
@@ -133,9 +149,7 @@ class ChatHeader extends ConsumerWidget {
     );
   }
 
-  Widget groupDetailsWidget(
-      {required final BuildContext context,
-      required final bool hasTransaction}) {
+  Widget groupDetailsWidget() {
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.symmetric(
@@ -166,6 +180,7 @@ class ChatHeader extends ConsumerWidget {
           ),
           regularSpacer(),
           Text(
+            ///TODO: Change the static 'ongoing' to the transaction's status.
             hasTransaction ? "Transaction Ongoing" : "No Transactions yet",
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -260,20 +275,31 @@ class ChatHeader extends ConsumerWidget {
     );
   }
 
-  Future<void> listenToGroupChanges(WidgetRef ref, bool hasTransactions) async {
+  Future<void> listenToGroupChanges() async {
     ref.listen(groupsStreamProvider, (previous, next) {
-      ref.watch(groupsStreamProvider).whenData((value) {
+      next.whenData((value) {
         final group = value
             .singleWhere((element) => element.groupId == this.group.groupId);
+
+        if (group.members.length != this.group.members.length) {
+          setState(() {
+            this.group = group;
+          });
+        }
+
+        bool hasTransaction = false;
         if (group.hasTransaction) {
-          if (hasTransactions == false) {
-            hasTransactions = true;
+          if (hasTransaction == false) {
+            hasTransaction = true;
           } else {
-            if (hasTransactions != false) {
-              hasTransactions = false;
+            if (hasTransaction != false) {
+              hasTransaction = false;
             }
           }
         }
+        setState(() {
+          this.hasTransaction = hasTransaction;
+        });
       });
     });
   }
