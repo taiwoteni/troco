@@ -480,7 +480,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             "productQuality": ProductQualityConverter.convertToString(
                 quality: selectedProductQuality!),
             "quantity": quantity,
-            "productImages": productImages,
+            "pricingImage": productImages[0],
           };
           if (mounted) {
             Navigator.pop(context, Product.fromJson(json: productJson));

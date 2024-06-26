@@ -196,6 +196,7 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
   }
 
   Future<void> createGroup() async {
+    
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
     if (formKey.currentState!.validate() && !groupNameError) {

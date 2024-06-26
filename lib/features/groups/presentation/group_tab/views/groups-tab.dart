@@ -72,10 +72,10 @@ class _GroupListState extends State<GroupList> {
     final groups = widget.groups;
 
     groups.sort((groupA, groupB) {
-      List<Chat> chatsA = (groupA.toJson()["messages"] as List)
+      List<Chat> chatsA = ((groupA.toJson()["messages"] ?? []) as List)
           .map((e) => Chat.fromJson(json: e))
           .toList();
-      List<Chat> chatsB = (groupB.toJson()["messages"] as List)
+      List<Chat> chatsB = ((groupB.toJson()["messages"] ?? []) as List)
           .map((e) => Chat.fromJson(json: e))
           .toList();
 
@@ -90,10 +90,10 @@ class _GroupListState extends State<GroupList> {
 
     return widget.groups.isEmpty
         ? const SliverFillRemaining(
-          child: EmptyScreen(
+            child: EmptyScreen(
               label: "No Business Groups.\nCreate a Business Group",
             ),
-        )
+          )
         : SliverList.builder(
             key: const Key("groupsList"),
 
@@ -109,10 +109,10 @@ class _GroupListState extends State<GroupList> {
                     if (index == widget.groups.length - 1)
                       const Gap(SizeManager.bottomBarHeight)
                     else
-                    Divider(
-                  thickness: 0.8,
-                  color: ColorManager.secondary.withOpacity(0.08),
-                )
+                      Divider(
+                        thickness: 0.8,
+                        color: ColorManager.secondary.withOpacity(0.08),
+                      )
                   ],
                 ),
             itemCount: widget.groups.length);

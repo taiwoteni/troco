@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
 
+import '../../../groups/domain/entities/group.dart';
 import '../entities/service.dart';
 import "package:path/path.dart" as Path;
 import 'package:http/http.dart';
@@ -27,12 +28,16 @@ class TransactionRepo {
       {required final String groupId,
       required final Transaction transaction,
       required final String dateOfWork}) async {
+    final cat = transaction.transactionCategory;
     final result = await ApiInterface.postRequest(
         url:
             "createtransaction/${ClientProvider.readOnlyClient!.userId}/$groupId",
         data: {
           "typeOftransaction":
               transaction.transactionCategory.name.toLowerCase(),
+          "pricingType": cat == TransactionCategory.Product
+              ? "pricings"
+              : "${cat.name.toLowerCase()}pricing",
           // "role":"Seller",
           "transactionName": transaction.transactionName,
           "aboutService": transaction.transactionDetail,
@@ -48,12 +53,13 @@ class TransactionRepo {
   static Future<HttpResponseModel> createPricing({
     required final TransactionCategory type,
     required final String transactionId,
-    required final String groupId,
-    required final String buyerId,
+    required final Group group,
     required final SalesItem item,
   }) async {
     /// As we all know, there are 3 types of Transactions.
     /// Virtual, Service and Product
+
+    log(type.name.toString());
 
     var parsedfile = File(item.image);
     var stream = ByteStream(parsedfile.openRead());
@@ -69,61 +75,70 @@ class TransactionRepo {
     multiparts
         .add(MultiPartModel.field(field: "quantity", value: item.quantity));
 
-    ///Now we go the interesting parts;
-    /// For Product Transactions, we have:
-    /// 'productName', 'productCondition', 'category' (Which is now quality. Finbarr's laziness. :|)
+    try {
+      /// For Service Transactions, we have:
+      /// 'serviceName', 'serviceRequirement'
+      if (type == TransactionCategory.Service) {
+        final service = item as Service;
+        log("Is Service");
 
-    if (type == TransactionCategory.Product) {
-      final product = item as Product;
-      final productName =
-          MultiPartModel.field(field: "productName", value: product.name);
-      final productQuality = MultiPartModel.field(
-          field: "category",
-          value: ProductQualityConverter.convertToString(
-              quality: product.productQuality));
-      final productCondition = MultiPartModel.field(
-          field: "productCondition",
-          value: ProductConditionConverter.convertToString(
-              condition: product.productCondition));
+        final serviceName =
+            MultiPartModel.field(field: "serviceName", value: service.name);
+        final serviceRequirement = MultiPartModel.field(
+            field: "serviceRequirement",
+            value: service.serviceRequirement.name.toLowerCase());
 
-      multiparts.add(productName);
-      multiparts.add(productQuality);
-      multiparts.add(productCondition);
-    }
+        multiparts.add(serviceName);
+        multiparts.add(serviceRequirement);
+      }
 
-    /// For Service Transactions, we have:
-    /// 'serviceName', 'serviceRequirement'
-    if (type == TransactionCategory.Service) {
-      final service = item as Service;
+      ///Now we go the interesting parts;
+      /// For Product Transactions, we have:
+      /// 'productName', 'productCondition', 'category' (Which is now quality. Finbarr's laziness. :|)
 
-      final serviceName =
-          MultiPartModel.field(field: "serviceName", value: service.name);
-      final serviceRequirement = MultiPartModel.field(
-          field: "serviceRequirement",
-          value: service.serviceRequirement.name.toLowerCase());
+      else if (type == TransactionCategory.Product) {
+        final product = item as Product;
+        log("Is Production");
 
-      multiparts.add(serviceName);
-      multiparts.add(serviceRequirement);
-    }
+        final productName =
+            MultiPartModel.field(field: "productName", value: product.name);
+        final productQuality = MultiPartModel.field(
+            field: "category",
+            value: ProductQualityConverter.convertToString(
+                quality: product.productQuality));
+        final productCondition = MultiPartModel.field(
+            field: "productCondition",
+            value: ProductConditionConverter.convertToString(
+                condition: product.productCondition));
 
-    /// For Virtual Service Transactions, we have:
-    /// 'virtualName', 'virtualRequirement'
-    if (type == TransactionCategory.Virtual) {
-      final virtual = item as VirtualService;
+        multiparts.add(productName);
+        multiparts.add(productQuality);
+        multiparts.add(productCondition);
+      }
 
-      final virtualName =
-          MultiPartModel.field(field: "virtualName", value: virtual.name);
-      final virtualRequirement = MultiPartModel.field(
-          field: "virtualRequirement",
-          value: virtual.serviceRequirement.name.toLowerCase());
+      /// For Virtual Service Transactions, we have:
+      /// 'virtualName', 'virtualRequirement'
 
-      multiparts.add(virtualName);
-      multiparts.add(virtualRequirement);
+      else if (type == TransactionCategory.Virtual) {
+        final virtual = item as VirtualService;
+        log("Is Virtual");
+
+        final virtualName =
+            MultiPartModel.field(field: "virtualName", value: virtual.name);
+        final virtualRequirement = MultiPartModel.field(
+            field: "virtualRequirement",
+            value: virtual.serviceRequirement.name.toLowerCase());
+
+        multiparts.add(virtualName);
+        multiparts.add(virtualRequirement);
+      }
+    } on Exception catch (e) {
+      log("Uploading Pricing$e");
     }
 
     final result = await ApiInterface.multipartPostRequest(
         url:
-            "createpricing/${ClientProvider.readOnlyClient!.userId}/$groupId/$transactionId/$buyerId",
+            "createpricing/${ClientProvider.readOnlyClient!.userId}/${group.groupId}/$transactionId/${group.buyer!.userId}/${group.adminId}",
         multiparts: multiparts);
     return result;
   }
@@ -134,6 +149,7 @@ class TransactionRepo {
     final response = await ApiInterface.getRequest(
       url: "getOneTransaction/$transactionId",
     );
+    // log(response.body);
 
     return response;
   }
@@ -152,11 +168,15 @@ class TransactionRepo {
           code: result.code);
     }
 
-    final transactionsJson = result.messageBody!["data"]["transactions"];
+    final transactionsJson = result.messageBody!["data"]["transactions"] ?? [];
     // log(transactionsJson.toString());
 
-    final List<String> transactionsId =
-        (transactionsJson as List).map((e) => e["_id"].toString()).toList();
+    final List<String> transactionsId = ((transactionsJson ?? []) as List)
+        .where(
+          (element) => (element["pricing"] as List).isNotEmpty,
+        )
+        .map((e) => e["_id"].toString())
+        .toList();
 
     List<Map<dynamic, dynamic>> jsonData = [];
     for (final String id in transactionsId) {
@@ -187,10 +207,22 @@ class TransactionRepo {
       log("error fetching transactions from repo");
       return AppStorage.getTransactions();
     } else {
-      final transactionsList = (json.decode(response.body) as List)
-          .map((e) => Transaction.fromJson(json: e))
-          .toList();
-      return transactionsList;
+      final transactionsJson = (json.decode(response.body) as List);
+
+      final transactions = <Transaction>[];
+
+      for (final json in transactionsJson) {
+        if ((json["pricing"] as List).isNotEmpty) {
+          Transaction t = Transaction.fromJson(json: json);
+          try {
+            t.salesItem.length;
+            transactions.add(t);
+          } on TypeError{
+            //Do nothing
+          }
+        }
+      }
+      return transactions;
     }
   }
 

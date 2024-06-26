@@ -3,8 +3,10 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/features/home/data/models/home-item-model.dart';
 import 'package:troco/features/dashboard/presentation/views/home-page.dart';
 import 'package:troco/features/settings/presentation/settings-page/views/settings-page.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/wallet/presentation/views/wallet-page.dart';
 
+import '../../../auth/presentation/providers/client-provider.dart';
 import '../../../groups/presentation/groups_page/views/group-page.dart';
 import '../../../services/presentation/core/views/services-page.dart';
 
@@ -13,10 +15,11 @@ List<HomeItemModel> homeItems = [
       icon: AssetManager.svgFile(name: 'home'),
       label: "Home",
       page: const HomePage()),
-  HomeItemModel(
-      icon: AssetManager.svgFile(name: 'wallet'),
-      label: "Wallet",
-      page: const WalletPage()),
+  if (ClientProvider.readOnlyClient!.accountCategory != Category.Personal)
+    HomeItemModel(
+        icon: AssetManager.svgFile(name: 'wallet'),
+        label: "Wallet",
+        page: const WalletPage()),
   HomeItemModel(
       icon: AssetManager.svgFile(name: 'group'),
       label: "Group",

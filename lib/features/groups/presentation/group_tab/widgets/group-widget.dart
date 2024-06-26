@@ -37,10 +37,18 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
   }
 
   @override
+  void setState(VoidCallback fn) {
+    if(!mounted){
+      return;
+    }
+    super.setState(fn);
+  }
+
+  @override
   Widget build(BuildContext context) {
     Color color = ColorManager.accentColor;
     chats = [
-      ...(group.toJson()["messages"] as List)
+      ...((group.toJson()["messages"] ?? []) as List)
           .map((e) => Chat.fromJson(json: e)),
       ...AppStorage.getUnsentChats(groupId: group.groupId)
     ];
@@ -66,12 +74,11 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
 
     listenToChatChanges();
     return ListTile(
-        onTap: () async{
+        onTap: () async {
           ref.watch(chatsGroupProvider.notifier).state = group.groupId;
           await Navigator.pushNamed(context, Routes.chatRoute,
               arguments: widget.group);
           setState(() {});
-              
         },
         dense: true,
         tileColor: Colors.transparent,

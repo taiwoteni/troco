@@ -10,6 +10,7 @@ import 'package:troco/features/auth/presentation/providers/client-provider.dart'
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import '../../../../chat/domain/entities/chat.dart';
+import '../../../../chat/presentation/providers/chat-provider.dart';
 
 /// This is a state Provider, responsible for returning and refreshing
 /// the Group Repo class. Inorder reload to be on the safer side when looking for changes.
@@ -58,11 +59,11 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
 
             /// Then We contrast.
             final bool groupsDifferent =
-                json.encode(_groupList) != json.encode(groupsJson);
+                json.encode(_groupList) != json.encode(groupsJson) || _groupList.length != groupsJson.length;
             final bool messagesDifferent =
-                json.encode(_messagesList) != json.encode(messagesList);
+                json.encode(_messagesList) != json.encode(messagesList) || _messagesList.length != messagesList.length;
             final bool membersDifferent =
-                json.encode(_membersList) != json.encode(membersList);
+                json.encode(_membersList) != json.encode(membersList) || _membersList.length != membersList.length;
 
             final valuesAreDifferent =
                 groupsDifferent || messagesDifferent || membersDifferent;
@@ -91,12 +92,22 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
               // log("Groups Newly Saved to Cache ${groupsList.map((e) => e.groupName).toList().where((element) => !AppStorage.getGroups().map((e) => e.groupName).toList().contains(element)).toList()}");
               // log("Are the groups now in sync ? ${groupsList.map((e) => e.groupName).toList() == AppStorage.getGroups().map((e) => e.groupName).toList()}");
               AppStorage.saveGroups(groups: groupsList);
+
+              ///Only saving chats if the group isn't opened by the user.
+              ///The concurrent modification doesn't allow the chat-provider
+              ///to know that chats have changed.
+              
+              
               for (final group in groupsList) {
-                final groupJson = group.toJson();
-                final chats = (groupJson["messages"] as List)
+                if(group.groupId != ref.watch(chatsGroupProvider)){
+                  final groupJson = group.toJson();
+                final chats = ((groupJson["messages"] ?? []) as List)
                     .map((e) => Chat.fromJson(json: e))
                     .toList();
+                // if(chatProvide)
                 AppStorage.saveChats(chats: chats, groupId: group.groupId);
+                }
+                
               }
               streamController.sink.add(groupsList);
             }

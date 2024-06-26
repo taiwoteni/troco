@@ -1,3 +1,4 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,8 +13,12 @@ import 'package:troco/features/groups/presentation/group_tab/widgets/create-grou
 import 'package:troco/features/groups/presentation/group_tab/views/groups-tab.dart';
 
 import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/app/snackbar-manager.dart';
+import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../../core/components/images/profile-icon.dart';
 import '../../../../../core/components/others/spacer.dart';
+import '../../../../auth/presentation/providers/client-provider.dart';
+import '../../../../transactions/utils/enums.dart';
 
 class GroupPage extends ConsumerStatefulWidget {
   const GroupPage({super.key});
@@ -174,6 +179,15 @@ class _GroupPageState extends ConsumerState<GroupPage>
   }
 
   Future<void> createGroup() async {
+    if (AppStorage.getGroups().length >= 20) {
+      if (ClientProvider.readOnlyClient!.accountCategory == Category.Personal) {
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            mode: ContentType.failure,
+            message: "Max groups for Personal Account is 20.");
+      }
+      return;
+    }
     showModalBottomSheet(
       isScrollControlled: true,
       enableDrag: true,

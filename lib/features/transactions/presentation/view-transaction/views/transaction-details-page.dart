@@ -13,6 +13,7 @@ import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
+import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
 class TransactionsDetailPage extends ConsumerStatefulWidget {
   final Transaction transaction;
@@ -55,7 +56,7 @@ class _TransactionsDetailPageState
         extraLargeSpacer(),
         regularSpacer(),
         // number of products
-        numberOfProducts(),
+        numberOfItems(),
         regularSpacer(),
         divider(),
         regularSpacer(),
@@ -154,7 +155,8 @@ class _TransactionsDetailPageState
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("View Products",
+                Text(
+                    "View ${TransactionCategoryConverter.convertToString(category: transaction.transactionCategory, plural: true)}",
                     textAlign: TextAlign.right,
                     style: TextStyle(
                         color: ColorManager.accentColor,
@@ -329,13 +331,13 @@ class _TransactionsDetailPageState
     );
   }
 
-  Widget numberOfProducts() {
+  Widget numberOfItems() {
     final no = transaction.salesItem.length;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "No. of products: ",
+          "No. of ${TransactionCategoryConverter.convertToString(category: transaction.transactionCategory, plural: true).toLowerCase()}: ",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.secondary,
@@ -345,7 +347,7 @@ class _TransactionsDetailPageState
               fontSize: FontSizeManager.medium * 0.85),
         ),
         Text(
-          "$no Product${no == 1 ? "" : "s"}",
+          "$no ${TransactionCategoryConverter.convertToString(category: transaction.transactionCategory, plural: no != 1)}",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,

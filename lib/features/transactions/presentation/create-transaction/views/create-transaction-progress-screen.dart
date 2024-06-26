@@ -8,6 +8,8 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../groups/domain/entities/group.dart';
@@ -27,6 +29,7 @@ class _CreateTransactonProgressScreenState
     extends ConsumerState<CreateTransactonProgressScreen> {
   @override
   void initState() {
+    maxValue = TransactionDataHolder.items!.length + 1;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
@@ -34,14 +37,23 @@ class _CreateTransactonProgressScreenState
     });
   }
 
+  @override
+  void setState(VoidCallback fn) {
+    if(!mounted){
+      return;
+    }
+    super.setState(fn);
+  }
+
   double value = 0.0;
+  double maxValue = 0.0;
   bool canPop = false;
   bool error = false;
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: canPop || error,
+      canPop: true,
       onPopInvoked: (didPop) {},
       child: Scaffold(
           backgroundColor: ColorManager.background,
@@ -74,13 +86,13 @@ class _CreateTransactonProgressScreenState
               backgroundColor: ColorManager.tertiary,
               valueColor: AlwaysStoppedAnimation(
                   error ? Colors.redAccent : ColorManager.accentColor),
-              value: value,
+              value: value / maxValue,
               strokeWidth: 2.5,
             ),
           ),
         ),
         Text(
-          "${(value * 100).toInt()}%",
+          "${(value / maxValue * 100).toInt()}%",
           textAlign: TextAlign.center,
           style: TextStyle(
               fontFamily: "quicksand",
@@ -93,14 +105,14 @@ class _CreateTransactonProgressScreenState
   }
 
   Widget descriptionText() {
-    final items = TransactionDataHolder.items ?? [];
     String text = "Creating Transaction...";
 
-    if (value >= 1 / (items.length + 1)) {
-      final itemNo = (value * (items.length + 1)).toInt() - 1;
-      text = "Adding Product $itemNo...";
+    if (value > 0) {
+      final itemNo = value.toInt();
+      text =
+          "Adding ${TransactionDataHolder.transactionCategory!.name + (TransactionDataHolder.transactionCategory! == TransactionCategory.Virtual ? " Service" : "")} $itemNo...";
     }
-    if (value == 1 || items.isEmpty) {
+    if (value == maxValue) {
       text = "Created transaction !";
     }
     if (error) {
@@ -121,78 +133,99 @@ class _CreateTransactonProgressScreenState
   }
 
   Future<void> createTransaction() async {
-    final group = ModalRoute.of(context)!.settings.arguments! as Group;
+    // This means a transaction has been created but it wasn't successful
+    // We get the transaction
+    // So we carry on and just add pricing
+    if (TransactionDataHolder.id != null) {
+      final transactionId = TransactionDataHolder.id!;
 
-    Transaction transaction = Transaction.fromJson(json: {
-      "transactionName": TransactionDataHolder.transactionName!,
-      "aboutService": TransactionDataHolder.aboutProduct!,
-      "inspectionDays": TransactionDataHolder.inspectionDays!,
-      "inspectionPeriod":
-          TransactionDataHolder.inspectionPeriod! ? "day" : "hour",
-      "transaction category":
-          TransactionDataHolder.transactionCategory!.name.toLowerCase(),
-    });
-    final day = TransactionDataHolder.date!.substring(0, 2).padLeft(2, '0');
-    final month = TransactionDataHolder.date!.substring(3, 5).padLeft(2, '0');
-    final year = TransactionDataHolder.date!.substring(6, 10);
-
-    final response = await TransactionRepo.createTransaction(
-        dateOfWork: "$year-$month-${day}T00:00:00Z",
-        groupId: group.groupId,
-        transaction: transaction);
-      log(response.body);
-
-
-    if (response.error) {
-      setState(() {
-        error = true;
-      });
-      log(response.body);
-    } else {
-      final products = TransactionDataHolder.items!;
-      setState(() {
-        value = 1 / (products.length + 1);
-      });
-      final transactionJson = response.messageBody!["data"];
-      await addPricing(
-          transaction: Transaction.fromJson(json: transactionJson));
-    }
-  }
-
-  Future<void> addPricing({required final Transaction transaction}) async {
-    final group = ModalRoute.of(context)!.settings.arguments! as Group;
-    final items = TransactionDataHolder.items!;
-    log(items.length.toString());
-    for (final item in items) {
-      setState(() {
-        value += 1 / (items.length + 1);
-        canPop = value == 1;
-      });
-      final response = await TransactionRepo.createPricing(
-        type: transaction.transactionCategory,
-          transactionId: transaction.transactionId,
-          groupId: group.groupId,
-          buyerId: group.buyer!.userId,
-          item: item);
-      log(response.body);    
-
+      final response =
+          await TransactionRepo.getOneTransaction(transactionId: transactionId);
+      log("Fetching Transaction :${response.body}");
       if (response.error) {
-        log("Error:${response.body}");
         setState(() {
           error = true;
         });
-        break;
       } else {
-        if (items.last == item) {
-          setState(() {
-            error = false;
-          });
-          log("Success: ${response.messageBody!.toString()}");
-        }
+        Transaction transaction =
+            Transaction.fromJson(json: response.messageBody!["data"]);
+        await carryOn(transaction: transaction);
+      }
+    } else {
+      final group = ModalRoute.of(context)!.settings.arguments! as Group;
+      Transaction transaction = Transaction.fromJson(json: {
+        "transactionName": TransactionDataHolder.transactionName!,
+        "aboutService": TransactionDataHolder.aboutProduct!,
+        "inspectionDays": TransactionDataHolder.inspectionDays!,
+        "inspectionPeriod":
+            TransactionDataHolder.inspectionPeriod! ? "day" : "hour",
+        "transaction category":
+            TransactionDataHolder.transactionCategory!.name.toLowerCase(),
+      });
+      final day = TransactionDataHolder.date!.substring(0, 2).padLeft(2, '0');
+      final month = TransactionDataHolder.date!.substring(3, 5).padLeft(2, '0');
+      final year = TransactionDataHolder.date!.substring(6, 10);
+
+      final response = await TransactionRepo.createTransaction(
+          dateOfWork: "$year-$month-${day}T00:00:00Z",
+          groupId: group.groupId,
+          transaction: transaction);
+      log("Creating Transaction :${response.body}");
+
+      if (response.error) {
+        setState(() {
+          error = true;
+        });
+        log(response.body);
+      } else {
+        TransactionDataHolder.id = response.messageBody!["data"]["_id"];
+        await carryOn(
+            transaction:
+                Transaction.fromJson(json: response.messageBody!["data"]));
       }
     }
-    // ref.read(createTransactionProgressProvider.notifier).state = 0;
-    Navigator.pushNamed(context, Routes.transactionSuccessRoute);
-    TransactionDataHolder.clear();
+  }
+
+  Future<void> carryOn({required Transaction transaction}) async {
+    setState(() {
+      value += 1;
+    });
+
+    final addedPricing = await addPricing(transaction: transaction);
+    if (addedPricing) {
+      TransactionDataHolder.clear();
+      Navigator.pushNamed(context, Routes.transactionSuccessRoute);
+    } else {
+      setState(() => error = true);
+    }
+  }
+
+  Future<bool> addPricing({required final Transaction transaction}) async {
+    final group = ModalRoute.of(context)!.settings.arguments! as Group;
+    final items = List<SalesItem>.unmodifiable(TransactionDataHolder.items!);
+    log(items.length.toString());
+    int successful = 0;
+    for (int i = 0; i<items.length; i++) {
+      final item = items[i];
+      final response = await TransactionRepo.createPricing(
+          type: TransactionDataHolder.transactionCategory!,
+          transactionId: transaction.transactionId,
+          group: group,
+          item: item);
+      log("Adding pricing ${i + 1} :${response.body}");
+
+      if (!response.error) {
+        
+        successful += 1;
+        setState(() {
+          value += 1;
+        });
+      }
+      
+    }
+    setState(() {
+      error = successful == items.length-1;
+    });
+    return error;
   }
 }

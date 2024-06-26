@@ -24,15 +24,16 @@ class PaymentMethodsScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
+  bool justCameBack = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
       appBar: appBar(),
-      body: ref.watch(paymentMethodProvider).isEmpty
-          ? const NoPaymentMethod()
-          : const PaymentMethodsList(),
+      body: ref.watch(paymentMethodProvider).isNotEmpty
+          ? const PaymentMethodsList()
+          : const NoPaymentMethod(),
       floatingActionButton: FloatingActionButton(
         onPressed: addPaymentMethod,
         shape: const CircleBorder(),
@@ -64,9 +65,8 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
       final paymentMethods = AppStorage.getPaymentMethods();
       paymentMethods.add(method);
       AppStorage.savePaymentMethod(paymentMethods: paymentMethods);
-
       ref.watch(paymentMethodProvider.notifier).state.add(method);
-
+      setState(() {});
     }
   }
 

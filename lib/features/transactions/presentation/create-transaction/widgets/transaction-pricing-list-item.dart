@@ -119,9 +119,9 @@ class _TransactionPricingListWidgetState
             /// I get the products from transactionProductions.
             /// and overwite it by affecting changes there.
 
-            final items = TransactionDataHolder.items;
+            final items = List<SalesItem>.from(TransactionDataHolder.items!);
             final currentItem =
-                items!.firstWhere((element) => element.id == widget.item.id);
+                items.firstWhere((element) => element.id == widget.item.id);
             final currentItemJson = currentItem.toJson();
             final int formerQuantity = quantity;
             currentItemJson["quantity"] =
@@ -163,9 +163,10 @@ class _TransactionPricingListWidgetState
             /// I get the products from transactionProductions.
             /// and overwite it by affecting changes there.
 
-            final items = TransactionDataHolder.items;
+            final items = List<SalesItem>.from(TransactionDataHolder.items!);
+
             final currentItem =
-                items!.firstWhere((element) => element.id == widget.item.id);
+                items.firstWhere((element) => element.id == widget.item.id);
             final currentItemJson = currentItem.toJson();
             final int formerQuantity = quantity;
             currentItemJson["quantity"] = formerQuantity + 1;

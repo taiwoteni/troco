@@ -1,7 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/dashboard/data/datasources/latest-transactions.dart';
+import 'package:intl/intl.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 
 import '../../../../core/app/color-manager.dart';
@@ -19,7 +20,7 @@ class TransactionOverview extends ConsumerStatefulWidget {
 }
 
 class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
-  final List<Transaction> transactions = latestTransactions();
+  final List<Transaction> transactions = AppStorage.getTransactions();
   final defaultStyle = TextStyle(
       fontFamily: 'quicksand',
       color: ColorManager.primary,
@@ -29,14 +30,14 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
   @override
   Widget build(BuildContext context) {
     double minAmount = transactions
-        .map((t) => t.transactionAmount / 1000)
+        .map((t) => t.transactionAmount)
         .reduce((a, b) => a < b ? a : b);
     double maxAmount = transactions
-        .map((t) => t.transactionAmount / 1000)
+        .map((t) => t.transactionAmount)
         .reduce((a, b) => a > b ? a : b);
 
     // Determine the number of weeks and the amount of money spent each week
-    int numberOfWeeks = (DateTime.now().day / 7).ceil();
+    int numberOfWeeks = 4;
     List<double> weeklySales = List.generate(numberOfWeeks, (index) {
       double startOfWeek = (index * 7) + 1;
       double endOfWeek = (index + 1) * 7;
@@ -46,7 +47,7 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
               t.transactionTime.day >= startOfWeek &&
               t.transactionTime.day <= endOfWeek &&
               t.transactionPurpose == TransactionPurpose.Selling)
-          .map((t) => t.transactionAmount / 1000)
+          .map((t) => t.transactionAmount)
           .fold(0, (sum, amount) {
         if (sum + amount > maxAmount) {
           maxAmount = sum + amount;
@@ -66,7 +67,7 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
               t.transactionTime.day >= startOfWeek &&
               t.transactionTime.day <= endOfWeek &&
               t.transactionPurpose == TransactionPurpose.Buying)
-          .map((t) => t.transactionAmount / 1000)
+          .map((t) => t.transactionAmount)
           .fold(0, (sum, amount) {
         if (sum + amount > maxAmount) {
           maxAmount = sum + amount;
@@ -131,10 +132,14 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
                     showTitles: true,
                     reservedSize: 40,
                     getTitlesWidget: (value, meta) {
+                      final maxFormattedString =
+                          NumberFormat.compact().format(maxAmount);
+                      final halfFormattedString =
+                          NumberFormat.compact().format(maxAmount ~/ 2);
                       final String text = value == maxAmount
-                          ? "${maxAmount.toInt()}K"
+                          ? maxFormattedString
                           : value == maxAmount / 2
-                              ? "${maxAmount ~/ 2}K"
+                              ? halfFormattedString
                               : "";
                       return Text(
                         text,
@@ -188,7 +193,7 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(SizeManager.regular),
                       ),
-                      toY: weeklySales[index],
+                      toY: weeklySales[index] == 0 ? 1 : weeklySales[index],
                       color: ColorManager.accentColor,
                     ),
                     BarChartRodData(
@@ -196,7 +201,9 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(SizeManager.regular),
                       ),
-                      toY: weeklyPurchases[index],
+                      toY: weeklyPurchases[index] == 0
+                          ? 1
+                          : weeklyPurchases[index],
                       color: Colors.redAccent,
                     )
                   ]);

@@ -410,14 +410,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } else {
       final Map<dynamic, dynamic> data = newResponse.messageBody!["data"];
       AppStorage.saveGroups(
-          groups: (data["groups"] as List)
+          groups: ((data["groups"] ?? []) as List)
               .map((e) => Group.fromJson(json: e))
               .toList());
-      List groups = data["groups"];
+      List groups = data["groups"] ?? [];
 
       for (final group in groups) {
         AppStorage.saveChats(
-            chats: (group["messages"] as List)
+            chats: ((group["messages"] ?? []) as List)
                 .map((e) => Chat.fromJson(json: e))
                 .toList(),
             groupId: group["_id"]);

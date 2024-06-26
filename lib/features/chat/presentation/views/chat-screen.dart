@@ -437,7 +437,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           const Spacer(),
           IconButton(
               onPressed: () {
-                setState((){
+                setState(() {
                   path = null;
                   thumbnail = null;
                   fileStat = null;
@@ -606,21 +606,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void openTransactionPage() {
-    if (isCreator) {
-      if (group.members.length >= 2) {
-        Navigator.pushNamed(context, Routes.createTransactionRoute,
-            arguments: group);
+    if (group.hasTransaction) {
+      Navigator.pushNamed(context, Routes.viewTransactionRoute,
+          arguments: group.transaction);
+    } else {
+      if (isCreator) {
+        if (group.members.length >= 2) {
+          Navigator.pushNamed(context, Routes.createTransactionRoute,
+              arguments: group);
+        } else {
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              message: "Add a buyer",
+              mode: ContentType.warning);
+        }
       } else {
         SnackbarManager.showBasicSnackbar(
             context: context,
-            message: "Add a buyer",
+            message: "Under maintenance for buyers",
             mode: ContentType.warning);
       }
-    } else {
-      SnackbarManager.showBasicSnackbar(
-          context: context,
-          message: "Under maintenance for buyers",
-          mode: ContentType.warning);
     }
   }
 
@@ -698,7 +703,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       "sender": ClientProvider.readOnlyClient!.userId,
       "profile": ClientProvider.readOnlyClient!.profile,
       "attachment": attachmentPath,
-      "thumbnail":thumbnail,
+      "thumbnail": thumbnail,
       "read": false,
       "loading": true,
       "timestamp": DateTime.now().toUtc().toIso8601String()
@@ -824,9 +829,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         fileStat = await File(file.path).stat();
         if (getMimeType(path: file.path).toLowerCase() == "video") {
           await _generateThumbnail(filePath: file.path);
-        }
-        else{
-          setState(()=> thumbnail = null);
+        } else {
+          setState(() => thumbnail = null);
         }
         setState(() => path = file.path);
       } else {

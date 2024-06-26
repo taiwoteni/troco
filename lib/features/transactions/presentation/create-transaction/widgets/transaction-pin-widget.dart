@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,7 +125,7 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
     await Future.delayed(const Duration(seconds: 3));
     final response = await AuthenticationRepo.verifyTransactionPin(
         transactionPin: "$pin1$pin2$pin3$pin4");
-    log(response.body.toString());
+    // log(response.body.toString());
 
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
 

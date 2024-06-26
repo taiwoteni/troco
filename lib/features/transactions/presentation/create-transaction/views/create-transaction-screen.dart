@@ -5,6 +5,7 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/datasources/create-transaction-stages.dart';
+import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
 
 import '../../../../../core/app/asset-manager.dart';
@@ -35,6 +36,7 @@ class _CreateTransactionScreenState extends ConsumerState<CreateTransactionScree
 
   @override
   void dispose() {
+    TransactionDataHolder.clear();
     super.dispose();
   }
 

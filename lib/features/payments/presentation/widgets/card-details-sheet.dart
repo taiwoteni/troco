@@ -36,12 +36,17 @@ class _AddPaymentSheetState extends ConsumerState<AddCardDetails> {
   final formKey = GlobalKey<FormState>();
   CardType cardType = CardType.Invalid;
 
-  late TextEditingController cardNumberController,cardNameController,expDateController,cvvController;
+  late TextEditingController cardNumberController,
+      cardNameController,
+      expDateController,
+      cvvController;
 
   @override
   void initState() {
-    cardNameController = TextEditingController(text: widget.card?.cardHolderName ?? "");
-    cardNumberController = TextEditingController(text: widget.card?.cardNumber ?? "");
+    cardNameController =
+        TextEditingController(text: widget.card?.cardHolderName ?? "");
+    cardNumberController =
+        TextEditingController(text: widget.card?.cardNumber ?? "");
     expDateController = TextEditingController(text: widget.card?.expDate ?? "");
     cvvController = TextEditingController(text: widget.card?.cvv ?? "");
 
@@ -132,7 +137,8 @@ class _AddPaymentSheetState extends ConsumerState<AddCardDetails> {
       label: 'Card Number',
       controller: cardNumberController,
       inputType: TextInputType.number,
-      validator: (value)=> CardUtils.validateCardNum(value, widget.card != null),
+      validator: (value) =>
+          CardUtils.validateCardNum(value, widget.card != null),
       onSaved: (value) {
         PaymentMethodDataHolder.cardNumber = value;
       },
@@ -206,18 +212,18 @@ class _AddPaymentSheetState extends ConsumerState<AddCardDetails> {
 
   Widget cvv() {
     return InputFormField(
-      label: 'CVC',
+      label: 'CVV',
       controller: cvvController,
       inputType: TextInputType.number,
       validator: (value) {
         if (value == null) {
-          return "* missing cvc";
+          return "* missing cvv";
         }
         if (value.trim().isEmpty) {
-          return "* missing cvc";
+          return "* missing cvv";
         }
         if (value.trim().length < 3) {
-          return "* enter valid cvc";
+          return "* enter valid cvv";
         }
         return null;
       },

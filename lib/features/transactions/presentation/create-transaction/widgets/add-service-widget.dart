@@ -32,10 +32,10 @@ class AddServiceWidget extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _AddProductWidgetState();
+      _AddServiceWidgetState();
 }
 
-class _AddProductWidgetState extends ConsumerState<AddServiceWidget> {
+class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
   ServiceRequirement? selectedRequirement;
   int quantity = 1;
   bool productImageError = false;
@@ -392,7 +392,7 @@ class _AddProductWidgetState extends ConsumerState<AddServiceWidget> {
             "servicePrice": int.parse(price),
             "serviceRequirement": selectedRequirement!.name,
             "quantity": quantity,
-            "serviceImages": productImages,
+            "pricingImage": productImages[0],
           };
           if (mounted) {
             Navigator.pop(context, Service.fromJson(json: serviceJson));

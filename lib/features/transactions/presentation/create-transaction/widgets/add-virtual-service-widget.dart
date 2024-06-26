@@ -32,10 +32,10 @@ class AddVirtualServiceWidget extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _AddProductWidgetState();
+      _AddVirtualServiceWidgetState();
 }
 
-class _AddProductWidgetState extends ConsumerState<AddVirtualServiceWidget> {
+class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidget> {
   VirtualServiceRequirement? selectedRequirement;
   int quantity = 1;
   bool productImageError = false;
@@ -392,7 +392,7 @@ class _AddProductWidgetState extends ConsumerState<AddVirtualServiceWidget> {
             "servicePrice": int.parse(price),
             "serviceRequirement": selectedRequirement!.name,
             "quantity": quantity,
-            "serviceImages": serviceImages,
+            "pricingImage": serviceImages[0],
           };
           if (mounted) {
             Navigator.pop(context, VirtualService.fromJson(json: serviceJson));

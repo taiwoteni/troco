@@ -270,13 +270,13 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
     );
   }
 
-  Widget productsCategory() {
+  Widget productsQuality() {
     final product = items[productIndex] as Product;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "Category: ",
+          "Quality: ",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.secondary,
@@ -407,7 +407,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
           productPrice(),
           extraLargeSpacer(),
           regularSpacer(),
-          productsCategory(),
+          productsQuality(),
           regularSpacer(),
           divider(),
           regularSpacer(),

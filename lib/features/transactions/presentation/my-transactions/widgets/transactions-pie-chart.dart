@@ -71,7 +71,7 @@ class _TransactionPieChartState extends ConsumerState<TransactionPieChart>
         fontWeight: FontWeightManager.semibold);
     return [
       PieChartSectionData(
-          value: 5.toDouble() * controller.value,
+          value: completedTransactions.toDouble() * controller.value,
           color: ColorManager.accentColor,
           radius: SizeManager.extralarge * 1.4,
           title:

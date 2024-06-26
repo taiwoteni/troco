@@ -11,22 +11,22 @@ class Product extends SalesItem {
           id: json["productId"] ?? json["_id"],
           price: int.parse((json["productPrice"] ?? json["price"]).toString()),
           name: json["productName"] ?? json["name"],
-          image: (json["productImages"] as List).map((e) => e.toString()).toList()[0],
-          quantity: int.parse(json["quantity"].toString()),
+          image: json["pricingImage"],
+          quantity: int.parse((json["quantity"]??0).toString()),
         );
 
   ProductCondition get productCondition =>
       ProductConditionConverter.convertToEnum(
           condition: _json["productCondition"] ?? _json["condition"] ?? "new");
   ProductQuality get productQuality => ProductQualityConverter.convertToEnum(
-      quality: _json["productQuality"] ?? _json["quality"] ?? "high quality");
+      quality: _json["productQuality"] ?? _json["quality"] ?? _json["category"] ?? "high quality");
   String get productCategory =>
       _json["category"] ??
       _json["productCategory"] ??
       _json["category"] ??
       "No Category";
   List<String> get productImages =>
-      (_json["productImages"] as List).map((e) => e.toString()).toList();
+      (_json["pricingImage"] as List).map((e) => e.toString()).toList();
 
   @override
   List<Object?> get props => [id];

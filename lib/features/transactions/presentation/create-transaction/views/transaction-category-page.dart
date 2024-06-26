@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
@@ -103,6 +102,8 @@ class _TransactionTermsPageState extends ConsumerState<TransactionTermsPage> {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 3));
         TransactionDataHolder.transactionCategory = category;
+        TransactionDataHolder.id = null;
+        TransactionDataHolder.items = [];
         ref.read(createTransactionPageController.notifier).state.nextPage(
             duration: const Duration(milliseconds: 450), curve: Curves.ease);
         ref.read(createTransactionProgressProvider.notifier).state = 1;

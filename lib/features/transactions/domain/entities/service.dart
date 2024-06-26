@@ -12,17 +12,17 @@ class Service extends SalesItem {
             name: json["serviceName"] ?? json["name"],
             price:
                 int.parse((json["servicePrice"] ?? json["price"]).toString()),
-            image: (json["serviceImages"] as List)
-                .map((e) => e.toString())
-                .toList()[0],
-            quantity: int.parse(json["quantity"].toString()));
+            image: json["pricingImage"],
+            quantity: int.parse((json["quantity"]??0).toString()));
 
   ServiceRequirement get serviceRequirement =>
       ServiceRequirementsConverter.convertToEnum(
           requirement:
               _json["serviceRequirement"] ?? _json["requirement"] ?? "design");
   List<String> get serviceImages =>
-      (_json["serviceImages"] as List).map((e) => e.toString()).toList();
+      (_json["pricingImage"] as List).map((e) => e.toString()).toList();
+
+  
 
   @override
   Map toJson() {

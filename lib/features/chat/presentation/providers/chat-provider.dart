@@ -51,7 +51,7 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>(
             .toList();
 
         final bool chatsAreDifferent =
-            json.encode(_chatsList) != json.encode(chatsJson);
+            json.encode(_chatsList) != json.encode(chatsJson)  || _chatsList.length != chatsJson.length;
         List chatsListJson = chatsJson;
         List<Chat> chatsList =
             chatsListJson.map((e) => Chat.fromJson(json: e)).toList();

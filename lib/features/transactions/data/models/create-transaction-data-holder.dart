@@ -8,10 +8,11 @@ class TransactionDataHolder {
   static int? inspectionDays;
   static bool? inspectionPeriod;
   static List<SalesItem>? items;
-  static String? date;
+  static String? date,id;
 
   static void clear() {
     transactionCategory = null;
+    id = null;
     transactionName = null;
     aboutProduct = null;
     inspectionDays = null;

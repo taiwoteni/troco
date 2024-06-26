@@ -10,19 +10,17 @@ class VirtualService extends SalesItem {
       : _json = json,
         super(
             id: json["serviceId"] ?? json["_id"],
-            name: json["serviceName"] ?? json["name"],
+            name: json["virtualName"] ?? json["name"],
             price:
-                int.parse((json["servicePrice"] ?? json["price"]).toString()),
-            image: (json["serviceImages"] as List)
-                .map((e) => e.toString())
-                .toList()[0],
-            quantity: int.parse(json["quantity"].toString()));
+                int.parse((json["virtualPrice"] ?? json["price"]).toString()),
+            image: json["pricingImage"],
+            quantity: int.parse((json["quantity"]??0).toString()));
 
 
    VirtualServiceRequirement get serviceRequirement =>
       VirtualServiceRequirementsConverter.convertToEnum(
           requirement:
-              _json["serviceRequirement"] ?? _json["requirement"] ?? "design");        
+              _json["virtualRequirement"] ?? _json["requirement"] ?? "design");        
 
   @override
   Map toJson() {

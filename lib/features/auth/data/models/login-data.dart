@@ -54,7 +54,7 @@ class LoginData {
       "profile": profile,
       "phoneNumber": phoneNumber,
       "businessName": businessName,
-      "category": CategoryConverter.convertToString(category: category!),
+      "accountType": CategoryConverter.convertToString(category: category!),
       "address": address,
       "city": city,
       "state": state,

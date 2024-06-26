@@ -7,8 +7,6 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
-import 'package:troco/features/transactions/domain/entities/service.dart';
-import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/widgets/add-service-widget.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/widgets/add-virtual-service-widget.dart';
@@ -17,7 +15,6 @@ import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/button/presentation/provider/button-provider.dart';
 import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../groups/presentation/groups_page/widgets/empty-screen.dart';
-import '../../../domain/entities/product.dart';
 import '../../../utils/enums.dart';
 import '../../create-transaction/providers/create-transaction-provider.dart';
 import '../widgets/add-product-widget.dart';
@@ -234,48 +231,28 @@ class _TransactionPricingPageState
   }
 
   Future<void> addItems() async {
-    SalesItem? item;
-    if (TransactionDataHolder.transactionCategory ==
-        TransactionCategory.Product) {
-      item = await showModalBottomSheet<Product>(
-        isScrollControlled: true,
-        enableDrag: true,
-        useSafeArea: false,
-        backgroundColor: ColorManager.background,
-        context: context,
-        builder: (context) {
+    final item = await showModalBottomSheet<SalesItem>(
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: false,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) {
+        if (TransactionDataHolder.transactionCategory ==
+            TransactionCategory.Product) {
           return const AddProductWidget();
-        },
-      );
-    } else {
-      if (TransactionDataHolder.transactionCategory ==
-          TransactionCategory.Virtual) {
-        item = await showModalBottomSheet<VirtualService>(
-          isScrollControlled: true,
-          enableDrag: true,
-          useSafeArea: false,
-          backgroundColor: ColorManager.background,
-          context: context,
-          builder: (context) {
-            return const AddVirtualServiceWidget();
-          },
-        );
-      } else {
-        item = await showModalBottomSheet<Service>(
-          isScrollControlled: true,
-          enableDrag: true,
-          useSafeArea: false,
-          backgroundColor: ColorManager.background,
-          context: context,
-          builder: (context) {
-            return const AddServiceWidget();
-          },
-        );
-      }
-    }
+        } else if (TransactionDataHolder.transactionCategory ==
+            TransactionCategory.Virtual) {
+          return const AddVirtualServiceWidget();
+        } else {
+          return const AddServiceWidget();
+        }
+      },
+    );
+
     if (item != null) {
       setState(() {
-        items.add(item!);
+        items.add(item);
       });
       TransactionDataHolder.items = items;
     }
