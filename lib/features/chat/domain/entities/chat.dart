@@ -23,6 +23,8 @@ class Chat extends Equatable {
   DateTime get time => DateTime.parse(_json["time"] ?? _json["timestamp"]);
   String? get message => _json["message"] ?? _json["content"];
   String? get attachment => _json["attachment"];
+  dynamic get thumbnail => _json["thumbnail"];
+
   String get senderId => _json["sender id"] ?? _json["sender"];
   String get chatId => _json["id"] ?? _json["chatId"] ?? _json["_id"];
   String get profile => _json["profile"] ?? "null";

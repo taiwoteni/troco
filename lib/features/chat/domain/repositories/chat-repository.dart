@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:path/path.dart' as Path;
 
 import 'package:http/http.dart';
@@ -45,15 +46,25 @@ class ChatRepo {
 
   static Future<HttpResponseModel> sendAttachment({
     required final String groupId,
-    required final String? message,
     required final String attachment,
+    final Uint8List? thumbnail,
+    final String? message,
+
   }) async {
-    var parsedfile = File(attachment);
-    var stream = ByteStream(parsedfile.openRead());
-    var length = await parsedfile.length();
+    final parsedfile = File(attachment);
+    final stream = ByteStream(parsedfile.openRead());
+    final length = await parsedfile.length();
 
     final file = MultipartFile("attachment", stream, length,
         filename: Path.basename(attachment));
+    
+    MultipartFile? thumbnailFile;
+
+    if(thumbnail != null){
+      thumbnailFile = MultipartFile.fromBytes("thumbnail", thumbnail);
+    }
+
+       
 
     final result = await ApiInterface.multipartPostRequest(
         url: "addattachment",
@@ -62,7 +73,9 @@ class ChatRepo {
               field: "userId", value: ClientProvider.readOnlyClient!.userId),
           MultiPartModel.field(field: "groupId", value: groupId),
           MultiPartModel.field(field: "content", value: message),
-          MultiPartModel.file(file: file)
+          MultiPartModel.file(file: file),
+          if(thumbnail!=null)
+          MultiPartModel.file(file: thumbnailFile!)
         ]);
 
     return result;

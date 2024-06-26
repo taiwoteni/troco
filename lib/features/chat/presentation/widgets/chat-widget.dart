@@ -265,6 +265,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
   Widget attachmentWidget() {
     bool isUrl = chat.attachment!.startsWith("https://");
     final attachment = chat.attachment!;
+    final thumbnail = chat.thumbnail;
     // log(attachment);
     return Container(
         width: double.maxFinite,
@@ -272,47 +273,71 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
           minHeight: 100,
           maxHeight: 250,
         ),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(SizeManager.large),
             image: !isUrl
                 ? DecorationImage(
-                    fit: BoxFit.cover, image: FileImage(File(attachment)))
+                    fit: BoxFit.cover,
+                    image: chat.isImage
+                        ? FileImage(File(attachment))
+                        : MemoryImage(chat.thumbnail))
                 : null),
         child: isUrl
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(SizeManager.large),
-                child: CachedNetworkImage(
-                  width: double.maxFinite,
-                  imageUrl: attachment,
-                  fit: BoxFit.cover,
-                  height: double.maxFinite,
-                  fadeInCurve: Curves.ease,
-                  fadeOutCurve: Curves.ease,
-                  placeholder: (context, url) {
-                    return Container(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CachedNetworkImage(
                       width: double.maxFinite,
+                      imageUrl:
+                          chat.isImage ? attachment : thumbnail.toString(),
+                      fit: BoxFit.cover,
                       height: double.maxFinite,
-                      color: ColorManager.lottieLoading,
-                      child: LottieWidget(
-                          lottieRes:
-                              AssetManager.lottieFile(name: "loading-image"),
-                          size: const Size.square(IconSizeManager.extralarge)),
-                    );
-                  },
-                  errorWidget: (context, url, error) {
-                    return Container(
-                      width: double.maxFinite,
-                      height: double.maxFinite,
-                      color: ColorManager.lottieLoading,
-                      child: LottieWidget(
-                          lottieRes:
-                              AssetManager.lottieFile(name: "loading-image"),
-                          size: const Size.square(IconSizeManager.extralarge)),
-                    );
-                  },
+                      fadeInCurve: Curves.ease,
+                      fadeOutCurve: Curves.ease,
+                      placeholder: (context, url) {
+                        return Container(
+                          width: double.maxFinite,
+                          height: double.maxFinite,
+                          color: ColorManager.lottieLoading,
+                          child: LottieWidget(
+                              lottieRes: AssetManager.lottieFile(
+                                  name: "loading-image"),
+                              size: const Size.square(
+                                  IconSizeManager.extralarge)),
+                        );
+                      },
+                      errorWidget: (context, url, error) {
+                        return Container(
+                          width: double.maxFinite,
+                          height: double.maxFinite,
+                          color: ColorManager.lottieLoading,
+                          child: LottieWidget(
+                              lottieRes: AssetManager.lottieFile(
+                                  name: "loading-image"),
+                              size: const Size.square(
+                                  IconSizeManager.extralarge)),
+                        );
+                      },
+                    ),
+                    if (!chat.isImage)
+                      const Icon(
+                        CupertinoIcons.play_fill,
+                        color: Colors.white,
+                        size: IconSizeManager.medium,
+                      )
+                  ],
                 ),
               )
-            : null);
+            : !chat.isImage
+                ? const Icon(
+                    CupertinoIcons.play_fill,
+                    color: Colors.white,
+                    size: IconSizeManager.medium,
+                  )
+                : null);
   }
 
   Widget stackedImages({required BuildContext context}) {

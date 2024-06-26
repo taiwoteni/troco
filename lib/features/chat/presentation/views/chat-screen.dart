@@ -437,7 +437,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           const Spacer(),
           IconButton(
               onPressed: () {
-                setState(() => path = null);
+                setState((){
+                  path = null;
+                  thumbnail = null;
+                  fileStat = null;
+                });
               },
               icon: Icon(
                 CupertinoIcons.xmark_circle_fill,
@@ -694,6 +698,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       "sender": ClientProvider.readOnlyClient!.userId,
       "profile": ClientProvider.readOnlyClient!.profile,
       "attachment": attachmentPath,
+      "thumbnail":thumbnail,
       "read": false,
       "loading": true,
       "timestamp": DateTime.now().toUtc().toIso8601String()
@@ -729,6 +734,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         : ChatRepo.sendAttachment(
             groupId: group.groupId,
             message: chatMessage,
+            thumbnail: thumbnail,
             attachment: attachmentPath));
     log(response.body);
 
