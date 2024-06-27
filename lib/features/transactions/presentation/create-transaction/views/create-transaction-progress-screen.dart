@@ -25,21 +25,25 @@ class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
       _CreateTransactonProgressScreenState();
 }
 
-class _CreateTransactonProgressScreenState
-    extends ConsumerState<CreateTransactonProgressScreen> {
+class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransactonProgressScreen> {
+  late Group group;
   @override
   void initState() {
     maxValue = TransactionDataHolder.items!.length + 1;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
+          setState((){
+    group = ModalRoute.of(context)!.settings.arguments! as Group;
+
+          });
       createTransaction();
     });
   }
 
   @override
   void setState(VoidCallback fn) {
-    if(!mounted){
+    if (!mounted) {
       return;
     }
     super.setState(fn);
@@ -152,7 +156,6 @@ class _CreateTransactonProgressScreenState
         await carryOn(transaction: transaction);
       }
     } else {
-      final group = ModalRoute.of(context)!.settings.arguments! as Group;
       Transaction transaction = Transaction.fromJson(json: {
         "transactionName": TransactionDataHolder.transactionName!,
         "aboutService": TransactionDataHolder.aboutProduct!,
@@ -201,31 +204,39 @@ class _CreateTransactonProgressScreenState
   }
 
   Future<bool> addPricing({required final Transaction transaction}) async {
-    final group = ModalRoute.of(context)!.settings.arguments! as Group;
     final items = List<SalesItem>.unmodifiable(TransactionDataHolder.items!);
     log(items.length.toString());
     int successful = 0;
-    for (int i = 0; i<items.length; i++) {
+    for (int i = 0; i < items.length; i++) {
+      log("Adding pricing ${i + 1}");
       final item = items[i];
       final response = await TransactionRepo.createPricing(
           type: TransactionDataHolder.transactionCategory!,
           transactionId: transaction.transactionId,
           group: group,
           item: item);
-      log("Adding pricing ${i + 1} :${response.body}");
+      log("Ended process ${i + 1} :${response.body}");
 
       if (!response.error) {
-        
+        TransactionDataHolder.items!.removeAt(i);
+        if (value + 1 == maxValue) {
+          setState(() {
+            value += 1;
+          });
+          log("Successfully added all pricings");
+          return true;
+        }
         successful += 1;
         setState(() {
           value += 1;
         });
       }
-      
     }
     setState(() {
-      error = successful == items.length-1;
+      error = successful == items.length - 1;
     });
     return error;
   }
+
+
 }

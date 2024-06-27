@@ -138,7 +138,7 @@ class TransactionRepo {
 
     final result = await ApiInterface.multipartPostRequest(
         url:
-            "createpricing/${ClientProvider.readOnlyClient!.userId}/${group.groupId}/$transactionId/${group.buyer!.userId}/${group.adminId}",
+            "createpricing/${ClientProvider.readOnlyClient!.userId}/${group.groupId}/${group.groupId}/${group.buyer!.userId}/${group.admin.userId}",
         multiparts: multiparts);
     return result;
   }
@@ -208,6 +208,7 @@ class TransactionRepo {
       return AppStorage.getTransactions();
     } else {
       final transactionsJson = (json.decode(response.body) as List);
+      log((transactionsJson[0]??[]).toString());
 
       final transactions = <Transaction>[];
 
@@ -217,7 +218,7 @@ class TransactionRepo {
           try {
             t.salesItem.length;
             transactions.add(t);
-          } on TypeError{
+          } on TypeError {
             //Do nothing
           }
         }

@@ -388,9 +388,9 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
           final serviceImages = List.from(ref.read(productImagesProvider));
           Map<dynamic, dynamic> serviceJson = {
             "serviceId": const Uuid().v4(),
-            "serviceName": name,
-            "servicePrice": int.parse(price),
-            "serviceRequirement": selectedRequirement!.name,
+            "virtualName": name,
+            "virtualPrice": int.parse(price),
+            "virtualRequirement": selectedRequirement!.name,
             "quantity": quantity,
             "pricingImage": serviceImages[0],
           };
