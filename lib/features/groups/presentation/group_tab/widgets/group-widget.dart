@@ -136,7 +136,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                               ClientProvider.readOnlyClient!.userId
                           ? "You:  "
                           : lastChat.senderId != group.adminId
-                              ? "Buyer:  "
+                              ? (lastChat.senderId != group.creator? "Buyer:  ":"Seller:  ")
                               : "Admin:  ",
                   style: messageStyle.copyWith(
                       color: clientIsLastSender ? ColorManager.secondary : null,

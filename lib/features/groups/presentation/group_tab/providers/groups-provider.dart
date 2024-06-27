@@ -59,11 +59,14 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
 
             /// Then We contrast.
             final bool groupsDifferent =
-                json.encode(_groupList) != json.encode(groupsJson) || _groupList.length != groupsJson.length;
+                json.encode(_groupList) != json.encode(groupsJson) ||
+                    _groupList.length != groupsJson.length;
             final bool messagesDifferent =
-                json.encode(_messagesList) != json.encode(messagesList) || _messagesList.length != messagesList.length;
+                json.encode(_messagesList) != json.encode(messagesList) ||
+                    _messagesList.length != messagesList.length;
             final bool membersDifferent =
-                json.encode(_membersList) != json.encode(membersList) || _membersList.length != membersList.length;
+                json.encode(_membersList) != json.encode(membersList) ||
+                    _membersList.length != membersList.length;
 
             final valuesAreDifferent =
                 groupsDifferent || messagesDifferent || membersDifferent;
@@ -96,18 +99,16 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
               ///Only saving chats if the group isn't opened by the user.
               ///The concurrent modification doesn't allow the chat-provider
               ///to know that chats have changed.
-              
-              
+
               for (final group in groupsList) {
-                if(group.groupId != ref.watch(chatsGroupProvider)){
+                if (group.groupId != ref.watch(chatsGroupProvider)) {
                   final groupJson = group.toJson();
-                final chats = ((groupJson["messages"] ?? []) as List)
-                    .map((e) => Chat.fromJson(json: e))
-                    .toList();
-                // if(chatProvide)
-                AppStorage.saveChats(chats: chats, groupId: group.groupId);
+                  final chats = ((groupJson["messages"] ?? []) as List)
+                      .map((e) => Chat.fromJson(json: e))
+                      .toList();
+                  // if(chatProvide)
+                  AppStorage.saveChats(chats: chats, groupId: group.groupId);
                 }
-                
               }
               streamController.sink.add(groupsList);
             }
