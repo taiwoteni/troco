@@ -31,6 +31,7 @@ import 'package:troco/features/groups/domain/repositories/group-repository.dart'
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
+import '../../../../core/app/audio-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/snackbar-manager.dart';
 import '../../domain/entities/chat.dart';
@@ -744,9 +745,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     log(response.body);
 
     if (!response.error) {
-      // final chats = AppStorage.getUnsentChats(groupId: group.groupId);
-      // chats.removeLast();
-      // AppStorage.saveUnsentChats(chats: chats, groupId: group.groupId);
+      await AudioManager.playSound(sound: AssetManager.audioFile(name: "send"));
     } else {
       final unsentChats = AppStorage.getUnsentChats(groupId: group.groupId);
       unsentChats.add(chat);
@@ -777,6 +776,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       next.when(
         data: (data) {
           final unsentChats = AppStorage.getUnsentChats(groupId: group.groupId);
+          bool newMessage = !data.every((element) => element.read);
+          if(newMessage){
+            AudioManager.playSound(sound: AssetManager.audioFile(name: "receive"));
+          }
           setState(() {
             chats = unsentChats.isNotEmpty ? [...data, ...unsentChats] : data;
             newMessage = data.isEmpty

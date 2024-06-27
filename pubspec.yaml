@@ -68,6 +68,7 @@ dependencies:
   flutter_native_splash: ^2.4.0
   visibility_detector: ^0.4.0+2
   video_thumbnail: ^0.5.3
+  audioplayers: ^6.0.0
 
 dev_dependencies:
   flutter_test:

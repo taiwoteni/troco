@@ -20,4 +20,9 @@ class AssetManager{
   static String lottieFile({required String name}){
     return "assets/lottie/$name.json";
   }
+
+  /// [audioFile] is used for getting the a particular audio from the asset directory. 
+  static String audioFile({required String name}){
+    return "assets/audio/$name.mp3";
+  }
 }
