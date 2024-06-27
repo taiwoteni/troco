@@ -1,8 +1,16 @@
 import 'dart:developer';
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/payments/domain/entity/card-method.dart';
+import 'package:troco/features/payments/domain/entity/payment-method.dart';
+import 'package:troco/features/payments/domain/repo/payment-repository.dart';
+import 'package:troco/features/payments/presentation/widgets/select-payment-profile-sheet.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
@@ -14,6 +22,8 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
+
+import '../../../../groups/domain/entities/group.dart';
 
 class TransactionsDetailPage extends ConsumerStatefulWidget {
   final Transaction transaction;
@@ -27,6 +37,7 @@ class TransactionsDetailPage extends ConsumerStatefulWidget {
 class _TransactionsDetailPageState
     extends ConsumerState<TransactionsDetailPage> {
   late Transaction transaction;
+  late Group group;
 
   final okKey = UniqueKey();
   final neutralKey = UniqueKey();
@@ -35,11 +46,15 @@ class _TransactionsDetailPageState
   @override
   void initState() {
     transaction = widget.transaction;
+    group = AppStorage.getGroups().firstWhere(
+      (element) => element.groupId == transaction.transactionId,
+    );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    listenToTransactionsChanges();
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.extralarge),
@@ -600,12 +615,20 @@ class _TransactionsDetailPageState
         ],
         if (isInProgress)
           actionButton(
-              positive: null, label: "Waiting for admin...", onPressed: () {}),
+              positive: transaction.paymentDone && isBuyer ? null : true,
+              label: isBuyer
+                  ? (transaction.paymentDone
+                      ? "Awaiting admin approval.."
+                      : "Make Payment")
+                  : "Add driver details",
+              onPressed: isBuyer
+                  ? (transaction.paymentDone ? () {} : makePayment)
+                  : addDriverDetails),
         if (isProcessing)
           actionButton(
-              positive: isBuyer ? null : true,
-              label: isBuyer ? "Getting a driver..." : "Add driver details",
-              onPressed: addDriverDetails),
+              positive: true,
+              label: isBuyer ? "Make Payment" : "Add driver details",
+              onPressed: isBuyer ? makePayment : addDriverDetails),
         if (isOngoing)
           actionButton(
               positive: !isBuyer ? null : true,
@@ -647,7 +670,53 @@ class _TransactionsDetailPageState
     );
   }
 
-  Future<void> makePayment() async {}
+  Future<void> makePayment() async {
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    final method = await selectPaymentProfile();
+
+    if (method == null) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "No Method was selected");
+      return;
+    }
+
+    if (method is CardMethod) {
+      final response = await PaymentRepository.makeCardPayment(
+          transaction: transaction, group: group, card: method);
+      log(response.body);
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+
+      if (response.error) {
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            mode: ContentType.failure,
+            message: "Payment was unsuccessful");
+      }
+      return;
+    }
+    ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+    SnackbarManager.showBasicSnackbar(
+        context: context,
+        mode: ContentType.warning,
+        message: "Only working on Card Methods");
+  }
+
+  Future<PaymentMethod?> selectPaymentProfile() async {
+    final method = await showModalBottomSheet<PaymentMethod?>(
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: false,
+      isDismissible: false,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) => const SelectPaymentProfileSheet(),
+    );
+
+    return method;
+  }
 
   Future<void> addDriverDetails() async {}
 
@@ -690,5 +759,21 @@ class _TransactionsDetailPageState
         approve: false, transaction: transaction);
     log(result.body);
     ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
+  }
+
+  Future<void> listenToTransactionsChanges() async {
+    ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        if (value
+            .map((t) => t.transactionId)
+            .contains(transaction.transactionId)) {
+          final t = value.firstWhere(
+              (tr) => tr.transactionId == transaction.transactionId);
+          setState(() {
+            transaction = t;
+          });
+        }
+      });
+    });
   }
 }

@@ -16,7 +16,7 @@ class PaymentRepository{
   })async{
 
     final result = await ApiInterface.postRequest(
-      url: "makecardpayment/${ClientProvider.readOnlyClient!.userId}/${transaction.transactionId}/${group.groupId}/${group.admin}",
+      url: "makecardpayment/${ClientProvider.readOnlyClient!.userId}/${transaction.transactionId}/${group.adminId}/${group.groupId}",
       data: {
         "cardNumber":card.cardNumber,
         "expiry":card.expDate,

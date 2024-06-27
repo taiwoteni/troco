@@ -4,27 +4,38 @@ import 'package:flutter/material.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/components/animations/lottie.dart';
-import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/payments/domain/entity/account-method.dart';
+import 'package:troco/features/payments/domain/entity/card-method.dart';
+import 'package:troco/features/payments/domain/entity/payment-method.dart';
 
-class SelectPaymentMethodWidget extends StatefulWidget {
+class SelectPaymentProfileWidget extends StatefulWidget {
   bool selected;
   final void Function() onChecked;
-  final String label, lottie;
+  final PaymentMethod method;
 
-  SelectPaymentMethodWidget(
+  SelectPaymentProfileWidget(
       {super.key,
       required this.selected,
       required this.onChecked,
-      required this.label,
-      required this.lottie});
+      required this.method});
 
   @override
-  State<SelectPaymentMethodWidget> createState() =>
+  State<SelectPaymentProfileWidget> createState() =>
       _SelectPaymentMethodWidgetState();
 }
 
-class _SelectPaymentMethodWidgetState extends State<SelectPaymentMethodWidget> {
+class _SelectPaymentMethodWidgetState extends State<SelectPaymentProfileWidget> {
+  late PaymentMethod method;
+  bool isCard = false;
+
+  @override
+  void initState() {
+    method = widget.method;
+    isCard = method is CardMethod;
+    super.initState();
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -48,20 +59,21 @@ class _SelectPaymentMethodWidgetState extends State<SelectPaymentMethodWidget> {
                   width: 2),
               borderRadius: BorderRadius.circular(SizeManager.regular)),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Transform.scale(
-                scale: 1.2,
-                child: LottieWidget(
-                    lottieRes: widget.lottie,
-                    size: const Size.square(IconSizeManager.medium)),
-              ),
-              smallSpacer(),
               Text(
-                widget.label,
+                isCard? cardName(): (method as AccountMethod).accountNumber,
                 style: TextStyle(
                     fontFamily: "quicksand",
                     color: ColorManager.primary,
+                    fontSize: FontSizeManager.regular,
+                    fontWeight: FontWeightManager.semibold),
+              ),
+              Text(
+                isCard? (method as CardMethod).cardType.name: (method as AccountMethod).bankName,
+                style: TextStyle(
+                    fontFamily: "quicksand",
+                    color: ColorManager.secondary,
                     fontSize: FontSizeManager.small,
                     fontWeight: FontWeightManager.semibold),
               ),
@@ -70,5 +82,11 @@ class _SelectPaymentMethodWidgetState extends State<SelectPaymentMethodWidget> {
         ),
       ),
     );
+  }
+
+  String cardName(){
+    final card = method as CardMethod;
+    return "".padRight(card.cardNumber.length-4, "*") + card.cardNumber.substring(card.cardNumber.length-4);
+
   }
 }

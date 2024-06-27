@@ -208,7 +208,6 @@ class TransactionRepo {
       return AppStorage.getTransactions();
     } else {
       final transactionsJson = (json.decode(response.body) as List);
-      log((transactionsJson[0]??[]).toString());
 
       final transactions = <Transaction>[];
 

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import '../../utils/enums.dart';
 
 import '../../../../core/app/routes-manager.dart';
@@ -47,6 +48,7 @@ List<SettingsModel> presetSettings({required BuildContext context, required fina
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
         onTap: () async{
+          ref.watch(paymentMethodProvider.notifier).state = [];
           await AppStorage.clear();
           Navigator.pushNamedAndRemoveUntil(
               context, Routes.authRoute, (route) => false);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:recase/recase.dart';
 import 'package:timelines/timelines.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -8,6 +9,7 @@ import '../../../../../core/components/others/spacer.dart';
 import '../../../data/models/process-model.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../utils/enums.dart';
+import '../providers/transactions-provider.dart';
 
 class ProgressTimelinePage extends ConsumerStatefulWidget {
   final Transaction transaction;
@@ -31,6 +33,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
 
   @override
   Widget build(BuildContext context) {
+    listenToTransactionsChanges();
     return Container(
         width: double.maxFinite,
         color: ColorManager.background,
@@ -203,16 +206,12 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
 
   List<Process> timeline() {
     Process acceptanceOfTerms =
-        Process(message: "Acceptance Of Terms.", subProcesses: [
+        Process(message: "Acceptance Of Terms", subProcesses: [
       SubProcess(
-          message: "seller created transaction",
+          message: "Seller created transaction",
           done: transaction.transactionStatus != TransactionStatus.Cancelled),
       SubProcess(
-          message: "buyer approved transaction",
-          done: transaction.transactionStatus != TransactionStatus.Pending &&
-              transaction.transactionStatus != TransactionStatus.Cancelled),
-      SubProcess(
-          message: "admin approved transaction",
+          message: "Buyer approved transaction",
           done: completedAcceptanceOfTerms()),
     ]);
 
@@ -227,50 +226,58 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
         message: "Payment of ${transaction.transactionCategory.name}",
         subProcesses: [
           SubProcess(
-              message: "buyer makes payment", done: transaction.paymentDone),
+              message: "Buyer makes payment", done: transaction.paymentDone),
           SubProcess(
-              message: "seller uploaded driver details",
+              message: "Admin approves payment",
+              done: transaction.adminApprovesPayment),
+          SubProcess(
+              message: "Seller uploaded driver details",
+              done: transaction.hasDriver),
+          SubProcess(
+              message: "Admin approves driver details",
               done: transaction.hasDriver &&
                   paymentStatus.contains(transaction.transactionStatus)),
           SubProcess(
-              message: "seller has sent the driver",
-              done: transaction.hasDriver
-                  ? transaction.driver.checkedOut
-                  : false),
+              message: "Seller sends the driver",
+              done:
+                  transaction.hasDriver ? transaction.driver.checkedOut : false)
         ]);
 
     var deliveryStatus = <TransactionStatus>[
       TransactionStatus.Finalizing,
       TransactionStatus.Completed,
     ];
+    final category = transaction.transactionCategory.name.toLowerCase();
+    Process deliveryOfTransaction =
+        Process(message: "Delivery of ${category.titleCase}", subProcesses: [
+      SubProcess(
+          message: "Driver delivers $category",
+          done: deliveryStatus.contains(transaction.transactionStatus)),
+      SubProcess(
+          message: "Buyer recieves $category",
+          done: deliveryStatus.contains(transaction.transactionStatus)),
+    ]);
 
-    Process deliveryOfTransaction = Process(
-        message: "Delivery of ${transaction.transactionCategory.name}",
-        subProcesses: [
-          SubProcess(
-              message: "driver delivers product",
-              done: deliveryStatus.contains(transaction.transactionStatus)),
-          SubProcess(
-              message: "buyer recieves product",
-              done: deliveryStatus.contains(transaction.transactionStatus)),
-        ]);
+    //TODO: VALUE TO KNOW WHEN BUYER IS SATISFIED WITH PRODUCT.
+
+    bool buyerSatisfiedWithProduct = false;
+    bool trocoPaysSeller = false;
+    bool sellerConfirmsPayment = false;
 
     Process acceptanceOfProducts = Process(
         message: "Acceptance of ${transaction.transactionCategory.name}",
         subProcesses: [
           SubProcess(
-              message: "buyer satisfied with product",
-              done:
-                  transaction.transactionStatus == TransactionStatus.Completed),
-          SubProcess(
-              message: "troco pays seller",
-              done:
-                  transaction.transactionStatus == TransactionStatus.Completed),
+              message: "Buyer is satisfied with $category",
+              done: buyerSatisfiedWithProduct),
+          SubProcess(message: "Troco pays seller", done: trocoPaysSeller),
         ]);
     Process completed =
         Process(message: "Completed Transaction", subProcesses: [
       SubProcess(
-          message: "transaction is completed",
+          message: "Seller confirms payment", done: sellerConfirmsPayment),
+      SubProcess(
+          message: "Transaction is completed",
           done: transaction.transactionStatus == TransactionStatus.Completed),
     ]);
 
@@ -284,15 +291,24 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
   }
 
   bool completedAcceptanceOfTerms() {
-    final status = transaction.transactionStatus;
-
-    List<TransactionStatus> criterias = [
-      TransactionStatus.Processing,
-      TransactionStatus.Ongoing,
-      TransactionStatus.Finalizing,
-      TransactionStatus.Completed
-    ];
-
-    return criterias.contains(status) && transaction.hasAdmin;
+    return transaction.transactionStatus != TransactionStatus.Pending &&
+        transaction.transactionStatus != TransactionStatus.Cancelled;
   }
+
+  Future<void> listenToTransactionsChanges() async {
+    ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        if (value
+            .map((t) => t.transactionId)
+            .contains(transaction.transactionId)) {
+          final t = value.firstWhere(
+              (tr) => tr.transactionId == transaction.transactionId);
+          setState(() {
+            transaction = t;
+          });
+        }
+      });
+    });
+  }
+
 }

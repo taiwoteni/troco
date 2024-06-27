@@ -76,11 +76,12 @@ class Transaction extends Equatable {
 
   bool get hasAdmin => _json.containsKey("adminId") ? adminId != null : false;
 
-  Driver get driver => Driver.fromJson(json: _json["driver"]);
+  Driver get driver => Driver.fromJson(json: _json["driverInformation"]);
 
   bool get hasDriver => false;
 
-  bool get paymentDone => false;
+  bool get paymentDone => _json["paymentMade"] ?? false;
+  bool get adminApprovesPayment => _json["adminPaymentApproved"] ?? false;
 
   String get transactionAmountString =>
       NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
