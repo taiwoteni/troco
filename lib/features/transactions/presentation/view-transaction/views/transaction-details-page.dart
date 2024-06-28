@@ -10,6 +10,7 @@ import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/payments/domain/repo/payment-repository.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-sheet.dart';
+import 'package:troco/features/transactions/domain/entities/driver.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -20,6 +21,7 @@ import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/add-driver-details-form.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
@@ -42,6 +44,8 @@ class _TransactionsDetailPageState
   final okKey = UniqueKey();
   final neutralKey = UniqueKey();
   final cancelKey = UniqueKey();
+
+  bool driverDetailsExpanded = false;
 
   @override
   void initState() {
@@ -98,17 +102,56 @@ class _TransactionsDetailPageState
         //Driver details
         regularSpacer(),
         driverDetailsTitle(),
-        largeSpacer(),
-        regularSpacer(),
-        // delivery details
-        driverDestination(),
-        regularSpacer(),
+
         divider(),
+        extraLargeSpacer(),
+
+        // total price
+        price(),
         regularSpacer(),
-        // Vehicle Name
-        vehicleName(),
-        regularSpacer(),
-        divider(),
+        extraLargeSpacer(),
+        extraLargeSpacer(),
+        button(),
+        extraLargeSpacer()
+      ],
+    );
+  }
+
+  Widget driverDetailsTitle() {
+    return ExpansionPanelList(
+      expansionCallback: (panelIndex, isExpanded) =>
+          setState(() => driverDetailsExpanded = isExpanded),
+      elevation: 0,
+      expandedHeaderPadding: EdgeInsets.zero,
+      materialGapSize: 0,
+      dividerColor: Colors.transparent,
+      expandIconColor: ColorManager.primary,
+      children: [
+        ExpansionPanel(
+          backgroundColor: Colors.transparent,
+          canTapOnHeader: true,
+          headerBuilder: (context, isExpanded) {
+            return Text(
+              "Driver Details",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                  color: ColorManager.primary,
+                  fontFamily: 'Quicksand',
+                  wordSpacing: -0.5,
+                  fontWeight: FontWeightManager.bold,
+                  fontSize: FontSizeManager.medium * 0.9),
+            );
+          },
+          body: driverDetailsBody(),
+          isExpanded: driverDetailsExpanded,
+        )
+      ],
+    );
+  }
+
+  Widget driverDetailsBody() {
+    return Column(
+      children: [
         regularSpacer(),
         // Driver Name
         driverName(),
@@ -120,6 +163,16 @@ class _TransactionsDetailPageState
         regularSpacer(),
         divider(),
         regularSpacer(),
+        // Company Name
+        companyName(),
+        regularSpacer(),
+        divider(),
+        regularSpacer(),
+        // delivery details
+        driverDestination(),
+        regularSpacer(),
+        divider(),
+        regularSpacer(),
         // Delivery Date
         estimatedDate(),
         regularSpacer(),
@@ -128,15 +181,6 @@ class _TransactionsDetailPageState
         // Delivery Fee
         deliveryFee(),
         regularSpacer(),
-        divider(),
-        extraLargeSpacer(),
-        // total price
-        price(),
-        regularSpacer(),
-        extraLargeSpacer(),
-        extraLargeSpacer(),
-        button(),
-        extraLargeSpacer()
       ],
     );
   }
@@ -403,19 +447,6 @@ class _TransactionsDetailPageState
     );
   }
 
-  Widget driverDetailsTitle() {
-    return Text(
-      "Driver Details",
-      textAlign: TextAlign.left,
-      style: TextStyle(
-          color: ColorManager.primary,
-          fontFamily: 'Quicksand',
-          wordSpacing: -0.5,
-          fontWeight: FontWeightManager.bold,
-          fontSize: FontSizeManager.medium * 0.9),
-    );
-  }
-
   Widget driverDestination() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -444,12 +475,12 @@ class _TransactionsDetailPageState
     );
   }
 
-  Widget vehicleName() {
+  Widget companyName() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "Vehicle Name: ",
+          "Company Name: ",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.secondary,
@@ -615,38 +646,51 @@ class _TransactionsDetailPageState
         ],
         if (isInProgress)
           actionButton(
-              positive: transaction.paymentDone && isBuyer ? null : true,
+              positive:
+                  isBuyer ? (transaction.paymentDone ? null : true) : null,
               label: isBuyer
                   ? (transaction.paymentDone
-                      ? "Awaiting admin approval.."
+                      ? "Awaiting admin's approval.."
                       : "Make Payment")
-                  : "Add driver details",
-              onPressed: isBuyer
-                  ? (transaction.paymentDone ? () {} : makePayment)
-                  : addDriverDetails),
+                  : "Awaiting buyer's payment",
+              onPressed: transaction.paymentDone ? () {} : makePayment),
         if (isProcessing)
           actionButton(
-              positive: true,
-              label: isBuyer ? "Make Payment" : "Add driver details",
-              onPressed: isBuyer ? makePayment : addDriverDetails),
+              positive: isBuyer ? null : (transaction.hasDriver ? null : true),
+              label: isBuyer
+                  ? "Awaiting driver.."
+                  : (transaction.hasDriver
+                      ? "Awaiting admin's approval.."
+                      : "Add driver details"),
+              onPressed: isBuyer
+                  ? () {}
+                  : (transaction.hasDriver ? () {} : addDriverDetails)),
         if (isOngoing)
           actionButton(
               positive: !isBuyer ? null : true,
               label: isBuyer ? "Received Product" : "Sending Product...",
               onPressed: () {}),
         if (isFinalizing) ...[
-          if (isBuyer)
+          if (isBuyer && !transaction.buyerSatisfied)
             actionButton(positive: true, label: "Satisfied", onPressed: () {}),
           actionButton(
-              positive: isBuyer ? null : false,
-              label: isBuyer ? "Unsatisfied" : "Waiting for response...",
+              positive: transaction.buyerSatisfied || !isBuyer ? null : true,
+              label: transaction.buyerSatisfied
+                  ? (isBuyer
+                      ? "Enjoy.."
+                      : transaction.trocoPaysSeller
+                          ? "Payment done.."
+                          : "Revenue underway..")
+                  : isBuyer
+                      ? "Unsatisfied"
+                      : "Waiting for response...",
               //No function to delete yet.
               onPressed: () {}),
         ],
         if (isCompleted || isCancelled)
           actionButton(
               positive: null,
-              label: isCompleted ? "Completed..." : "Cancelled..",
+              label: isCompleted ? "Completed!" : "Cancelled..",
               onPressed: () {}),
 
         // Expanded(
@@ -672,6 +716,7 @@ class _TransactionsDetailPageState
 
   Future<void> makePayment() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
     final method = await selectPaymentProfile();
 
     if (method == null) {
@@ -718,14 +763,31 @@ class _TransactionsDetailPageState
     return method;
   }
 
-  Future<void> addDriverDetails() async {}
+  Future<void> addDriverDetails() async {
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
+    final driver = await showModalBottomSheet<Driver?>(
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: false,
+      isDismissible: false,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) => const AddDriverDetailsForm(),
+    );
+    ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+
+    if (driver != null) {
+      // endpoint to add driver details
+    }
+  }
 
   Widget actionButton(
       {required final bool? positive,
       required final String label,
       required void Function() onPressed}) {
     return Expanded(
-      child: CustomButton.medium(
+      child: CustomButton(
         margin: const EdgeInsets.symmetric(horizontal: SizeManager.small),
         label: label,
         buttonKey: positive == null
@@ -739,7 +801,7 @@ class _TransactionsDetailPageState
         color: positive == null
             ? null
             : positive
-                ? ColorManager.accentColor
+                ? ColorManager.themeColor
                 : Colors.red.shade700,
       ),
     );

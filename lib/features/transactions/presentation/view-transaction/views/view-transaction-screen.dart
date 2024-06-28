@@ -24,6 +24,7 @@ import 'package:troco/features/transactions/presentation/view-transaction/widget
 import 'package:troco/features/transactions/utils/transaction-status-converter.dart';
 
 import '../../../../../core/components/animations/lottie.dart';
+import '../providers/transactions-provider.dart';
 
 class ViewTransactionScreen extends ConsumerStatefulWidget {
   final Transaction transaction;
@@ -51,6 +52,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    listenToTransactionsChanges();
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: CustomScrollView(
@@ -296,4 +298,21 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
       ),
     );
   }
+
+  Future<void> listenToTransactionsChanges() async {
+    ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        if (value
+            .map((t) => t.transactionId)
+            .contains(transaction.transactionId)) {
+          final t = value.firstWhere(
+              (tr) => tr.transactionId == transaction.transactionId);
+          setState(() {
+            transaction = t;
+          });
+        }
+      });
+    });
+  }
+
 }

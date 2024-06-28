@@ -26,6 +26,8 @@ class Transaction extends Equatable {
   DateTime get transactionTime =>
       DateTime.parse(_json["transaction time"] ?? _json["DateOfWork"]);
 
+  DateTime get creationTime => DateTime.parse(_json["creation time"]?? _json["createdTime"] ?? DateTime.now().toIso8601String());
+
   String get transactionId => _json["transaction id"] ?? _json["_id"];
 
   int get inspectionDays => int.parse(_json["inspectionDays"].toString());
@@ -82,6 +84,9 @@ class Transaction extends Equatable {
 
   bool get paymentDone => _json["paymentMade"] ?? false;
   bool get adminApprovesPayment => _json["adminPaymentApproved"] ?? false;
+  bool get adminApprovesDriver => false;
+  bool get buyerSatisfied => false;
+  bool get trocoPaysSeller => false;
 
   String get transactionAmountString =>
       NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
@@ -89,7 +94,7 @@ class Transaction extends Equatable {
 
   double get transactionAmount {
     if (_json["transaction amount"] != null) {
-      return _json["transaction amount"];
+      return (_json["transaction amount"]);
     }
 
     if (salesItem.isEmpty) {
