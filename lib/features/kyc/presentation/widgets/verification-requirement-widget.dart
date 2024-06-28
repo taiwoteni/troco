@@ -40,6 +40,7 @@ class _VerificationRequirementWidgetState
     extends ConsumerState<VerificationRequirementWidget> {
   final key = GlobalKey();
   double height = 123.0;
+  double minPerfectScreenWidth = 346.0;
 
   @override
   void initState() {
@@ -49,8 +50,8 @@ class _VerificationRequirementWidgetState
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
-        if(widget.met && widget.onTap != null){
+      onTap: () {
+        if (widget.met && widget.onTap != null) {
           widget.onTap!();
         }
       },
@@ -114,23 +115,31 @@ class _VerificationRequirementWidgetState
   }
 
   Widget title() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final scale = (screenWidth >= minPerfectScreenWidth
+        ? 1
+        : screenWidth / minPerfectScreenWidth * 0.9);
     return Text(
       widget.title,
       style: TextStyle(
           color: ColorManager.accentColor,
           fontFamily: 'lato',
-          fontSize: FontSizeManager.medium,
+          fontSize: FontSizeManager.medium * scale,
           fontWeight: FontWeightManager.semibold),
     );
   }
 
   Widget description() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final scale = (screenWidth >= minPerfectScreenWidth
+        ? 1
+        : screenWidth / minPerfectScreenWidth * 0.9);
     return Text(
       widget.description,
       style: TextStyle(
           color: ColorManager.secondary,
           fontFamily: 'lato',
-          fontSize: FontSizeManager.small * 0.9,
+          fontSize: FontSizeManager.small * 0.9 * scale,
           fontWeight: FontWeightManager.regular),
     );
   }

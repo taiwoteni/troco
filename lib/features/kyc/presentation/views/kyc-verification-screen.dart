@@ -27,6 +27,7 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
   int index = 0;
   String? path;
   VerificationTier? tier;
+  double minPerfectScreenWidth = 346.0;
 
   @override
   void initState() {
@@ -162,15 +163,22 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
   }
 
   List<VerificationRequirementWidget> requirements() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final scale = (screenWidth >= minPerfectScreenWidth
+        ? 1
+        : screenWidth / minPerfectScreenWidth * 0.9);
     return [
       VerificationRequirementWidget(
         title: "Upload Formal Picture",
         met: tier != null,
         description:
             "Informal, Illicit or\nAI-generated images are NOT accepted.",
-        icon: SvgIcon(
-          svgRes: AssetManager.svgFile(name: "upload-photo"),
-          size: const Size.square(IconSizeManager.extralarge),
+        icon: Transform.scale(
+          scale: scale.toDouble(),
+          child: SvgIcon(
+            svgRes: AssetManager.svgFile(name: "upload-photo"),
+            size: Size.square(IconSizeManager.extralarge * (scale.toDouble())),
+          ),
         ),
       ),
       VerificationRequirementWidget(
@@ -181,9 +189,12 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
         description:
             "ONLY National ID Card,\nDriver's Licence,\nVoter's card or Passport IS accepted.",
         size: IconSizeManager.large,
-        icon: SvgIcon(
-          svgRes: AssetManager.svgFile(name: "identity-document"),
-          size: const Size.square(IconSizeManager.large),
+        icon: Transform.scale(
+          scale: scale.toDouble(),
+          child: SvgIcon(
+            svgRes: AssetManager.svgFile(name: "identity-document"),
+            size: Size.square(IconSizeManager.large * scale.toDouble()),
+          ),
         ),
       ),
       VerificationRequirementWidget(
@@ -191,9 +202,12 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
         met: tier == VerificationTier.Tier3,
         description:
             "Enter a VALID residential address\nfor proof of verification.",
-        icon: SvgIcon(
-          svgRes: AssetManager.svgFile(name: "residential-address"),
-          size: const Size.square(IconSizeManager.extralarge),
+        icon: Transform.scale(
+          scale: scale.toDouble(),
+          child: SvgIcon(
+            svgRes: AssetManager.svgFile(name: "residential-address"),
+            size: Size.square(IconSizeManager.extralarge * scale.toDouble()),
+          ),
         ),
       ),
     ];
