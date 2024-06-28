@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recase/recase.dart';
@@ -23,6 +25,7 @@ class ProgressTimelinePage extends ConsumerStatefulWidget {
 class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
   late Transaction transaction;
   late List<Process> timelines;
+  final double minPerfectScreenWidth = 337.0;
 
   @override
   void initState() {
@@ -33,6 +36,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
 
   @override
   Widget build(BuildContext context) {
+    log(MediaQuery.of(context).size.width.toString());
     listenToTransactionsChanges();
     return Container(
         width: double.maxFinite,
@@ -129,6 +133,8 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
   }
 
   Widget subTimelineWidget({required final List<SubProcess> subProcesses}) {
+    final overflowing =
+        MediaQuery.of(context).size.width < minPerfectScreenWidth;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
       child: FixedTimeline.tileBuilder(
@@ -173,7 +179,13 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
                   color: ColorManager.accentColor);
             },
             itemExtentBuilder: (context, index) =>
-                index == 0 || index == subProcesses.length - 1 ? 20 : 30,
+                index == 0 || index == subProcesses.length - 1
+                    ? overflowing
+                        ? 40
+                        : 30
+                    : overflowing
+                        ? 50
+                        : 40,
             nodeItemOverlapBuilder: (context, index) => false,
             indicatorBuilder: (context, index) {
               final subProcess = subProcesses[index];
