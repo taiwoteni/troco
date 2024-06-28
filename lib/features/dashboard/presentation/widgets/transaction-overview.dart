@@ -44,8 +44,9 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
 
       return transactions
           .where((t) =>
-              t.transactionTime.day >= startOfWeek &&
-              t.transactionTime.day <= endOfWeek &&
+              t.creationTime.day >= startOfWeek &&
+              t.creationTime.day <= endOfWeek &&
+              t.creationTime.month == DateTime.now().month &&
               t.transactionPurpose == TransactionPurpose.Selling)
           .map((t) => t.transactionAmount)
           .fold(0, (sum, amount) {
@@ -64,8 +65,9 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
 
       return transactions
           .where((t) =>
-              t.transactionTime.day >= startOfWeek &&
-              t.transactionTime.day <= endOfWeek &&
+              t.creationTime.day >= startOfWeek &&
+              t.creationTime.day <= endOfWeek &&
+              t.creationTime.month == DateTime.now().month &&
               t.transactionPurpose == TransactionPurpose.Buying)
           .map((t) => t.transactionAmount)
           .fold(0, (sum, amount) {
@@ -110,7 +112,7 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
                     tooltipRoundedRadius: SizeManager.regular,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
-                          "${rod.toY.toInt()}K",
+                          NumberFormat.compact().format(rod.toY.toInt()),
                           style.copyWith(
                               fontWeight: FontWeightManager.bold,
                               fontSize: style.fontSize! * 1.1,
@@ -123,7 +125,7 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
                     },
                   )),
               minY: 0,
-              maxY: maxAmount + 100,
+              maxY: maxAmount * 1.5,
               titlesData: FlTitlesData(
                 leftTitles: AxisTitles(
                   axisNameSize: 0,
@@ -132,6 +134,8 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
                     showTitles: true,
                     reservedSize: 40,
                     getTitlesWidget: (value, meta) {
+                      final highestFormattedString =
+                          NumberFormat.compact().format(maxAmount * 1.5);
                       final maxFormattedString =
                           NumberFormat.compact().format(maxAmount);
                       final halfFormattedString =
@@ -140,7 +144,9 @@ class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
                           ? maxFormattedString
                           : value == maxAmount / 2
                               ? halfFormattedString
-                              : "";
+                              : value == maxAmount * 1.5
+                                  ? highestFormattedString
+                                  : "";
                       return Text(
                         text,
                         style: style,

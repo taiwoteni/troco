@@ -238,9 +238,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
               done: transaction.hasDriver &&
                   paymentStatus.contains(transaction.transactionStatus)),
           SubProcess(
-              message: "Seller sends the driver",
-              done:
-                  transaction.hasDriver ? transaction.driver.checkedOut : false)
+              message: "Seller sends the driver", done: transaction.hasDriver)
         ]);
 
     var deliveryStatus = <TransactionStatus>[
@@ -260,22 +258,20 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
 
     //TODO: VALUE TO KNOW WHEN BUYER IS SATISFIED WITH PRODUCT.
 
-    bool buyerSatisfiedWithProduct = false;
-    bool trocoPaysSeller = false;
-    bool sellerConfirmsPayment = false;
-
     Process acceptanceOfProducts = Process(
         message: "Acceptance of ${transaction.transactionCategory.name}",
         subProcesses: [
           SubProcess(
               message: "Buyer is satisfied with $category",
-              done: buyerSatisfiedWithProduct),
-          SubProcess(message: "Troco pays seller", done: trocoPaysSeller),
+              done: transaction.buyerSatisfied),
+          SubProcess(
+              message: "Troco pays seller", done: transaction.trocoPaysSeller),
         ]);
     Process completed =
         Process(message: "Completed Transaction", subProcesses: [
       SubProcess(
-          message: "Seller confirms payment", done: sellerConfirmsPayment),
+          message: "Seller confirms payment",
+          done: transaction.transactionStatus == TransactionStatus.Completed),
       SubProcess(
           message: "Transaction is completed",
           done: transaction.transactionStatus == TransactionStatus.Completed),
@@ -310,5 +306,4 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
       });
     });
   }
-
 }

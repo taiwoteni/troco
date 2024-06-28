@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../auth/presentation/providers/client-provider.dart';
 import '../../../../groups/presentation/groups_page/widgets/empty-screen.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../utils/enums.dart';
+import '../providers/transactions-provider.dart';
 
-class ProgressDetailsPage extends StatefulWidget {
+class ProgressDetailsPage extends ConsumerStatefulWidget {
   final Transaction transaction;
   const ProgressDetailsPage({super.key, required this.transaction});
 
   @override
-  State<ProgressDetailsPage> createState() => _ProgressDetailsPageState();
+  ConsumerState<ProgressDetailsPage> createState() => _ProgressDetailsPageState();
 }
 
-class _ProgressDetailsPageState extends State<ProgressDetailsPage> {
+class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
   late Transaction transaction;
 
   @override
@@ -25,6 +27,7 @@ class _ProgressDetailsPageState extends State<ProgressDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    listenToTransactionsChanges();
     return SizedBox(
       width: double.maxFinite,
       child: EmptyScreen(
@@ -37,7 +40,21 @@ class _ProgressDetailsPageState extends State<ProgressDetailsPage> {
   }
 
   String getAnimationName() {
+    final bool isSeller =
+        transaction.creator == ClientProvider.readOnlyClient!.userId;
     switch (transaction.transactionStatus) {
+      case TransactionStatus.Pending:
+        return "pending";
+      case TransactionStatus.Ongoing:
+        return "delivery";
+      case TransactionStatus.Processing:
+        return transaction.buyerSatisfied
+            ? (isSeller ? "money-bag" : "happy")
+            : "pending";
+      case TransactionStatus.Inprogress:
+        return isSeller
+            ? "payment-loading"
+            : (transaction.paymentDone ? "pending" : "payment-loading");
       default:
         return "pending";
     }
@@ -57,14 +74,74 @@ class _ProgressDetailsPageState extends State<ProgressDetailsPage> {
     final bool isSeller =
         transaction.creator == ClientProvider.readOnlyClient!.userId;
     switch (transaction.transactionStatus) {
+      case TransactionStatus.Inprogress:
+        return isSeller
+            ? "Awaiting buyer's payemnt"
+            : transaction.paymentDone
+                ? "Awaiting admin's approval"
+                : "Waiting for your payment";
       case TransactionStatus.Processing:
         return isSeller
-            ? "Upload driver details"
+            ? (transaction.hasDriver
+                ? "Awaiting admin's approval"
+                : "Upload driver details")
             : "Seller is uploading driver details";
-      case TransactionStatus.Inprogress:
-        return "Waiting for admin to approve";
+      case TransactionStatus.Ongoing:
+        return isSeller
+            ? "Delivering ${transaction.transactionCategory.name}(s)"
+            : "${transaction.transactionCategory.name}(s) are on their way";
+      case TransactionStatus.Finalizing:
+        return transaction.buyerSatisfied
+            ? "Awaiting ${isSeller ? "buyer's" : "your"} satisfaction"
+            : isSeller
+                ? "Your revenue is on the way"
+                : "Hope you enjoyed our services";
+      case TransactionStatus.Completed:
+        return "Completed Transaction!";
+
       default:
         return "Waiting for ${isSeller ? "buyer" : "you"} to approve..";
     }
   }
+  
+  Future<void> listenToTransactionsChanges() async {
+    ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        if (value
+            .map((t) => t.transactionId)
+            .contains(transaction.transactionId)) {
+          final t = value.firstWhere(
+              (tr) => tr.transactionId == transaction.transactionId);
+          setState(() {
+            transaction = t;
+          });
+        }
+      });
+    });
+  }
+
+
+
 }
+
+/// Basically, this is the timeline:
+/// The Transaction is on Pending when created.
+/// At this point buyer is awaited to approve.
+/// Once buyer approves, Transaction is In progress.
+/// Buyer is awaited to pay. Once he pays => paymentDone == true.
+/// Then admin has to approve.
+/// Once the admin approves, the transaction is Processing.
+/// The seller is awaited to upload driver details.
+/// Once he does so, driverInformation.isNotEmpty.
+/// Then admin has to approve. Admin approves by changing status to Ongoing.
+/// Once the admin approves, the transaction is Ongoing.
+/// Here, the goods or services are being delivered.
+/// Buyer will be prompted to acknowledge the delivery once delivered.
+/// This would be done by changing status to Finalizing
+/// Once he does that, the transaction is Finalizing.
+/// He would then be asked if satisfied or not.
+/// Once he clicks satisfied, transactionJson will update buyerSatisfied to true.
+/// After this, admin pays the Seller.
+/// This would be done by paying the seller and transactionJson updating payedSeller to true.
+/// Then Seller would be prompted if received payment.
+/// It would be done by changing transactionStatus to Completed.

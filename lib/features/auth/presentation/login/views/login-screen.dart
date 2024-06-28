@@ -28,6 +28,7 @@ import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/settings/utils/enums.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -427,6 +428,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// User data must have been saved in Cache
   Future<void> saveTransactions() async {
+    ref.read(transacionRepoProvider.notifier).state = TransactionRepo();
     final transactions = await TransactionRepo().getTransactions();
     AppStorage.saveTransactions(transactions: transactions);
   }
