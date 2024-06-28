@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -154,7 +155,7 @@ class PaymentCard extends StatelessWidget {
     );
   }
 
-  Future<void> showActions(BuildContext context)async{
+  Future<void> showActions(BuildContext context) async {
     await showModalBottomSheet(
       isScrollControlled: true,
       enableDrag: true,
@@ -183,16 +184,28 @@ class PaymentCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                account.bankName.titleCase,
+                account.bank.name.titleCase,
                 style: const TextStyle(
                     fontFamily: 'lato',
                     fontSize: FontSizeManager.medium,
                     color: Colors.white,
                     fontWeight: FontWeightManager.bold),
               ),
+              if (account.bank.logo != null)
+                CachedNetworkImage(
+                  imageUrl: account.bank.logo!,
+                  fadeInCurve: Curves.ease,
+                  color: Colors.white,
+                  fadeInDuration: const Duration(milliseconds: 650),
+                  width: IconSizeManager.medium * 1.5,
+                  height: IconSizeManager.medium * 1.5,
+                  fit: BoxFit.cover,
+                )
+              else
+                const SizedBox.square(dimension: IconSizeManager.medium * 1.5)
             ],
           ),
           smallSpacer(),
@@ -246,7 +259,13 @@ class PaymentCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                account.accountName.titleCase,
+                account.accountName.titleCase.length >= 26
+                    ? account.accountName.titleCase
+                        .replaceRange(23, null, '...')
+                    : account.accountName.titleCase,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                softWrap: true,
                 style: const TextStyle(
                     fontFamily: 'lato',
                     fontSize: FontSizeManager.medium,

@@ -1,13 +1,16 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/components/others/spacer.dart';
-import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import 'package:troco/features/payments/presentation/widgets/payment-card-widget.dart';
 
 import '../../../../core/app/size-manager.dart';
+import '../../domain/entity/payment-method.dart';
 
 class PaymentMethodsList extends ConsumerStatefulWidget {
-  const PaymentMethodsList({super.key});
+  List<PaymentMethod> methods;
+  PaymentMethodsList({super.key, required this.methods});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -17,33 +20,24 @@ class PaymentMethodsList extends ConsumerStatefulWidget {
 class _PaymentMethodsListState extends ConsumerState<PaymentMethodsList> {
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            largeSpacer(),
-            ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return Transform.scale(
-                    scaleY: 0.9,
-                    child: Container(
-                        width: double.maxFinite,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: SizeManager.large * 1.55),
-                        child: PaymentCard(
-                            primary: primaryColor(index: index),
-                            secondary: primaryColor(index: index).shade800,
-                            method: ref.watch(paymentMethodProvider)[index])),
-                  );
-                },
-                separatorBuilder: (context, index) => regularSpacer(),
-                itemCount: ref.watch(paymentMethodProvider).length),
-          ],
-        ),
-      ),
-    );
+    return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          return Transform.scale(
+            scaleY: 0.9,
+            child: Container(
+                width: double.maxFinite,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: SizeManager.large * 1.55),
+                child: PaymentCard(
+                    primary: primaryColor(index: index),
+                    secondary: primaryColor(index: index).shade800,
+                    method: widget.methods[index])),
+          );
+        },
+        separatorBuilder: (context, index) => regularSpacer(),
+        itemCount: widget.methods.length);
   }
 
   MaterialColor primaryColor({required int index}) {

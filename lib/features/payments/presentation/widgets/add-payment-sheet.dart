@@ -12,9 +12,11 @@ import 'package:troco/features/payments/presentation/widgets/select-payment-meth
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
+import '../../../../core/cache/shared-preferences.dart';
 import '../../../../core/components/button/presentation/provider/button-provider.dart';
 import '../../../../core/components/others/drag-handle.dart';
 import '../../../../core/components/others/spacer.dart';
+import '../provider/payment-methods-provider.dart';
 
 class AddPaymentMethod extends ConsumerStatefulWidget {
   const AddPaymentMethod({super.key});
@@ -131,23 +133,28 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentMethod> {
 
     final paymentMethod = await method();
 
-    Navigator.pop(
-        context,
-        paymentMethod
-        );
+    if (paymentMethod != null) {
+      final paymentMethods = AppStorage.getPaymentMethods();
+      paymentMethods.add(paymentMethod);
+      AppStorage.savePaymentMethod(paymentMethods: paymentMethods);
+      ref.watch(paymentMethodProvider.notifier).state = paymentMethods;
+      ref.watch(paymentMethodProvider.notifier).state = paymentMethods;
+      // setState(() {});
+    }
+
+    Navigator.pop(context, paymentMethod);
   }
 
-  Future<PaymentMethod?> method()async{
+  Future<PaymentMethod?> method() async {
     return await showModalBottomSheet<PaymentMethod?>(
-          isScrollControlled: true,
-          enableDrag: true,
-          useSafeArea: false,
-          isDismissible: false,
-          backgroundColor: ColorManager.background,
-          context: context,
-          builder: (context) =>
-              !account ? const AddCardDetails() : const AddAccountDetails(),
-        );
-
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: false,
+      isDismissible: false,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) =>
+          !account ? const AddCardDetails() : const AddAccountDetails(),
+    );
   }
 }

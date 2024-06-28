@@ -20,7 +20,8 @@ class SelectPaymentProfileSheet extends ConsumerStatefulWidget {
       _SelectPaymentMethodSheetState();
 }
 
-class _SelectPaymentMethodSheetState extends ConsumerState<SelectPaymentProfileSheet> {
+class _SelectPaymentMethodSheetState
+    extends ConsumerState<SelectPaymentProfileSheet> {
   bool loading = false;
   int selectedProfileIndex = 0;
   List<PaymentMethod> methods = [];
@@ -56,7 +57,8 @@ class _SelectPaymentMethodSheetState extends ConsumerState<SelectPaymentProfileS
             mediumSpacer(),
             methodsList(),
             extraLargeSpacer(),
-            button()
+            button(),
+            extraLargeSpacer()
           ],
         ),
       ),
@@ -72,7 +74,7 @@ class _SelectPaymentMethodSheetState extends ConsumerState<SelectPaymentProfileS
           padding: const EdgeInsets.symmetric(vertical: SizeManager.small),
           alignment: Alignment.center,
           child: Text(
-            "Select Payment Method",
+            "Select Payment Profile",
             style: TextStyle(
                 color: ColorManager.primary,
                 fontWeight: FontWeightManager.bold,
@@ -105,7 +107,7 @@ class _SelectPaymentMethodSheetState extends ConsumerState<SelectPaymentProfileS
       itemCount: methods.length,
       itemBuilder: (context, index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: SizeManager.medium),
+          padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
           child: SelectPaymentProfileWidget(
               selected: selectedProfileIndex == index,
               onChecked: () => setState(() => selectedProfileIndex = index),
@@ -116,22 +118,20 @@ class _SelectPaymentMethodSheetState extends ConsumerState<SelectPaymentProfileS
     );
   }
 
-  Widget button(){
+  Widget button() {
     return CustomButton(
-      buttonKey: buttonKey,
-      usesProvider: true,
-      onPressed: selectProfile,
-      label: "Select Profile"
-    );
+        buttonKey: buttonKey,
+        usesProvider: true,
+        onPressed: selectProfile,
+        label: "Select Profile");
   }
 
-  Future<void> selectProfile()async{
-    setState(()=> loading=true);
+  Future<void> selectProfile() async {
+    setState(() => loading = true);
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
-    setState(()=> loading=false);
+    setState(() => loading = false);
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     Navigator.pop(context, methods[selectedProfileIndex]);
-
   }
 }

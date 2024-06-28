@@ -5,6 +5,7 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/images/pick-profile-widget.dart';
 import 'package:troco/core/components/others/drag-handle.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
@@ -127,7 +128,9 @@ class _PaymentMethodActionState extends ConsumerState<PaymentMethodAction> {
           ? AddCardDetails(
               card: widget.method as CardMethod,
             )
-          : const AddAccountDetails(),
+          : AddAccountDetails(
+              account: widget.method as AccountMethod,
+            ),
     );
 
     if (method != null) {

@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:math';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +10,8 @@ import 'package:troco/core/components/button/presentation/provider/button-provid
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/payments/data/models/payment-method-dataholder.dart';
+import 'package:troco/features/payments/domain/entity/account-method.dart';
+import 'package:troco/features/payments/domain/repo/bank-repository.dart';
 import 'package:troco/features/payments/utils/uppercase-input-formatter.dart';
 
 import '../../../../core/app/color-manager.dart';
@@ -18,9 +20,12 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/others/drag-handle.dart';
 import '../../../../core/components/others/spacer.dart';
 import '../../../../core/components/texts/inputs/text-form-field.dart';
+import '../../domain/entity/bank.dart';
+import 'select-bank-sheet.dart';
 
 class AddAccountDetails extends ConsumerStatefulWidget {
-  const AddAccountDetails({super.key});
+  final AccountMethod? account;
+  const AddAccountDetails({super.key, this.account});
 
   @override
   ConsumerState<AddAccountDetails> createState() => _AddPaymentSheetState();
@@ -30,9 +35,17 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
   bool loading = false;
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
+  Bank? bank;
+  String? bankAccountError;
+  late TextEditingController accountNumberController, bankNameController;
 
   @override
   void initState() {
+    accountNumberController =
+        TextEditingController(text: widget.account?.accountNumber);
+    bankNameController = TextEditingController(text: widget.account?.bank.name);
+    bank = widget.account?.bank;
+
     super.initState();
   }
 
@@ -115,9 +128,23 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
   Widget accountNumber() {
     return InputFormField(
       label: 'Account Number',
+      controller: accountNumberController,
       inputType: TextInputType.number,
       onSaved: (value) {
         PaymentMethodDataHolder.accountNumber = value;
+      },
+      validator: (value) {
+        if (value == null) {
+          return "* enter account number";
+        }
+        if (value.trim().isEmpty) {
+          return "* enter account number";
+        }
+
+        if (bankAccountError != null) {
+          return bankAccountError;
+        }
+        return null;
       },
       prefixIcon: IconButton(
         onPressed: null,
@@ -141,6 +168,7 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
   Widget bankName() {
     return InputFormField(
       label: 'Bank Name',
+      controller: bankNameController,
       validator: (value) {
         if (value == null) {
           return "* enter valid bank";
@@ -150,10 +178,22 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
         }
         return null;
       },
-      showtrailingIcon: true,
-      onSaved: (value) {
-        PaymentMethodDataHolder.bank = value;
+      onRedirect: () async {
+        final bank = await showModalBottomSheet<Bank?>(
+          isScrollControlled: true,
+          enableDrag: true,
+          useSafeArea: false,
+          isDismissible: false,
+          backgroundColor: ColorManager.background,
+          context: context,
+          builder: (context) => const SearchBankSheet(),
+        );
+        setState(() => this.bank = bank);
+
+        return bank?.name;
       },
+      showtrailingIcon: true,
+      onSaved: (value) {},
       readOnly: true,
       inputType: TextInputType.name,
       inputFormatters: [
@@ -183,17 +223,50 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
 
   Future<void> validatePaymentDetails() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    setState(() => bankAccountError = null);
+
     await Future.delayed(const Duration(seconds: 3));
-    if (Random().nextBool()) {
+
+    if (formKey.currentState!.validate() && bank != null) {
       formKey.currentState!.save();
-      PaymentMethodDataHolder.name = "Teninlanimi David Taiwo";
-      PaymentMethodDataHolder.bank = "Access Bank";
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      final paymentMethod = PaymentMethodDataHolder.toPaymentMethod();
-      Navigator.pop(context, paymentMethod);
-      PaymentMethodDataHolder.clear();
+      log(bank!.toJson().toString());
+      PaymentMethodDataHolder.bank = bank;
+
+      final validatedBankAccount = await validateAccountNumber();
+
+      // if no error message
+      if (validatedBankAccount == null) {
+        // by now, account name would have been saved.
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+        final paymentMethod = PaymentMethodDataHolder.toPaymentMethod();
+        Navigator.pop(context, paymentMethod);
+        PaymentMethodDataHolder.clear();
+      } else {
+        // We show bank account error
+        setState(() => bankAccountError = validatedBankAccount);
+        await Future.delayed(const Duration(seconds: 1));
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+        formKey.currentState!.validate();
+      }
     } else {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     }
+  }
+
+  Future<String?> validateAccountNumber() async {
+    final response = await BankRepository.verifyBankAccount(
+        accountNo: PaymentMethodDataHolder.accountNumber!,
+        bank: PaymentMethodDataHolder.bank!);
+    log(response.body);
+    log(response.code.toString());
+
+    if (response.error || (response.messageBody?.isEmpty ?? false)) {
+      return "Account not found";
+    }
+
+    PaymentMethodDataHolder.name =
+        response.messageBody!["data"]["account_name"];
+    return null;
   }
 }

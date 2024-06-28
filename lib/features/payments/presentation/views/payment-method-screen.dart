@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
-import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import 'package:troco/features/payments/presentation/widgets/add-payment-sheet.dart';
@@ -30,10 +29,22 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
-      appBar: appBar(),
       body: ref.watch(paymentMethodProvider).isNotEmpty
-          ? const PaymentMethodsList()
-          : const NoPaymentMethod(),
+          ? SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  header(),
+                  PaymentMethodsList(
+                    methods: ref.watch(paymentMethodProvider),
+                  )
+                ],
+              ),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [header(), const Expanded(child: NoPaymentMethod())],
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: addPaymentMethod,
         shape: const CircleBorder(),
@@ -47,12 +58,56 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
     );
   }
 
+  Widget header() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          extraLargeSpacer(),
+          back(),
+          mediumSpacer(),
+          title(),
+        ],
+      ),
+    );
+  }
+
+  Widget title() {
+    return Text(
+      "Payment Methods",
+      textAlign: TextAlign.left,
+      style: TextStyle(
+          color: ColorManager.accentColor,
+          fontFamily: 'lato',
+          fontSize: FontSizeManager.large * 1.2,
+          fontWeight: FontWeightManager.extrabold),
+    );
+  }
+
+  Widget back() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: IconButton(
+          onPressed: () => Navigator.pop(context),
+          style: ButtonStyle(
+              shape: const MaterialStatePropertyAll(CircleBorder()),
+              backgroundColor: MaterialStatePropertyAll(
+                  ColorManager.accentColor.withOpacity(0.2))),
+          icon: Icon(
+            Icons.close_rounded,
+            color: ColorManager.accentColor,
+            size: IconSizeManager.small,
+          )),
+    );
+  }
+
   Future<void> addPaymentMethod() async {
     await showPaymentSheet();
   }
 
   Future<void> showPaymentSheet() async {
-    final method = await showModalBottomSheet<PaymentMethod?>(
+    await showModalBottomSheet<PaymentMethod?>(
       isScrollControlled: true,
       enableDrag: true,
       useSafeArea: false,
@@ -61,13 +116,8 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
       context: context,
       builder: (context) => const AddPaymentMethod(),
     );
-    if (method != null) {
-      final paymentMethods = AppStorage.getPaymentMethods();
-      paymentMethods.add(method);
-      AppStorage.savePaymentMethod(paymentMethods: paymentMethods);
-      ref.watch(paymentMethodProvider.notifier).state.add(method);
-      setState(() {});
-    }
+    setState(() {});
+    ref.watch(paymentMethodProvider);
   }
 
   PreferredSizeWidget appBar() {

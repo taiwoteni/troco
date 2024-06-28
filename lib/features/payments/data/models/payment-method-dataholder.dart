@@ -1,13 +1,15 @@
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 
+import '../../domain/entity/bank.dart';
 import '../../domain/entity/payment-method.dart';
 
 class PaymentMethodDataHolder{
   
   static String? cardNumber,cvv,expDate;
   
-  static String? name,bank;
+  static String? name;
+  static Bank? bank;
 
   static String? accountNumber;
 
@@ -23,7 +25,7 @@ class PaymentMethodDataHolder{
   static PaymentMethod toPaymentMethod(){
     if(cardNumber== null){
       return AccountMethod(
-        bankName: bank!, 
+        bank: bank!, 
         accountNumber: accountNumber!, 
         accountName: name!);
     }
