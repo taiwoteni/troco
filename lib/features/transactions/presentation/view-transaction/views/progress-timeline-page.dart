@@ -1,4 +1,6 @@
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recase/recase.dart';
@@ -35,6 +37,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
 
   @override
   Widget build(BuildContext context) {
+    log(MediaQuery.of(context).size.width.toString());
     listenToTransactionsChanges();
     return Container(
         width: double.maxFinite,
