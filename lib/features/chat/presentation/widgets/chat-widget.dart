@@ -207,7 +207,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
 
   Widget loadingWidget() {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1000),
       curve: Curves.ease,
       width: chat.loading || failed
           ? IconSizeManager.regular + SizeManager.small

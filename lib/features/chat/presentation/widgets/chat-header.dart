@@ -197,6 +197,7 @@ class _ChatHeaderState extends ConsumerState<ChatHeader> {
           regularSpacer(),
           GestureDetector(
             onTap: () {
+              return;
               Navigator.pushNamed(context, Routes.viewGroupRoute,
                   arguments: group);
             },
@@ -217,14 +218,6 @@ class _ChatHeaderState extends ConsumerState<ChatHeader> {
                     fontFamily: 'Lato',
                     fontWeight: FontWeightManager.medium,
                     fontSize: FontSizeManager.small,
-                  ),
-                ),
-                Transform.translate(
-                  offset: const Offset(0, 2),
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    color: ColorManager.accentColor,
-                    size: IconSizeManager.small,
                   ),
                 ),
               ],

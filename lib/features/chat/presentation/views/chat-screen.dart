@@ -488,8 +488,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 bottom: Radius.circular(SizeManager.large * 1.5)),
             child: ListTile(
               onTap: () {
-                Navigator.pushNamed(context, Routes.viewGroupRoute,
-                    arguments: group);
+                // Navigator.pushNamed(context, Routes.viewGroupRoute,
+                //     arguments: group);
               },
               tileColor: Colors.transparent,
               dense: true,
@@ -660,6 +660,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return canUsePixels && chats.isNotEmpty
         ? Visibility(
             visible: !fullScroll ? !isScrolling : false,
+            maintainAnimation: true,
+            maintainState: true,
             child: FloatingActionButton.small(
               onPressed: () async {
                 setState(() {
@@ -673,8 +675,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 setState(() => isScrolling = false);
               },
               shape: const StadiumBorder(),
-              backgroundColor: ColorManager.background,
-              foregroundColor: ColorManager.accentColor,
+              backgroundColor: newMessage
+                  ? ColorManager.accentColor
+                  : ColorManager.background,
+              foregroundColor: newMessage
+                  ? ColorManager.primaryDark
+                  : ColorManager.accentColor,
               child: const Icon(
                 CupertinoIcons.chevron_down,
                 size: IconSizeManager.small,
@@ -745,6 +751,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     log(response.body);
 
     if (!response.error) {
+      // To show stopped-loading animation if sent
+      // and is still not overwritten by provider.
+      if (chats
+          .map(
+            (e) => e.chatId,
+          )
+          .contains(chatId)) {
+        pendingChatJson["loading"] = false;
+        setState(() =>
+            chats[chats.indexOf(chat)] = Chat.fromJson(json: pendingChatJson));
+      }
       await AudioManager.playSound(sound: AssetManager.audioFile(name: "send"));
     } else {
       final unsentChats = AppStorage.getUnsentChats(groupId: group.groupId);
@@ -777,8 +794,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         data: (data) {
           final unsentChats = AppStorage.getUnsentChats(groupId: group.groupId);
           bool newMessage = !data.every((element) => element.read);
-          if(newMessage){
-            AudioManager.playSound(sound: AssetManager.audioFile(name: "receive"));
+          if (newMessage) {
+            AudioManager.playSound(
+                sound: AssetManager.audioFile(name: "receive"));
           }
           setState(() {
             chats = unsentChats.isNotEmpty ? [...data, ...unsentChats] : data;
