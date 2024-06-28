@@ -8,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
+import 'package:troco/features/groups/presentation/group_tab/providers/search-provider.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -58,18 +59,25 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
   }
 }
 
-class GroupList extends StatefulWidget {
+class GroupList extends ConsumerStatefulWidget {
   final List<Group> groups;
   const GroupList({super.key, required this.groups});
 
   @override
-  State<GroupList> createState() => _GroupListState();
+  ConsumerState<GroupList> createState() => _GroupListState();
 }
 
-class _GroupListState extends State<GroupList> {
+class _GroupListState extends ConsumerState<GroupList> {
   @override
   Widget build(BuildContext context) {
-    final groups = widget.groups;
+    final groups = ref.watch(groupSearchProvider).trim().isEmpty
+        ? widget.groups
+        : widget.groups
+            .where(
+              (element) => element.groupName.toLowerCase().trim().contains(
+                  ref.watch(groupSearchProvider).trim().toLowerCase()),
+            )
+            .toList();
 
     groups.sort((groupA, groupB) {
       List<Chat> chatsA = ((groupA.toJson()["messages"] ?? []) as List)
@@ -88,7 +96,7 @@ class _GroupListState extends State<GroupList> {
       return timeB.compareTo(timeA);
     });
 
-    return widget.groups.isEmpty
+    return groups.isEmpty
         ? const SliverFillRemaining(
             child: EmptyScreen(
               label: "No Business Groups.\nCreate a Business Group",
@@ -103,10 +111,10 @@ class _GroupListState extends State<GroupList> {
             itemBuilder: (context, index) => Column(
                   children: [
                     ChatContactWidget(
-                      key: ObjectKey(widget.groups[index]),
-                      group: widget.groups[index],
+                      key: ObjectKey(groups[index]),
+                      group: groups[index],
                     ),
-                    if (index == widget.groups.length - 1)
+                    if (index == groups.length - 1)
                       const Gap(SizeManager.bottomBarHeight)
                     else
                       Divider(
@@ -115,6 +123,6 @@ class _GroupListState extends State<GroupList> {
                       )
                   ],
                 ),
-            itemCount: widget.groups.length);
+            itemCount: groups.length);
   }
 }

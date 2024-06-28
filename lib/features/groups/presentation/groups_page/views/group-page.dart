@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/features/groups/presentation/group_tab/providers/search-provider.dart';
 import 'package:troco/features/groups/presentation/group_tab/widgets/group-widget.dart';
 import 'package:troco/core/components/texts/inputs/search-bar.dart';
 import 'package:troco/core/components/clippers/inward-bottom-rounded-clipper.dart';
@@ -113,7 +114,9 @@ class _GroupPageState extends ConsumerState<GroupPage>
             ],
           ),
           const Spacer(),
-          SearchBarWidget(label: "Search", onChanged: (v) {}),
+          SearchBarWidget(label: "Search", onChanged: (v) {
+            ref.watch(groupSearchProvider.notifier).state = v;
+          }),
           const Spacer(),
         ],
       ),

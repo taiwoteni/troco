@@ -86,7 +86,7 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
 
             if (valuesAreDifferent) {
               log("");
-              log("Values have changed");
+              log("Groups have changed");
               log("");
 
               // Only if Data is not the same
