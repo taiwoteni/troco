@@ -6,6 +6,7 @@ import 'dart:developer';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
@@ -13,6 +14,7 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 
 import '../../features/chat/domain/entities/chat.dart';
 import '../../features/groups/domain/entities/group.dart';
+import '../../features/kyc/utils/enums.dart';
 import '../../features/notifications/domain/entities/notification.dart';
 import '../../features/settings/domain/entity/settings.dart';
 
@@ -24,6 +26,8 @@ class AppStorage {
   static const String USER_STORAGE_KEY = "userData";
   static const String GROUP_STORAGE_KEY = "groups";
   static const String PAYMENT_METHODS_STORAGE_KEY = "paymentMethods";
+  static const String KYC_STATUS_STORAGE_KEY = "kycVerificationStatus";
+
 
   static const String NOTIFICATION_STORAGE_KEY = "notifications";
   static const String TRANSACTION_STORAGE_KEY = "transactions";
@@ -212,6 +216,14 @@ class AppStorage {
 
     _pref!.setString(
         PAYMENT_METHODS_STORAGE_KEY, json.encode(paymentMethodsJson));
+  }
+
+  static VerificationTier getkycVerificationStatus(){
+    return KycConverter.convertToEnum(tier: _pref!.getString(KYC_STATUS_STORAGE_KEY)??"0");
+  }
+
+  static Future<void> savekycVerificationStatus({required VerificationTier tier})async{
+    _pref!.setString(KYC_STATUS_STORAGE_KEY, KycConverter.convertToStringApi(tier: tier));
   }
 
   static Future<void> saveSettings({required Settings settings}) async {
