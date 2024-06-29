@@ -8,6 +8,7 @@ import 'package:troco/features/transactions/domain/entities/virtual-service.dart
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
 
 import '../../../groups/domain/entities/group.dart';
+import '../entities/driver.dart';
 import '../entities/service.dart';
 import "package:path/path.dart" as Path;
 import 'package:http/http.dart';
@@ -236,5 +237,36 @@ class TransactionRepo {
         data: {"status": approve ? "In Progress" : "Declined"});
 
     return result;
+  }
+
+  static Future<HttpResponseModel> uploadDriverDetails(
+    {
+      required final Driver driver,
+      required final Group group,
+    }
+  )async{
+
+    var parsedfile = File(driver.plateNumber);
+    var stream = ByteStream(parsedfile.openRead());
+    var length = await parsedfile.length();
+    final file = MultipartFile("plateNumber", stream, length,
+        filename: Path.basename(driver.plateNumber.toString()));
+
+    final multiparts = <MultiPartModel>[];
+    multiparts.add(MultiPartModel.field(field: "name", value: driver.driverName));
+    multiparts.add(MultiPartModel.field(field: "phoneNumber", value: driver.phoneNumber));
+    multiparts.add(MultiPartModel.field(field: "EstimatedDeliveryTime", value: driver.estimatedDeliveryTime.toIso8601String()));
+    multiparts.add(MultiPartModel.field(field: "theDelivery", value: driver.destinationLocation));
+    multiparts.add(MultiPartModel.field(field: "name", value: driver.driverName));
+    multiparts.add(MultiPartModel.file(file: file));
+
+
+
+    final response = await ApiInterface.multipartPostRequest(
+      url: "createdriver/${ClientProvider.readOnlyClient!.userId}/${group.groupId}/${group.groupId}/${group.adminId}",
+      multiparts:multiparts
+    );
+    return response;
+
   }
 }
