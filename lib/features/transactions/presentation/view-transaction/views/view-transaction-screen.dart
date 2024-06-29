@@ -24,6 +24,7 @@ import 'package:troco/features/transactions/presentation/view-transaction/widget
 import 'package:troco/features/transactions/utils/transaction-status-converter.dart';
 
 import '../../../../../core/components/animations/lottie.dart';
+import '../providers/current-transacton-provider.dart';
 import '../providers/transactions-provider.dart';
 
 class ViewTransactionScreen extends ConsumerStatefulWidget {
@@ -48,6 +49,13 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     transaction = widget.transaction;
     log(transaction.toJson().toString());
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        // Still keeping transaction as a named argument
+        //but later override it during initState
+        transaction = ref.watch(currentTransactionProvider);
+      },
+    );
   }
 
   @override
@@ -110,15 +118,14 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
                 Row(
                   children: [
                     CustomTabWidget(
-                        transaction: widget.transaction,
+                        transaction: transaction,
                         isFirst: true,
-                        description:
-                            widget.transaction.transactionPurpose.name),
+                        description: transaction.transactionPurpose.name),
                     CustomTabWidget(
-                        transaction: widget.transaction,
+                        transaction: transaction,
                         description:
                             TransactionStatusConverter.convertToStringStatus(
-                                status: widget.transaction.transactionStatus)),
+                                status: transaction.transactionStatus)),
                   ],
                 ),
                 smallSpacer(),
@@ -310,9 +317,9 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
           setState(() {
             transaction = t;
           });
+          ref.watch(currentTransactionProvider.notifier).state = t;
         }
       });
     });
   }
-
 }

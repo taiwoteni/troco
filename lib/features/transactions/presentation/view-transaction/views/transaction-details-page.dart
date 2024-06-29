@@ -6,11 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
-import 'package:troco/features/payments/domain/entity/card-method.dart';
+import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
-import 'package:troco/features/payments/domain/repo/payment-repository.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-sheet.dart';
 import 'package:troco/features/transactions/domain/entities/driver.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -21,6 +21,7 @@ import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/troco-details-sheet.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/add-driver-details-form.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
@@ -54,6 +55,11 @@ class _TransactionsDetailPageState
       (element) => element.groupId == transaction.transactionId,
     );
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      // Still keeping transaction as a named argument
+      //but later override it during initState 
+      transaction = ref.watch(currentTransactionProvider);
+    },);
   }
 
   @override
@@ -728,25 +734,30 @@ class _TransactionsDetailPageState
       return;
     }
 
-    if (method is CardMethod) {
-      final response = await PaymentRepository.makeCardPayment(
-          transaction: transaction, group: group, card: method);
-      log(response.body);
-      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+    if (method is AccountMethod) {
+      await Future.delayed(const Duration(seconds: 3));
+      await showPayment();
 
-      if (response.error) {
-        SnackbarManager.showBasicSnackbar(
-            context: context,
-            mode: ContentType.failure,
-            message: "Payment was unsuccessful");
-      }
       return;
     }
+
     ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
     SnackbarManager.showBasicSnackbar(
         context: context,
-        mode: ContentType.warning,
-        message: "Only working on Card Methods");
+        mode: ContentType.help,
+        message: "Only working on Account Methods");
+  }
+
+  Future<void> showPayment()async{
+    await showModalBottomSheet<bool?>(
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: false,
+      isDismissible: false,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) => const TrocoDetailsSheet(),
+    );
   }
 
   Future<PaymentMethod?> selectPaymentProfile() async {
@@ -834,6 +845,7 @@ class _TransactionsDetailPageState
           setState(() {
             transaction = t;
           });
+          ref.watch(currentTransactionProvider.notifier).state = t;
         }
       });
     });

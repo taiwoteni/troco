@@ -1,6 +1,4 @@
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recase/recase.dart';
@@ -8,6 +6,7 @@ import 'package:timelines/timelines.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../data/models/process-model.dart';
 import '../../../domain/entities/transaction.dart';
@@ -33,11 +32,15 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
     transaction = widget.transaction;
     timelines = timeline();
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      // Still keeping transaction as a named argument
+      //but later override it during initState 
+      transaction = ref.watch(currentTransactionProvider);
+    },);
   }
 
   @override
   Widget build(BuildContext context) {
-    log(MediaQuery.of(context).size.width.toString());
     listenToTransactionsChanges();
     return Container(
         width: double.maxFinite,
@@ -312,9 +315,10 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
             .contains(transaction.transactionId)) {
           final t = value.firstWhere(
               (tr) => tr.transactionId == transaction.transactionId);
-          setState(() {
-            transaction = t;
-          });
+              setState(() {
+                transaction = t;
+              });
+          ref.watch(currentTransactionProvider.notifier).state = t;
         }
       });
     });

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -11,16 +12,17 @@ import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 
+import '../../../transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import '../../../transactions/utils/enums.dart';
 import '../../../transactions/utils/transaction-status-converter.dart';
 
-class TransactionItemWidget extends StatelessWidget {
+class TransactionItemWidget extends ConsumerWidget {
   final Transaction transaction;
   final bool? fromDarkStatusBar;
   const TransactionItemWidget({super.key, required this.transaction, this.fromDarkStatusBar});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     bool isBuying = transaction.transactionPurpose == TransactionPurpose.Buying;
     Color color = transaction.transactionPurpose == TransactionPurpose.Buying
         ? Colors.deepOrange
@@ -43,6 +45,7 @@ class TransactionItemWidget extends StatelessWidget {
         child: ListTile(
           onTap: () async {
             await Future.delayed(const Duration(microseconds: 4));
+            ref.watch(currentTransactionProvider.notifier).state = transaction;
             await Navigator.pushNamed(context, Routes.viewTransactionRoute,
                 arguments: transaction);
             if(fromDarkStatusBar??false){
