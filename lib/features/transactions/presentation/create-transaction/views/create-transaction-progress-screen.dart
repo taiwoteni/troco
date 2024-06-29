@@ -204,7 +204,7 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
   }
 
   Future<bool> addPricing({required final Transaction transaction}) async {
-    final items = List<SalesItem>.unmodifiable(TransactionDataHolder.items!);
+    final items = List<SalesItem>.from(TransactionDataHolder.items!);
     log(items.length.toString());
     int successful = 0;
     for (int i = 0; i < items.length; i++) {
@@ -218,7 +218,7 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
       log("Ended process ${i + 1} :${response.body}");
 
       if (!response.error) {
-        TransactionDataHolder.items!.removeAt(i);
+        TransactionDataHolder.items!.removeAt(0);
         if (value + 1 == maxValue) {
           setState(() {
             value += 1;
