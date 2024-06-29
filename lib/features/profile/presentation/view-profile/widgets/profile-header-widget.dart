@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:recase/recase.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
@@ -129,7 +130,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
               Text(
                 CategoryConverter.convertToString(
                         category: client.accountCategory)
-                    .toUpperCase(),
+                    .titleCase,
                 textAlign: TextAlign.left,
                 style: TextStyle(
                     fontWeight: FontWeightManager.semibold,

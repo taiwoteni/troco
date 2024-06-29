@@ -3,6 +3,8 @@ import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
 import 'package:troco/features/auth/presentation/welcome-back/views/welcome-back-screen.dart';
+import 'package:troco/features/chat/domain/entities/chat.dart';
+import 'package:troco/features/chat/presentation/views/view-attachment-screen.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password.dart';
@@ -83,6 +85,10 @@ class Routes {
   static const feeCalculatorRoute = "/fee-calculator";
   static const viewProfileRoute = "/view-profile";
   static const viewGroupRoute = "/view-group";
+
+  /// Make sure when using, u are passing [Chat,Group] as the arguments
+  /// for [viewAttachmentRoute].
+  static const viewAttachmentRoute = "/view-attachments";
 }
 
 class RouteGenerator {
@@ -250,6 +256,19 @@ class RouteGenerator {
               final group = routeSettings.arguments! as Group;
               return ViewGroupScreen(
                 group: group,
+              );
+            });
+      case Routes.viewAttachmentRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) {
+              final arguments = routeSettings.arguments! as List;
+
+              final chat = arguments[0] as Chat;
+              final group = arguments[1] as Group;
+              return ViewAttachmentScreen(
+                chat: chat,
+                group:group,
               );
             });
 

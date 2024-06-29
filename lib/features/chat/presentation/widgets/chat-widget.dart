@@ -20,6 +20,7 @@ import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
 
 import '../../../../core/app/font-manager.dart';
+import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/animations/lottie.dart';
 import '../../../groups/domain/entities/group.dart';
@@ -273,77 +274,83 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
     // log(attachment);
     return Hero(
       tag: chat.chatId,
-      child: Container(
-          width: double.maxFinite,
-          constraints: const BoxConstraints(
-            minHeight: 100,
-            maxHeight: 250,
-          ),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(SizeManager.large),
-              image: !isUrl
-                  ? DecorationImage(
-                      fit: BoxFit.cover,
-                      image: chat.isImage
-                          ? FileImage(File(attachment))
-                          : MemoryImage(chat.thumbnail))
-                  : null),
-          child: isUrl
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(SizeManager.large),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CachedNetworkImage(
-                        width: double.maxFinite,
-                        imageUrl:
-                            chat.isImage ? attachment : thumbnail.toString(),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, Routes.viewAttachmentRoute,
+              arguments: [chat,group]);
+        },
+        child: Container(
+            width: double.maxFinite,
+            constraints: const BoxConstraints(
+              minHeight: 100,
+              maxHeight: 250,
+            ),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(SizeManager.large),
+                image: !isUrl
+                    ? DecorationImage(
                         fit: BoxFit.cover,
-                        height: double.maxFinite,
-                        fadeInCurve: Curves.ease,
-                        fadeOutCurve: Curves.ease,
-                        placeholder: (context, url) {
-                          return Container(
-                            width: double.maxFinite,
-                            height: double.maxFinite,
-                            color: ColorManager.lottieLoading,
-                            child: LottieWidget(
-                                lottieRes: AssetManager.lottieFile(
-                                    name: "loading-image"),
-                                size: const Size.square(
-                                    IconSizeManager.extralarge)),
-                          );
-                        },
-                        errorWidget: (context, url, error) {
-                          return Container(
-                            width: double.maxFinite,
-                            height: double.maxFinite,
-                            color: ColorManager.lottieLoading,
-                            child: LottieWidget(
-                                lottieRes: AssetManager.lottieFile(
-                                    name: "loading-image"),
-                                size: const Size.square(
-                                    IconSizeManager.extralarge)),
-                          );
-                        },
-                      ),
-                      if (!chat.isImage)
-                        const Icon(
-                          CupertinoIcons.play_fill,
-                          color: Colors.white,
-                          size: IconSizeManager.medium,
-                        )
-                    ],
-                  ),
-                )
-              : !chat.isImage
-                  ? const Icon(
-                      CupertinoIcons.play_fill,
-                      color: Colors.white,
-                      size: IconSizeManager.medium,
-                    )
-                  : null),
+                        image: chat.isImage
+                            ? FileImage(File(attachment))
+                            : MemoryImage(chat.thumbnail))
+                    : null),
+            child: isUrl
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(SizeManager.large),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CachedNetworkImage(
+                          width: double.maxFinite,
+                          imageUrl:
+                              chat.isImage ? attachment : thumbnail.toString(),
+                          fit: BoxFit.cover,
+                          height: double.maxFinite,
+                          fadeInCurve: Curves.ease,
+                          fadeOutCurve: Curves.ease,
+                          placeholder: (context, url) {
+                            return Container(
+                              width: double.maxFinite,
+                              height: double.maxFinite,
+                              color: ColorManager.lottieLoading,
+                              child: LottieWidget(
+                                  lottieRes: AssetManager.lottieFile(
+                                      name: "loading-image"),
+                                  size: const Size.square(
+                                      IconSizeManager.extralarge)),
+                            );
+                          },
+                          errorWidget: (context, url, error) {
+                            return Container(
+                              width: double.maxFinite,
+                              height: double.maxFinite,
+                              color: ColorManager.lottieLoading,
+                              child: LottieWidget(
+                                  lottieRes: AssetManager.lottieFile(
+                                      name: "loading-image"),
+                                  size: const Size.square(
+                                      IconSizeManager.extralarge)),
+                            );
+                          },
+                        ),
+                        if (!chat.isImage)
+                          const Icon(
+                            CupertinoIcons.play_fill,
+                            color: Colors.white,
+                            size: IconSizeManager.medium,
+                          )
+                      ],
+                    ),
+                  )
+                : !chat.isImage
+                    ? const Icon(
+                        CupertinoIcons.play_fill,
+                        color: Colors.white,
+                        size: IconSizeManager.medium,
+                      )
+                    : null),
+      ),
     );
   }
 
