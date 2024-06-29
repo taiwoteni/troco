@@ -12,6 +12,8 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/utils/category-converter.dart';
+import 'package:troco/features/kyc/utils/enums.dart';
+import 'package:troco/features/kyc/utils/kyc-converter.dart';
 
 class ProfileHeader extends ConsumerStatefulWidget {
   final Client client;
@@ -149,7 +151,9 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
           ),
           regularSpacer(),
           Text(
-            "Tier 3 Troco Verified",
+            client.kycTier == VerificationTier.None
+                ? "Not Verified"
+                : "Tier ${KycConverter.convertToStringApi(tier: client.kycTier)} Troco Verified",
             textAlign: TextAlign.left,
             style: TextStyle(
                 fontWeight: FontWeightManager.semibold,
@@ -176,13 +180,28 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
             url: widget.client.profile,
             size: double.maxFinite,
           ),
+          if(widget.client.kycTier != VerificationTier.None)
           Positioned(
               right: 0,
               bottom: 2,
-              child: SvgIcon(
-                svgRes: AssetManager.svgFile(name: "verification"),
-                color: ColorManager.accentColor,
-                size: const Size.square(IconSizeManager.medium * 1.2),
+              child: SizedBox.square(
+                dimension: IconSizeManager.medium * 1.2,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                          shape: BoxShape.circle, color: Colors.white),
+                      width: IconSizeManager.small,
+                      height: IconSizeManager.small,
+                    ),
+                    SvgIcon(
+                      svgRes: AssetManager.svgFile(name: "verification"),
+                      color: ColorManager.accentColor,
+                      size: const Size.square(IconSizeManager.medium * 1.2),
+                    ),
+                  ],
+                ),
               ))
         ],
       ),

@@ -88,7 +88,7 @@ class _ProfileBodyWidgetState extends ConsumerState<ProfileBody> {
             style: TextStyle(
                 fontFamily: "Lato",
                 color: ColorManager.primary,
-                fontSize: FontSizeManager.regular,
+                fontSize: FontSizeManager.regular * 0.9,
                 fontWeight: FontWeightManager.bold),
           ),
           largeSpacer(),
@@ -97,7 +97,7 @@ class _ProfileBodyWidgetState extends ConsumerState<ProfileBody> {
             style: TextStyle(
                 fontFamily: "Lato",
                 color: ColorManager.secondary,
-                fontSize: FontSizeManager.regular,
+                fontSize: FontSizeManager.regular * 0.9,
                 fontWeight: FontWeightManager.bold),
           ),
         ],
