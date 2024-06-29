@@ -11,6 +11,8 @@ class Notification extends Equatable{
 
   String get label => _json["title"] ?? _json["notificationTitle"] ?? "Notification";
 
+  bool get read => _json["read"] ?? false;
+
   String get content => _json["notificationContent"];
   dynamic get argument => _json["argument"];
 

@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
 import 'package:troco/features/notifications/presentation/providers/notification-provider.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-item-widget.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-menu-button.dart';
@@ -56,7 +59,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   Widget emptyBody() {
     return EmptyScreen(
       lottie: AssetManager.lottieFile(name: 'empty-transactions'),
-      label: "You have no notifiacations.",
+      label: filter == NotificationFilter.All
+          ? "You have no notifications"
+          : "You have no ${filter.name.toLowerCase()} notifications",
       scale: 1.5,
     );
   }
@@ -151,17 +156,31 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   }
 
   Widget notificationsList() {
-    return ListView.separated(
-        shrinkWrap: true,
-        key: const Key("notification-list"),
-        physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) => NotificationItemWidget(
-            key: ObjectKey(allNotifications[index]),
-            notification: allNotifications[index]),
-        separatorBuilder: (context, index) => Divider(
-              color: ColorManager.secondary.withOpacity(0.09),
-            ),
-        itemCount: allNotifications.length);
+    final filteredNotifications = filter == NotificationFilter.All
+        ? allNotifications
+        : allNotifications
+            .where(
+              (element) => filter == NotificationFilter.Read
+                  ? element.read
+                  : !element.read,
+            )
+            .toList();
+    return filteredNotifications.isEmpty
+        ? SizedBox.fromSize(
+            size: Size.fromHeight(MediaQuery.of(context).size.height * .7),
+            child: emptyBody(),
+          )
+        : ListView.separated(
+            shrinkWrap: true,
+            key: const Key("notification-list"),
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) => NotificationItemWidget(
+                key: ObjectKey(filteredNotifications[index]),
+                notification: filteredNotifications[index]),
+            separatorBuilder: (context, index) => Divider(
+                  color: ColorManager.secondary.withOpacity(0.09),
+                ),
+            itemCount: filteredNotifications.length);
   }
 
   Future<void> listenToTransactionsChanges() async {
@@ -170,10 +189,24 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         value.sort(
           (a, b) => 1.compareTo(0),
         );
+
         setState(() {
           allNotifications = value;
         });
+        markNotificationsAsRead();
       });
     });
+  }
+
+  Future<void> markNotificationsAsRead() async {
+    for (final notif in allNotifications) {
+      if (!notif.read) {
+        NotificationRepo.markNotificationAsRead(notification: notif).then(
+          (value) {
+            log(value.body);
+          },
+        );
+      }
+    }
   }
 }

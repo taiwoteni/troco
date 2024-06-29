@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:recase/recase.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
@@ -28,21 +29,22 @@ class _ToggleWidgetState extends State<ToggleWidget> {
       child: Container(
         constraints: const BoxConstraints(minWidth: 72.6),
         padding: const EdgeInsets.symmetric(
-            vertical: SizeManager.regular, horizontal: SizeManager.medium),
+            vertical: SizeManager.regular * 1.25,
+            horizontal: SizeManager.medium),
         decoration: BoxDecoration(
             color: widget.selected
                 ? ColorManager.accentColor
-                : ColorManager.accentColor.withOpacity(0.15),
+                : ColorManager.tertiary,
             borderRadius: BorderRadius.circular(SizeManager.medium * 1.6)),
         alignment: Alignment.center,
         child: Text(
-          widget.label,
+          widget.label.titleCase,
           maxLines: 1,
           style: TextStyle(
               fontFamily: "quicksand",
               color: widget.selected
                   ? ColorManager.primaryDark
-                  : ColorManager.secondary.withOpacity(0.5),
+                  : ColorManager.secondary,
               fontSize: FontSizeManager.regular * 0.8,
               fontWeight: FontWeightManager.semibold),
         ),

@@ -30,6 +30,20 @@ class NotificationRepo{
         code: result.code);
   }
 
+  static Future<HttpResponseModel> markNotificationAsRead({
+    required final Notification notification,
+  })async{
+
+    final result = await ApiInterface.patchRequest(
+      url: "marknotificationasread/${ClientProvider.readOnlyClient!.userId}/${notification.id}",
+      data: {}
+    );
+
+    return result;
+
+
+  }
+
   Future<List<Notification>> getNotifications()async{
     final response = await getAllNotifications();
 
