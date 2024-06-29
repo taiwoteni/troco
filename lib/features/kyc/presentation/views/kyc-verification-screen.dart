@@ -1,14 +1,24 @@
+import 'dart:developer';
+
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/kyc/domain/repository/kyc-repository.dart';
 import 'package:troco/features/kyc/presentation/widgets/verification-requirement-widget.dart';
+import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/button/presentation/provider/button-provider.dart';
 import '../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../core/components/images/svg.dart';
+import '../../../auth/presentation/providers/client-provider.dart';
 import '../../utils/enums.dart';
 
 class KycVerificationScreen extends ConsumerStatefulWidget {
@@ -26,12 +36,18 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
   bool verified = false;
   int index = 0;
   String? path;
-  VerificationTier? tier;
+  late VerificationTier tier;
+  VerificationTier? addedTier, uploadingTier, verifyingTier;
   double minPerfectScreenWidth = 346.0;
 
   @override
   void initState() {
+    tier = ClientProvider.readOnlyClient!.kycTier;
     tabController = TabController(length: 3, vsync: this);
+    final currentVerifyTier = AppStorage.getkycVerificationStatus();
+    if (currentVerifyTier != VerificationTier.None) {
+      verifyingTier = currentVerifyTier;
+    }
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
@@ -42,32 +58,35 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.background,
-      body: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
-        width: double.maxFinite,
-        height: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              extraLargeSpacer(),
-              back(),
-              mediumSpacer(),
-              title(),
-              mediumSpacer(),
-              label(),
-              extraLargeSpacer(),
-              chooseVerificationTier(),
-              largeSpacer(),
-              tiers(),
-              largeSpacer(),
-              regularSpacer(),
-              column(),
-              largeSpacer(),
-              button(),
-              extraLargeSpacer(),
-            ],
+      body: PopScope(
+        canPop: uploadingTier == null,
+        child: Container(
+          padding:
+              const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
+          width: double.maxFinite,
+          height: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                extraLargeSpacer(),
+                back(),
+                mediumSpacer(),
+                title(),
+                mediumSpacer(),
+                label(),
+                extraLargeSpacer(),
+                chooseVerificationTier(),
+                largeSpacer(),
+                tiers(),
+                largeSpacer(),
+                regularSpacer(),
+                column(),
+                largeSpacer(),
+                button(),
+                extraLargeSpacer(),
+              ],
+            ),
           ),
         ),
       ),
@@ -170,7 +189,9 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
     return [
       VerificationRequirementWidget(
         title: "Upload Formal Picture",
-        met: tier != null,
+        met: tier != VerificationTier.None,
+        process: getProcessValue(tier: VerificationTier.Tier1),
+        onTap: () => pickDocument(tier: VerificationTier.Tier1),
         description:
             "Informal, Illicit or\nAI-generated images are NOT accepted.",
         icon: Transform.scale(
@@ -183,9 +204,9 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
       ),
       VerificationRequirementWidget(
         title: "Identity Document",
-        met: tier == null
-            ? false
-            : [VerificationTier.Tier2, VerificationTier.Tier3].contains(tier!),
+        process: getProcessValue(tier: VerificationTier.Tier2),
+        onTap: () => pickDocument(tier: VerificationTier.Tier2),
+        met: [VerificationTier.Tier2, VerificationTier.Tier3].contains(tier),
         description:
             "ONLY National ID Card,\nDriver's Licence,\nVoter's card or Passport IS accepted.",
         size: IconSizeManager.large,
@@ -199,9 +220,11 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
       ),
       VerificationRequirementWidget(
         title: "Verify Residential Address",
+        process: getProcessValue(tier: VerificationTier.Tier3),
+        onTap: () => pickDocument(tier: VerificationTier.Tier3),
         met: tier == VerificationTier.Tier3,
         description:
-            "Enter a VALID residential address\nfor proof of verification.",
+            "Submit your CURRENT NEPA Bill\nfor residential verification.",
         icon: Transform.scale(
           scale: scale.toDouble(),
           child: SvgIcon(
@@ -211,6 +234,18 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
         ),
       ),
     ];
+  }
+
+  VerificationProcess? getProcessValue({required VerificationTier tier}) {
+    return (addedTier ?? VerificationTier.None) == tier
+        ? ((uploadingTier ?? VerificationTier.None) == tier
+            ? VerificationProcess.Uploading
+            : VerificationProcess.Added)
+        : (uploadingTier ?? VerificationTier.None) == tier
+            ? VerificationProcess.Uploading
+            : (verifyingTier ?? VerificationTier.None) == tier
+                ? VerificationProcess.Processing
+                : null;
   }
 
   Widget column() {
@@ -237,9 +272,78 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
     );
   }
 
+  Future<void> pickDocument({required final VerificationTier tier}) async {
+    final currentTierLevel =
+        int.parse(KycConverter.convertToStringApi(tier: this.tier));
+    final selectedTierLevel =
+        int.parse(KycConverter.convertToStringApi(tier: tier));
+
+    // If user is trying to verify with a lower or same tier
+    if (selectedTierLevel <= currentTierLevel) {
+      return;
+    }
+    // If the user is trying to select a tier when a tier is still being
+    // verified by admin or select a tier when uploading a tier
+    if (verifyingTier != null || uploadingTier != null) {
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "A tier is currently being uploaded or verified");
+      return;
+    }
+
+    // If the user is trying to skip an immediate tier
+    if (selectedTierLevel >= currentTierLevel + 2) {
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Verify an immediate tier. Do not skip");
+      return;
+    }
+
+    if (addedTier != null) {
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Can only be verified one stage at a time");
+      return;
+    }
+    final file = await FileManager.pickImage(imageSource: ImageSource.gallery);
+
+    if (file != null) {
+      setState(() {
+        path = file.path;
+        addedTier = tier;
+      });
+      ButtonProvider.enable(buttonKey: buttonKey, ref: ref);
+    }
+  }
+
   Future<void> verify() async {
+    final selectedTier = addedTier!;
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
-    Navigator.pop(context);
+
+    setState(() => uploadingTier = selectedTier);
+    final response = await KycRepository.verifyKyc(
+      tier: selectedTier,
+      bill: selectedTier == VerificationTier.Tier3 ? path! : null,
+      photo: selectedTier == VerificationTier.Tier1 ? path! : null,
+      document: selectedTier == VerificationTier.Tier2 ? path! : null,
+    );
+    log(response.body);
+    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    setState(() => uploadingTier = null);
+
+    if (!response.error) {
+      setState(() {
+        addedTier == null;
+        verifyingTier = selectedTier;
+      });
+      SnackbarManager.showBasicSnackbar(
+          context: context, message: "Submission Successful.");
+      ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
+      AppStorage.savekycVerificationStatus(tier: selectedTier);
+    }
   }
 }

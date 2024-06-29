@@ -21,9 +21,9 @@ class VerificationRequirementWidget extends ConsumerStatefulWidget {
       this.process,
       this.size = IconSizeManager.extralarge,
       this.met = false,
-      this.onTap});
+      required this.onTap});
 
-  final void Function()? onTap;
+  final void Function() onTap;
   final String title;
   final String description;
   final double size;
@@ -50,11 +50,7 @@ class _VerificationRequirementWidgetState
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        if (widget.met && widget.onTap != null) {
-          widget.onTap!();
-        }
-      },
+      onTap: () => widget.onTap(),
       child: DottedBorder(
         color: ColorManager.accentColor,
         strokeWidth: 2,

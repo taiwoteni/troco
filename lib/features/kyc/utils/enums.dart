@@ -6,6 +6,7 @@ enum AssetType{
 }
 
 enum VerificationTier{
+  None,
   Tier1,
   Tier2,
   Tier3
