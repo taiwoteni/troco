@@ -34,6 +34,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../../../core/app/audio-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/snackbar-manager.dart';
+import '../../../transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
 import '../../domain/entities/chat.dart';
 import '../../../groups/domain/entities/group.dart';
 
@@ -606,15 +607,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  void openTransactionPage() {
+  Future<void> openTransactionPage() async {
     if (group.hasTransaction) {
       Navigator.pushNamed(context, Routes.viewTransactionRoute,
           arguments: group.transaction);
     } else {
       if (isCreator) {
         if (group.members.length >= 2) {
-          Navigator.pushNamed(context, Routes.createTransactionRoute,
+          await Navigator.pushNamed(context, Routes.createTransactionRoute,
               arguments: group);
+          ref.watch(createTransactionProgressProvider.notifier).state = 0;
         } else {
           SnackbarManager.showBasicSnackbar(
               context: context,

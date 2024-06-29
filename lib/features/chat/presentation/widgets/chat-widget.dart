@@ -65,7 +65,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
     alignViewsBottom = chat.hasAttachment ? true : chat.message!.length >= 116;
     failed = chat.loading &&
         AppStorage.getUnsentChats(groupId: groupId).contains(chat);
-    showViews = (lastMessage ? true : lastSent) && isSender;
+    showViews = (lastMessage ? true : lastSender) && isSender;
     super.initState();
   }
 

@@ -88,7 +88,7 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                     setState(() => groupNameError = true);
                     return null;
                   }
-                  if (value.trim().length < 8) {
+                  if (value.trim().length < 6) {
                     setState(() => groupNameError = true);
                     return null;
                   } else {
@@ -106,7 +106,7 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                 )),
             regularSpacer(),
             InfoText(
-              text: " * More than 8 digits in length",
+              text: " * More than 5 digits in length",
               color: groupNameError ? Colors.red : ColorManager.secondary,
             ),
             smallSpacer(),
@@ -196,7 +196,6 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
   }
 
   Future<void> createGroup() async {
-    
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
     if (formKey.currentState!.validate() && !groupNameError) {
