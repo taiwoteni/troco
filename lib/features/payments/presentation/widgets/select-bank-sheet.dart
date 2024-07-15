@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/features/groups/presentation/groups_page/widgets/empty-screen.dart';
 import 'package:troco/features/payments/data/sources/all-available-banks.dart';
 
 import '../../../../../core/app/font-manager.dart';
@@ -9,6 +8,7 @@ import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/components/images/svg.dart';
+import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 import '../../domain/entity/bank.dart';
 
 class SearchBankSheet extends StatefulWidget {

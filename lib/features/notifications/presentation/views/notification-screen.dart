@@ -16,7 +16,7 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/app/theme-manager.dart';
 import '../../../../core/components/images/svg.dart';
 import '../../../../core/components/others/spacer.dart';
-import '../../../groups/presentation/groups_page/widgets/empty-screen.dart';
+import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 import '../../domain/entities/notification.dart' as n;
 import '../../utils/enums.dart';
 

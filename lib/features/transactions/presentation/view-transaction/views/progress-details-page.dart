@@ -4,7 +4,7 @@ import 'package:troco/features/transactions/presentation/view-transaction/provid
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../auth/presentation/providers/client-provider.dart';
-import '../../../../groups/presentation/groups_page/widgets/empty-screen.dart';
+import '../../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../utils/enums.dart';
 import '../providers/transactions-provider.dart';

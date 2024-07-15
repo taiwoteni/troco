@@ -22,7 +22,8 @@ import 'package:troco/features/dashboard/presentation/widgets/latest-transaction
 import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 
-import '../../../groups/presentation/groups_page/widgets/empty-screen.dart';
+
+import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 
 class HomePage extends ConsumerStatefulWidget {

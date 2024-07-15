@@ -15,7 +15,7 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/images/svg.dart';
 import '../../../../core/components/others/spacer.dart';
 import '../../../groups/domain/entities/group.dart';
-import '../../../groups/presentation/groups_page/widgets/empty-screen.dart';
+import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 
 class AddGroupMemberWidget extends ConsumerStatefulWidget {
   final Group group;

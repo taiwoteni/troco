@@ -17,7 +17,7 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/wallet/data/models/wallet-menu-item-model.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
-import '../../../groups/presentation/groups_page/widgets/empty-screen.dart';
+import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 
 class WalletPage extends ConsumerStatefulWidget {
   const WalletPage({super.key});

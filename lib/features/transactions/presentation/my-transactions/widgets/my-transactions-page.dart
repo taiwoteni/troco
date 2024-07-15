@@ -8,7 +8,7 @@ import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../../dashboard/presentation/widgets/transaction-item-widget.dart';
-import '../../../../groups/presentation/groups_page/widgets/empty-screen.dart';
+import '../../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../view-transaction/providers/transactions-provider.dart';
 
