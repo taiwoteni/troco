@@ -7,6 +7,7 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/features/groups/presentation/friends_tab/views/friends-tab.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/search-provider.dart';
 import 'package:troco/features/groups/presentation/group_tab/widgets/group-widget.dart';
 import 'package:troco/core/components/texts/inputs/search-bar.dart';
@@ -33,6 +34,7 @@ class GroupPage extends ConsumerStatefulWidget {
 class _GroupPageState extends ConsumerState<GroupPage>
     with TickerProviderStateMixin {
   late final TabController tabController;
+  bool isGroupsTab = true;
 
   @override
   void initState() {
@@ -68,13 +70,13 @@ class _GroupPageState extends ConsumerState<GroupPage>
                   pinned: true,
                   delegate:
                       _SliverTabBarDelegate(child: tabBar(), context: context)),
-              const CollectionsPage(),
+              isGroupsTab? const CollectionsTab(): const FriendsTab(),
             ],
           )),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
         child: FloatingActionButton(
-          onPressed: tabController.index == 0 ? createGroup : null,
+          onPressed: tabController.index == 0 ? createGroup : addFriends,
           heroTag: "add-group",
           shape: const CircleBorder(),
           backgroundColor: ColorManager.accentColor,
@@ -152,6 +154,9 @@ class _GroupPageState extends ConsumerState<GroupPage>
                   text: "Friends",
                 )
               ],
+              onTap: (value){
+                setState(()=> isGroupsTab=value==0);
+              },
               dividerHeight: 0,
               indicatorColor: Colors.white,
               indicatorWeight: SizeManager.small * 1.4,
@@ -181,7 +186,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
         padding: const EdgeInsets.symmetric(horizontal: SizeManager.small),
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        itemBuilder: (context, index) => ChatContactWidget(
+        itemBuilder: (context, index) => CollectionWidget(
               group: groups[index],
             ),
         separatorBuilder: (context, index) => Divider(
@@ -189,6 +194,10 @@ class _GroupPageState extends ConsumerState<GroupPage>
               color: ColorManager.secondary.withOpacity(0.08),
             ),
         itemCount: groups.length);
+  }
+
+  Future<void> addFriends()async{
+    Navigator.pushNamed(context, Routes.viewContacts);
   }
 
   Future<void> createGroup() async {

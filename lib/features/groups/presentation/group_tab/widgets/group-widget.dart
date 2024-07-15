@@ -18,15 +18,15 @@ import 'package:troco/features/groups/domain/entities/group.dart';
 
 import '../../../../chat/domain/entities/chat.dart';
 
-class ChatContactWidget extends ConsumerStatefulWidget {
+class CollectionWidget extends ConsumerStatefulWidget {
   final Group group;
-  const ChatContactWidget({super.key, required this.group});
+  const CollectionWidget({super.key, required this.group});
 
   @override
-  ConsumerState<ChatContactWidget> createState() => _ChatContactWidgetState();
+  ConsumerState<CollectionWidget> createState() => _CollectionWidgetState();
 }
 
-class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
+class _CollectionWidgetState extends ConsumerState<CollectionWidget> {
   late Group group;
   late List<Chat> chats;
 
@@ -38,7 +38,7 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
 
   @override
   void setState(VoidCallback fn) {
-    if(!mounted){
+    if (!mounted) {
       return;
     }
     super.setState(fn);
@@ -136,7 +136,9 @@ class _ChatContactWidgetState extends ConsumerState<ChatContactWidget> {
                               ClientProvider.readOnlyClient!.userId
                           ? "You:  "
                           : lastChat.senderId != group.adminId
-                              ? (lastChat.senderId != group.creator? "Buyer:  ":"Seller:  ")
+                              ? (lastChat.senderId != group.creator
+                                  ? "Buyer:  "
+                                  : "Seller:  ")
                               : "Admin:  ",
                   style: messageStyle.copyWith(
                       color: clientIsLastSender ? ColorManager.secondary : null,

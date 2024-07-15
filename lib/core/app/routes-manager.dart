@@ -8,6 +8,7 @@ import 'package:troco/features/chat/presentation/views/view-attachment-screen.da
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password.dart';
+import 'package:troco/features/groups/presentation/group_tab/views/contacts-screen.dart';
 import 'package:troco/features/home/presentation/views/home-screen.dart';
 import 'package:troco/features/notifications/presentation/views/notification-screen.dart';
 import 'package:troco/features/onboarding/presentation/views/onboarding-sceen.dart';
@@ -89,6 +90,7 @@ class Routes {
   /// Make sure when using, u are passing [Chat,Group] as the arguments
   /// for [viewAttachmentRoute].
   static const viewAttachmentRoute = "/view-attachments";
+  static const viewContacts = "/view-contacts";
 }
 
 class RouteGenerator {
@@ -270,6 +272,10 @@ class RouteGenerator {
                 group:group,
               );
             });
+            case Routes.viewContacts:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const ContactsScreen());
 
       default:
         return MaterialPageRoute(

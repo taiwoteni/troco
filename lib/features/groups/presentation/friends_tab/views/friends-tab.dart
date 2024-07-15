@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/app/asset-manager.dart';
 
 import '../../collections_page/widgets/empty-screen.dart';
 
@@ -15,9 +16,11 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return const SliverFillRemaining(
+    return SliverFillRemaining(
       child: EmptyScreen(
-        label: "Add a friend",
+        scale: 1.5,
+        lottie: AssetManager.lottieFile(name: "add-friends"),
+        label: "Invite a friend to Troco",
       ),
     );
   }

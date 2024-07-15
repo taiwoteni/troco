@@ -51,7 +51,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       Permission.manageExternalStorage,
       Permission.storage,
       Permission.microphone,
-      Permission.contacts
     ].request();
     log(permissions.toString());
   }
