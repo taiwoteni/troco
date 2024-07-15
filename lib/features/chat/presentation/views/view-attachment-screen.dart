@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/font-manager.dart';
@@ -35,12 +38,45 @@ class _ViewAttachmentScreenState extends ConsumerState<ViewAttachmentScreen> {
   late Chat chat;
   // final MediaDownload download = MediaDownload();
   bool downloading = false;
+  bool loading = true;
+
+  VideoPlayerController? controller;
+  bool controlsVisible = false;
 
   @override
   void initState() {
     group = widget.group;
     chat = widget.chat;
+    final bool isUrl = chat.attachment!.startsWith("https://");
+    final options = VideoPlayerOptions(mixWithOthers: true);
+
     super.initState();
+    if (!chat.isImage) {
+      controller = isUrl
+          ? VideoPlayerController.networkUrl(Uri.parse(chat.attachment!),
+              videoPlayerOptions: options)
+          : VideoPlayerController.file(File(chat.attachment!),
+              videoPlayerOptions: options);
+      controller!.initialize();
+    }
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) async {
+        if (controller != null) {
+          controller!.addListener(
+            () {
+              // setState()
+              if (controller!.value.isInitialized &&
+                  !controller!.value.isPlaying) {
+                controller!.play();
+                setState(() {
+                  loading = false;
+                });
+              }
+            },
+          );
+        }
+      },
+    );
   }
 
   @override
@@ -52,19 +88,54 @@ class _ViewAttachmentScreenState extends ConsumerState<ViewAttachmentScreen> {
         child: Hero(
           tag: chat.chatId,
           transitionOnUserGestures: true,
-          child: Container(
-            width: double.maxFinite,
-            constraints: const BoxConstraints(maxHeight: 400),
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    fit: BoxFit.fitWidth,
-                    image: chat.attachment!.startsWith("https://")
-                        ? CachedNetworkImageProvider(chat.attachment!)
-                        : FileImage(File(chat.attachment!)))),
-          ),
+          child: chat.isImage
+              ? Container(
+                  width: double.maxFinite,
+                  constraints: const BoxConstraints(maxHeight: 400),
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                          fit: BoxFit.fitWidth,
+                          image: chat.attachment!.startsWith("https://")
+                              ? CachedNetworkImageProvider(chat.attachment!)
+                              : FileImage(File(chat.attachment!)))),
+                )
+              : videoPlayerWidget(),
         ),
       ),
     );
+  }
+
+  Widget videoPlayerWidget() {
+    final bool isUrl = chat.attachment!.startsWith("https://");
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+          minWidth: double.maxFinite, minHeight: 200, maxHeight: 400),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (loading)
+            Image(
+              width: double.maxFinite,
+              image: isUrl
+                  ? CachedNetworkImageProvider(chat.thumbnail.toString())
+                  : MemoryImage(chat.thumbnail),
+              fit: BoxFit.fitWidth,
+            )
+          else
+            AspectRatio(
+                aspectRatio: controller!.value.aspectRatio,
+                child: VideoPlayer(controller!))
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    if (controller != null && controller!.value.isInitialized) {
+      controller!.dispose();
+    }
+    super.dispose();
   }
 
   PreferredSizeWidget appBar() {
@@ -125,7 +196,7 @@ class _ViewAttachmentScreenState extends ConsumerState<ViewAttachmentScreen> {
                   fontSize: FontSizeManager.medium * 1.3,
                   fontWeight: FontWeightManager.semibold),
               subtitle: Text(
-                  "Sent by ${chat.senderId == ClientProvider.readOnlyClient!.userId ? "You" : (chat.senderId == group.seller.userId ? "Seller" : (chat.senderId != group.adminId ? "Buyer" : "Admin"))}"),
+                  "Sent by ${chat.senderId == ClientProvider.readOnlyClient!.userId ? "You" : (chat.senderId == group.creator ? "Seller" : (chat.senderId != group.adminId ? "Buyer" : "Admin"))}"),
               subtitleTextStyle: TextStyle(
                   color: ColorManager.accentColor,
                   fontFamily: 'Quicksand',
@@ -141,17 +212,20 @@ class _ViewAttachmentScreenState extends ConsumerState<ViewAttachmentScreen> {
                           color: ColorManager.accentColor,
                           size:
                               const Size.square(IconSizeManager.regular * 1.3))
-                      : IconButton(
-                          onPressed: downloadFile,
-                          highlightColor:
-                              ColorManager.accentColor.withOpacity(0.15),
-                          style: const ButtonStyle(
-                              splashFactory: InkRipple.splashFactory),
-                          icon: Icon(
-                            CupertinoIcons.arrow_down_to_line,
-                            color: ColorManager.accentColor,
-                            size: IconSizeManager.regular * 1.3,
-                          )),
+                      : Visibility(
+                          visible: false,
+                          child: IconButton(
+                              onPressed: downloadFile,
+                              highlightColor:
+                                  ColorManager.accentColor.withOpacity(0.15),
+                              style: const ButtonStyle(
+                                  splashFactory: InkRipple.splashFactory),
+                              icon: Icon(
+                                CupertinoIcons.arrow_down_to_line,
+                                color: ColorManager.accentColor,
+                                size: IconSizeManager.regular * 1.3,
+                              )),
+                        ),
                 ],
               ),
             ),
@@ -160,11 +234,10 @@ class _ViewAttachmentScreenState extends ConsumerState<ViewAttachmentScreen> {
   }
 
   Future<void> downloadFile() async {
-    setState(()=> downloading=true);
+    setState(() => downloading = true);
     // final directory = await getApplicationDocumentsDirectory();
     // await download.downloadMedia(context, chat.attachment!, directory.path,
     //     "Troco-${chat.isImage ? "Image" : "Video"}-${DateFormat.jms().format(DateTime.now())}.${chat.attachment!.substring(chat.attachment!.lastIndexOf(".") + 1)}");
-    setState(()=> downloading=false);
-
+    setState(() => downloading = false);
   }
 }

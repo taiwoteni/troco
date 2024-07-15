@@ -13,18 +13,18 @@ import 'package:troco/features/groups/presentation/group_tab/providers/search-pr
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../chat/domain/entities/chat.dart';
-import '../../groups_page/widgets/empty-screen.dart';
+import '../../collections_page/widgets/empty-screen.dart';
 import '../widgets/group-widget.dart';
 import '../providers/groups-provider.dart';
 
-class GroupsPage extends ConsumerStatefulWidget {
-  const GroupsPage({super.key});
+class CollectionsPage extends ConsumerStatefulWidget {
+  const CollectionsPage({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _GroupsPageState();
 }
 
-class _GroupsPageState extends ConsumerState<GroupsPage> {
+class _GroupsPageState extends ConsumerState<CollectionsPage> {
   bool hasShownError = false;
   @override
   Widget build(BuildContext context) {

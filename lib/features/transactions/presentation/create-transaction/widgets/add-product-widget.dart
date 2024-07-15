@@ -176,9 +176,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             if (value.trim().isEmpty) {
               return "* enter a product name";
             }
-            if (value.trim().length <= 4) {
-              return "* should be at least 4 digits";
-            }
+            
             return null;
           },
           onSaved: (value) {

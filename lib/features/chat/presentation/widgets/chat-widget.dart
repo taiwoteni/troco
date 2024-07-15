@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -277,7 +278,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
       child: GestureDetector(
         onTap: () {
           Navigator.pushNamed(context, Routes.viewAttachmentRoute,
-              arguments: [chat,group]);
+              arguments: [chat, group]);
         },
         child: Container(
             width: double.maxFinite,
@@ -293,7 +294,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
                         fit: BoxFit.cover,
                         image: chat.isImage
                             ? FileImage(File(attachment))
-                            : MemoryImage(chat.thumbnail))
+                            : MemoryImage(thumbnail as Uint8List))
                     : null),
             child: isUrl
                 ? ClipRRect(
@@ -306,6 +307,10 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
                           imageUrl:
                               chat.isImage ? attachment : thumbnail.toString(),
                           fit: BoxFit.cover,
+                          color: chat.isImage
+                              ? null
+                              : Colors.white.withOpacity(0.5),
+                          colorBlendMode: chat.isImage ? null : BlendMode.hue,
                           height: double.maxFinite,
                           fadeInCurve: Curves.ease,
                           fadeOutCurve: Curves.ease,
@@ -338,7 +343,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
                           const Icon(
                             CupertinoIcons.play_fill,
                             color: Colors.white,
-                            size: IconSizeManager.medium,
+                            size: IconSizeManager.large,
                           )
                       ],
                     ),
@@ -365,7 +370,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
             .map<ImageProvider<Object>>(
               (e) => e.userId == group.adminId
                   ? AssetImage(AssetManager.imageFile(
-                      name: "product-image-demo", ext: Extension.jpg))
+                      name: "no_profile", ext: Extension.webp))
                   : CachedNetworkImageProvider(e.profile),
             )
             .toList();

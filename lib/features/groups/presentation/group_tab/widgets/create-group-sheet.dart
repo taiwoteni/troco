@@ -67,7 +67,7 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
             const DragHandle(),
             largeSpacer(),
             Text(
-              "Create Group",
+              "Create Collection",
               style: TextStyle(
                   color: ColorManager.primary,
                   fontWeight: FontWeightManager.bold,
@@ -81,14 +81,14 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
             ),
             mediumSpacer(),
             InputFormField(
-                label: "Group name",
+                label: "Collection name",
                 inputType: TextInputType.name,
                 validator: (value) {
                   if (value == null) {
                     setState(() => groupNameError = true);
                     return null;
                   }
-                  if (value.trim().length < 6) {
+                  if (value.trim().length < 5) {
                     setState(() => groupNameError = true);
                     return null;
                   } else {
@@ -106,7 +106,7 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                 )),
             regularSpacer(),
             InfoText(
-              text: " * More than 5 digits in length",
+              text: " * At least 4 digits in length",
               color: groupNameError ? Colors.red : ColorManager.secondary,
             ),
             smallSpacer(),

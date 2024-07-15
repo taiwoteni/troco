@@ -39,7 +39,13 @@ class Group extends Equatable {
         .toList();
   }
 
-  bool get hasTransaction => _transactions.isNotEmpty;
+  bool get hasTransaction =>
+      _transactions.isNotEmpty &&
+      AppStorage.getTransactions()
+          .map(
+            (e) => e.transactionId,
+          )
+          .contains(_transactions.first);
 
   Transaction get transaction {
     final transactions = AppStorage.getTransactions();
@@ -65,6 +71,7 @@ class Group extends Equatable {
   String get groupId => _json["id"] ?? _json["_id"];
   String get creator => members.first;
   String get adminId => _json["adminId"] ?? "abc";
+  String get buyerId => members.firstWhere((element) => ![creator, adminId].contains(element));
 
   Client get seller {
     return sortedMembers.firstWhere(

@@ -108,11 +108,8 @@ class _TransactionDescriptionPageState
             if (value.trim().isEmpty) {
               return "* enter a tranaction name";
             }
-            if (value.trim().length <= 8) {
-              return "* should be at least 8 digits";
-            }
-            if (value.trim().length >= 25) {
-              return "* less than 25 digits";
+            if (value.trim().length >= 30) {
+              return "* less than 30 digits";
             }
             return null;
           },

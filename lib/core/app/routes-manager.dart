@@ -196,8 +196,7 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) {
-            final transaction = routeSettings.arguments! as Transaction;
-            return ViewProductScreen(transaction: transaction);
+            return const ViewProductScreen();
           },
         );
       case Routes.editProfileRoute:

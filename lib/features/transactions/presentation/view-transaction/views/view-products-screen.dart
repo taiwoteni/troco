@@ -7,6 +7,9 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/service.dart';
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 
 import '../../../../../core/app/asset-manager.dart';
@@ -15,11 +18,9 @@ import '../../../../../core/components/animations/lottie.dart';
 import '../../../../../core/components/images/svg.dart';
 import '../../../../../core/components/others/onboarding-indicator.dart';
 import '../../../domain/entities/product.dart';
-import '../../../domain/entities/transaction.dart';
 
 class ViewProductScreen extends ConsumerStatefulWidget {
-  final Transaction transaction;
-  const ViewProductScreen({super.key, required this.transaction});
+  const ViewProductScreen({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -34,8 +35,15 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   @override
   void initState() {
     controller = PageController();
-    items = widget.transaction.salesItem;
+    items = [];
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        setState(() {
+          items = ref.watch(currentTransactionProvider).salesItem;
+        });
+      },
+    );
   }
 
   @override
@@ -182,12 +190,12 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   }
 
   Widget productName() {
-    final product = items[productIndex];
+    final item = items[productIndex];
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "${product.name.substring(0, product.name.length > 25 ? 23 : null)}${product.name.length > 25 ? ".." : ""}",
+          "${item.name.substring(0, item.name.length > 25 ? 23 : null)}${item.name.length > 25 ? ".." : ""}",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
@@ -216,7 +224,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   }
 
   Widget productPrice() {
-    final product = items[productIndex];
+    final item = items[productIndex];
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -227,7 +235,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
         ),
         smallSpacer(),
         Text(
-          product.priceString,
+          item.priceString,
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.accentColor,
@@ -241,8 +249,8 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   }
 
   Widget productsQuantity() {
-    final product = items[productIndex];
-    final no = product.quantity;
+    final item = items[productIndex];
+    final no = item.quantity;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -254,7 +262,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           "$no",
@@ -264,36 +272,42 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
   }
 
   Widget productsQuality() {
-    final product = items[productIndex] as Product;
+    final item = items[productIndex];
+    bool product = item is Product;
+    bool service = item is Service;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "Quality: ",
+          product ? "Quality: " : "Requirement: ",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.secondary,
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
-          product.productCategory,
+          product
+              ? (item).productCategory
+              : service
+                  ? item.serviceRequirement.name
+                  : (item as VirtualService).serviceRequirement.name,
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -312,7 +326,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           ProductConditionConverter.convertToString(
@@ -323,7 +337,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -342,7 +356,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           service.serviceRequirement.name,
@@ -352,13 +366,11 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
   }
-
-
 
   Widget totalAmount() {
     final product = items[productIndex];
@@ -374,7 +386,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           "${NumberFormat.currency(decimalDigits: 2, locale: 'en_NG', symbol: '').format(product.price * no)} NG",
@@ -384,7 +396,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -409,10 +421,13 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
           regularSpacer(),
           productsQuality(),
           regularSpacer(),
-          divider(),
-          regularSpacer(),
-          productsCondition(),
-          regularSpacer(),
+          if (ref.watch(currentTransactionProvider).transactionCategory ==
+              TransactionCategory.Product) ...[
+            divider(),
+            regularSpacer(),
+            productsCondition(),
+            regularSpacer(),
+          ],
           divider(),
           regularSpacer(),
           productsQuantity(),

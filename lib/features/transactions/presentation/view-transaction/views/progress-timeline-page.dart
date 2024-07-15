@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recase/recase.dart';
@@ -32,11 +31,15 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
     transaction = widget.transaction;
     timelines = timeline();
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      // Still keeping transaction as a named argument
-      //but later override it during initState 
-      transaction = ref.watch(currentTransactionProvider);
-    },);
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        // Still keeping transaction as a named argument
+        //but later override it during initState
+        setState(() {
+          transaction = ref.watch(currentTransactionProvider);
+        });
+      },
+    );
   }
 
   @override
@@ -221,6 +224,8 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
   }
 
   List<Process> timeline() {
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
     Process acceptanceOfTerms =
         Process(message: "Acceptance Of Terms", subProcesses: [
       SubProcess(
@@ -232,8 +237,6 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
     ]);
 
     List<TransactionStatus> paymentStatus = [
-      TransactionStatus.Ongoing,
-      TransactionStatus.Processing,
       TransactionStatus.Finalizing,
       TransactionStatus.Completed,
     ];
@@ -247,21 +250,33 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
               message: "Admin approves payment",
               done: transaction.adminApprovesPayment),
           SubProcess(
-              message: "Seller uploaded driver details",
-              done: transaction.hasDriver),
+              message: isVirtual
+                  ? "Seller starts leading"
+                  : "Seller uploads driver details",
+              done: isVirtual
+                  ? transaction.sellerStarteedLeading
+                  : transaction.hasDriver),
           SubProcess(
-              message: "Admin approves driver details",
-              done: transaction.hasDriver &&
-                  paymentStatus.contains(transaction.transactionStatus)),
+              message: isVirtual
+                  ? "Buyer accepts lead"
+                  : "Admin approves driver details",
+              done: isVirtual
+                  ? transaction.leadStarted
+                  : paymentStatus.contains(transaction.transactionStatus)),
           SubProcess(
-              message: "Seller sends the driver", done: transaction.hasDriver)
+              message:
+                  isVirtual ? "Inspection Started" : "Seller sends the driver",
+              done: paymentStatus.contains(transaction.transactionStatus))
         ]);
 
     var deliveryStatus = <TransactionStatus>[
       TransactionStatus.Finalizing,
       TransactionStatus.Completed,
     ];
-    final category = transaction.transactionCategory.name.toLowerCase();
+    final category =
+        transaction.transactionCategory == TransactionCategory.Product
+            ? "Product"
+            : "Service";
     Process deliveryOfTransaction =
         Process(message: "Delivery of ${category.titleCase}", subProcesses: [
       SubProcess(
@@ -271,8 +286,6 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
           message: "Buyer recieves $category",
           done: deliveryStatus.contains(transaction.transactionStatus)),
     ]);
-
-    //TODO: VALUE TO KNOW WHEN BUYER IS SATISFIED WITH PRODUCT.
 
     Process acceptanceOfProducts = Process(
         message: "Acceptance of ${transaction.transactionCategory.name}",
@@ -296,7 +309,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
     return [
       acceptanceOfTerms,
       paymentOfTransaction,
-      deliveryOfTransaction,
+      if (!isVirtual) deliveryOfTransaction,
       acceptanceOfProducts,
       completed
     ];
@@ -315,9 +328,9 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
             .contains(transaction.transactionId)) {
           final t = value.firstWhere(
               (tr) => tr.transactionId == transaction.transactionId);
-              setState(() {
-                transaction = t;
-              });
+          setState(() {
+            transaction = t;
+          });
           ref.watch(currentTransactionProvider.notifier).state = t;
         }
       });

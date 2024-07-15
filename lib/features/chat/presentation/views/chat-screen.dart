@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
 import 'dart:math' as Math;
 import 'dart:developer';
@@ -284,7 +285,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            onPressed: showMaintenanceMessage,
+                            onPressed: () => pickFile(gallery: false),
                             icon: SvgIcon(
                               svgRes: AssetManager.svgFile(name: "camera"),
                               color: ColorManager.secondary,
@@ -294,7 +295,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           ),
                           smallSpacer(),
                           IconButton(
-                            onPressed: pickFile,
+                            onPressed: () => pickFile(gallery: true),
                             icon: SvgIcon(
                               svgRes: AssetManager.svgFile(name: "attach"),
                               color: ColorManager.secondary,
@@ -560,26 +561,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   smallSpacer(),
-                  IconButton(
-                    onPressed: deleteGroup,
-                    highlightColor: ColorManager.accentColor.withOpacity(0.15),
-                    style: const ButtonStyle(
-                        splashFactory: InkRipple.splashFactory),
-                    icon: deleting
-                        ? Transform.scale(
-                            scale: 1.5,
-                            child: LottieWidget(
-                                lottieRes:
-                                    AssetManager.lottieFile(name: "loading"),
-                                color: Colors.red,
-                                size: const Size.square(
-                                    IconSizeManager.regular * 1.3)),
-                          )
-                        : const Icon(
-                            CupertinoIcons.delete_solid,
-                            color: Colors.red,
-                            size: IconSizeManager.regular * 1.3,
-                          ),
+                  Visibility(
+                    visible: false,
+                    child: IconButton(
+                      onPressed: deleteGroup,
+                      highlightColor:
+                          ColorManager.accentColor.withOpacity(0.15),
+                      style: const ButtonStyle(
+                          splashFactory: InkRipple.splashFactory),
+                      icon: deleting
+                          ? Transform.scale(
+                              scale: 1.5,
+                              child: LottieWidget(
+                                  lottieRes:
+                                      AssetManager.lottieFile(name: "loading"),
+                                  color: Colors.red,
+                                  size: const Size.square(
+                                      IconSizeManager.regular * 1.3)),
+                            )
+                          : const Icon(
+                              CupertinoIcons.delete_solid,
+                              color: Colors.red,
+                              size: IconSizeManager.regular * 1.3,
+                            ),
+                    ),
                   )
                 ],
               ),
@@ -764,7 +769,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         setState(() =>
             chats[chats.indexOf(chat)] = Chat.fromJson(json: pendingChatJson));
       }
-      await AudioManager.playSound(sound: AssetManager.audioFile(name: "send"));
+      AudioManager.playSource(source: AudioManager.sendSource);
     } else {
       final unsentChats = AppStorage.getUnsentChats(groupId: group.groupId);
       unsentChats.add(chat);
@@ -797,8 +802,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           final unsentChats = AppStorage.getUnsentChats(groupId: group.groupId);
           bool newMessage = !data.every((element) => element.read);
           if (newMessage) {
-            AudioManager.playSound(
-                sound: AssetManager.audioFile(name: "receive"));
+            AudioManager.playSource(source: AudioManager.receiveSource);
           }
           setState(() {
             chats = unsentChats.isNotEmpty ? [...data, ...unsentChats] : data;
@@ -845,8 +849,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
   }
 
-  Future<void> pickFile() async {
-    final file = await FileManager.pickMedia();
+  Future<void> pickFile({required final bool gallery}) async {
+    final _file = await (gallery
+        ? FileManager.pickMedia()
+        : FileManager.pickImage(imageSource: ImageSource.camera));
+
+    XFile? file = _file == null
+        ? null
+        : XFile(gallery ? (_file as XFile?)!.path : (_file as File?)!.path);
     if (file != null) {
       if (["Video", "Image"].contains(getMimeType(path: file.path))) {
         fileStat = await File(file.path).stat();

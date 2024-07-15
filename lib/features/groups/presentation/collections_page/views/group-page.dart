@@ -1,6 +1,7 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -14,6 +15,7 @@ import 'package:troco/features/groups/presentation/group_tab/widgets/create-grou
 import 'package:troco/features/groups/presentation/group_tab/views/groups-tab.dart';
 
 import '../../../../../core/app/font-manager.dart';
+import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/snackbar-manager.dart';
 import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../../core/components/images/profile-icon.dart';
@@ -66,7 +68,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
                   pinned: true,
                   delegate:
                       _SliverTabBarDelegate(child: tabBar(), context: context)),
-              const GroupsPage(),
+              const CollectionsPage(),
             ],
           )),
       floatingActionButton: Padding(
@@ -95,12 +97,12 @@ class _GroupPageState extends ConsumerState<GroupPage>
         children: [
           Gap(MediaQuery.of(context).viewPadding.top),
           mediumSpacer(),
-          const Row(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "My Groups",
+              const Text(
+                "My Collections",
                 style: TextStyle(
                     fontFamily: 'Lato',
                     color: Colors.white,
@@ -108,15 +110,23 @@ class _GroupPageState extends ConsumerState<GroupPage>
                     fontSize: FontSizeManager.large * 1.1,
                     fontWeight: FontWeightManager.semibold),
               ),
-              UserProfileIcon(
-                size: IconSizeManager.medium * 1.3,
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, Routes.viewProfileRoute,
+                      arguments: ClientProvider.readOnlyClient!);
+                },
+                child: const UserProfileIcon(
+                  size: IconSizeManager.medium * 1.3,
+                ),
               ),
             ],
           ),
           const Spacer(),
-          SearchBarWidget(label: "Search", onChanged: (v) {
-            ref.watch(groupSearchProvider.notifier).state = v;
-          }),
+          SearchBarWidget(
+              label: "Search",
+              onChanged: (v) {
+                ref.watch(groupSearchProvider.notifier).state = v;
+              }),
           const Spacer(),
         ],
       ),

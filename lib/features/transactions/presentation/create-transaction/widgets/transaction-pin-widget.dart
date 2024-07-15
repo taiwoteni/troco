@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
@@ -142,7 +142,9 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
         Navigator.pop(context, false);
       }
       SnackbarManager.showBasicSnackbar(
-          context: context, message: "Incorrect Pin or Internet Error");
+          mode: ContentType.failure,
+          context: context,
+          message: "Incorrect Pin or Internet Error");
     }
   }
 }

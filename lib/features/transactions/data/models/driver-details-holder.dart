@@ -1,6 +1,8 @@
+import 'package:intl/intl.dart';
+
 class DriverDetailsHolder{
 
-  static String? companyName,driverName,plateNumber,driverPhoneNumber,destination;
+  static String? companyName,driverName,plateNumber,driverPhoneNumber,destination,estimatedDeliveryTime;
 
   static void clear(){
     companyName = null;
@@ -8,6 +10,7 @@ class DriverDetailsHolder{
     plateNumber = null;
     driverPhoneNumber = null;
     destination = null;
+    estimatedDeliveryTime = null;
   }
 
   static Map<dynamic,dynamic> toJson(){
@@ -15,7 +18,8 @@ class DriverDetailsHolder{
       "companyName":companyName,
       "driverName":driverName,
       "plateNumber":plateNumber,
-      "driverPhoneNumber":driverPhoneNumber,
+      "estimatedDeliveryTime":DateFormat("dd/MM/yyyy").parse(estimatedDeliveryTime?? DateTime.now().toIso8601String()).toIso8601String(),
+      "phoneNumber":driverPhoneNumber,
       "destination":destination
     };
   }

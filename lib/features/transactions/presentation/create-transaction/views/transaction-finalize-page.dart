@@ -1,9 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/kyc/utils/enums.dart';
+import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -94,8 +99,41 @@ class _TransactionPreviewPageState
       buttonKey: buttonKey,
       color: ColorManager.themeColor,
       onPressed: () async {
+        final client = ref.watch(clientProvider)!;
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 2));
+        final totalPrice = TransactionDataHolder.items!
+            .map(
+              (e) => e.quantity * e.price,
+            )
+            .fold(
+              0,
+              (previousValue, element) => previousValue + element,
+            );
+
+        if (client.kycTier == VerificationTier.Tier1) {
+          if (totalPrice > 200000) {
+            SnackbarManager.showBasicSnackbar(
+                context: context,
+                mode: ContentType.failure,
+                message:
+                    "Max price for Tier 1 is 200,000 NGN\nUpgrade your KYC Tier");
+            ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+            return;
+          }
+        } else if (client.kycTier == VerificationTier.Tier2) {
+          if (totalPrice > 500000) {
+            SnackbarManager.showBasicSnackbar(
+                context: context,
+                mode: ContentType.failure,
+                message:
+                    "Max price for Tier 1 is 500,000 NGN\nUpgrade your KYC Tier");
+            ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+            return;
+          }
+        }
         await verifyPin();
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },
@@ -119,8 +157,8 @@ class _TransactionPreviewPageState
       Navigator.push(
           context,
           MaterialPageRoute(
-            settings:
-                RouteSettings(arguments: ModalRoute.of(context)!.settings.arguments),
+            settings: RouteSettings(
+                arguments: ModalRoute.of(context)!.settings.arguments),
             builder: (context) => const CreateTransactonProgressScreen(),
           ));
     }

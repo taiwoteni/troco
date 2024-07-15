@@ -26,7 +26,9 @@ class Transaction extends Equatable {
   DateTime get transactionTime =>
       DateTime.parse(_json["transaction time"] ?? _json["DateOfWork"]);
 
-  DateTime get creationTime => DateTime.parse(_json["creation time"]?? _json["createdTime"] ?? DateTime.now().toIso8601String());
+  DateTime get creationTime => DateTime.parse(_json["creation time"] ??
+      _json["createdTime"] ??
+      DateTime.now().toIso8601String());
 
   String get transactionId => _json["transaction id"] ?? _json["_id"];
 
@@ -75,22 +77,36 @@ class Transaction extends Equatable {
   }
 
   String? get adminId => _json["adminId"];
+  String get buyer => _json["buyer"];
 
   bool get hasAdmin => _json.containsKey("adminId") ? adminId != null : false;
 
-  Driver get driver => Driver.fromJson(json: _json["driverInformation"]);
+  Driver get driver =>
+      Driver.fromJson(json: (_json["driverInformation"] as List)[0]);
 
-  bool get hasDriver => false;
+  bool get hasDriver => ((_json["driverInformation"] ?? []) as List).isNotEmpty;
+
+  bool get hasAccountDetails =>
+      ((_json["accountDetailes"] ?? []) as List).isNotEmpty;
 
   bool get paymentDone => _json["paymentMade"] ?? false;
   bool get adminApprovesPayment => _json["adminPaymentApproved"] ?? false;
   bool get adminApprovesDriver => false;
-  bool get buyerSatisfied => false;
-  bool get trocoPaysSeller => false;
+  bool get buyerSatisfied => _json["buyerSatisfied"] ?? false;
+  bool get trocoPaysSeller => _json["trocopaidSeller"] ?? false;
+
+  bool get leadStarted =>
+      [
+        TransactionStatus.Ongoing,
+        TransactionStatus.Finalizing,
+        TransactionStatus.Completed
+      ].contains(transactionStatus) &&
+      sellerStarteedLeading;
+  bool get sellerStarteedLeading => _json["sellerStartLeading"] ?? false;
 
   String get transactionAmountString =>
       NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
-          .format(transactionAmount);
+          .format(transactionAmount * 1.05);
 
   double get transactionAmount {
     if (_json["transaction amount"] != null) {

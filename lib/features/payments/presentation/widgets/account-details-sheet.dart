@@ -167,14 +167,14 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
 
   Widget bankName() {
     return InputFormField(
-      label: 'Bank Name',
+      label: 'Bank',
       controller: bankNameController,
       validator: (value) {
         if (value == null) {
-          return "* enter valid bank";
+          return "* select bank";
         }
         if (value.trim().isEmpty) {
-          return "* select valid bank";
+          return "* select bank";
         }
         return null;
       },
@@ -189,7 +189,6 @@ class _AddPaymentSheetState extends ConsumerState<AddAccountDetails> {
           builder: (context) => const SearchBankSheet(),
         );
         setState(() => this.bank = bank);
-
         return bank?.name;
       },
       showtrailingIcon: true,

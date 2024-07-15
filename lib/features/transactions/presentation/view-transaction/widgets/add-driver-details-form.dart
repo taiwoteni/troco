@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
@@ -19,6 +20,8 @@ import '../../../../../core/components/others/spacer.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../auth/utils/phone-number-converter.dart';
 import '../../../domain/entities/driver.dart';
+import '../../../utils/date-input-formatter.dart';
+import '../../../utils/date-verification-validation.dart';
 
 class AddDriverDetailsForm extends ConsumerStatefulWidget {
   const AddDriverDetailsForm({super.key});
@@ -62,11 +65,12 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
               mediumSpacer(),
               driverName(),
               mediumSpacer(),
-              companyName(),
-              mediumSpacer(),
               row(),
               mediumSpacer(),
               destination(),
+              mediumSpacer(),
+              estimatedDeliveryTime(),
+              mediumSpacer(),
               extraLargeSpacer(),
               button(),
               extraLargeSpacer(),
@@ -284,7 +288,7 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
           height: SizeManager.extralarge * 1.1,
           right: SizeManager.regular,
           child: IconButton(
-              onPressed: (){
+              onPressed: () {
                 loading ? null : Navigator.pop(context);
                 DriverDetailsHolder.clear();
               },
@@ -299,6 +303,43 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
               )),
         )
       ],
+    );
+  }
+
+  Widget estimatedDeliveryTime() {
+    return InputFormField(
+      label: 'Est. Time (DD/MM/YYYY)',
+      inputType: TextInputType.datetime,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10,
+            maxLengthEnforcement:
+                MaxLengthEnforcement.truncateAfterCompositionEnds),
+        DateInputFormatter(),
+      ],
+      validator: (value) {
+        if (value == null) {
+          return "* enter date";
+        }
+        if (value.trim().isEmpty) {
+          return "* enter date";
+        }
+        if (!DateValidator.isValidDate(value.trim(), expritation: true)) {
+          return "* enter valid date";
+        }
+        return null;
+      },
+      onSaved: (value) {
+        DriverDetailsHolder.estimatedDeliveryTime = value;
+      },
+      prefixIcon: IconButton(
+        onPressed: null,
+        iconSize: IconSizeManager.regular,
+        icon: Icon(
+          CupertinoIcons.time,
+          color: ColorManager.secondary,
+        ),
+      ),
     );
   }
 
@@ -323,7 +364,6 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
       Navigator.pop(
           context, Driver.fromJson(json: DriverDetailsHolder.toJson()));
       DriverDetailsHolder.clear();
-
     } else {
       DriverDetailsHolder.clear();
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

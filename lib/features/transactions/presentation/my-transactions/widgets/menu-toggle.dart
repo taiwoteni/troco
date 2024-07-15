@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/font-manager.dart';
+import 'package:troco/features/transactions/presentation/my-transactions/providers/statistics-mode-provider.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
-import '../providers/transaction-tab-index.dart';
+
+final _bgColor = ColorManager.secondary.withOpacity(0.07);
 
 class MenuToggle extends ConsumerWidget {
   const MenuToggle({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
-    bool firstSelected = ref.watch(menuToggleIndexProvider);
+    bool firstSelected =
+        ref.watch(statisticsMode) == TransactionPurpose.Selling;
     final tabWidth =
-        (MediaQuery.sizeOf(context).width - (SizeManager.extralarge)) / 4;
+        (MediaQuery.sizeOf(context).width - (SizeManager.extralarge)) / 3.8;
     return Container(
       width: tabWidth * 2 + 2,
-      height: SizeManager.extralarge * 1.25,
+      height: SizeManager.extralarge * 1.3,
       decoration: BoxDecoration(
-          border: Border.all(color: ColorManager.accentColor, width: 1),
           borderRadius: BorderRadius.circular(SizeManager.extralarge),
-          color: ColorManager.background),
+          color: _bgColor),
       child: Stack(
         children: [
           Row(
@@ -36,11 +39,15 @@ class MenuToggle extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(SizeManager.extralarge),
                 ),
               ),
-              Container(
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.ease,
                 width: tabWidth,
                 height: double.maxFinite,
                 decoration: BoxDecoration(
-                  color: ColorManager.accentColor,
+                  color: firstSelected
+                      ? ColorManager.accentColor
+                      : Colors.redAccent,
                   borderRadius: BorderRadius.circular(SizeManager.extralarge),
                 ),
               ),
@@ -53,46 +60,46 @@ class MenuToggle extends ConsumerWidget {
               children: [
                 Expanded(
                   child: InkWell(
-                    onTap: () =>
-                        ref.read(menuToggleIndexProvider.notifier).state = true,
+                    onTap: () => ref.read(statisticsMode.notifier).state =
+                        TransactionPurpose.Selling,
                     borderRadius: BorderRadius.circular(SizeManager.extralarge),
                     splashColor: ColorManager.accentColor.withOpacity(0.4),
                     child: AnimatedDefaultTextStyle(
                       style: TextStyle(
-                          color: firstSelected
-                              ? Colors.white
-                              : ColorManager.accentColor,
+                          color: !firstSelected
+                              ? ColorManager.secondary
+                              : Colors.white,
                           fontFamily: 'quicksand',
                           fontSize: FontSizeManager.regular,
-                          fontWeight: FontWeightManager.bold),
+                          fontWeight: FontWeightManager.semibold),
                       textAlign: TextAlign.center,
                       duration: const Duration(milliseconds: 500),
                       curve: Curves.ease,
                       child: const Text(
-                        "Timeline",
+                        "Selling",
                       ),
                     ),
                   ),
                 ),
                 Expanded(
                     child: InkWell(
-                  onTap: () =>
-                      ref.read(menuToggleIndexProvider.notifier).state = false,
+                  onTap: () => ref.read(statisticsMode.notifier).state =
+                      TransactionPurpose.Buying,
                   borderRadius: BorderRadius.circular(SizeManager.extralarge),
                   splashColor: ColorManager.accentColor.withOpacity(0.4),
                   child: AnimatedDefaultTextStyle(
                     style: TextStyle(
-                        color: !firstSelected
-                            ? Colors.white
-                            : ColorManager.accentColor,
+                        color: firstSelected
+                            ? ColorManager.secondary
+                            : Colors.white,
                         fontFamily: 'quicksand',
                         fontSize: FontSizeManager.regular,
-                        fontWeight: FontWeightManager.bold),
+                        fontWeight: FontWeightManager.semibold),
                     textAlign: TextAlign.center,
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.ease,
                     child: const Text(
-                      "Detail",
+                      "Buying",
                     ),
                   ),
                 )),

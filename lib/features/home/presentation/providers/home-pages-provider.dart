@@ -7,7 +7,7 @@ import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/wallet/presentation/views/wallet-page.dart';
 
 import '../../../auth/presentation/providers/client-provider.dart';
-import '../../../groups/presentation/groups_page/views/group-page.dart';
+import '../../../groups/presentation/collections_page/views/group-page.dart';
 import '../../../services/presentation/core/views/services-page.dart';
 
 List<HomeItemModel> homeItems = [
@@ -22,7 +22,7 @@ List<HomeItemModel> homeItems = [
         page: const WalletPage()),
   HomeItemModel(
       icon: AssetManager.svgFile(name: 'group'),
-      label: "Group",
+      label: "Collections",
       page: const GroupPage()),
   HomeItemModel(
       icon: AssetManager.svgFile(name: 'services'),

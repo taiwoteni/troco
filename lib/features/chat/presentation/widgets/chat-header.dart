@@ -181,7 +181,9 @@ class _ChatHeaderState extends ConsumerState<ChatHeader> {
           regularSpacer(),
           Text(
             ///TODO: Change the static 'ongoing' to the transaction's status.
-            hasTransaction ? "Transaction Ongoing" : "No Transactions yet",
+            hasTransaction
+                ? "Transaction ${group.transaction.transactionStatus.name}"
+                : "No Transactions yet",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: hasTransaction

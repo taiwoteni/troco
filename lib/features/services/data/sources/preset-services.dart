@@ -1,6 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/kyc/utils/enums.dart';
 
 import '../../../settings/data/models/settings-model.dart';
 import '../../../settings/utils/enums.dart';
@@ -30,8 +33,13 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         label: "KYC Verification",
         icon: AssetManager.svgFile(name: "verification"),
         settingsType: SettingsType.financial,
-        onTap: () =>
-            Navigator.pushNamed(context, Routes.kycVerificationIntroRoute),
+        onTap: () => Navigator.pushNamed(
+            context,
+            ClientProvider.readOnlyClient!.kycTier != VerificationTier.None ||
+                    AppStorage.getkycVerificationStatus() !=
+                        VerificationTier.None
+                ? Routes.kycVerificationRoute
+                : Routes.kycVerificationIntroRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "Share Troco",

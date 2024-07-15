@@ -1,3 +1,5 @@
+import 'package:recase/recase.dart';
+
 import '../../domain/entities/client.dart';
 import '../../utils/category-converter.dart';
 import '../../../transactions/utils/enums.dart';
@@ -54,7 +56,7 @@ class LoginData {
       "profile": profile,
       "phoneNumber": phoneNumber,
       "businessName": businessName,
-      "accountType": CategoryConverter.convertToString(category: category!),
+      "accountType": CategoryConverter.convertToString(category: category!).titleCase,
       "address": address,
       "city": city,
       "state": state,

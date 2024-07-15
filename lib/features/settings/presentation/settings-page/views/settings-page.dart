@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
@@ -35,6 +38,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    log(ClientProvider.readOnlyClient!.kycTier.name);
+    log(AppStorage.getkycVerificationStatus().name);
     return Scaffold(
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
@@ -112,7 +117,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget settingsList() {
-    final List<SettingsModel> settings = presetSettings(context: context, ref: ref);
+    final List<SettingsModel> settings =
+        presetSettings(context: context, ref: ref);
     return ListView.separated(
         padding: EdgeInsets.zero,
         shrinkWrap: true,

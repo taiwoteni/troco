@@ -38,7 +38,7 @@ class TransactionRepo {
               transaction.transactionCategory.name.toLowerCase(),
           "pricingType": cat == TransactionCategory.Product
               ? "pricings"
-              : "${cat.name.toLowerCase()}pricing",
+              : "${transaction.transactionCategory.name.toLowerCase()}pricing",
           // "role":"Seller",
           "transactionName": transaction.transactionName,
           "aboutService": transaction.transactionDetail,
@@ -239,34 +239,93 @@ class TransactionRepo {
     return result;
   }
 
-  static Future<HttpResponseModel> uploadDriverDetails(
-    {
-      required final Driver driver,
-      required final Group group,
-    }
-  )async{
-
+  static Future<HttpResponseModel> uploadDriverDetails({
+    required final Driver driver,
+    required final Group group,
+  }) async {
     var parsedfile = File(driver.plateNumber);
     var stream = ByteStream(parsedfile.openRead());
     var length = await parsedfile.length();
-    final file = MultipartFile("plateNumber", stream, length,
+    final file = MultipartFile("plateNumberPicture", stream, length,
         filename: Path.basename(driver.plateNumber.toString()));
 
     final multiparts = <MultiPartModel>[];
-    multiparts.add(MultiPartModel.field(field: "name", value: driver.driverName));
-    multiparts.add(MultiPartModel.field(field: "phoneNumber", value: driver.phoneNumber));
-    multiparts.add(MultiPartModel.field(field: "EstimatedDeliveryTime", value: driver.estimatedDeliveryTime.toIso8601String()));
-    multiparts.add(MultiPartModel.field(field: "theDelivery", value: driver.destinationLocation));
-    multiparts.add(MultiPartModel.field(field: "name", value: driver.driverName));
+    multiparts
+        .add(MultiPartModel.field(field: "name", value: driver.driverName));
+    multiparts.add(
+        MultiPartModel.field(field: "phoneNumber", value: driver.phoneNumber));
+    multiparts.add(MultiPartModel.field(
+        field: "EstimatedDeliveryTime",
+        value: driver.estimatedDeliveryTime.toIso8601String()));
+    multiparts.add(MultiPartModel.field(
+        field: "theDelivery", value: driver.destinationLocation));
+    multiparts.add(
+        MultiPartModel.field(field: "companyName", value: driver.companyName));
     multiparts.add(MultiPartModel.file(file: file));
 
-
-
     final response = await ApiInterface.multipartPostRequest(
-      url: "createdriver/${ClientProvider.readOnlyClient!.userId}/${group.groupId}/${group.groupId}/${group.adminId}",
-      multiparts:multiparts
-    );
+        url:
+            "createdriver/${ClientProvider.readOnlyClient!.userId}/${group.groupId}/${group.groupId}/${group.adminId}",
+        multiparts: multiparts);
     return response;
+  }
 
+  static Future<HttpResponseModel> hasReceivedProduct({
+    required final Group group,
+    required final bool yes,
+  }) async {
+    final response = await ApiInterface.patchRequest(
+        url:
+            "updatetofinalizing/${group.groupId}/${group.buyer!.userId}/${group.seller.userId}",
+        data: {"status": yes ? "approved" : "declined"});
+
+    return response;
+  }
+
+  static Future<HttpResponseModel> satisfiedWithProduct({
+    required final Group group,
+    required final bool yes,
+  }) async {
+    final reqParams =
+        "${group.groupId}/${group.buyerId}/${group.adminId}/${group.creator}";
+
+    final response = await ApiInterface.patchRequest(
+        url: "buyer${yes ? "" : "not"}satisfied/$reqParams", data: {});
+
+    return response;
+  }
+
+  static Future<HttpResponseModel> finalizeVirtualTransaction({
+    required final Transaction transaction,
+    required final bool yes,
+  }) async {
+    final response = await ApiInterface.patchRequest(
+        url:
+            "finalizevirtualtransaction/${transaction.transactionId}/${transaction.buyer}/${transaction.creator}",
+        data: {"status": yes ? "approved" : "no"});
+
+    return response;
+  }
+
+  static Future<HttpResponseModel> createLeadingTransaction({
+    required final Transaction transaction,
+  }) async {
+    final response = await ApiInterface.patchRequest(
+        url: "sellerleads/${transaction.transactionId}/${transaction.creator}",
+        data: {"status": "approved"});
+
+    return response;
+  }
+
+  static Future<HttpResponseModel> startLeadingTransaction({
+    required final Transaction transaction,
+    required final bool yes,
+  }) async {
+    final response = await ApiInterface.patchRequest(
+        url:
+            "startledingtransaction/${transaction.transactionId}/${transaction.buyer}/${transaction.creator}",
+        data: {"status": yes ? "approved" : "no"});
+
+    return response;
   }
 }

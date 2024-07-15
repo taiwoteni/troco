@@ -1,12 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-widget.dart';
 
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
+import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/others/drag-handle.dart';
 import '../../../../core/components/others/spacer.dart';
@@ -29,12 +31,12 @@ class _SelectPaymentMethodSheetState
 
   @override
   void initState() {
-    methods = AppStorage.getPaymentMethods();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    methods = ref.watch(paymentMethodProvider);
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
@@ -57,7 +59,7 @@ class _SelectPaymentMethodSheetState
             mediumSpacer(),
             methodsList(),
             extraLargeSpacer(),
-            button(),
+            if (methods.isNotEmpty) button(),
             extraLargeSpacer()
           ],
         ),
@@ -103,19 +105,50 @@ class _SelectPaymentMethodSheetState
   }
 
   Widget methodsList() {
-    return ListView.builder(
-      itemCount: methods.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
-          child: SelectPaymentProfileWidget(
-              selected: selectedProfileIndex == index,
-              onChecked: () => setState(() => selectedProfileIndex = index),
-              method: methods[index]),
-        );
-      },
-      shrinkWrap: true,
+    final style = TextStyle(
+      color: ColorManager.secondary,
+      fontFamily: 'lato',
+      height: 1.6,
+      fontSize: FontSizeManager.regular,
+      fontWeight: FontWeightManager.regular,
     );
+
+    return methods.isEmpty
+        ? Padding(
+            padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
+            child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(style: style, children: [
+                  const TextSpan(
+                      text: "You do not have any payment profile.\n"),
+                  TextSpan(
+                      text: "Create One",
+                      style: style.copyWith(
+                        fontWeight: FontWeightManager.semibold,
+                        color: ColorManager.accentColor,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Navigator.pushNamed(
+                              context, Routes.paymentMethodRoute);
+                        })
+                ])),
+          )
+        : ListView.builder(
+            itemCount: methods.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: SizeManager.regular),
+                child: SelectPaymentProfileWidget(
+                    selected: selectedProfileIndex == index,
+                    onChecked: () =>
+                        setState(() => selectedProfileIndex = index),
+                    method: methods[index]),
+              );
+            },
+            shrinkWrap: true,
+          );
   }
 
   Widget button() {

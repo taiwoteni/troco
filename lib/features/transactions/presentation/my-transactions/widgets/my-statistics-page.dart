@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/transactions/presentation/my-transactions/widgets/menu-toggle.dart';
+import 'package:troco/features/transactions/presentation/my-transactions/widgets/my-transactions-per-month.dart';
 import 'package:troco/features/transactions/presentation/my-transactions/widgets/transactions-pie-chart.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
@@ -73,6 +75,10 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
           largeSpacer(),
           mediumSpacer(),
           pieChartAnalysis(),
+          extraLargeSpacer(),
+          statisticsMode(),
+          largeSpacer(),
+          const MyTransactionsPerMonth()
         ],
       ),
     );
@@ -130,11 +136,22 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
         children: [
           total(),
           largeSpacer(),
-          spent(),
+          completed(),
           mediumSpacer(),
-          cancelled(),
+          ongoing(),
         ],
       ),
+    );
+  }
+
+  Widget statisticsMode() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        largeSpacer(),
+        const Align(child: MenuToggle()),
+        largeSpacer(),
+      ],
     );
   }
 
@@ -164,7 +181,7 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
     );
   }
 
-  Widget spent() {
+  Widget completed() {
     final transactions = AppStorage.getTransactions();
 
     final completedAmount = transactions
@@ -203,20 +220,22 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
     );
   }
 
-  Widget cancelled() {
+  Widget ongoing() {
     final transactions = AppStorage.getTransactions();
 
-    final cancelledAmount = transactions
+    final ongoingAmount = transactions
         .where(
-          (element) => element.transactionStatus == TransactionStatus.Cancelled,
+          (element) => ![
+            TransactionStatus.Completed,
+            TransactionStatus.Cancelled
+          ].contains(element.transactionStatus),
         )
         .fold(
           0,
           (previousValue, transaction) =>
               previousValue + transaction.transactionAmount.toInt(),
         );
-    final cancelledAmountString =
-        NumberFormat.compact().format(cancelledAmount);
+    final ongoingAmountString = NumberFormat.compact().format(ongoingAmount);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +245,7 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
           height: IconSizeManager.small * 0.5,
           margin: const EdgeInsets.only(top: SizeManager.small),
           decoration:
-              const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+              const BoxDecoration(color: Colors.purple, shape: BoxShape.circle),
         ),
         regularSpacer(),
         Column(
@@ -234,8 +253,8 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            smallText(text: "Cancelled"),
-            mediumText(text: cancelledAmountString)
+            smallText(text: "Ongoing"),
+            mediumText(text: ongoingAmountString)
           ],
         )
       ],

@@ -45,78 +45,76 @@ class _SelectPaymentMethodWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(SizeManager.regular),
-        splashColor: ColorManager.accentColor.withOpacity(0.1),
-        onTap: () {
-          widget.onChecked();
-        },
-        child: Container(
-          width: double.maxFinite,
-          height: 95,
-          padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-          decoration: BoxDecoration(
-              color: widget.selected
-                  ? ColorManager.accentColor.withOpacity(0.05)
-                  : ColorManager.background,
-              border: Border.all(
-                  color: widget.selected
-                      ? ColorManager.accentColor
-                      : ColorManager.secondary.withOpacity(0.09),
-                  width: 2),
-              borderRadius: BorderRadius.circular(SizeManager.regular)),
-          child: Row(
-            children: [
-              Transform.scale(
-                scale: 1.2,
-                child: LottieWidget(
-                  lottieRes: AssetManager.lottieFile(
-                      name: isCard ? "card-payment" : "bank-payment"),
-                  size: const Size.square(IconSizeManager.medium * 1.25),
-                  loop: !isCard,
+    return InkWell(
+      borderRadius: BorderRadius.circular(SizeManager.regular),
+      splashColor: ColorManager.accentColor.withOpacity(0.1),
+      onTap: () {
+        widget.onChecked();
+      },
+      child: Container(
+        width: double.maxFinite,
+        height: 95,
+        padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
+        decoration: BoxDecoration(
+            color: widget.selected
+                ? ColorManager.accentColor.withOpacity(0.05)
+                : ColorManager.background,
+            border: Border.all(
+                color: widget.selected
+                    ? ColorManager.accentColor
+                    : ColorManager.secondary.withOpacity(0.09),
+                width: 2),
+            borderRadius: BorderRadius.circular(SizeManager.regular)),
+        child: Row(
+          children: [
+            Transform.scale(
+              scale: 1.2,
+              child: LottieWidget(
+                lottieRes: AssetManager.lottieFile(
+                    name: isCard ? "card-payment" : "bank-payment"),
+                size: const Size.square(IconSizeManager.medium * 1.25),
+                loop: !isCard,
+              ),
+            ),
+            extraLargeSpacer(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isCard
+                      ? cardName()
+                      : (method as AccountMethod).accountNumber,
+                  style: TextStyle(
+                      fontFamily: "quicksand",
+                      color: ColorManager.primary,
+                      fontSize: FontSizeManager.regular,
+                      fontWeight: FontWeightManager.semibold),
                 ),
-              ),
-              extraLargeSpacer(),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isCard
-                        ? cardName()
-                        : (method as AccountMethod).accountNumber,
-                    style: TextStyle(
-                        fontFamily: "quicksand",
-                        color: ColorManager.primary,
-                        fontSize: FontSizeManager.regular,
-                        fontWeight: FontWeightManager.semibold),
-                  ),
-                  Text(
-                    isCard
-                        ? (method as CardMethod).cardHolderName
-                        : (method as AccountMethod).accountName.length >= 24
-                            ? (method as AccountMethod)
-                                .accountName
-                                .replaceRange(19, null, '...')
-                            : (method as AccountMethod).name,
-                    style: TextStyle(
-                        fontFamily: "quicksand",
-                        color: ColorManager.secondary,
-                        fontSize: FontSizeManager.small * 0.9,
-                        fontWeight: FontWeightManager.semibold),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              isCard
-                  ? SvgIcon(
-                      size: const Size.square(IconSizeManager.large),
-                      svgRes: CardUtils.getCardIcon(
-                          type: (method as CardMethod).cardType))
-                  : bankLogo()
-            ],
-          ),
+                Text(
+                  isCard
+                      ? (method as CardMethod).cardHolderName
+                      : (method as AccountMethod).accountName.length >= 24
+                          ? (method as AccountMethod)
+                              .accountName
+                              .replaceRange(19, null, '...')
+                          : (method as AccountMethod).name,
+                  style: TextStyle(
+                      fontFamily: "quicksand",
+                      color: ColorManager.secondary,
+                      fontSize: FontSizeManager.small * 0.9,
+                      fontWeight: FontWeightManager.semibold),
+                ),
+              ],
+            ),
+            const Spacer(),
+            isCard
+                ? SvgIcon(
+                    size: const Size.square(IconSizeManager.large),
+                    svgRes: CardUtils.getCardIcon(
+                        type: (method as CardMethod).cardType))
+                : bankLogo()
+          ],
         ),
       ),
     );

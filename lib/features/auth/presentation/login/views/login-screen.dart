@@ -26,6 +26,9 @@ import 'package:troco/features/auth/presentation/providers/client-provider.dart'
 import 'package:troco/features/auth/presentation/welcome-back/views/pin-entry-screen.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
+import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
+import 'package:troco/features/kyc/utils/enums.dart';
+import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import 'package:troco/features/settings/utils/enums.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
@@ -495,6 +498,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> saveAndNavigate(
       {required final Map<dynamic, dynamic> map}) async {
     await save(map: map);
+    ref.watch(homeProvider.notifier).state = 0;
     Navigator.pushNamedAndRemoveUntil(
         context, Routes.homeRoute, (route) => false);
   }
@@ -502,6 +506,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> save({required final Map<dynamic, dynamic> map}) async {
     // We have to save user data first
     ClientProvider.saveUserData(ref: ref, json: map);
+    ref.watch(clientProvider.notifier).state = ClientProvider.readOnlyClient;
+
+    if (map["kycTier"] <= map["kyccurrentTier"]) {
+      //To save kyc status, if currently verifying or not.
+      AppStorage.savekycVerificationStatus(
+          tier: KycConverter.convertToEnum(tier: map["kyccurrentTier"].toString()));
+    }
+    else{
+      AppStorage.savekycVerificationStatus(
+          tier: VerificationTier.None);
+    }
 
     // We have to locally store all the groups and it's respective chats.
     await saveGroupsAndChats(userId: map["_id"]);

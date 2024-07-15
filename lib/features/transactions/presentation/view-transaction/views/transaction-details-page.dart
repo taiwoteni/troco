@@ -7,7 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
+import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
+import 'package:troco/features/payments/domain/repo/payment-repository.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-sheet.dart';
 import 'package:troco/features/transactions/domain/entities/driver.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
@@ -22,6 +24,7 @@ import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/troco-details-sheet.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/view-driver-details-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/add-driver-details-form.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
@@ -55,11 +58,15 @@ class _TransactionsDetailPageState
       (element) => element.groupId == transaction.transactionId,
     );
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      // Still keeping transaction as a named argument
-      //but later override it during initState 
-      transaction = ref.watch(currentTransactionProvider);
-    },);
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        // Still keeping transaction as a named argument
+        //but later override it during initState
+        setState(() {
+          transaction = ref.watch(currentTransactionProvider);
+        });
+      },
+    );
   }
 
   @override
@@ -106,10 +113,11 @@ class _TransactionsDetailPageState
         largeSpacer(),
 
         //Driver details
-        regularSpacer(),
-        driverDetailsTitle(),
-
-        divider(),
+        if (transaction.transactionCategory != TransactionCategory.Virtual) ...[
+          regularSpacer(),
+          driverDetailsTitle(),
+          divider(),
+        ],
         extraLargeSpacer(),
 
         // total price
@@ -169,11 +177,11 @@ class _TransactionsDetailPageState
         regularSpacer(),
         divider(),
         regularSpacer(),
-        // Company Name
-        companyName(),
-        regularSpacer(),
-        divider(),
-        regularSpacer(),
+        // // Company Name
+        // companyName(),
+        // regularSpacer(),
+        // divider(),
+        // regularSpacer(),
         // delivery details
         driverDestination(),
         regularSpacer(),
@@ -296,7 +304,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           "${transaction.transactionAmountString.trim()} NGN",
@@ -306,7 +314,7 @@ class _TransactionsDetailPageState
               fontFamily: 'lato',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -324,7 +332,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           transaction.address,
@@ -334,7 +342,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -352,7 +360,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           transaction.inspectionString,
@@ -362,7 +370,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -380,7 +388,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           DateFormat.yMMMEd().format(transaction.transactionTime),
@@ -390,7 +398,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -409,7 +417,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           "$no ${TransactionCategoryConverter.convertToString(category: transaction.transactionCategory, plural: no != 1)}",
@@ -419,7 +427,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -437,7 +445,7 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
           "${NumberFormat.currency(symbol: '', locale: 'en_NG', decimalDigits: 2).format(transaction.transactionAmount * 0.05)} NGN",
@@ -447,7 +455,7 @@ class _TransactionsDetailPageState
               fontFamily: 'lato',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -465,17 +473,19 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
-          "---",
+          !transaction.hasDriver
+              ? "---"
+              : transaction.driver.destinationLocation,
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -493,17 +503,17 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
-          '---',
+          !transaction.hasDriver ? '---' : transaction.driver.companyName,
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -521,17 +531,17 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
-          '---',
+          !transaction.hasDriver ? '---' : transaction.driver.driverName,
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -549,17 +559,17 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
-          "---",
+          !transaction.hasDriver ? '---' : transaction.driver.phoneNumber,
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -570,24 +580,38 @@ class _TransactionsDetailPageState
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "Delivery Fee",
+          "Plate Number",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.secondary,
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
-        Text(
-          '---',
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              color: ColorManager.primary,
-              fontFamily: 'quicksand',
-              height: 1.4,
-              fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+        Hero(
+          tag: transaction.transactionId,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) {
+                  return const ViewDriverDetailsScreen();
+                },
+              ));
+            },
+            child: Text(
+              !transaction.hasDriver ? '---' : "View Plate Number >",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                  color: !transaction.hasDriver
+                      ? ColorManager.primary
+                      : ColorManager.accentColor,
+                  fontFamily: 'quicksand',
+                  height: 1.4,
+                  fontWeight: FontWeightManager.extrabold,
+                  fontSize: FontSizeManager.medium * 0.8),
+            ),
+          ),
         ),
       ],
     );
@@ -605,17 +629,20 @@ class _TransactionsDetailPageState
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.85),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
-          "---",
+          !transaction.hasDriver
+              ? '---'
+              : DateFormat.yMMMEd()
+                  .format(transaction.driver.estimatedDeliveryTime),
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.primary,
               fontFamily: 'quicksand',
               height: 1.4,
               fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.92),
+              fontSize: FontSizeManager.medium * 0.8),
         ),
       ],
     );
@@ -638,6 +665,8 @@ class _TransactionsDetailPageState
         transaction.transactionStatus == TransactionStatus.Cancelled;
 
     final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
     return Row(
       children: [
         if (isPending) ...[
@@ -660,27 +689,65 @@ class _TransactionsDetailPageState
                       : "Make Payment")
                   : "Awaiting buyer's payment",
               onPressed: transaction.paymentDone ? () {} : makePayment),
-        if (isProcessing)
+        if (isProcessing) ...[
           actionButton(
-              positive: isBuyer ? null : (transaction.hasDriver ? null : true),
-              label: isBuyer
-                  ? "Awaiting driver.."
-                  : (transaction.hasDriver
-                      ? "Awaiting admin's approval.."
-                      : "Add driver details"),
-              onPressed: isBuyer
-                  ? () {}
-                  : (transaction.hasDriver ? () {} : addDriverDetails)),
+              positive: isVirtual
+                  ? (isBuyer
+                      ? (transaction.sellerStarteedLeading ? true : null)
+                      : (transaction.sellerStarteedLeading ? null : true))
+                  : (isBuyer ? null : (transaction.hasDriver ? null : true)),
+              label: isVirtual
+                  ? (isBuyer
+                      ? (transaction.sellerStarteedLeading
+                          ? "Accept"
+                          : "Awaiting seller..")
+                      : (transaction.sellerStarteedLeading
+                          ? "Awaiting buyer.."
+                          : "Start Leading"))
+                  : (isBuyer
+                      ? "Awaiting driver.."
+                      : (transaction.hasDriver
+                          ? "Awaiting admin's approval.."
+                          : "Add driver details")),
+              onPressed: isVirtual
+                  ? (isBuyer
+                      ? (transaction.sellerStarteedLeading
+                          ? () => respondToLeading(yes: true)
+                          : () {})
+                      : (transaction.sellerStarteedLeading
+                          ? () {}
+                          : startLeading))
+                  : (isBuyer
+                      ? () {}
+                      : (transaction.hasDriver ? () {} : addDriverDetails))),
+          if (isVirtual && isBuyer && transaction.sellerStarteedLeading)
+            actionButton(
+              positive: false,
+              label: "Decline",
+              onPressed: () => respondToLeading(yes: false),
+            )
+        ],
         if (isOngoing)
           actionButton(
               positive: !isBuyer ? null : true,
-              label: isBuyer ? "Received Product" : "Sending Product...",
-              onPressed: () {}),
+              label: isBuyer
+                  ? (!isVirtual ? "Received Product" : "Inspect Service")
+                  : "Sending Product...",
+              onPressed: isBuyer
+                  ? (isVirtual ? inspectService : markReceivedProduct)
+                  : () {}),
         if (isFinalizing) ...[
           if (isBuyer && !transaction.buyerSatisfied)
-            actionButton(positive: true, label: "Satisfied", onPressed: () {}),
+            actionButton(
+                positive: true,
+                label: "Satisfied",
+                onPressed: () => showSatisfaction(satisfied: true)),
           actionButton(
-              positive: transaction.buyerSatisfied || !isBuyer ? null : true,
+              positive: transaction.buyerSatisfied
+                  ? (null)
+                  : isBuyer
+                      ? false
+                      : null,
               label: transaction.buyerSatisfied
                   ? (isBuyer
                       ? "Enjoy.."
@@ -691,13 +758,14 @@ class _TransactionsDetailPageState
                       ? "Unsatisfied"
                       : "Waiting for response...",
               //No function to delete yet.
-              onPressed: () {}),
+              onPressed:
+                  isBuyer ? () => showSatisfaction(satisfied: false) : () {}),
         ],
         if (isCompleted || isCancelled)
           actionButton(
-              positive: null,
-              label: isCompleted ? "Completed!" : "Cancelled..",
-              onPressed: () {}),
+              positive: isCompleted && !isBuyer ? null : null,
+              label: isCompleted ? "Completed" : "Cancelled..",
+              onPressed: isCompleted && !isBuyer ? viewReceipt : () {}),
 
         // Expanded(
         //     child: CustomButton.medium(
@@ -720,9 +788,101 @@ class _TransactionsDetailPageState
     );
   }
 
+  Future<void> startLeading() async {
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
+    final response = await TransactionRepo.createLeadingTransaction(
+        transaction: transaction);
+    log(response.body);
+
+    if (response.error) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Could not start lead. Try again");
+    }
+  }
+
+  Future<void> respondToLeading({required final yes}) async {
+    ButtonProvider.startLoading(buttonKey: yes ? okKey : cancelKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
+    final response = await TransactionRepo.startLeadingTransaction(
+        transaction: transaction, yes: yes);
+    log(response.body);
+
+    if (response.error) {
+      ButtonProvider.stopLoading(buttonKey: yes ? okKey : cancelKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Could not ${yes ? "accept" : "decline"} lead. Try again");
+      return;
+    }
+    SnackbarManager.showBasicSnackbar(
+        context: context,
+        mode: ContentType.help,
+        message: "You can start inspecting");
+  }
+
+  Future<void> inspectService() async {
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
+    final response = await TransactionRepo.finalizeVirtualTransaction(
+        transaction: transaction, yes: true);
+    log(response.body);
+
+    if (response.error) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Could not start inspection. Try again");
+    }
+  }
+
+  Future<void> viewReceipt() async {}
+
+  Future<void> showSatisfaction({required bool satisfied}) async {
+    ButtonProvider.startLoading(
+        buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
+
+    final response = await TransactionRepo.satisfiedWithProduct(
+        group: group, yes: satisfied);
+    log(response.body);
+
+    if (response.error) {
+      ButtonProvider.stopLoading(
+          buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "An unknown error occurred");
+    }
+  }
+
+  Future<void> markReceivedProduct() async {
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    final result =
+        await TransactionRepo.hasReceivedProduct(group: group, yes: true);
+    log(result.body);
+    if (result.error) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Failed to mark product as received");
+    }
+  }
+
   Future<void> makePayment() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
+    if (transaction.hasAccountDetails) {
+      await showPayment();
+      return;
+    }
     final method = await selectPaymentProfile();
 
     if (method == null) {
@@ -734,30 +894,45 @@ class _TransactionsDetailPageState
       return;
     }
 
-    if (method is AccountMethod) {
-      await Future.delayed(const Duration(seconds: 3));
-      await showPayment();
-
+    if (method is CardMethod) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.help,
+          message: "Only working on Account Methods");
       return;
     }
+    final response = await PaymentRepository.uploadSelectedAccount(
+        group: group, account: method as AccountMethod);
 
-    ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
-    SnackbarManager.showBasicSnackbar(
-        context: context,
-        mode: ContentType.help,
-        message: "Only working on Account Methods");
+    if (response.error) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Error occurred selecting account");
+      return;
+    }
+    await showPayment();
+
+    return;
   }
 
-  Future<void> showPayment()async{
-    await showModalBottomSheet<bool?>(
-      isScrollControlled: true,
-      enableDrag: true,
-      useSafeArea: false,
-      isDismissible: false,
-      backgroundColor: ColorManager.background,
-      context: context,
-      builder: (context) => const TrocoDetailsSheet(),
-    );
+  Future<void> showPayment() async {
+    final done = (await showModalBottomSheet<bool?>(
+          isScrollControlled: true,
+          enableDrag: true,
+          useSafeArea: false,
+          isDismissible: false,
+          backgroundColor: ColorManager.background,
+          context: context,
+          builder: (context) => const TrocoDetailsSheet(),
+        ) ??
+        false);
+
+    if (!done) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+    }
   }
 
   Future<PaymentMethod?> selectPaymentProfile() async {
@@ -786,10 +961,28 @@ class _TransactionsDetailPageState
       context: context,
       builder: (context) => const AddDriverDetailsForm(),
     );
-    ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
 
-    if (driver != null) {
-      // endpoint to add driver details
+    if (driver == null) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Empty Driver details");
+      return;
+    }
+
+    // endpoint to add driver details
+    final response =
+        await TransactionRepo.uploadDriverDetails(driver: driver, group: group);
+    log(response.body);
+
+    if (response.error) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Unable to add driver details");
+      return;
     }
   }
 
@@ -823,7 +1016,13 @@ class _TransactionsDetailPageState
     final result = await TransactionRepo.respondToTransaction(
         approve: true, transaction: transaction);
     log(result.body);
-    ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+    if (result.error) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Failed to approve transaction");
+    }
   }
 
   Future<void> rejectTransaction() async {
@@ -842,10 +1041,28 @@ class _TransactionsDetailPageState
             .contains(transaction.transactionId)) {
           final t = value.firstWhere(
               (tr) => tr.transactionId == transaction.transactionId);
-          setState(() {
-            transaction = t;
-          });
+
+          if (transaction.transactionStatus == TransactionStatus.Pending &&
+                  t.transactionStatus == TransactionStatus.Inprogress ||
+              transaction.transactionStatus == TransactionStatus.Ongoing &&
+                  t.transactionStatus == TransactionStatus.Finalizing ||
+              transaction.transactionStatus == TransactionStatus.Inprogress &&
+                  !transaction.paymentDone &&
+                  t.paymentDone ||
+              transaction.transactionStatus == TransactionStatus.Processing &&
+                  !transaction.hasDriver &&
+                  t.transactionStatus == TransactionStatus.Ongoing &&
+                  t.hasDriver ||
+              transaction.buyerSatisfied != t.buyerSatisfied ||
+              t.sellerStarteedLeading != transaction.sellerStarteedLeading ||
+              t.leadStarted != transaction.leadStarted) {
+            ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+            ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
+          }
           ref.watch(currentTransactionProvider.notifier).state = t;
+          setState(() {
+            transaction = ref.watch(currentTransactionProvider);
+          });
         }
       });
     });

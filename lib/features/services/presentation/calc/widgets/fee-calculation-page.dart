@@ -199,7 +199,7 @@ class _SelectCategoryPageState extends ConsumerState<FeeCalculationPage> {
 
   Future<void> next() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 2));
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     //should move to next page
     if (price.trim().isEmpty || price == "0") {
@@ -210,6 +210,13 @@ class _SelectCategoryPageState extends ConsumerState<FeeCalculationPage> {
         setState(() {
           charges = ((double.parse(price) * 0.05)).toString();
           price = ((double.parse(price) * 1.05)).toString();
+        }, calculation: true);
+      } else if (ref.watch(feeCategoryProvider) ==
+          TransactionCategory.Service) {
+        double charge = double.parse(price) > 500000 ? 0.03 : 0.05;
+        setState(() {
+          charges = ((double.parse(price) * charge)).toString();
+          price = ((double.parse(price) * (1 + charge))).toString();
         }, calculation: true);
       }
     }

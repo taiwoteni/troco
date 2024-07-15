@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../auth/presentation/providers/client-provider.dart';
@@ -13,7 +14,8 @@ class ProgressDetailsPage extends ConsumerStatefulWidget {
   const ProgressDetailsPage({super.key, required this.transaction});
 
   @override
-  ConsumerState<ProgressDetailsPage> createState() => _ProgressDetailsPageState();
+  ConsumerState<ProgressDetailsPage> createState() =>
+      _ProgressDetailsPageState();
 }
 
 class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
@@ -27,14 +29,19 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBarHeight = MediaQuery.of(context).size.height * 0.4 +
+        MediaQuery.viewPaddingOf(context).top;
+    final screenHieght = MediaQuery.of(context).size.height;
+    transaction = ref.watch(currentTransactionProvider);
     listenToTransactionsChanges();
     return SizedBox(
       width: double.maxFinite,
+      height: screenHieght - appBarHeight,
       child: EmptyScreen(
         lottie: AssetManager.lottieFile(name: getAnimationName()),
         scale: getAnimationScale(),
         label: getAnimationLabel(),
-        expanded: true,
+        expanded: false,
       ),
     );
   }
@@ -42,15 +49,34 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
   String getAnimationName() {
     final bool isSeller =
         transaction.creator == ClientProvider.readOnlyClient!.userId;
+    final bool isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
     switch (transaction.transactionStatus) {
       case TransactionStatus.Pending:
         return "pending";
+
+      /// At this stage goods are being delivered.
       case TransactionStatus.Ongoing:
-        return "delivery";
+        return isVirtual ? "pending" : "delivery";
+
+      /// At this stage seller is to upload driver details.
       case TransactionStatus.Processing:
+        return "pending";
+
+      /// At this stage goods have been received.
+      /// Buyer is to show satisfaction
+      case TransactionStatus.Finalizing:
         return transaction.buyerSatisfied
             ? (isSeller ? "money-bag" : "happy")
-            : "pending";
+            : isSeller
+                ? "pending"
+                : "happy";
+      case TransactionStatus.Completed:
+        return "happy";
+      case TransactionStatus.Cancelled:
+        return "empty";
+
+      /// At this stage buyer is to pay
       case TransactionStatus.Inprogress:
         return isSeller
             ? "payment-loading"
@@ -73,7 +99,12 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
   String getAnimationLabel() {
     final bool isSeller =
         transaction.creator == ClientProvider.readOnlyClient!.userId;
+    final bool isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+
     switch (transaction.transactionStatus) {
+      case TransactionStatus.Cancelled:
+        return "Cancelled Transaction";
       case TransactionStatus.Inprogress:
         return isSeller
             ? "Awaiting buyer's payemnt"
@@ -81,20 +112,26 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
                 ? "Awaiting admin's approval"
                 : "Waiting for your payment";
       case TransactionStatus.Processing:
-        return isSeller
-            ? (transaction.hasDriver
-                ? "Awaiting admin's approval"
-                : "Upload driver details")
-            : "Seller is uploading driver details";
+        return isVirtual
+            ? "Leading and Inspection period"
+            : (isSeller
+                ? (transaction.hasDriver
+                    ? "Awaiting admin's approval"
+                    : "Upload driver details")
+                : "Seller is uploading driver details");
       case TransactionStatus.Ongoing:
-        return isSeller
-            ? "Delivering ${transaction.transactionCategory.name}(s)"
-            : "${transaction.transactionCategory.name}(s) are on their way";
+        return isVirtual
+            ? "Leading and Inspection period"
+            : (isSeller
+                ? "Delivering ${transaction.transactionCategory.name}(s)"
+                : "${transaction.transactionCategory.name}(s) are on their way");
       case TransactionStatus.Finalizing:
-        return transaction.buyerSatisfied
+        return !transaction.buyerSatisfied
             ? "Awaiting ${isSeller ? "buyer's" : "your"} satisfaction"
             : isSeller
-                ? "Your revenue is on the way"
+                ? transaction.trocoPaysSeller
+                    ? "You should have received\nyour revenue"
+                    : "Your revenue is on the way"
                 : "Hope you enjoyed our services";
       case TransactionStatus.Completed:
         return "Completed Transaction!";
@@ -103,7 +140,7 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
         return "Waiting for ${isSeller ? "buyer" : "you"} to approve..";
     }
   }
-  
+
   Future<void> listenToTransactionsChanges() async {
     ref.listen(transactionsStreamProvider, (previous, next) {
       next.whenData((value) {
@@ -119,9 +156,6 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
       });
     });
   }
-
-
-
 }
 
 /// Basically, this is the timeline:

@@ -333,17 +333,31 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
     );
     log(response.body);
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    setState(() => uploadingTier = null);
+    ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
+    setState(() {
+      uploadingTier = null;
+      addedTier = null;
+    });
 
     if (!response.error) {
       setState(() {
-        addedTier == null;
+        addedTier = null;
+        uploadingTier = null;
         verifyingTier = selectedTier;
       });
       SnackbarManager.showBasicSnackbar(
           context: context, message: "Submission Successful.");
-      ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
+
+      /// To locally save this tier. Indicating that this tier is currently being
+      /// verified.
       AppStorage.savekycVerificationStatus(tier: selectedTier);
+    } else {
+      if (response.messageBody!["message"] != null) {
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            mode: ContentType.failure,
+            message: response.messageBody!["message"].toString());
+      }
     }
   }
 }
