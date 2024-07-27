@@ -62,7 +62,7 @@ class _ContactWidgetState extends State<ContactWidget> {
       ),
       subtitleTextStyle: TextStyle(
           overflow: TextOverflow.ellipsis,
-          color: ColorManager.accentColor,
+          color: ColorManager.secondary,
           fontFamily: 'Lato',
           fontSize: FontSizeManager.regular * 1.1,
           fontWeight: FontWeightManager.medium),

@@ -69,7 +69,7 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         label: "About  Us",
         icon: AssetManager.svgFile(name: "about"),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.aboutUsRoute),
         iconType: IconType.svg),
   ];
 }

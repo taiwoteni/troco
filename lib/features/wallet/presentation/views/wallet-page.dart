@@ -17,6 +17,7 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/wallet/data/models/wallet-menu-item-model.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
+import '../../../../core/app/routes-manager.dart';
 import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 
 class WalletPage extends ConsumerStatefulWidget {
@@ -53,6 +54,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: Container(
+        
         width: double.maxFinite,
         height: double.maxFinite,
         padding: const EdgeInsets.only(
@@ -66,12 +68,13 @@ class _WalletPageState extends ConsumerState<WalletPage>
             extraLargeSpacer(),
             menu(),
             extraLargeSpacer(),
-            EmptyScreen(
-              expanded: true,
-              lottie: AssetManager.lottieFile(name: "empty-transactions"),
-              scale: 1.2,
-              label: "No Wallet Transactions so far.",
-            )
+            transactionWidget(),
+            // EmptyScreen(
+            //   expanded: true,
+            //   lottie: AssetManager.lottieFile(name: "empty-transactions"),
+            //   scale: 1.2,
+            //   label: "No Wallet Transactions so far.",
+            // )
           ],
         ),
       ),
@@ -197,6 +200,10 @@ class _WalletPageState extends ConsumerState<WalletPage>
         final item = menuItems()[index];
         return InkWell(
           onTap: () {
+            if (item.onClick != null) {
+              item.onClick!();
+              return;
+            }
             SnackbarManager.showBasicSnackbar(
                 context: context, message: "Coming in next update");
           },
@@ -243,6 +250,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
           label: "Withdraw",
           color: Colors.red),
       WalletMenuItemModel(
+          onClick: () => Navigator.pushNamed(context, Routes.viewContacts),
           svgRes: AssetManager.svgFile(name: 'invite'),
           label: "Refer",
           color: Colors.orange),

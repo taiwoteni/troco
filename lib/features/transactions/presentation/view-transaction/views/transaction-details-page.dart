@@ -883,6 +883,7 @@ class _TransactionsDetailPageState
       await showPayment();
       return;
     }
+
     final method = await selectPaymentProfile();
 
     if (method == null) {
@@ -895,11 +896,10 @@ class _TransactionsDetailPageState
     }
 
     if (method is CardMethod) {
+      final response = await PaymentRepository.makeCardPayment(transaction: transaction, group: group, card: method);
+      log(response.body);
+      final redirected = (await Navigator.pushNamed(context, Routes.cardPaymentScreen, arguments: response.messageBody!["paymentLink"]) as bool?)?? false;
       ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
-      SnackbarManager.showBasicSnackbar(
-          context: context,
-          mode: ContentType.help,
-          message: "Only working on Account Methods");
       return;
     }
     final response = await PaymentRepository.uploadSelectedAccount(

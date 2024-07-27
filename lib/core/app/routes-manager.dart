@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:troco/features/about%20us/presentation/views/about-us-screen.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
@@ -17,6 +18,7 @@ import 'package:troco/features/auth/presentation/register/views/add-pin-screen.d
 import 'package:troco/features/auth/presentation/register/views/add-profile-screen.dart';
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/payments/presentation/views/payment-method-screen.dart';
+import 'package:troco/features/payments/presentation/views/payment-screen.dart';
 import 'package:troco/features/profile/presentation/edit-profile/views/edit-profile-screen.dart';
 import 'package:troco/features/profile/presentation/view-profile/views/view-profile-screen.dart';
 import 'package:troco/features/settings/presentation/language/views/change-language-screen.dart';
@@ -91,6 +93,10 @@ class Routes {
   /// for [viewAttachmentRoute].
   static const viewAttachmentRoute = "/view-attachments";
   static const viewContacts = "/view-contacts";
+  static const aboutUsRoute = "/about-us";
+  static const cardPaymentScreen = "/payment-screen";
+
+
 }
 
 class RouteGenerator {
@@ -272,10 +278,23 @@ class RouteGenerator {
                 group:group,
               );
             });
-            case Routes.viewContacts:
+      case Routes.viewContacts:
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const ContactsScreen());
+      case Routes.aboutUsRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const AboutUsScreen());
+      case Routes.cardPaymentScreen:
+      final redirectLink = routeSettings.arguments as String;
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => PaymentScreen(redirectLink: redirectLink));
+
+
+          
+
 
       default:
         return MaterialPageRoute(
