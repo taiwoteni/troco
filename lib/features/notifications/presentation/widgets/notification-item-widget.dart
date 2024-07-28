@@ -24,9 +24,7 @@ class _NotificationItemWidgetState
     extends ConsumerState<NotificationItemWidget> {
   @override
   Widget build(BuildContext context) {
-    var color = widget.notification.type == NotificationType.VerifyTransaction
-        ? Colors.redAccent
-        : ColorManager.accentColor;
+    var color = ColorManager.accentColor;
     return ListTile(
       onTap: onTap,
       dense: true,
@@ -52,22 +50,18 @@ class _NotificationItemWidgetState
         decoration: BoxDecoration(
             shape: BoxShape.circle, color: color.withOpacity(0.2)),
         child: SvgIcon(
-          svgRes: AssetManager.svgFile(
-              name:
-                  widget.notification.type == NotificationType.VerifyTransaction
-                      ? "buy"
-                      : "delivery"),
+          svgRes: AssetManager.svgFile(name: "bell"),
           color: color,
           size: const Size.square(IconSizeManager.regular),
         ),
       ),
-      trailing: IconButton(
-          onPressed: null,
-          icon: Icon(
-            Icons.more_vert_rounded,
-            size: IconSizeManager.regular,
-            color: ColorManager.primary,
-          )),
+      // trailing: IconButton(
+      //     onPressed: null,
+      //     icon: Icon(
+      //       Icons.more_vert_rounded,
+      //       size: IconSizeManager.regular,
+      //       color: ColorManager.primary,
+      //     )),
       title: Text(widget.notification.label),
       subtitle: Text(
         widget.notification.content,
@@ -88,6 +82,7 @@ class _NotificationItemWidgetState
       //     arguments: Transaction.fromJson(json: widget.notification.argument));
       return;
     }
+    return;
 
     showDialog(
       context: context,

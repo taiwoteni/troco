@@ -40,7 +40,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
-    final appBarHeight = height * .37;
+    final appBarHeight = height * .425;
 
     return Container(
       width: double.maxFinite,
@@ -180,29 +180,29 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
             url: widget.client.profile,
             size: double.maxFinite,
           ),
-          if(widget.client.kycTier != VerificationTier.None)
-          Positioned(
-              right: 0,
-              bottom: 2,
-              child: SizedBox.square(
-                dimension: IconSizeManager.medium * 1.2,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      decoration: const BoxDecoration(
-                          shape: BoxShape.circle, color: Colors.white),
-                      width: IconSizeManager.small,
-                      height: IconSizeManager.small,
-                    ),
-                    SvgIcon(
-                      svgRes: AssetManager.svgFile(name: "verification"),
-                      color: ColorManager.accentColor,
-                      size: const Size.square(IconSizeManager.medium * 1.2),
-                    ),
-                  ],
-                ),
-              ))
+          if (widget.client.kycTier != VerificationTier.None)
+            Positioned(
+                right: 0,
+                bottom: 2,
+                child: SizedBox.square(
+                  dimension: IconSizeManager.medium * 1.2,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle, color: Colors.white),
+                        width: IconSizeManager.small,
+                        height: IconSizeManager.small,
+                      ),
+                      SvgIcon(
+                        svgRes: AssetManager.svgFile(name: "verification"),
+                        color: ColorManager.accentColor,
+                        size: const Size.square(IconSizeManager.medium * 1.2),
+                      ),
+                    ],
+                  ),
+                ))
         ],
       ),
     );

@@ -61,10 +61,16 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         iconType: IconType.svg),
     SettingsModel(
         label: "Customer Care",
-        icon: AssetManager.svgFile(name: "audio-call"),
+        icon: AssetManager.svgFile(name: "customer-service"),
         settingsType: SettingsType.financial,
         onTap: () => Navigator.pushNamed(context, Routes.customerCareRoute),
         iconType: IconType.svg),
+    SettingsModel(
+        label: "Contact Us",
+        icon: AssetManager.svgFile(name: "audio-call"),
+        settingsType: SettingsType.financial,
+        // onTap: () => Navigator.pushNamed(context, Routes.customerCareRoute),
+        iconType: IconType.svg),    
     SettingsModel(
         label: "About  Us",
         icon: AssetManager.svgFile(name: "about"),

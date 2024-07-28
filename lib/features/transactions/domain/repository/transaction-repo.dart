@@ -295,6 +295,22 @@ class TransactionRepo {
     return response;
   }
 
+  static Future<HttpResponseModel> returnTransaction({
+    required final Transaction transaction,
+    required final List<String> itemIds,
+  }) async {
+    final response = await ApiInterface.postRequest(
+        url: "returntransaction",
+        data: {
+          "transactionId":transaction.transactionId,
+          "comments":"Not Satisfied With Products",
+          "productIds":itemIds,
+          "userId":ClientProvider.readOnlyClient!.userId
+        });
+
+    return response;
+  }
+
   static Future<HttpResponseModel> finalizeVirtualTransaction({
     required final Transaction transaction,
     required final bool yes,

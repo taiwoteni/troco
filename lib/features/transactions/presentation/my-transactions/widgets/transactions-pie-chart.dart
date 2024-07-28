@@ -71,7 +71,7 @@ class _TransactionPieChartState extends ConsumerState<TransactionPieChart>
         fontWeight: FontWeightManager.semibold);
     return [
       PieChartSectionData(
-          value: (completedTransactions == 0 ? 0.1 : completedTransactions)
+          value: (completedTransactions)
                   .toDouble() *
               controller.value,
           color: ColorManager.accentColor,
@@ -81,7 +81,7 @@ class _TransactionPieChartState extends ConsumerState<TransactionPieChart>
           showTitle: true,
           titleStyle: style),
       PieChartSectionData(
-          value: (ongoingTransactions == 0 ? 0.1 : ongoingTransactions)
+          value: (ongoingTransactions)
                   .toDouble()
                   .toDouble() *
               controller.value,

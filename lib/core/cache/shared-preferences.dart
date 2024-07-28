@@ -33,6 +33,14 @@ class AppStorage {
   static const String TRANSACTION_STORAGE_KEY = "transactions";
   static const String SETTINGS_STORAGE_KEY = "settings";
 
+
+  static const String CC_SESSION_KEY = "cc-session";
+  static String CC_CHAT_STORAGE_KEY =
+      "cc_chats";
+  static String UNSENT_CC_CHAT_STORAGE_KEY =
+      "cc_unsent-chats";
+  
+
   static String CHAT_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.chats";
   static String UNSENT_CHAT_STORAGE_KEY({required String groupId}) =>
@@ -253,4 +261,53 @@ class AppStorage {
       });
     }
   }
+
+
+  static List<Chat> getCustomerCareChats() {
+    final jsonString = _pref!.getString(CC_CHAT_STORAGE_KEY);
+    if (jsonString == null) {
+      return [];
+    }
+    final List<dynamic> chatsJson = json.decode(jsonString);
+    return chatsJson.map((e) => Chat.fromJson(json: e)).toList();
+  }
+
+  static Future<void> saveCustomerCareChats(
+      {required final List<Chat> chats}) async {
+    List<Map<dynamic, dynamic>> chatsJson =
+        chats.map((e) => e.toJson()).toList();
+
+    _pref!
+        .setString(CC_CHAT_STORAGE_KEY, json.encode(chatsJson));
+  }
+
+  static List<Chat> getUnsentCustomerCareChats() {
+    final jsonString =
+        _pref!.getString(UNSENT_CC_CHAT_STORAGE_KEY);
+    if (jsonString == null) {
+      return [];
+    }
+    final List<dynamic> chatsJson = json.decode(jsonString);
+    return chatsJson.map((e) => Chat.fromJson(json: e)).toList();
+  }
+
+  static Future<void> saveUnsentCustomerCareChats(
+      {required final List<Chat> chats}) async {
+    List<Map<dynamic, dynamic>> chatsJson =
+        chats.map((e) => e.toJson()).toList();
+
+    _pref!.setString(
+        UNSENT_CC_CHAT_STORAGE_KEY, json.encode(chatsJson));
+  }
+
+  static String? getCustomerCareSessionId() {
+    
+    return _pref!.getString(CC_SESSION_KEY);
+  }
+
+  static Future<void> saveCustomerCareSessionId({required final String sessionId})async{
+    
+    await _pref!.setString(CC_SESSION_KEY, sessionId);
+  }
+
 }

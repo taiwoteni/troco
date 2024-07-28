@@ -19,6 +19,14 @@ class HttpResponseModel {
     }
   }
 
+  List<dynamic>? get messageListBody {
+    try {
+      return json.decode(body);
+    } on FormatException {
+      return [];
+    }
+  }
+
   Map<String, dynamic> decodeLoginData() {
     final loginData = messageBody!["data"];
     return {

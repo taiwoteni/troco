@@ -71,10 +71,10 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          mediumSpacer(),
-          menuButtons(),
-          mediumSpacer(),
-          title(),
+          // mediumSpacer(),
+          // menuButtons(),
+          // mediumSpacer(),
+          // title(),
           mediumSpacer(),
           notificationsList(),
         ],

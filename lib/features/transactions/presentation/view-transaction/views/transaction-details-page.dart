@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/core/components/texts/outputs/info-text.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
@@ -30,6 +32,7 @@ import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
 import '../../../../groups/domain/entities/group.dart';
+import '../widgets/select-return-items-sheet.dart';
 
 class TransactionsDetailPage extends ConsumerStatefulWidget {
   final Transaction transaction;
@@ -125,6 +128,19 @@ class _TransactionsDetailPageState
         regularSpacer(),
         extraLargeSpacer(),
         extraLargeSpacer(),
+        if (!transaction.paymentDone &&
+            transaction.buyer == ClientProvider.readOnlyClient!.userId)
+          Padding(
+              padding: const EdgeInsets.only(
+                  left: SizeManager.small,
+                  right: SizeManager.small,
+                  bottom: SizeManager.medium),
+              child: InfoText(
+                  fontSize: FontSizeManager.small,
+                  color: ColorManager.secondary,
+                  text:
+                      "* If payment was previously made with Card, hold on for admin to approve. Do NOT Pay again. There will be no refunds for 'mistakes'")),
+
         button(),
         extraLargeSpacer()
       ],
@@ -841,14 +857,50 @@ class _TransactionsDetailPageState
     }
   }
 
-  Future<void> viewReceipt() async {
-    
-  }
+  Future<void> viewReceipt() async {}
 
   Future<void> showSatisfaction({required bool satisfied}) async {
     ButtonProvider.startLoading(
         buttonKey: satisfied ? okKey : cancelKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
+
+    if (!satisfied) {
+      final items = (await showModalBottomSheet<List<String>?>(
+              isScrollControlled: true,
+              enableDrag: true,
+              useSafeArea: false,
+              isDismissible: false,
+              backgroundColor: ColorManager.background,
+              context: context,
+              builder: (context) => SelectReturnItemsSheet(
+                    transaction: transaction,
+                  ))) ??
+          [];
+
+      log(items.toString());
+
+      if (items.isEmpty) {
+        ButtonProvider.stopLoading(
+            buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+        return;
+      }
+
+      final response = await TransactionRepo.returnTransaction(
+          transaction: transaction, itemIds: items);
+
+      log(response.body);
+
+      if (response.error) {
+        ButtonProvider.stopLoading(
+            buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            mode: ContentType.failure,
+            message: "An unknown error occurred");
+      }
+
+      return;
+    }
 
     final response = await TransactionRepo.satisfiedWithProduct(
         group: group, yes: satisfied);
@@ -898,11 +950,14 @@ class _TransactionsDetailPageState
     }
 
     if (method is CardMethod) {
-      final response = await PaymentRepository.makeCardPayment(transaction: transaction, group: group, card: method);
+      final response = await PaymentRepository.makeCardPayment(
+          transaction: transaction, group: group, card: method);
       log(response.body);
-      final redirected = (await Navigator.pushNamed(context, Routes.cardPaymentScreen, arguments: response.messageBody!["paymentLink"]) as bool?)?? false;
+      (await Navigator.pushNamed(context, Routes.cardPaymentScreen,
+              arguments: response.messageBody!["paymentLink"]) as bool?) ??
+          false;
       ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
-      
+
       return;
     }
     final response = await PaymentRepository.uploadSelectedAccount(

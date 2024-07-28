@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -8,15 +9,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/features/customer%20care/domain/repositories/customer-care-repository.dart';
+import 'package:troco/features/customer%20care/presentation/providers/chat-provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../../core/app/asset-manager.dart';
+import '../../../../core/app/audio-manager.dart';
 import '../../../../core/app/file-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/platform.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/app/snackbar-manager.dart';
 import '../../../../core/app/theme-manager.dart';
+import '../../../../core/cache/shared-preferences.dart';
 import '../../../../core/components/animations/lottie.dart';
 import '../../../../core/components/images/profile-icon.dart';
 import '../../../../core/components/images/svg.dart';
@@ -32,14 +37,17 @@ class CustomerCareChatScreen extends ConsumerStatefulWidget {
   const CustomerCareChatScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _CustomerCareChatScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _CustomerCareChatScreenState();
 }
 
-class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen> {
+class _CustomerCareChatScreenState
+    extends ConsumerState<CustomerCareChatScreen> {
   bool canUsePixels = false;
   final FocusNode messageNode = FocusNode();
   final ScrollController scrollController = ScrollController();
   final TextEditingController controller = TextEditingController();
+  late String sessionId;
   String? path;
   Uint8List? thumbnail;
   FileStat? fileStat;
@@ -50,13 +58,14 @@ class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen>
   bool isScrolling = false;
   bool deleting = false;
 
-
   @override
   Widget build(BuildContext context) {
+    listenToChatChanges();
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Scaffold(
-         backgroundColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: true,
         resizeToAvoidBottomInset: false,
         extendBody: true,
@@ -68,19 +77,19 @@ class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen>
           height: double.maxFinite,
           color: ColorManager.tertiary,
           child: SingleChildScrollView(
-            controller: scrollController,
-            child:ChatLists(chats: chats)
-          ),
+              controller: scrollController, child: ChatLists(chats: chats)),
         ),
       ),
-    
     );
   }
 
   @override
   void initState() {
     // Normally, this is meant to be set to preset cc chats
-    chats = [];
+    chats = [
+      ...AppStorage.getCustomerCareChats(),
+      ...AppStorage.getUnsentCustomerCareChats()
+    ];
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
@@ -233,40 +242,6 @@ class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen>
                       ),
                     ),
                     regularSpacer(),
-                    Container(
-                      width: 2.5,
-                      height: 20,
-                      decoration: BoxDecoration(
-                          color: ColorManager.primary.withOpacity(0.10),
-                          borderRadius:
-                              BorderRadius.circular(SizeManager.large)),
-                    ),
-                    mediumSpacer(),
-                    if (controller.text.trim().isEmpty && path == null)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            onPressed: () => pickFile(gallery: false),
-                            icon: SvgIcon(
-                              svgRes: AssetManager.svgFile(name: "camera"),
-                              color: ColorManager.secondary,
-                              size: const Size.square(
-                                  IconSizeManager.medium * 0.9),
-                            ),
-                          ),
-                          smallSpacer(),
-                          IconButton(
-                            onPressed: () => pickFile(gallery: true),
-                            icon: SvgIcon(
-                              svgRes: AssetManager.svgFile(name: "attach"),
-                              color: ColorManager.secondary,
-                              size: const Size.square(
-                                  IconSizeManager.medium * 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
                     if (path != null || controller.text.trim().isNotEmpty)
                       AnimatedCrossFade(
                         firstCurve: Curves.ease,
@@ -422,7 +397,6 @@ class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen>
   /// The AppBar contains the Groups icon, action button
   /// And business Days
   PreferredSizeWidget appBar() {
-  
     return PreferredSize(
       preferredSize:
           Size.fromHeight(75 + MediaQuery.of(context).viewPadding.top),
@@ -467,7 +441,9 @@ class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen>
                         color: ColorManager.accentColor,
                         size: const Size.square(IconSizeManager.regular * 1.5),
                       )),
-                  const ProfileIcon(size: 47, url: null),
+                  Transform.scale(
+                      scale: 1.25,
+                      child: const ProfileIcon(size: 47, url: null)),
                 ],
               ),
               title: const Text("Customer Care"),
@@ -477,7 +453,7 @@ class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen>
                   fontFamily: 'Lato',
                   fontSize: FontSizeManager.medium * 1.3,
                   fontWeight: FontWeightManager.semibold),
-              subtitle:const Text(""),
+              subtitle: const Text("Troco customer care"),
               subtitleTextStyle: TextStyle(
                   color: ColorManager.secondary,
                   fontFamily: 'Quicksand',
@@ -612,14 +588,9 @@ class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen>
     controller.text = "";
 
     /// We send the Chat through the API.
-    // final response = await (attachmentPath == null
-    //     ? ChatRepo.sendChat(groupId: group.groupId, message: chatMessage)
-    //     : ChatRepo.sendAttachment(
-    //         groupId: group.groupId,
-    //         message: chatMessage,
-    //         thumbnail: thumbnail,
-    //         attachment: attachmentPath));
-    // log(response.body);
+    final response = await CustomerCareRepository.sendChat(
+        content: chatMessage, sessionId: sessionId);
+    log(response.body);
 
     // if (!response.error) {
     //   // To show stopped-loading animation if sent
@@ -641,4 +612,39 @@ class _CustomerCareChatScreenState extends ConsumerState<CustomerCareChatScreen>
     // }
   }
 
+  Future<void> listenToChatChanges() async {
+    ref.listen(chatsStreamProvider, (previous, next) {
+      next.when(
+        data: (data) {
+          final unsentChats = AppStorage.getUnsentCustomerCareChats();
+          bool newMessage = !data.every((element) => element.read);
+          if (newMessage) {
+            AudioManager.playSource(source: AudioManager.receiveSource);
+          }
+          setState(() {
+            chats = unsentChats.isNotEmpty ? [...data, ...unsentChats] : data;
+            newMessage = data.isEmpty
+                ? false
+                : !chats.last.read &&
+                    chats.last.senderId !=
+                        ref.read(ClientProvider.userProvider)!.userId;
+          });
+          if (scrollController.position.pixels >=
+              scrollController.position.maxScrollExtent) {
+            WidgetsFlutterBinding.ensureInitialized()
+                .addPostFrameCallback((timeStamp) async {
+              setState(() => isScrolling = true);
+              await scrollController.animateTo(
+                  scrollController.position.maxScrollExtent,
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.ease);
+              setState(() => isScrolling = false);
+            });
+          }
+        },
+        error: (error, stackTrace) => null,
+        loading: () => null,
+      );
+    });
+  }
 }
