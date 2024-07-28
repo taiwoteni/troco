@@ -6,6 +6,7 @@ import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
 import 'package:troco/features/auth/presentation/welcome-back/views/welcome-back-screen.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/chat/presentation/views/view-attachment-screen.dart';
+import 'package:troco/features/customer%20care/presentation/views/customer-care-chat-screen.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password.dart';
@@ -94,6 +95,8 @@ class Routes {
   static const viewAttachmentRoute = "/view-attachments";
   static const viewContacts = "/view-contacts";
   static const aboutUsRoute = "/about-us";
+  static const customerCareRoute = "/customer-care";
+
   static const cardPaymentScreen = "/payment-screen";
 
 
@@ -291,6 +294,10 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => PaymentScreen(redirectLink: redirectLink));
+      case Routes.customerCareRoute:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const CustomerCareChatScreen());
 
 
           

@@ -841,7 +841,9 @@ class _TransactionsDetailPageState
     }
   }
 
-  Future<void> viewReceipt() async {}
+  Future<void> viewReceipt() async {
+    
+  }
 
   Future<void> showSatisfaction({required bool satisfied}) async {
     ButtonProvider.startLoading(
@@ -900,6 +902,7 @@ class _TransactionsDetailPageState
       log(response.body);
       final redirected = (await Navigator.pushNamed(context, Routes.cardPaymentScreen, arguments: response.messageBody!["paymentLink"]) as bool?)?? false;
       ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      
       return;
     }
     final response = await PaymentRepository.uploadSelectedAccount(

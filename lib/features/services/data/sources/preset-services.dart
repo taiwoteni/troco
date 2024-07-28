@@ -60,10 +60,10 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
         iconType: IconType.svg),
     SettingsModel(
-        label: "Contact  Us",
+        label: "Customer Care",
         icon: AssetManager.svgFile(name: "audio-call"),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.customerCareRoute),
         iconType: IconType.svg),
     SettingsModel(
         label: "About  Us",
