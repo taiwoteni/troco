@@ -246,8 +246,10 @@ class TransactionRepo {
     var parsedfile = File(driver.plateNumber);
     var stream = ByteStream(parsedfile.openRead());
     var length = await parsedfile.length();
-    final file = MultipartFile("plateNumberPicture", stream, length,
+    final file = MultipartFile("FrontPlateNumber", stream, length,
         filename: Path.basename(driver.plateNumber.toString()));
+    final file2 = MultipartFile("BackPlateNumber", stream, length,
+        filename: Path.basename(driver.backPlateNumber.toString()));
 
     final multiparts = <MultiPartModel>[];
     multiparts
@@ -260,8 +262,9 @@ class TransactionRepo {
     multiparts.add(MultiPartModel.field(
         field: "theDelivery", value: driver.destinationLocation));
     multiparts.add(
-        MultiPartModel.field(field: "companyName", value: driver.companyName));
+        MultiPartModel.field(field: "CompanyName", value: driver.companyName));
     multiparts.add(MultiPartModel.file(file: file));
+    multiparts.add(MultiPartModel.file(file: file2));
 
     final response = await ApiInterface.multipartPostRequest(
         url:

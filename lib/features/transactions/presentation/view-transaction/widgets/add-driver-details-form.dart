@@ -35,7 +35,7 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
   bool loading = false;
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
-  String? plateNumber;
+  String? plateNumber, backPlateNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +65,13 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
               mediumSpacer(),
               driverName(),
               mediumSpacer(),
-              row(),
+              phoneNumber(),
               mediumSpacer(),
               destination(),
               mediumSpacer(),
               estimatedDeliveryTime(),
+              mediumSpacer(),
+              row(),
               mediumSpacer(),
               extraLargeSpacer(),
               button(),
@@ -82,25 +84,40 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
   }
 
   Widget row() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
-              "Plate number",
+              "Front Plate number",
               style: TextStyle(
                   color: ColorManager.secondary,
                   fontFamily: 'lato',
                   fontSize: FontSizeManager.small * 0.8,
                   fontWeight: FontWeightManager.regular),
             ),
-            regularSpacer(),
-            plateNumber != null ? plateNumberWidget() : pickPlateNumber()
+            Text(
+              "Back Plate number",
+              style: TextStyle(
+                  color: ColorManager.secondary,
+                  fontFamily: 'lato',
+                  fontSize: FontSizeManager.small * 0.8,
+                  fontWeight: FontWeightManager.regular),
+            ),
           ],
         ),
-        largeSpacer(),
-        Expanded(child: phoneNumber())
+        regularSpacer(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            plateNumber != null ? plateNumberWidget() : pickPlateNumber(),
+            backPlateNumber != null
+                ? backPlateNumberWidget()
+                : pickBackPlateNumber()
+          ],
+        )
       ],
     );
   }
@@ -266,6 +283,17 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
     );
   }
 
+  Widget backPlateNumberWidget() {
+    return Container(
+      width: 70,
+      height: 80,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(SizeManager.regular * 1.3),
+          image: DecorationImage(
+              image: FileImage(File(backPlateNumber!)), fit: BoxFit.cover)),
+    );
+  }
+
   Widget title() {
     return Stack(
       alignment: Alignment.center,
@@ -357,9 +385,10 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
     setState(() => loading = false);
-    if (formKey.currentState!.validate() && plateNumber != null) {
+    if (formKey.currentState!.validate() && plateNumber != null && backPlateNumber != null) {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       formKey.currentState!.save();
+      DriverDetailsHolder.backPlateNumber = backPlateNumber!;
       DriverDetailsHolder.plateNumber = plateNumber!;
       Navigator.pop(
           context, Driver.fromJson(json: DriverDetailsHolder.toJson()));
@@ -380,5 +409,35 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
     bool is13 = number.length == 13 && number.startsWith("234");
     bool is12 = number.length == 12;
     return (regExp.hasMatch(number) || is11 || is14) && !is13 && !is12;
+  }
+
+  Widget pickBackPlateNumber() {
+    return InkWell(
+      onTap: () async {
+        final pickedFile =
+            await FileManager.pickImage(imageSource: ImageSource.gallery);
+        if (pickedFile != null) {
+          setState(() {
+            backPlateNumber = pickedFile.path;
+          });
+        }
+      },
+      highlightColor: ColorManager.accentColor.withOpacity(0.3),
+      customBorder: const CircleBorder(),
+      child: Container(
+        width: 70,
+        height: 70,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: ColorManager.accentColor.withOpacity(0.15),
+        ),
+        child: Icon(
+          CupertinoIcons.add,
+          color: ColorManager.accentColor,
+          size: IconSizeManager.medium,
+        ),
+      ),
+    );
   }
 }

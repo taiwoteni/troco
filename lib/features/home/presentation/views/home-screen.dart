@@ -9,7 +9,6 @@ import 'package:troco/features/customer%20care/domain/repositories/customer-care
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 import 'package:troco/features/notifications/domain/entities/notification.dart' as n;
 import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
-
 import '../widgets/bottom-bar.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -35,7 +34,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if(AppStorage.getCustomerCareSessionId() == null){
        final response = await CustomerCareRepository.createChatSession();
-       log(response.body);
+              log(response.body);
+       if(!response.error){
+        final id = response.messageBody!["chatSession"]["_id"].toString();
+        log(id);
+        AppStorage.saveCustomerCareSessionId(sessionId: id);
+       }
       }
     });
   }

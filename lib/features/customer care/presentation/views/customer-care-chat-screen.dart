@@ -85,6 +85,7 @@ class _CustomerCareChatScreenState
 
   @override
   void initState() {
+    sessionId = AppStorage.getCustomerCareSessionId() ?? "00??";
     // Normally, this is meant to be set to preset cc chats
     chats = [
       ...AppStorage.getCustomerCareChats(),

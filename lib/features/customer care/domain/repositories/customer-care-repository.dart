@@ -1,7 +1,7 @@
+
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
-import 'package:troco/features/chat/domain/entities/chat.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
 
@@ -10,6 +10,7 @@ class CustomerCareRepository{
   static Future<HttpResponseModel> createChatSession()async{
     final result = await ApiInterface.postRequest(
       url: "startChat",
+      okCode: 201,
       data: {
         "userId":ClientProvider.readOnlyClient!.userId
       });
@@ -36,7 +37,7 @@ class CustomerCareRepository{
     return result;
   }
 
-  Future<List<Chat>> getCustomerCareMessages(
+  Future<List<Map<dynamic, dynamic>>> getCustomerCareMessages(
     {
       required final String sessionId,
     }
@@ -45,13 +46,21 @@ class CustomerCareRepository{
       url: "getcustomercaremessages/$sessionId");
 
       if(result.error){
-        return AppStorage.getCustomerCareChats();
+        return AppStorage.getCustomerCareChats().map((e) => e.toJson()).toList();
       }
+
+      final sortedList = (result.messageBody!["chatSession"]["messages"] as List)
+      .map((e) => {
+        "_id":e["_id"],
+        "content":e["content"],
+        "sender":e["sender"]["_id"],
+        "timestamp":e["timestamp"]
+        },).toList();
 
 
 
     
-    return (result.messageBody!["messages"] as List).map((e) => Chat.fromJson(json: e)).toList();
+    return sortedList;
   }
 
 

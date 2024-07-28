@@ -193,11 +193,11 @@ class _TransactionsDetailPageState
         regularSpacer(),
         divider(),
         regularSpacer(),
-        // // Company Name
-        // companyName(),
-        // regularSpacer(),
-        // divider(),
-        // regularSpacer(),
+        // Company Name
+        companyName(),
+        regularSpacer(),
+        divider(),
+        regularSpacer(),
         // delivery details
         driverDestination(),
         regularSpacer(),
