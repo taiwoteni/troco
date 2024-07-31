@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import '../../../kyc/utils/enums.dart';
 import '../../../transactions/utils/enums.dart';
+import '../../presentation/providers/client-provider.dart';
 import '../../utils/category-converter.dart';
 
 class Client extends Equatable {
@@ -25,6 +26,25 @@ class Client extends Equatable {
   String get zipcode => _json["zipcode"];
   String get bustop => _json["nearestBustop"];
   String? get transactionPin => _json["transactionPin"];
+
+  bool get blocked => _json["blocked"] == true;
+
+  bool get online {
+    final difference = DateTime.now().difference(lastSeen);
+
+    // return difference.inMinutes < 5;
+
+    return userId == ClientProvider.readOnlyClient!.userId;
+  }
+
+  DateTime get lastSeen {
+    if (_json["lastSeen"] == null) {
+      return DateTime.now();
+    }
+
+    return DateTime.parse(_json["lastSeen"]);
+  }
+
   VerificationTier get kycTier =>
       KycConverter.convertToEnum(tier: _json["kycTier"].toString());
 

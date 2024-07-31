@@ -25,6 +25,8 @@ class AppStorage {
 
   static const String USER_STORAGE_KEY = "userData";
   static const String GROUP_STORAGE_KEY = "groups";
+  static const String FRIENDS_STORAGE_KEY = "friends";
+
   static const String PAYMENT_METHODS_STORAGE_KEY = "paymentMethods";
   static const String KYC_STATUS_STORAGE_KEY = "kycVerificationStatus";
 
@@ -177,6 +179,20 @@ class AppStorage {
     return transactions;
   }
 
+  static List<Transaction> getAllTransactions() {
+    final jsonString = _pref!.getString(TRANSACTION_STORAGE_KEY);
+    if (jsonString == null) {
+      // log("No Transactions stored.");
+      return [];
+    }
+    // log("transactions are :$jsonString");
+    final List<dynamic> transactionsJson = json.decode(jsonString) as List;
+    final transactions = transactionsJson.map((json)=> Transaction.fromJson(json: json)).toList();
+
+    
+    return transactions;
+  }
+
   static Future<void> saveTransactions(
       {required final List<Transaction> transactions}) async {
     List<Map<dynamic, dynamic>> transactionsJson =
@@ -309,5 +325,24 @@ class AppStorage {
     
     await _pref!.setString(CC_SESSION_KEY, sessionId);
   }
+
+  static List<Client> getFriends() {
+    final jsonString = _pref!.getString(FRIENDS_STORAGE_KEY);
+    if (jsonString == null) {
+      log("No friends Stored");
+      return [];
+    }
+    final List<dynamic> groupsJson = json.decode(jsonString);
+    return groupsJson
+        .map((e) => Client.fromJson(json: e))
+        .toList();
+  }
+
+  static Future<void> saveFriends({required final List<Client> friends}) async {
+    List<Map<dynamic, dynamic>> friendsJson =
+        friends.map((e) => e.toJson()).toList();
+    _pref!.setString(FRIENDS_STORAGE_KEY, json.encode(friendsJson));
+  }
+
 
 }

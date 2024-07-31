@@ -65,10 +65,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
       leading: GestureDetector(
         onTap: () => Navigator.pushNamed(context, Routes.viewProfileRoute,
             arguments: client),
-        child: ProfileIcon(
-          size: IconSizeManager.large,
-          url: client.profile,
-        ),
+        child: profileIcon(),
       ),
       title: Text(
         client.fullName,
@@ -79,7 +76,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
             fontSize: FontSizeManager.medium * 0.95,
             fontWeight: FontWeightManager.semibold),
       ),
-      subtitle: Text(" ${client.accountCategory.name.toLowerCase()}",
+      subtitle: Text(" ${client.accountCategory.name} User",
           style: TextStyle(
               color: ColorManager.secondary,
               fontFamily: 'Quicksand',
@@ -88,6 +85,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
       trailing: inviteMode
           ? SizedBox(
               width: IconSizeManager.large * 1.7,
+              height: IconSizeManager.regular * 2,
               child: CustomButton.small(
                   onPressed: addMemberToGroup,
                   buttonKey: buttonKey,
@@ -95,6 +93,36 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
                   label: text),
             )
           : null,
+    );
+  }
+
+  Widget profileIcon() {
+    return SizedBox.square(
+      dimension: IconSizeManager.large,
+      child: Stack(
+        children: [
+          ProfileIcon(
+            size: double.maxFinite,
+            url: client.profile,
+          ),
+          Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: SizeManager.medium - 2,
+                height: SizeManager.medium - 2,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: client.online
+                        ? ColorManager.accentColor
+                        : Colors.redAccent,
+                    border: Border.all(
+                        color: ColorManager.background,
+                        width: SizeManager.small * 0.5,
+                        strokeAlign: BorderSide.strokeAlignOutside)),
+              ))
+        ],
+      ),
     );
   }
 

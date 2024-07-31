@@ -28,7 +28,7 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
 
   @override
   void initState() {
-    transactions = AppStorage.getTransactions();
+    transactions = AppStorage.getAllTransactions();
     controller = TextEditingController();
     searchBarWidget = searchBar();
     super.initState();
@@ -178,7 +178,7 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
           setState(() {
             searching = search.isNotEmpty;
             this.transactions =
-                search.isEmpty ? AppStorage.getTransactions() : transactions;
+                search.isEmpty ? AppStorage.getAllTransactions() : transactions;
           });
         },
         cursorColor: ColorManager.themeColor,

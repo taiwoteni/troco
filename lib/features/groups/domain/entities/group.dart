@@ -41,18 +41,21 @@ class Group extends Equatable {
 
   bool get hasTransaction =>
       _transactions.isNotEmpty &&
-      AppStorage.getTransactions()
+      AppStorage.getAllTransactions()
           .map(
             (e) => e.transactionId,
           )
           .contains(_transactions.first);
 
   Transaction get transaction {
-    final transactions = AppStorage.getTransactions();
+    final transactions = AppStorage.getAllTransactions();
     final _transaction = transactions.firstWhere(
         (transaction) => transaction.transactionId == _transactions[0]);
     return _transaction;
   }
+
+  bool get transactionIsHampered =>
+      hasTransaction && transaction.salesItem.isEmpty;
 
   List<Client> get sortedMembers {
     final sortedMembersJson = _json["sortedMembers"];
@@ -71,7 +74,8 @@ class Group extends Equatable {
   String get groupId => _json["id"] ?? _json["_id"];
   String get creator => members.first;
   String get adminId => _json["adminId"] ?? "abc";
-  String get buyerId => members.firstWhere((element) => ![creator, adminId].contains(element));
+  String get buyerId =>
+      members.firstWhere((element) => ![creator, adminId].contains(element));
 
   Client get seller {
     return sortedMembers.firstWhere(

@@ -18,6 +18,7 @@ class LoginData {
       profile,
       lastName,
       address,
+      referralCode,
       businessName,
       otp,
       city,
@@ -35,6 +36,7 @@ class LoginData {
     lastName = null;
     transactionPin = null;
     nearestBustop = null;
+    referralCode = null;
     address = null;
     businessName = null;
     city = null;
@@ -60,6 +62,7 @@ class LoginData {
       "address": address,
       "city": city,
       "state": state,
+      "referralCode":referralCode,
       "nearestBustop": nearestBustop,
       "transactionPin": transactionPin,
       "zipcode": zipCode,

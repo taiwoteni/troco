@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import '../../utils/enums.dart';
 
@@ -50,6 +51,7 @@ List<SettingsModel> presetSettings({required BuildContext context, required fina
         onTap: () async{
           ref.watch(paymentMethodProvider.notifier).state = [];
           await AppStorage.clear();
+          ref.watch(homeProvider.notifier).state = 0;
           Navigator.pushNamedAndRemoveUntil(
               context, Routes.authRoute, (route) => false);
         },

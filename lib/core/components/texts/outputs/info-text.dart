@@ -9,7 +9,14 @@ class InfoText extends StatelessWidget {
   final FontWeight? fontWeight;
   final void Function()? onPressed;
   final Alignment? alignment;
-  const InfoText({super.key, this.fontSize, required this.text, this.alignment, this.onPressed, this.fontWeight, this.color});
+  const InfoText(
+      {super.key,
+      this.fontSize,
+      required this.text,
+      this.alignment,
+      this.onPressed,
+      this.fontWeight,
+      this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +26,14 @@ class InfoText extends StatelessWidget {
         alignment: alignment ?? Alignment.centerLeft,
         child: Text(
           text,
-          textAlign: TextAlign.left,
+          textAlign: (alignment ?? Alignment.centerLeft) == Alignment.center
+              ? TextAlign.center
+              : TextAlign.left,
           style: TextStyle(
             color: color ?? ColorManager.themeColor,
             fontFamily: 'Lato',
             fontWeight: fontWeight ?? FontWeightManager.medium,
-            fontSize: fontSize?? FontSizeManager.regular,
+            fontSize: fontSize ?? FontSizeManager.regular,
           ),
         ),
       ),

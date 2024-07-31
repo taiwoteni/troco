@@ -1,4 +1,6 @@
+import 'package:intl/intl.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import '../../domain/entities/transaction.dart';
 import '../../utils/enums.dart';
 
 class TransactionDataHolder {
@@ -19,5 +21,16 @@ class TransactionDataHolder {
     inspectionPeriod = null;
     items = null;
     date = null;
+  }
+
+  static void assignFrom({required final Transaction transaction}){
+    transactionCategory = transaction.transactionCategory;
+    transactionName = transaction.transactionName;
+    aboutProduct = transaction.transactionDetail;
+    inspectionPeriod = transaction.inspectionPeriod == InspectionPeriod.Day;
+    inspectionDays = transaction.inspectionDays;
+    items = transaction.salesItem;
+    date = DateFormat("dd/MM/yyyy").format(transaction.transactionTime);
+    id = transaction.transactionId;
   }
 }

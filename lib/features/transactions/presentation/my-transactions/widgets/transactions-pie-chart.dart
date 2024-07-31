@@ -44,7 +44,7 @@ class _TransactionPieChartState extends ConsumerState<TransactionPieChart>
   }
 
   void initializeTransaction() {
-    final transactions = AppStorage.getTransactions();
+    final transactions = AppStorage.getAllTransactions();
 
     totalTransaction = transactions.length;
     completedTransactions = transactions

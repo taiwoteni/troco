@@ -30,6 +30,8 @@ import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
+import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../../core/app/audio-manager.dart';
@@ -613,6 +615,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> openTransactionPage() async {
+    if (group.transactionIsHampered) {
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message:
+              "${group.transaction.transactionCategory == TransactionCategory.Product ? "Product" : "Service"}(s) are missing. Add the required.");
+      TransactionDataHolder.assignFrom(transaction: group.transaction);
+      ref.read(createTransactionProgressProvider.notifier).state = 2;
+      await Navigator.pushNamed(context, Routes.createTransactionRoute,
+          arguments: group);
+      ref.watch(createTransactionProgressProvider.notifier).state = 0;
+      return;
+    }
     if (group.hasTransaction) {
       Navigator.pushNamed(context, Routes.viewTransactionRoute,
           arguments: group.transaction);

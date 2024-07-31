@@ -45,43 +45,45 @@ class _ProfileIconState extends ConsumerState<ProfileIcon> {
             width: widget.size ?? IconSizeManager.medium,
             height: widget.size ?? IconSizeManager.medium,
             decoration: const BoxDecoration(shape: BoxShape.circle),
-            child: widget.url == null? 
-            Image.asset(
-              AssetManager.imageFile(name: "profile_img"),
-              fit: BoxFit.cover,
-              width: double.maxFinite,
-              height: double.maxFinite,
-            )
-            : CachedNetworkImage(
-              width: double.maxFinite,
-              imageUrl: widget.url!,
-              fit: BoxFit.cover,
-              height: double.maxFinite,
-              fadeInCurve: Curves.ease,
-              fadeOutCurve: Curves.ease,
-              placeholder: (context, url) {
-                return Container(
-                  width: double.maxFinite,
-                  height: double.maxFinite,
-                  color: ColorManager.lottieLoading,
-                  child: LottieWidget(
-                      lottieRes: AssetManager.lottieFile(name: "loading-image"),
-                      size: Size.square(
-                          widget.size ?? IconSizeManager.medium * 0.8)),
-                );
-              },
-              errorWidget: (context, url, error) {
-                return Container(
-                  width: double.maxFinite,
-                  height: double.maxFinite,
-                  color: ColorManager.lottieLoading,
-                  child: LottieWidget(
-                      lottieRes: AssetManager.lottieFile(name: "loading-image"),
-                      size: Size.square(
-                          widget.size ?? IconSizeManager.medium * 0.8)),
-                );
-              },
-            ),
+            child: widget.url == null
+                ? Image.asset(
+                    AssetManager.imageFile(name: "profile_img"),
+                    fit: BoxFit.cover,
+                    width: double.maxFinite,
+                    height: double.maxFinite,
+                  )
+                : CachedNetworkImage(
+                    width: double.maxFinite,
+                    imageUrl: widget.url!,
+                    fit: BoxFit.cover,
+                    height: double.maxFinite,
+                    fadeInCurve: Curves.ease,
+                    fadeOutCurve: Curves.ease,
+                    placeholder: (context, url) {
+                      return Container(
+                        width: double.maxFinite,
+                        height: double.maxFinite,
+                        color: ColorManager.lottieLoading,
+                        child: LottieWidget(
+                            lottieRes:
+                                AssetManager.lottieFile(name: "loading-image"),
+                            size: Size.square(
+                                widget.size ?? IconSizeManager.medium * 0.8)),
+                      );
+                    },
+                    errorWidget: (context, url, error) {
+                      return Container(
+                        width: double.maxFinite,
+                        height: double.maxFinite,
+                        color: ColorManager.lottieLoading,
+                        child: LottieWidget(
+                            lottieRes:
+                                AssetManager.lottieFile(name: "loading-image"),
+                            size: Size.square(
+                                widget.size ?? IconSizeManager.medium * 0.8)),
+                      );
+                    },
+                  ),
           ),
         ),
         if (widget.badge != null) widget.badge!
@@ -180,6 +182,47 @@ class _GroupProfileIconState extends ConsumerState<GroupProfileIcon> {
                 ? widget.size! >= 50
                     ? widget.size! * 0.47
                     : widget.size! * 0.55
+                : (IconSizeManager.medium) * 0.65),
+          ),
+        ));
+  }
+}
+
+class CustomerCareProfileIcon extends ConsumerStatefulWidget {
+  final double? size;
+  const CustomerCareProfileIcon({super.key, this.size});
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _CustomerCareProfileIconState();
+}
+
+class _CustomerCareProfileIconState
+    extends ConsumerState<CustomerCareProfileIcon> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+        width: widget.size ?? IconSizeManager.medium,
+        height: widget.size ?? IconSizeManager.medium,
+        child: Container(
+          width: double.maxFinite,
+          height: double.maxFinite,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color.fromARGB(255, 223, 218, 218)),
+          child: SvgIcon(
+            svgRes: AssetManager.svgFile(name: 'customer-service'),
+            color: Colors.white,
+            size: Size.square(widget.size != null
+                ? widget.size! >= 50
+                    ? widget.size! * 0.42
+                    : widget.size! * 0.5
                 : (IconSizeManager.medium) * 0.65),
           ),
         ));

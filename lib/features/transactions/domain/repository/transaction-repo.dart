@@ -173,10 +173,7 @@ class TransactionRepo {
     // log(transactionsJson.toString());
 
     final List<String> transactionsId = ((transactionsJson ?? []) as List)
-        .where(
-          (element) => (element["pricing"] as List).isNotEmpty,
-        )
-        .map((e) => e["_id"].toString())
+    .map((e) => e["_id"].toString())
         .toList();
 
     List<Map<dynamic, dynamic>> jsonData = [];
@@ -206,23 +203,23 @@ class TransactionRepo {
 
     if (response.error) {
       log("error fetching transactions from repo");
-      return AppStorage.getTransactions();
+      return AppStorage.getAllTransactions();
     } else {
       final transactionsJson = (json.decode(response.body) as List);
 
-      final transactions = <Transaction>[];
+      final transactions = transactionsJson.map((e) => Transaction.fromJson(json: e)).toList();
 
-      for (final json in transactionsJson) {
-        if ((json["pricing"] as List).isNotEmpty) {
-          Transaction t = Transaction.fromJson(json: json);
-          try {
-            t.salesItem.length;
-            transactions.add(t);
-          } on TypeError {
-            //Do nothing
-          }
-        }
-      }
+      // for (final json in transactionsJson) {
+      //   if ((json["pricing"] as List).isNotEmpty) {
+      //     Transaction t = Transaction.fromJson(json: json);
+      //     try {
+      //       t.salesItem.length;
+      //       transactions.add(t);
+      //     } on TypeError {
+      //       //Do nothing
+      //     }
+      //   }
+      // }
       return transactions;
     }
   }

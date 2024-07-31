@@ -7,6 +7,8 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 
+import '../../../../../core/app/routes-manager.dart';
+import '../../../../chat/presentation/providers/chat-provider.dart';
 import '../../../../groups/domain/entities/group.dart';
 
 class GroupsInCommonWidget extends ConsumerStatefulWidget {
@@ -24,6 +26,11 @@ class _GroupsInCommonWidgetState extends ConsumerState<GroupsInCommonWidget> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: () async {
+        ref.watch(chatsGroupProvider.notifier).state = widget.group.groupId;
+        await Navigator.pushNamed(context, Routes.chatRoute,
+            arguments: widget.group);
+      },
       contentPadding: const EdgeInsets.symmetric(
           vertical: SizeManager.small, horizontal: 0),
       dense: true,

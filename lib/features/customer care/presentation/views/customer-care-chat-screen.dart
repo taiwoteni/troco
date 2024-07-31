@@ -442,12 +442,10 @@ class _CustomerCareChatScreenState
                         color: ColorManager.accentColor,
                         size: const Size.square(IconSizeManager.regular * 1.5),
                       )),
-                  Transform.scale(
-                      scale: 1.25,
-                      child: const ProfileIcon(size: 47, url: null)),
+                  const CustomerCareProfileIcon(size: 47),
                 ],
               ),
-              title: const Text("Customer Care"),
+              title: const Text("Customer Service"),
               titleTextStyle: TextStyle(
                   overflow: TextOverflow.ellipsis,
                   color: ColorManager.primary,

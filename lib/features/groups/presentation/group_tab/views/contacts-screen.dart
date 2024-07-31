@@ -6,11 +6,15 @@ import 'package:gap/gap.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/auth/utils/phone-number-converter.dart';
 import 'package:troco/features/groups/presentation/friends_tab/widgets/contact-widget.dart';
 
+import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/others/spacer.dart';
+import '../../collections_page/widgets/empty-screen.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
@@ -20,7 +24,7 @@ class ContactsScreen extends ConsumerStatefulWidget {
 }
 
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
-  late List<Contact> contacts,allContacts;
+  late List<Contact> contacts, allContacts;
   final TextEditingController controller = TextEditingController();
   late Widget searchBar;
 
@@ -48,23 +52,29 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 .toLowerCase()
                 .contains(query.trim().toLowerCase()))
             .toList();
+
     return Scaffold(
       backgroundColor: ColorManager.background,
-      body: SingleChildScrollView(
-        padding:
-            const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            extraLargeSpacer(),
-            back(),
-            mediumSpacer(),
-            title(),
-            largeSpacer(),
-            searchBar,
-            contactsList(),
-          ],
-        ),
+      body: SizedBox.expand(
+          child:
+              contacts.isEmpty ? body() : SingleChildScrollView(child: body())),
+    );
+  }
+
+  Widget body() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          extraLargeSpacer(),
+          back(),
+          mediumSpacer(),
+          title(),
+          largeSpacer(),
+          searchBar,
+          contactsList(),
+        ],
       ),
     );
   }
@@ -99,23 +109,36 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   }
 
   Widget contactsList() {
-    return ListView.separated(
-        key: const Key("contacts-list"),
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) => ContactWidget(
-            key: ObjectKey(contacts[index]), contact: contacts[index]),
-        separatorBuilder: (context, index) {
-          if (index == contacts.length - 1) {
-            return const Gap(SizeManager.bottomBarHeight);
-          } else {
-            return Divider(
-              thickness: 0.8,
-              color: ColorManager.secondary.withOpacity(0.08),
-            );
-          }
-        },
-        itemCount: contacts.length);
+    return contacts.isEmpty
+        ? Expanded(
+            child: SizedBox(
+              width: double.maxFinite,
+              child: EmptyScreen(
+                expanded: true,
+                lottie: AssetManager.lottieFile(name: "plane-cloud"),
+                label: controller.text.trim().isNotEmpty
+                    ? "No results for '${controller.text}'"
+                    : "Getting Contacts",
+              ),
+            ),
+          )
+        : ListView.separated(
+            key: const Key("contacts-list"),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) => ContactWidget(
+                key: ObjectKey(contacts[index]), contact: contacts[index]),
+            separatorBuilder: (context, index) {
+              if (index == contacts.length - 1) {
+                return const Gap(SizeManager.bottomBarHeight);
+              } else {
+                return Divider(
+                  thickness: 0.8,
+                  color: ColorManager.secondary.withOpacity(0.08),
+                );
+              }
+            },
+            itemCount: contacts.length);
   }
 
   Future<bool> requestPermissions() async {
@@ -125,7 +148,20 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
   Future<void> initiatePermissions() async {
     if (await requestPermissions()) {
-      Iterable<Contact> contacts = await ContactsService.getContacts();
+      final phoneNumbers = AppStorage.getFriends()
+          .map(
+            (e) => e.phoneNumber,
+          )
+          .toList();
+      Iterable<Contact> contacts =
+          (await ContactsService.getContacts()).where((element) =>
+              element.phones != null &&
+              element.phones!.every(
+                (phone) => !phoneNumbers.contains(
+                    PhoneNumberConverter.convertToFull(
+                        phone.value!.replaceAll(" ", ""))),
+              ));
+
       setState(() {
         this.contacts = contacts.toList();
         this.allContacts = contacts.toList();

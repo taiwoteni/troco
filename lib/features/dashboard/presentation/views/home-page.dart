@@ -63,11 +63,11 @@ class _HomePageState extends ConsumerState<HomePage> {
             return transactions.isEmpty ? emptyBody() : body();
           },
           error: (error, stackTrace) {
-            transactions = AppStorage.getTransactions();
+            transactions = AppStorage.getAllTransactions();
             return transactions.isEmpty ? emptyBody() : body();
           },
           loading: () {
-            transactions = AppStorage.getTransactions();
+            transactions = AppStorage.getAllTransactions();
             return transactions.isEmpty ? emptyBody() : body();
           },
         ),

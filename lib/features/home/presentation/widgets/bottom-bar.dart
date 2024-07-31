@@ -6,6 +6,9 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 
+import '../../../auth/presentation/providers/client-provider.dart';
+import '../../../transactions/utils/enums.dart';
+
 class BottomBar extends ConsumerStatefulWidget {
   const BottomBar({super.key});
 
@@ -14,6 +17,16 @@ class BottomBar extends ConsumerStatefulWidget {
 }
 
 class _BottomBarState extends ConsumerState<BottomBar> {
+final pages = homeItems;
+  @override
+  void initState() {
+    if(ClientProvider.readOnlyClient!.accountCategory == Category.Personal){
+      pages.remove(1);
+    }
+  super.initState();
+  
+}
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -41,7 +54,7 @@ class _BottomBarState extends ConsumerState<BottomBar> {
                 fontSize: FontSizeManager.small),
             unselectedLabelStyle: const TextStyle(
                 fontFamily: 'Lato', fontSize: FontSizeManager.small),
-            items: homeItems.map((homeItem) {
+            items: pages.map((homeItem) {
               final bool isSelected =
                   homeItems.indexOf(homeItem) == ref.watch(homeProvider);
               return BottomNavigationBarItem(

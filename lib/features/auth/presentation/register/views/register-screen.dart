@@ -228,6 +228,42 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                   ),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: SizeManager.medium,
+                        vertical: SizeManager.regular),
+                    child: InputFormField(
+                      inputType: TextInputType.name,
+                      label: "referral code",
+                      validator: (value) {
+                        return null;
+                      },
+                      onSaved: (value) {
+                        LoginData.referralCode = value;
+                      },
+                      prefixIcon: IconButton(
+                        onPressed: null,
+                        iconSize: IconSizeManager.regular,
+                        icon: SvgIcon(
+                          svgRes: AssetManager.svgFile(name: "referral-code"),
+                          color: ColorManager.themeColor,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: SizeManager.small,
+                        horizontal: SizeManager.medium * 1.5),
+                    child: InfoText(
+                      text: "* Optional. If you were referred to Troco by a friend, type in their referral code.",
+                      color: primaryPasswordError
+                          ? Colors.red
+                          : ColorManager.secondary,
+                    ),
+                  ),
                   largeSpacer(),
                   CustomButton(
                     onPressed: next,

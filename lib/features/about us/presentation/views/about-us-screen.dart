@@ -156,6 +156,7 @@ class _AboutUsScreenState extends ConsumerState<AboutUsScreen> {
           color: ColorManager.accentColor,
           fontFamily: 'lato',
           decoration: TextDecoration.underline,
+          decorationColor: ColorManager.accentColor,
           fontSize: FontSizeManager.large * 0.9,
           fontWeight: FontWeightManager.bold),
     );

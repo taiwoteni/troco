@@ -254,7 +254,11 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
     return ((lastSender ? lastSender : lastMessage) && !isSender)
         ? Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: ProfileIcon(url: chat.profile, size: 35),
+            child: isSender
+                ? ProfileIcon(url: chat.profile, size: 35)
+                : const CustomerCareProfileIcon(
+                    size: 35,
+                  ),
           )
         : const SizedBox.square(
             dimension: 0,
@@ -351,5 +355,4 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
       ),
     );
   }
-
 }

@@ -67,6 +67,10 @@ class _ViewAttachmentScreenState extends ConsumerState<ViewAttachmentScreen> {
               // setState()
               if (controller!.value.isInitialized &&
                   !controller!.value.isPlaying) {
+                if (!mounted) {
+                  controller!.dispose();
+                  return;
+                }
                 controller!.play();
                 setState(() {
                   loading = false;

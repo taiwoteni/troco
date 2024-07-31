@@ -23,7 +23,7 @@ class MyTransactionsPerMonth extends ConsumerStatefulWidget {
 
 class _MyTransactionsPerMonthState
     extends ConsumerState<MyTransactionsPerMonth> {
-  final List<Transaction> transactions = AppStorage.getTransactions();
+  final List<Transaction> transactions = AppStorage.getAllTransactions();
   int selectMonth = DateTime.now().month;
 
   @override

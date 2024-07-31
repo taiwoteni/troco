@@ -81,6 +81,7 @@ class _ProfileBodyWidgetState extends ConsumerState<ProfileBody> {
 
   Widget subtTitle({required final String name, required final String value}) {
     return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       child: Row(
         children: [
           Text(

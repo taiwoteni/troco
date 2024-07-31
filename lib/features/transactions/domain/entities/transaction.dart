@@ -9,6 +9,8 @@ import 'package:troco/features/transactions/domain/entities/virtual-service.dart
 import 'package:troco/features/transactions/utils/inspection-period-converter.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
+import '../../../../core/cache/shared-preferences.dart';
+import '../../../groups/domain/entities/group.dart';
 import '../../utils/enums.dart';
 import '../../utils/transaction-purpose-converter.dart';
 import '../../utils/transaction-status-converter.dart';
@@ -23,11 +25,15 @@ class Transaction extends Equatable {
   String get transactionName =>
       _json["transaction name"] ?? _json["transactionName"];
 
+  Group get group{
+    return AppStorage.getGroups().firstWhere((element) => element.groupId ==transactionId,);
+  }
+
   DateTime get transactionTime =>
       DateTime.parse(_json["transaction time"] ?? _json["DateOfWork"]);
 
   DateTime get creationTime => DateTime.parse(_json["creation time"] ??
-      _json["createdTime"] ??
+      _json["createdTime"] ?? _json["timestamp"] ?? _json["createdAt"]??
       DateTime.now().toIso8601String());
 
   String get transactionId => _json["transaction id"] ?? _json["_id"];

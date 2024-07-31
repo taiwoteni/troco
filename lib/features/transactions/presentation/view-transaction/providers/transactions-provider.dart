@@ -49,7 +49,7 @@ final transactionsStreamProvider = StreamProvider<List<Transaction>>(
 
             /// We get the transactionsList from the Cache
             final _transacionsList =
-                AppStorage.getTransactions().map((e) => e.toJson()).toList();
+                AppStorage.getAllTransactions().map((e) => e.toJson()).toList();
 
             if(i==0){
               log(transactionsJson.last.toString());
@@ -58,7 +58,7 @@ final transactionsStreamProvider = StreamProvider<List<Transaction>>(
 
                 /// This is because some transactions json have empty products.
                 /// Due to previous complications in consuming the APIs. 
-            final sortedTransactionsList = transactionsJson.where((e) => (e["pricing"] as List).isNotEmpty).toList();
+            final sortedTransactionsList = transactionsJson;
             
 
             // bool sameProducts = _transacionsList.map((e) => ,)

@@ -2,11 +2,10 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/core/components/texts/outputs/info-text.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/client-widget.dart';
 
 import '../../../../core/app/color-manager.dart';
@@ -26,19 +25,15 @@ class AddGroupMemberWidget extends ConsumerStatefulWidget {
       _AddGroupMemberWidgetState();
 }
 
-class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
-    with TickerProviderStateMixin {
-  late TabController controller;
+class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget> {
   late TextEditingController textController;
   late Group group;
   List<Client> allClients = [];
   List<Client> queriedClients = [];
-  List<Client> invitedClients = [];
 
   @override
   void initState() {
     group = widget.group;
-    controller = TabController(length: 2, vsync: this);
     textController = TextEditingController();
     super.initState();
     fetchAll();
@@ -54,32 +49,14 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
 
   @override
   void dispose() {
-    controller.dispose();
     textController.dispose();
     super.dispose();
   }
-  // data[index]._id,profile
 
   Future<void> fetchAll() async {
-    List<Client> invitedClients =
-        await AppStorage.getInvitedClients(groupId: group.groupId);
-    List<Client> allClients = [];
-    final result = await ApiInterface.searchUser(query: "");
-    log(result.body);
-    if (!result.error) {
-      final List<dynamic> clientsJson = result.messageBody!["data"];
-      allClients = clientsJson
-          .map((e) => Client.fromJson(json: e))
-          .toList()
-          .where((element) =>
-              element.userId != ClientProvider.readOnlyClient!.userId)
-          .toList();
-    } else {
-      log(result.body);
-    }
+    List<Client> allClients = AppStorage.getFriends();
 
     setState(() {
-      this.invitedClients = invitedClients;
       queriedClients = allClients;
       this.allClients = allClients;
     });
@@ -99,20 +76,14 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
         children: [
           appBar(),
           regularSpacer(),
-          tabBar(),
-          Expanded(
-            child: TabBarView(controller: controller, children: [
-              clientSearch(),
-              groupInvitations(),
-            ]),
-          )
+          Expanded(child: clientSearch()),
         ],
       ),
     );
   }
 
   Widget clientSearch() {
-    return Column(
+    final child = Column(
       children: [
         regularSpacer(),
         searchBar(),
@@ -122,77 +93,47 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
                 expanded: true,
                 lottie: AssetManager.lottieFile(name: "plane-cloud"),
                 label: allClients.isEmpty
-                    ? "Getting users"
+                    ? "You don't have any friends"
                     : "No search results for '${textController.text.toString().trim()}'",
               )
             : ListView.separated(
                 shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 key: const Key("add-member-list"),
-                itemBuilder: (context, index) => ClientWidget(
-                      key: ObjectKey(queriedClients[0]),
-                      client: queriedClients[index],
-                      group: group,
-                      inviteMode: true,
+                itemBuilder: (context, index) => Padding(
+                      padding: EdgeInsets.only(
+                          bottom: index == queriedClients.length - 1
+                              ? SizeManager.large * 1.5
+                              : 0),
+                      child: ClientWidget(
+                        key: ObjectKey(queriedClients[0]),
+                        client: queriedClients[index],
+                        group: group,
+                        inviteMode: true,
+                      ),
                     ),
                 separatorBuilder: (context, index) => Divider(
                       thickness: 0.8,
                       color: ColorManager.secondary.withOpacity(0.09),
                     ),
-                itemCount: queriedClients.length)
+                itemCount: queriedClients.length),
+        if (allClients.isNotEmpty)
+          Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: SizeManager.extralarge),
+              alignment: Alignment.center,
+              child: InfoText(
+                  color: ColorManager.secondary,
+                  alignment: Alignment.center,
+                  text:
+                      "You can only add members from your friend list to a group."))
       ],
     );
-  }
-
-  Widget groupInvitations() {
-    return invitedClients.isEmpty
-        ? SizedBox(
-            width: double.maxFinite,
-            child: EmptyScreen(
-              expanded: true,
-              lottie: AssetManager.lottieFile(name: "empty"),
-              label: "No Invitations so far in this group",
-            ),
-          )
-        : ListView.separated(
-            shrinkWrap: true,
-            itemBuilder: (context, index) => ClientWidget(
-                  client: invitedClients[index],
-                  group: group,
-                  inviteMode: false,
-                ),
-            separatorBuilder: (context, index) => Divider(
-                  color: ColorManager.secondary.withOpacity(0.9),
-                ),
-            itemCount: invitedClients.length);
-  }
-
-  Widget tabBar() {
-    return TabBar(
-      tabs: const [
-        Tab(
-          //intentional
-          text: " Invite ",
-        ),
-        Tab(
-          text: "Invites",
-        )
-      ],
-      controller: controller,
-      dividerHeight: 1,
-      indicatorSize: TabBarIndicatorSize.label,
-      indicatorColor: ColorManager.accentColor,
-      indicatorWeight: SizeManager.small * 1.4,
-      labelStyle: TextStyle(
-          color: ColorManager.accentColor,
-          fontFamily: 'Lato',
-          fontSize: FontSizeManager.medium,
-          fontWeight: FontWeightManager.semibold),
-      unselectedLabelStyle: TextStyle(
-          color: ColorManager.secondary,
-          fontFamily: 'Lato',
-          fontSize: FontSizeManager.medium,
-          fontWeight: FontWeightManager.medium),
-    );
+    return queriedClients.isEmpty
+        ? child
+        : SingleChildScrollView(
+            child: child,
+          );
   }
 
   PreferredSizeWidget appBar() {
@@ -270,7 +211,7 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget>
                 vertical: SizeManager.medium,
                 horizontal: SizeManager.medium * 1.3),
             isDense: true,
-            hintText: "Search for client",
+            hintText: "Search Friend",
             floatingLabelBehavior: FloatingLabelBehavior.never,
             hintStyle: defaultStyle().copyWith(color: ColorManager.secondary),
             fillColor: ColorManager.tertiary,

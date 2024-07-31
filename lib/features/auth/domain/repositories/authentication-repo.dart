@@ -95,9 +95,21 @@ class AuthenticationRepo {
     return result;
   }
 
+  // m3nz7j
+
   static Future<HttpResponseModel> deleteUser(
       {required final String userId}) async {
     final result = await ApiInterface.deleteRequest(url: "deleteuser/$userId");
+    return result;
+  }
+
+
+  static Future<HttpResponseModel> updateOnlineStatus() async {
+    final result = await ApiInterface.patchRequest(
+        url: "addtransactionPin/${ClientProvider.readOnlyClient!.userId}",
+        data: {
+          "timestamp": DateTime.now().toIso8601String(),
+        });
     return result;
   }
 }
