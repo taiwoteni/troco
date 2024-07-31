@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/texts/inputs/otp-input-field.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
+import '../../../domain/entities/client.dart';
 import '../../success/views/auth-success-screen.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -237,8 +240,11 @@ class _SetTransactionPinScreenState
     log(pinResponse.body);
     final response = await AuthenticationRepo.updateUser(
         userId: LoginData.id!, body: LoginData.toClientJson());
+    final userResponse = await ApiInterface.findUser(userId: LoginData.id!);
     log(response.messageBody.toString());
-    if (!response.error) {
+    if (!response.error && !userResponse.error) {
+      AppStorage.saveClient(
+          client: Client.fromJson(json: userResponse.messageBody!["data"]));
       setState(() => registerSuccess = true);
     } else {
       ButtonProvider.stopLoading(buttonKey: key, ref: ref);

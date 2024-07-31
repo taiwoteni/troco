@@ -30,6 +30,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       // updateOnlineStatus(); 
+      checkBlockStatus();
     },);
     
   }
@@ -40,6 +41,7 @@ class _MyAppState extends State<MyApp> {
     if(onlineTimer != null){
       onlineTimer.cancel();
     }
+    blockedTimer.cancel();
     super.dispose();
   }
 
@@ -83,8 +85,9 @@ class _MyAppState extends State<MyApp> {
         final blocked = response.messageBody!["data"]["blocked"] == true;
         final currentRoute = ModalRoute.of(context);
 
-        if(blocked && currentRoute != null && currentRoute.settings.name != "blocked"){
+        if(blocked && currentRoute != null && currentRoute.settings.name != Routes.blockedScreenRoute){
           // Change to blocked screen;
+          Navigator.pushNamedAndRemoveUntil(context, Routes.blockedScreenRoute, (route) => false);
           
           
         }

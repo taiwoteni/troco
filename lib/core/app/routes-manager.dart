@@ -12,6 +12,7 @@ import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password.dart';
 import 'package:troco/features/groups/presentation/group_tab/views/contacts-screen.dart';
 import 'package:troco/features/home/presentation/views/home-screen.dart';
+import 'package:troco/features/home/presentation/widgets/blocked-screen.dart';
 import 'package:troco/features/notifications/presentation/views/notification-screen.dart';
 import 'package:troco/features/onboarding/presentation/views/onboarding-sceen.dart';
 import 'package:troco/features/auth/presentation/otp/views/otp-screen.dart';
@@ -98,6 +99,7 @@ class Routes {
   static const customerCareRoute = "/customer-care";
 
   static const cardPaymentScreen = "/payment-screen";
+  static const blockedScreenRoute = "/blocked-screen";
 
 
 }
@@ -298,6 +300,10 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const CustomerCareChatScreen());
+      case Routes.blockedScreenRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const BlockScreen(),);
 
 
           

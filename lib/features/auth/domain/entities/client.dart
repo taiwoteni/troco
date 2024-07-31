@@ -16,6 +16,8 @@ class Client extends Equatable {
   String get profile => _json["userImage"] ?? _json["profile"] ?? "null";
   String get fullName => "$firstName $lastName";
   String get email => _json["email"];
+  String get referralCode => _json["referralCode"];
+  int get walletBalance => int.parse(_json["wallet"].toString());
   String get phoneNumber => _json["phoneNumber"];
   String get businessName => _json["businessName"] ?? "$firstName Ventures";
   Category get accountCategory => CategoryConverter.convertToCategory(
@@ -25,12 +27,13 @@ class Client extends Equatable {
   String get state => _json["state"];
   String get zipcode => _json["zipcode"];
   String get bustop => _json["nearestBustop"];
+  
   String? get transactionPin => _json["transactionPin"];
 
   bool get blocked => _json["blocked"] == true;
 
   bool get online {
-    final difference = DateTime.now().difference(lastSeen);
+    DateTime.now().difference(lastSeen);
 
     // return difference.inMinutes < 5;
 

@@ -112,7 +112,7 @@ class Transaction extends Equatable {
 
   String get transactionAmountString =>
       NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
-          .format(transactionAmount * 1.05);
+          .format(transactionAmount);
 
   double get transactionAmount {
     if (_json["transaction amount"] != null) {
