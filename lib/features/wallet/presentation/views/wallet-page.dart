@@ -1,5 +1,3 @@
-// ignore_for_file: dead_code
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -237,6 +235,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
       WalletMenuItemModel(
           svgRes: AssetManager.svgFile(name: 'withdraw'),
           label: "Withdraw",
+          onClick: () => Navigator.pushNamed(context, Routes.withdrawRoute),
           color: Colors.red),
       WalletMenuItemModel(
           onClick: () => Navigator.pushNamed(context, Routes.viewContacts),
@@ -246,9 +245,13 @@ class _WalletPageState extends ConsumerState<WalletPage>
       WalletMenuItemModel(
           svgRes: AssetManager.svgFile(name: 'wallet'),
           label: "History",
+          onClick: () => Navigator.pushNamed(context, Routes.walletHistoryRoute),
           color: Colors.indigo),
       WalletMenuItemModel(
-          svgRes: AssetManager.svgFile(name: 'group'), label: "Referred")
+          svgRes: AssetManager.svgFile(name: 'group'),
+          label: "Referred",
+          onClick: () => Navigator.pushNamed(context, Routes.referredRoute),
+          )
       // WalletMenuItem(
       // svgRes: AssetManager.svgFile(name: 'withdraw')
       // label: "Transfer",

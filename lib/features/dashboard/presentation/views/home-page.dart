@@ -57,17 +57,20 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: SizedBox(
         width: double.maxFinite,
         height: double.maxFinite,
+        /// We are using the getTransactions method here because
+        /// The transactionOverview widget (The bar chart), will throw errors
+        /// if the sum total of all transactions is 0
         child: ref.watch(transactionsStreamProvider).when(
           data: (transactions) {
             this.transactions = transactions;
             return transactions.isEmpty ? emptyBody() : body();
           },
           error: (error, stackTrace) {
-            transactions = AppStorage.getAllTransactions();
+            transactions = AppStorage.getTransactions();
             return transactions.isEmpty ? emptyBody() : body();
           },
           loading: () {
-            transactions = AppStorage.getAllTransactions();
+            transactions = AppStorage.getTransactions();
             return transactions.isEmpty ? emptyBody() : body();
           },
         ),

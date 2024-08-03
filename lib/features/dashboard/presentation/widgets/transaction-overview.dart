@@ -20,7 +20,7 @@ class TransactionOverview extends ConsumerStatefulWidget {
 }
 
 class _TransactionOverviewState extends ConsumerState<TransactionOverview> {
-  final List<Transaction> transactions = AppStorage.getAllTransactions();
+  final List<Transaction> transactions = AppStorage.getTransactions();
   final defaultStyle = TextStyle(
       fontFamily: 'quicksand',
       color: ColorManager.primary,

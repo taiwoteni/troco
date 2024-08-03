@@ -243,8 +243,16 @@ class _SetTransactionPinScreenState
     final userResponse = await ApiInterface.findUser(userId: LoginData.id!);
     log(response.messageBody.toString());
     if (!response.error && !userResponse.error) {
-      AppStorage.saveClient(
-          client: Client.fromJson(json: userResponse.messageBody!["data"]));
+      final Map<dynamic, dynamic> userJson = LoginData.toClientJson();
+      userJson["wallet"] = 0;
+      userJson["referralCode"] = LoginData.referralCode;
+      await AppStorage.clear();
+      AppStorage.saveClient(client: Client.fromJson(json: userJson));
+      AppStorage.saveTransactions(transactions: []);
+      AppStorage.saveGroups(groups: []);
+      AppStorage.saveFriends(friends: []);
+      AppStorage.savePaymentMethod(paymentMethods: []);
+      AppStorage.saveCustomerCareChats(chats: []);
       setState(() => registerSuccess = true);
     } else {
       ButtonProvider.stopLoading(buttonKey: key, ref: ref);

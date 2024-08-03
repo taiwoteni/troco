@@ -12,6 +12,7 @@ import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/routes-manager.dart';
+import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../groups/domain/entities/group.dart';
 import '../../../data/models/create-transaction-data-holder.dart';
 import '../../../domain/entities/transaction.dart';
@@ -27,16 +28,24 @@ class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
 
 class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransactonProgressScreen> {
   late Group group;
+
   @override
   void initState() {
+    final bool transactionAlreadyCreated = TransactionDataHolder.id != null;
+    if(transactionAlreadyCreated){
+      group = AppStorage.getGroups().firstWhere((element) => element.groupId == TransactionDataHolder.id);
+    }
     maxValue = TransactionDataHolder.items!.length + 1;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
-          setState((){
+          if(!transactionAlreadyCreated){
+            setState((){
     group = ModalRoute.of(context)!.settings.arguments! as Group;
 
           });
+          }
+          
       createTransaction();
     });
   }
@@ -237,6 +246,5 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
     });
     return error;
   }
-
 
 }

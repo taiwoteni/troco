@@ -1,15 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
-import 'package:troco/core/cache/shared-preferences.dart';
-import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import '../../utils/enums.dart';
 
 import '../../../../core/app/routes-manager.dart';
 import '../models/settings-model.dart';
 
-List<SettingsModel> presetSettings({required BuildContext context, required final WidgetRef ref}) {
+List<SettingsModel> presetSettings(
+    {required BuildContext context, required final WidgetRef ref}) {
   return [
     //Normal Settings
     //settingType is normal by default so it can be omitted
@@ -35,10 +34,16 @@ List<SettingsModel> presetSettings({required BuildContext context, required fina
         onTap: () => Navigator.pushNamed(context, Routes.changePasswordRoute),
         iconType: IconType.svg),
     SettingsModel(
-        label: "Change Language",
-        icon: AssetManager.svgFile(name: "language"),
-        onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        label: "Share Troco",
+        icon: AssetManager.svgFile(name: "share"),
+        settingsType: SettingsType.financial,
+        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
         iconType: IconType.svg),
+    // SettingsModel(
+    //     label: "Change Language",
+    //     icon: AssetManager.svgFile(name: "language"),
+    //     onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+    //     iconType: IconType.svg),
     // SettingsModel(
     //     label: "Notification Settings",
     //     icon: AssetManager.svgFile(name: "bell"),
@@ -48,11 +53,9 @@ List<SettingsModel> presetSettings({required BuildContext context, required fina
     SettingsModel(
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
-        onTap: () async{
+        onTap: () async {
           ref.watch(paymentMethodProvider.notifier).state = [];
-          await AppStorage.clear();
-          ref.watch(homeProvider.notifier).state = 0;
-          Navigator.pushNamedAndRemoveUntil(
+          await Navigator.pushNamedAndRemoveUntil(
               context, Routes.authRoute, (route) => false);
         },
         settingsType: SettingsType.grave,

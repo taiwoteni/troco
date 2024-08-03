@@ -8,6 +8,7 @@ import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/app/value-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import '../../../../../core/components/others/spacer.dart';
@@ -23,10 +24,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) async{
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getSystemUiOverlayStyle());
       ref.read(clientProvider.notifier).state = null;
+      await AppStorage.clear();
     });
   }
 

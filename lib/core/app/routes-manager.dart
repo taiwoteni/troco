@@ -33,6 +33,9 @@ import 'package:troco/features/transactions/presentation/create-transaction/view
 import 'package:troco/features/transactions/presentation/my-transactions/views/my-transaction-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-products-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-transaction-screen.dart';
+import 'package:troco/features/wallet/presentation/views/referrals-screen.dart';
+import 'package:troco/features/wallet/presentation/views/wallet-history-screen.dart';
+import 'package:troco/features/wallet/presentation/views/withdraw-screen.dart';
 
 import '../../features/auth/presentation/login/views/login-screen.dart';
 import '../../features/auth/presentation/register/views/register-screen.dart';
@@ -100,6 +103,10 @@ class Routes {
 
   static const cardPaymentScreen = "/payment-screen";
   static const blockedScreenRoute = "/blocked-screen";
+  static const withdrawRoute = "/withdraw";
+  static const referredRoute = "/referred";
+  static const walletHistoryRoute = "/wallet-history";
+
 
 
 }
@@ -304,6 +311,18 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) => const BlockScreen(),);
+       case Routes.withdrawRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const WithdrawScreen(),);
+      case Routes.referredRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const ReferredScreen(),);
+      case Routes.walletHistoryRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const WalletHstoryScreen(),);
 
 
           

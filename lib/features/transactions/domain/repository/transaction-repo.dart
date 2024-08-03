@@ -144,6 +144,14 @@ class TransactionRepo {
     return result;
   }
 
+  static Future<HttpResponseModel> getEscrowCharges()async{
+
+    final result = await ApiInterface.getRequest(url:"getcharges");
+
+    return result;
+
+  }
+
   static Future<HttpResponseModel> getOneTransaction({
     required final String transactionId,
   }) async {
@@ -195,6 +203,7 @@ class TransactionRepo {
         body: json.encode(jsonData),
         code: result.code);
   }
+
 
   /// User Data must have been saved on Cache first before [getTransactions] can be called.
   /// Else: Error will be thrown.

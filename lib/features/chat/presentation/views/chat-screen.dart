@@ -57,7 +57,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController controller = TextEditingController();
   bool isCreator = false;
   String? path;
-  Uint8List? thumbnail;
+  Uint8List? thumbnail; 
   FileStat? fileStat;
   late List<Chat> chats;
   bool sending = false;

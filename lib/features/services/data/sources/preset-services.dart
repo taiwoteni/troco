@@ -41,12 +41,7 @@ List<SettingsModel> presetServices({required BuildContext context}) {
                 ? Routes.kycVerificationRoute
                 : Routes.kycVerificationIntroRoute),
         iconType: IconType.svg),
-    SettingsModel(
-        label: "Share Troco",
-        icon: AssetManager.svgFile(name: "share"),
-        settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
-        iconType: IconType.svg),
+    
     SettingsModel(
         label: "Terms and Conditions",
         icon: AssetManager.svgFile(name: "policy"),

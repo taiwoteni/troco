@@ -258,7 +258,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         vertical: SizeManager.small,
                         horizontal: SizeManager.medium * 1.5),
                     child: InfoText(
-                      text: "* Optional. If you were referred to Troco by a friend, type in their referral code.",
+                      text:
+                          "* Optional. If you were referred to Troco by a friend, type in their referral code.",
                       color: primaryPasswordError
                           ? Colors.red
                           : ColorManager.secondary,
@@ -316,6 +317,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         OtpData.password = LoginData.password;
         OtpData.model = result;
         LoginData.otp = result.messageBody!["data"]["verificationPin"];
+        LoginData.referralCode = result.messageBody!["data"]["referralCode"];
         log(OtpData.id!);
         verify(result: result);
       } else {

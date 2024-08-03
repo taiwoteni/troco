@@ -1,11 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/texts/inputs/otp-input-field.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
+import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -123,6 +126,9 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
   Future<void> verifyPin() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
+
+    final escrowChargesResponse = await TransactionRepo.getEscrowCharges();
+    log(escrowChargesResponse.body);
     final response = await AuthenticationRepo.verifyTransactionPin(
         transactionPin: "$pin1$pin2$pin3$pin4");
     // log(response.body.toString());
