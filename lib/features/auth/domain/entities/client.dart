@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import '../../../kyc/utils/enums.dart';
 import '../../../transactions/utils/enums.dart';
-import '../../presentation/providers/client-provider.dart';
 import '../../utils/category-converter.dart';
 
 class Client extends Equatable {
@@ -31,14 +30,14 @@ class Client extends Equatable {
 
   String? get transactionPin => _json["transactionPin"];
 
-  bool get blocked => _json["blocked"] == true;
+  bool get blocked => _json["blocked"] != true;
 
   bool get online {
-    DateTime.now().difference(lastSeen);
+    final difference = DateTime.now().difference(lastSeen);
 
-    // return difference.inMinutes < 5;
+    return difference.inMinutes < 5;
 
-    return userId == ClientProvider.readOnlyClient!.userId;
+    // return userId == ClientProvider.readOnlyClient!.userId;
   }
 
   DateTime get lastSeen {

@@ -106,7 +106,7 @@ class AuthenticationRepo {
 
   static Future<HttpResponseModel> updateOnlineStatus() async {
     final result = await ApiInterface.patchRequest(
-        url: "addtransactionPin/${ClientProvider.readOnlyClient!.userId}",
+        url: "updatelastseen/${ClientProvider.readOnlyClient!.userId}",
         data: {
           "timestamp": DateTime.now().toIso8601String(),
         });
