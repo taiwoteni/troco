@@ -135,9 +135,8 @@ class _WalletPageState extends ConsumerState<WalletPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     mediumSpacer(),
-                    Text(
-                        "${ref.watch(ClientProvider.userProvider)!.fullName} -",
-                        style: const TextStyle(
+                    const Text("My Wallet",
+                        style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Lato',
                             fontSize: FontSizeManager.medium * 0.9,
@@ -245,13 +244,14 @@ class _WalletPageState extends ConsumerState<WalletPage>
       WalletMenuItemModel(
           svgRes: AssetManager.svgFile(name: 'wallet'),
           label: "History",
-          onClick: () => Navigator.pushNamed(context, Routes.walletHistoryRoute),
+          onClick: () =>
+              Navigator.pushNamed(context, Routes.walletHistoryRoute),
           color: Colors.indigo),
       WalletMenuItemModel(
-          svgRes: AssetManager.svgFile(name: 'group'),
-          label: "Referred",
-          onClick: () => Navigator.pushNamed(context, Routes.referredRoute),
-          )
+        svgRes: AssetManager.svgFile(name: 'group'),
+        label: "Referred",
+        onClick: () => Navigator.pushNamed(context, Routes.referredRoute),
+      )
       // WalletMenuItem(
       // svgRes: AssetManager.svgFile(name: 'withdraw')
       // label: "Transfer",

@@ -11,6 +11,8 @@ import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
+import 'package:troco/features/wallet/domain/entities/referral.dart';
+import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 
 import '../../features/chat/domain/entities/chat.dart';
 import '../../features/groups/domain/entities/group.dart';
@@ -30,18 +32,16 @@ class AppStorage {
   static const String PAYMENT_METHODS_STORAGE_KEY = "paymentMethods";
   static const String KYC_STATUS_STORAGE_KEY = "kycVerificationStatus";
 
-
   static const String NOTIFICATION_STORAGE_KEY = "notifications";
   static const String TRANSACTION_STORAGE_KEY = "transactions";
   static const String SETTINGS_STORAGE_KEY = "settings";
 
+  static const String REFERRALS_STORAGE_KEY = "referrals";
+  static const String WALLET_HISTORY_STORAGE_KEY = "wallet-history";
 
   static const String CC_SESSION_KEY = "cc-session";
-  static String CC_CHAT_STORAGE_KEY =
-      "cc_chats";
-  static String UNSENT_CC_CHAT_STORAGE_KEY =
-      "cc_unsent-chats";
-  
+  static String CC_CHAT_STORAGE_KEY = "cc_chats";
+  static String UNSENT_CC_CHAT_STORAGE_KEY = "cc_unsent-chats";
 
   static String CHAT_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.chats";
@@ -164,14 +164,13 @@ class AppStorage {
     final List<dynamic> transactionsJson = json.decode(jsonString) as List;
     final transactions = <Transaction>[];
 
-    for(final json in transactionsJson){
-      if((json["pricing"] as List).isNotEmpty){
+    for (final json in transactionsJson) {
+      if ((json["pricing"] as List).isNotEmpty) {
         Transaction t = Transaction.fromJson(json: json);
-        try{
+        try {
           t.salesItem.length;
           transactions.add(t);
-        }
-        on TypeError{
+        } on TypeError {
           //Do nothing
         }
       }
@@ -187,9 +186,10 @@ class AppStorage {
     }
     // log("transactions are :$jsonString");
     final List<dynamic> transactionsJson = json.decode(jsonString) as List;
-    final transactions = transactionsJson.map((json)=> Transaction.fromJson(json: json)).toList();
+    final transactions = transactionsJson
+        .map((json) => Transaction.fromJson(json: json))
+        .toList();
 
-    
     return transactions;
   }
 
@@ -242,12 +242,15 @@ class AppStorage {
         PAYMENT_METHODS_STORAGE_KEY, json.encode(paymentMethodsJson));
   }
 
-  static VerificationTier getkycVerificationStatus(){
-    return KycConverter.convertToEnum(tier: _pref!.getString(KYC_STATUS_STORAGE_KEY)??"0");
+  static VerificationTier getkycVerificationStatus() {
+    return KycConverter.convertToEnum(
+        tier: _pref!.getString(KYC_STATUS_STORAGE_KEY) ?? "0");
   }
 
-  static Future<void> savekycVerificationStatus({required VerificationTier tier})async{
-    _pref!.setString(KYC_STATUS_STORAGE_KEY, KycConverter.convertToStringApi(tier: tier));
+  static Future<void> savekycVerificationStatus(
+      {required VerificationTier tier}) async {
+    _pref!.setString(
+        KYC_STATUS_STORAGE_KEY, KycConverter.convertToStringApi(tier: tier));
   }
 
   static Future<void> saveSettings({required Settings settings}) async {
@@ -278,7 +281,6 @@ class AppStorage {
     }
   }
 
-
   static List<Chat> getCustomerCareChats() {
     final jsonString = _pref!.getString(CC_CHAT_STORAGE_KEY);
     if (jsonString == null) {
@@ -293,13 +295,11 @@ class AppStorage {
     List<Map<dynamic, dynamic>> chatsJson =
         chats.map((e) => e.toJson()).toList();
 
-    _pref!
-        .setString(CC_CHAT_STORAGE_KEY, json.encode(chatsJson));
+    _pref!.setString(CC_CHAT_STORAGE_KEY, json.encode(chatsJson));
   }
 
   static List<Chat> getUnsentCustomerCareChats() {
-    final jsonString =
-        _pref!.getString(UNSENT_CC_CHAT_STORAGE_KEY);
+    final jsonString = _pref!.getString(UNSENT_CC_CHAT_STORAGE_KEY);
     if (jsonString == null) {
       return [];
     }
@@ -312,17 +312,15 @@ class AppStorage {
     List<Map<dynamic, dynamic>> chatsJson =
         chats.map((e) => e.toJson()).toList();
 
-    _pref!.setString(
-        UNSENT_CC_CHAT_STORAGE_KEY, json.encode(chatsJson));
+    _pref!.setString(UNSENT_CC_CHAT_STORAGE_KEY, json.encode(chatsJson));
   }
 
   static String? getCustomerCareSessionId() {
-    
     return _pref!.getString(CC_SESSION_KEY);
   }
 
-  static Future<void> saveCustomerCareSessionId({required final String sessionId})async{
-    
+  static Future<void> saveCustomerCareSessionId(
+      {required final String sessionId}) async {
     await _pref!.setString(CC_SESSION_KEY, sessionId);
   }
 
@@ -333,9 +331,7 @@ class AppStorage {
       return [];
     }
     final List<dynamic> groupsJson = json.decode(jsonString);
-    return groupsJson
-        .map((e) => Client.fromJson(json: e))
-        .toList();
+    return groupsJson.map((e) => Client.fromJson(json: e)).toList();
   }
 
   static Future<void> saveFriends({required final List<Client> friends}) async {
@@ -344,5 +340,41 @@ class AppStorage {
     _pref!.setString(FRIENDS_STORAGE_KEY, json.encode(friendsJson));
   }
 
+  static Future<void> saveReferrals(
+      {required final List<Referral> referrals}) async {
+    List<Map<dynamic, dynamic>> referralsJson =
+        referrals.map((e) => e.toJson()).toList();
 
+    _pref!.setString(REFERRALS_STORAGE_KEY, json.encode(referralsJson));
+  }
+
+  static List<Referral> getReferrals() {
+    final jsonString = _pref!.getString(REFERRALS_STORAGE_KEY);
+    if (jsonString == null) {
+      log("No friends Stored");
+      return [];
+    }
+    final List<dynamic> referralsJson = json.decode(jsonString);
+    return referralsJson.map((e) => Referral.fromJson(json: e)).toList();
+  }
+
+  static Future<void> saveWalletTransactions(
+      {required final List<WalletTransaction> walletTransactions}) async {
+    List<Map<dynamic, dynamic>> referralsJson =
+        walletTransactions.map((e) => e.toJson()).toList();
+
+    _pref!.setString(WALLET_HISTORY_STORAGE_KEY, json.encode(referralsJson));
+  }
+
+  static List<WalletTransaction> getWalletTransactions() {
+    final jsonString = _pref!.getString(WALLET_HISTORY_STORAGE_KEY);
+    if (jsonString == null) {
+      log("No friends Stored");
+      return [];
+    }
+    final List<dynamic> walletTransactionsJson = json.decode(jsonString);
+    return walletTransactionsJson
+        .map((e) => WalletTransaction.fromJson(json: e))
+        .toList();
+  }
 }

@@ -17,21 +17,30 @@ class LottieWidget extends StatelessWidget {
 
   /// The [color] is the color or tint of the lottie
   final Color? color;
-  const LottieWidget({super.key, required this.lottieRes,required this.size, this.color, this.fit, this.loop});
+  const LottieWidget(
+      {super.key,
+      required this.lottieRes,
+      required this.size,
+      this.color,
+      this.fit,
+      this.loop});
 
   @override
   Widget build(BuildContext context) {
-    return color != null? ColorFiltered(colorFilter: ColorFilter.mode(color!, BlendMode.srcIn), child: lottie()): lottie();
+    return color != null
+        ? ColorFiltered(
+            colorFilter: ColorFilter.mode(color!, BlendMode.srcIn),
+            child: lottie())
+        : lottie();
   }
 
-  Widget lottie(){
-    return Lottie.asset(
-      lottieRes, 
-      width: size.width, 
-      height: size.height,
-      fit: fit ?? BoxFit.cover,
-      animate: true,
-      repeat: loop ?? true
-    );
+  Widget lottie() {
+    return Lottie.asset(lottieRes,
+        width: size.width,
+        height: size.height,
+        fit: fit ?? BoxFit.cover,
+        animate: true, frameBuilder: (context, child, composition) {
+      return child;
+    }, repeat: loop ?? true);
   }
 }

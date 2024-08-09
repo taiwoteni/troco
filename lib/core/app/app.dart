@@ -66,9 +66,8 @@ class _MyAppState extends ConsumerState<MyApp> {
     // This way, wether a user has internet connection or not, we would be able to tell wether
     // ...he is online or not.
     userRefreshTimer = Timer.periodic(
-      const Duration(seconds: 5),
+      const Duration(seconds: 10),
       (timer) async {
-
         // We get the user to try to  know if the user is logged in
         // or not.
         final client = ClientProvider.readOnlyClient;
@@ -78,7 +77,8 @@ class _MyAppState extends ConsumerState<MyApp> {
         await updateOnlineStatus();
 
         final response = await ApiInterface.findUser(userId: client.userId);
-        log(response.body, name: "User");
+        debugPrint(response.body);
+        // log(response.body, name: "User");
 
         if (!response.error) {
           // To constantly save and update userdata
@@ -105,7 +105,8 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   Future<void> updateOnlineStatus() async {
-  final response =  await AuthenticationRepo.updateOnlineStatus();
-  log(response.body, name: "Online");
+    final response = await AuthenticationRepo.updateOnlineStatus();
+    debugPrint(response.body);
+    log(response.body, name: "Online");
   }
 }

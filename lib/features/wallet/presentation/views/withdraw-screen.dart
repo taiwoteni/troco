@@ -163,9 +163,8 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     mediumSpacer(),
-                    Text(
-                        "${ref.watch(ClientProvider.userProvider)!.fullName} -",
-                        style: const TextStyle(
+                    const Text("My Wallet",
+                        style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Lato',
                             fontSize: FontSizeManager.medium * 0.9,

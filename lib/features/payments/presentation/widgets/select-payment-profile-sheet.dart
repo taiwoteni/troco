@@ -38,7 +38,12 @@ class _SelectPaymentMethodSheetState
 
   @override
   Widget build(BuildContext context) {
-    methods = ref.watch(paymentMethodProvider).where((element) => widget.onlyAccount? element is AccountMethod:false,).toList();
+    methods = ref
+        .watch(paymentMethodProvider)
+        .where(
+          (element) => widget.onlyAccount ? element is AccountMethod : false,
+        )
+        .toList();
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
@@ -78,11 +83,11 @@ class _SelectPaymentMethodSheetState
           padding: const EdgeInsets.symmetric(vertical: SizeManager.small),
           alignment: Alignment.center,
           child: Text(
-            "Select Payment Profile",
+            "Select ${widget.onlyAccount ? "Bank Account" : "Payment Profile"}",
             style: TextStyle(
                 color: ColorManager.primary,
                 fontWeight: FontWeightManager.bold,
-                fontFamily: "Lato",
+                fontFamily: "lato",
                 fontSize: FontSizeManager.large * 0.9),
           ),
         ),
@@ -121,8 +126,7 @@ class _SelectPaymentMethodSheetState
             child: RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(style: style, children: [
-                  const TextSpan(
-                      text: "You do not have any payment profile.\n"),
+                  const TextSpan(text: "You don't have any payment profile.\n"),
                   TextSpan(
                       text: "Create One",
                       style: style.copyWith(

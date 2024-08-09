@@ -42,6 +42,14 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   }
 
   @override
+  void setState(VoidCallback fn) {
+    if (!mounted) {
+      return;
+    }
+    super.setState(fn);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final query = controller.text.trim();
     contacts = query.trim().isEmpty
@@ -55,7 +63,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
     return Scaffold(
       backgroundColor: ColorManager.background,
-      body: SizedBox.expand(
+      body: SizedBox.square(
+          dimension: double.maxFinite,
           child:
               contacts.isEmpty ? body() : SingleChildScrollView(child: body())),
     );
@@ -108,18 +117,17 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     );
   }
 
+  //gnnfbf
+
   Widget contactsList() {
     return contacts.isEmpty
-        ? Expanded(
-            child: SizedBox(
-              width: double.maxFinite,
-              child: EmptyScreen(
-                expanded: true,
-                lottie: AssetManager.lottieFile(name: "plane-cloud"),
-                label: controller.text.trim().isNotEmpty
-                    ? "No results for '${controller.text}'"
-                    : "Getting Contacts",
-              ),
+        ? Flexible(
+            child: EmptyScreen(
+              expanded: false,
+              lottie: AssetManager.lottieFile(name: "plane-cloud"),
+              label: controller.text.trim().isNotEmpty
+                  ? "No results for '${controller.text}'"
+                  : "Getting Contacts",
             ),
           )
         : ListView.separated(

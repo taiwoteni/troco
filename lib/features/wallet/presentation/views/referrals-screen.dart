@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/app/color-manager.dart';
+
+import '../../../../core/app/font-manager.dart';
+import '../../../../core/app/size-manager.dart';
+import '../../../../core/components/others/spacer.dart';
 
 class ReferredScreen extends ConsumerStatefulWidget {
   const ReferredScreen({super.key});
@@ -9,9 +14,54 @@ class ReferredScreen extends ConsumerStatefulWidget {
 }
 
 class _ReferredScreenState extends ConsumerState<ReferredScreen> {
-
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      backgroundColor: ColorManager.background,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SizeManager.large * 1.2,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            extraLargeSpacer(),
+            back(),
+            mediumSpacer(),
+            title(),
+            largeSpacer(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget title() {
+    return Text(
+      "Referred",
+      textAlign: TextAlign.left,
+      style: TextStyle(
+          color: ColorManager.accentColor,
+          fontFamily: 'lato',
+          fontSize: FontSizeManager.large * 1.2,
+          fontWeight: FontWeightManager.extrabold),
+    );
+  }
+
+  Widget back() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: IconButton(
+          onPressed: () => Navigator.pop(context),
+          style: ButtonStyle(
+              shape: const MaterialStatePropertyAll(CircleBorder()),
+              backgroundColor: MaterialStatePropertyAll(
+                  ColorManager.accentColor.withOpacity(0.2))),
+          icon: Icon(
+            Icons.close_rounded,
+            color: ColorManager.accentColor,
+            size: IconSizeManager.small,
+          )),
+    );
   }
 }

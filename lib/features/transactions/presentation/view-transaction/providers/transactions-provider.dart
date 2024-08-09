@@ -10,9 +10,6 @@ import 'package:troco/features/transactions/domain/repository/transaction-repo.d
 
 import '../../../domain/entities/transaction.dart';
 
-    int i = 0;
-
-
 /// This is a state Provider, responsible for returning and refreshing
 /// the Transaction Repo class. Inorder reload to be on the safer side when looking for changes.
 final transacionRepoProvider =
@@ -51,30 +48,23 @@ final transactionsStreamProvider = StreamProvider<List<Transaction>>(
             final _transacionsList =
                 AppStorage.getAllTransactions().map((e) => e.toJson()).toList();
 
-            if(i==0){
-              log(transactionsJson.last.toString());
-              i++;
-            }
-
-                /// This is because some transactions json have empty products.
-                /// Due to previous complications in consuming the APIs. 
+            /// This is because some transactions json have empty products.
+            /// Due to previous complications in consuming the APIs.
             final sortedTransactionsList = transactionsJson;
-            
 
             // bool sameProducts = _transacionsList.map((e) => ,)
 
             /// Then We contrast.
-            final bool transactionsDifferent =
-                json.encode(_transacionsList) != json.encode(sortedTransactionsList);
+            final bool transactionsDifferent = json.encode(_transacionsList) !=
+                json.encode(sortedTransactionsList);
 
             final valuesAreDifferent = transactionsDifferent;
 
-            List<Transaction> transactionsList = sortedTransactionsList.map((e) => Transaction.fromJson(json: e))
+            List<Transaction> transactionsList = sortedTransactionsList
+                .map((e) => Transaction.fromJson(json: e))
                 .toList();
 
             if (valuesAreDifferent) {
-              log('transactions have changed');
-
               AppStorage.saveTransactions(transactions: transactionsList);
               streamController.sink.add(transactionsList);
             }
