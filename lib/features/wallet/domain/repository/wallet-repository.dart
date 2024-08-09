@@ -10,10 +10,12 @@ class WalletRepository {
     required final AccountMethod account,
   }) async {
     final result = await ApiInterface.postRequest(
-        url: "/requestwithdrawal/${ClientProvider.readOnlyClient!.userId}",
+        url: "requestwithdrawal/${ClientProvider.readOnlyClient!.userId}",
         data: {
           "amount":amount,
-          "accountToBeSenTo":account.accountId
+          "accountName":account.accountName,
+          "accountNumber":account.accountNumber,
+          "bankName":account.bank.name,
         });
 
     return result;

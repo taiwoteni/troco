@@ -24,7 +24,6 @@ class AuthenticationRepo {
         data: {"emailOrPhone": phoneNumber, "password": password});
     return result;
   }
-  
 
   static Future<HttpResponseModel> verifyTransactionPin(
       {required final String transactionPin,
@@ -103,13 +102,10 @@ class AuthenticationRepo {
     return result;
   }
 
-
   static Future<HttpResponseModel> updateOnlineStatus() async {
     final result = await ApiInterface.patchRequest(
         url: "updatelastseen/${ClientProvider.readOnlyClient!.userId}",
-        data: {
-          "timestamp": DateTime.now().toIso8601String(),
-        });
+        data: null);
     return result;
   }
 }

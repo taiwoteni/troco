@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-widget.dart';
 
@@ -15,7 +16,8 @@ import '../../../../core/components/others/spacer.dart';
 import '../../domain/entity/payment-method.dart';
 
 class SelectPaymentProfileSheet extends ConsumerStatefulWidget {
-  const SelectPaymentProfileSheet({super.key});
+  final bool onlyAccount;
+  const SelectPaymentProfileSheet({super.key, this.onlyAccount = false});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -36,7 +38,7 @@ class _SelectPaymentMethodSheetState
 
   @override
   Widget build(BuildContext context) {
-    methods = ref.watch(paymentMethodProvider);
+    methods = ref.watch(paymentMethodProvider).where((element) => widget.onlyAccount? element is AccountMethod:false,).toList();
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
