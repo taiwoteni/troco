@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -194,12 +195,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
                             fontSize: FontSizeManager.medium * 0.9,
                             fontWeight: FontWeightManager.semibold)),
                     const Spacer(),
-                    Text("#${ClientProvider.readOnlyClient!.referralCode}",
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Quicksand',
-                            fontSize: FontSizeManager.medium * 0.8,
-                            fontWeight: FontWeightManager.regular))
+                    codeWidget()
                   ]))
         ]));
   }
@@ -243,9 +239,49 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
                     iconSize: IconSizeManager.small,
                     icon: Icon(
                       Icons.expand_circle_down,
-                      color: ColorManager.secondary,
-                      size: IconSizeManager.small,
+                      color: ColorManager.secondary.withOpacity(0.35),
+                      size: IconSizeManager.small * 1.5,
                     )))
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget codeWidget() {
+    return InkWell(
+      onTap: () {
+        FlutterClipboard.copy(ClientProvider.readOnlyClient!.referralCode)
+            .then((value) {
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              mode: ContentType.help,
+              message: "Copied Referral Code");
+        });
+      },
+      splashColor: Colors.white.withOpacity(0.8),
+      borderRadius: BorderRadius.circular(FontSizeManager.large),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+            vertical: SizeManager.small, horizontal: SizeManager.regular),
+        decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(FontSizeManager.large)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.link_rounded,
+              color: Colors.white,
+              size: IconSizeManager.small,
+            ),
+            smallSpacer(),
+            Text(ClientProvider.readOnlyClient!.referralCode,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Quicksand',
+                    fontSize: FontSizeManager.medium * 0.7,
+                    fontWeight: FontWeightManager.semibold))
           ],
         ),
       ),
@@ -332,14 +368,26 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
         final response = await WalletRepository.requestWithdrawal(
             amount: double.parse(amountController.text),
             account: selectedAccount!);
-        log(response.body, name: "Withdraw");
+        debugPrint(response.body);
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
 
         if (response.error) {
           SnackbarManager.showBasicSnackbar(
               context: context,
               mode: ContentType.failure,
-              message: "Failed to withdraw amount.");
+              message: (response.messageBody?["message"]
+                          .toString()
+                          .toLowerCase()
+                          .contains("minimum") ??
+                      false)
+                  ? "Cannot withdraw until account has 5000 NGN"
+                  : (response.messageBody?["message"]
+                              .toString()
+                              .toLowerCase()
+                              .contains("insufficient wallet funds") ??
+                          false)
+                      ? "Insufficient funds"
+                      : "Failed to withdraw amount.");
           ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
         } else {
           SnackbarManager.showBasicSnackbar(

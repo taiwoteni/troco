@@ -25,15 +25,19 @@ class Transaction extends Equatable {
   String get transactionName =>
       _json["transaction name"] ?? _json["transactionName"];
 
-  Group get group{
-    return AppStorage.getGroups().firstWhere((element) => element.groupId ==transactionId,);
+  Group get group {
+    return AppStorage.getGroups().firstWhere(
+      (element) => element.groupId == transactionId,
+    );
   }
 
   DateTime get transactionTime =>
       DateTime.parse(_json["transaction time"] ?? _json["DateOfWork"]);
 
   DateTime get creationTime => DateTime.parse(_json["creation time"] ??
-      _json["createdTime"] ?? _json["timestamp"] ?? _json["createdAt"]??
+      _json["createdTime"] ??
+      _json["timestamp"] ??
+      _json["createdAt"] ??
       DateTime.now().toIso8601String());
 
   String get transactionId => _json["transaction id"] ?? _json["_id"];
@@ -114,6 +118,18 @@ class Transaction extends Equatable {
       NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
           .format(transactionAmount);
 
+  String get escrowChargesString =>
+      NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
+          .format(escrowCharges);
+
+  double get escrowCharges {
+    double amount = salesItem
+        .map((e) => e.quantity * e.escrowCharge)
+        .toList()
+        .fold(0, (previousValue, currentPrice) => previousValue + currentPrice);
+    return amount;
+  }
+
   double get transactionAmount {
     if (_json["transaction amount"] != null) {
       return (_json["transaction amount"]);
@@ -123,15 +139,26 @@ class Transaction extends Equatable {
       return 0;
     }
 
-    int amount = salesItem
-        .map((e) => e.quantity * e.price)
+    double amount = salesItem
+        .map((e) => e.quantity * e.finalPrice)
         .toList()
         .fold(0, (previousValue, currentPrice) => previousValue + currentPrice);
-    return amount.toDouble();
+    return amount;
   }
 
   Map<dynamic, dynamic> toJson() {
     return _json;
+  }
+
+  Transaction copyWith({
+    final TransactionStatus? transactionStatus,
+  }) {
+    final old = toJson();
+    if (transactionStatus != null) {
+      old["status"] = transactionStatus.name.toLowerCase();
+    }
+
+    return Transaction.fromJson(json: old);
   }
 
   @override

@@ -13,6 +13,7 @@ import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/settings/presentation/settings-page/providers/settings-provider.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/receipt-widget.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -30,6 +31,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
+      kReceiptViewInsetsTop = MediaQuery.of(context).viewInsets.top;
+      kReceiptHorizontalMargin = MediaQuery.of(context).size.width * .09;
+      kReceiptWatermarkWidth = MediaQuery.of(context).size.width * 4;
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getSplashUiOverlayStyle());
       await Future.delayed(const Duration(seconds: 4));
@@ -40,7 +44,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       await Future.delayed(const Duration(seconds: 5));
       final isLoggedIn = ClientProvider.readOnlyClient != null;
       Navigator.pushReplacementNamed(
-          context, isLoggedIn ? (ref.watch(settingsProvider).autoLogout? Routes.welcomeBackRoute:(ref.watch(clientProvider)!.blocked? Routes.blockedScreenRoute:Routes.homeRoute)) : Routes.onBoardingRoute);
+          context,
+          isLoggedIn
+              ? (ref.watch(settingsProvider).autoLogout
+                  ? Routes.welcomeBackRoute
+                  : (ref.watch(clientProvider)!.blocked
+                      ? Routes.blockedScreenRoute
+                      : Routes.homeRoute))
+              : Routes.onBoardingRoute);
     });
   }
 
@@ -86,7 +97,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           alignment: Alignment.bottomCenter,
           padding: const EdgeInsets.only(bottom: SizeManager.extralarge * 1.5),
           child: Transform.translate(
-            offset: Offset(-(SizeManager.extralarge/1.5), 0),
+            offset: Offset(-(SizeManager.extralarge / 1.5), 0),
             child: LottieWidget(
               //duration of this lottie is 3 secs
               lottieRes: AssetManager.lottieFile(name: 'loading-label'),

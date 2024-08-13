@@ -26,12 +26,15 @@ import 'package:troco/features/auth/presentation/providers/client-provider.dart'
 import 'package:troco/features/auth/presentation/welcome-back/views/pin-entry-screen.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
+import 'package:troco/features/groups/domain/repositories/friend-repository.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 import 'package:troco/features/kyc/utils/enums.dart';
 import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import 'package:troco/features/settings/utils/enums.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
+import 'package:troco/features/wallet/domain/repository/wallet-repository.dart';
+import 'package:troco/features/wallet/presentation/providers/referrals-provider.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -403,7 +406,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
   }
 
-  Future<void> saveGroupsAndChats({required final String userId}) async {
+  Future<void> saveCollections({required final String userId}) async {
     final newResponse = await ApiInterface.findUser(userId: userId);
     if (newResponse.error) {
       log(newResponse.body.toString());
@@ -427,6 +430,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             groupId: group["_id"]);
       }
     }
+
+    final friends = await FriendRepository().getFriends();
+
+    AppStorage.saveFriends(friends: friends);
   }
 
   /// User data must have been saved in Cache
@@ -434,6 +441,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.read(transacionRepoProvider.notifier).state = TransactionRepo();
     final transactions = await TransactionRepo().getTransactions();
     AppStorage.saveTransactions(transactions: transactions);
+
+    ref.read(walletProvider.notifier).state = WalletRepository();
+    final referrals = await WalletRepository().getReferrals();
+    AppStorage.saveReferrals(referrals: referrals);
   }
 
   PreferredSizeWidget appBar() {
@@ -511,15 +522,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (map["kycTier"] <= map["kyccurrentTier"]) {
       //To save kyc status, if currently verifying or not.
       AppStorage.savekycVerificationStatus(
-          tier: KycConverter.convertToEnum(tier: map["kyccurrentTier"].toString()));
-    }
-    else{
-      AppStorage.savekycVerificationStatus(
-          tier: VerificationTier.None);
+          tier: KycConverter.convertToEnum(
+              tier: map["kyccurrentTier"].toString()));
+    } else {
+      AppStorage.savekycVerificationStatus(tier: VerificationTier.None);
     }
 
     // We have to locally store all the groups and it's respective chats.
-    await saveGroupsAndChats(userId: map["_id"]);
+    await saveCollections(userId: map["_id"]);
     // We have to save transactions
     await saveTransactions();
   }

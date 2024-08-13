@@ -144,12 +144,10 @@ class TransactionRepo {
     return result;
   }
 
-  static Future<HttpResponseModel> getEscrowCharges()async{
-
-    final result = await ApiInterface.getRequest(url:"getcharges");
+  static Future<HttpResponseModel> getEscrowCharges() async {
+    final result = await ApiInterface.getRequest(url: "getcharges");
 
     return result;
-
   }
 
   static Future<HttpResponseModel> getOneTransaction({
@@ -181,7 +179,7 @@ class TransactionRepo {
     // log(transactionsJson.toString());
 
     final List<String> transactionsId = ((transactionsJson ?? []) as List)
-    .map((e) => e["_id"].toString())
+        .map((e) => e["_id"].toString())
         .toList();
 
     List<Map<dynamic, dynamic>> jsonData = [];
@@ -204,7 +202,6 @@ class TransactionRepo {
         code: result.code);
   }
 
-
   /// User Data must have been saved on Cache first before [getTransactions] can be called.
   /// Else: Error will be thrown.
   Future<List<Transaction>> getTransactions() async {
@@ -216,7 +213,8 @@ class TransactionRepo {
     } else {
       final transactionsJson = (json.decode(response.body) as List);
 
-      final transactions = transactionsJson.map((e) => Transaction.fromJson(json: e)).toList();
+      final transactions =
+          transactionsJson.map((e) => Transaction.fromJson(json: e)).toList();
 
       // for (final json in transactionsJson) {
       //   if ((json["pricing"] as List).isNotEmpty) {
@@ -250,11 +248,15 @@ class TransactionRepo {
     required final Group group,
   }) async {
     var parsedfile = File(driver.plateNumber);
+    var parsedFile2 = File(driver.backPlateNumber);
     var stream = ByteStream(parsedfile.openRead());
+    var stream2 = ByteStream(parsedFile2.openRead());
     var length = await parsedfile.length();
+    var length2 = await parsedFile2.length();
+
     final file = MultipartFile("FrontPlateNumber", stream, length,
         filename: Path.basename(driver.plateNumber.toString()));
-    final file2 = MultipartFile("BackPlateNumber", stream, length,
+    final file2 = MultipartFile("BackPlateNumber", stream2, length2,
         filename: Path.basename(driver.backPlateNumber.toString()));
 
     final multiparts = <MultiPartModel>[];
@@ -308,14 +310,13 @@ class TransactionRepo {
     required final Transaction transaction,
     required final List<String> itemIds,
   }) async {
-    final response = await ApiInterface.postRequest(
-        url: "returntransaction",
-        data: {
-          "transactionId":transaction.transactionId,
-          "comments":"Not Satisfied With Products",
-          "productIds":itemIds,
-          "userId":ClientProvider.readOnlyClient!.userId
-        });
+    final response =
+        await ApiInterface.postRequest(url: "returntransaction", data: {
+      "transactionId": transaction.transactionId,
+      "comments": "Not Satisfied With Products",
+      "productIds": itemIds,
+      "userId": ClientProvider.readOnlyClient!.userId
+    });
 
     return response;
   }

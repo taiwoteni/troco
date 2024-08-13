@@ -30,12 +30,14 @@ class Client extends Equatable {
 
   String? get transactionPin => _json["transactionPin"];
 
-  bool get blocked => _json["blocked"] != true;
+  bool get blocked => _json["blocked"] == true;
+
+  bool get verified => kycTier != VerificationTier.None;
 
   bool get online {
     final difference = DateTime.now().difference(lastSeen);
 
-    return difference.inMinutes < 5;
+    return difference.inMinutes < 2;
 
     // return userId == ClientProvider.readOnlyClient!.userId;
   }

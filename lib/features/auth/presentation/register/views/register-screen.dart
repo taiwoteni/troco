@@ -303,12 +303,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     // if user had created this account but is still verfying
     if (OtpData.isVerifying()) {
+      debugPrint(LoginData.otp);
       verify(result: OtpData.model!);
     } else {
       final result = await AuthenticationRepo.registerUser(
           email: LoginData.email!,
           phoneNumber: LoginData.phoneNumber!,
-          password: LoginData.password!);
+          password: LoginData.password!,
+          referralCode: LoginData.referralCode);
       log(result.body);
 
       if (!result.error) {
@@ -320,10 +322,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         LoginData.otp = result.messageBody!["data"]["verificationPin"];
         LoginData.referralCode = result.messageBody!["data"]["referralCode"];
         log(OtpData.id!);
+        debugPrint(LoginData.otp);
         verify(result: result);
       } else {
         log(result.code.toString());
-        print(result.body);
+        debugPrint(result.body);
         if (result.messageBody!["error"].toString().contains("duplicate")) {
           setState(() {
             if (result.messageBody!["error"]

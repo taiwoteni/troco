@@ -37,7 +37,7 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
   @override
   Widget build(BuildContext context) {
     listenToChanges();
-    return transactions.isEmpty ? emptyBody() : body();
+    return body(transactions: transactions);
   }
 
   Future<void> listenToChanges() async {
@@ -56,47 +56,41 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
   }
 
   Widget emptyBody() {
-    return Container(
-      alignment: Alignment.center,
-      child: Column(
-        children: [
-          extraLargeSpacer(),
-          back(),
-          mediumSpacer(),
-          Align(alignment: Alignment.centerLeft, child: title()),
-          if (searching) ...[largeSpacer(), mediumSpacer(), searchBarWidget],
-          EmptyScreen(
-            lottie: AssetManager.lottieFile(name: "empty-transactions"),
-            scale: 1.5,
-            label: "You do not have any transactions.",
-            expanded: true,
-          ),
-        ],
+    return Flexible(
+      child: EmptyScreen(
+        expanded: false,
+        lottie: AssetManager.lottieFile(
+            name: controller.text.trim().isNotEmpty
+                ? "no-search-results"
+                : "empty-transaction"),
+        forward: true,
+        xIndex: controller.text.trim().isEmpty ? 1 : 0.25,
+        label: controller.text.trim().isEmpty
+            ? "You don't have any transaction"
+            : "No search results for '${controller.text.toString().trim()}'",
       ),
     );
   }
 
-  Widget body() {
-    return SizedBox.expand(
-      child: SingleChildScrollView(
-        // padding: const EdgeInsets.symmetric(horizontal: SizeManager.large * 1.2),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            extraLargeSpacer(),
-            back(),
-            mediumSpacer(),
-            title(),
-            largeSpacer(),
-            mediumSpacer(),
-            searchBarWidget,
-            largeSpacer(),
-            searching ? querySearchList() : const MyTransactionsList(),
-            mediumSpacer(),
-          ],
-        ),
-      ),
+  Widget body({required final List<Transaction> transactions}) {
+    final child = Column(
+      children: [
+        extraLargeSpacer(),
+        back(),
+        mediumSpacer(),
+        Align(alignment: Alignment.centerLeft, child: title()),
+        if (this.transactions.isNotEmpty) ...[
+          extraLargeSpacer(),
+          searchBarWidget
+        ],
+        if (transactions.isNotEmpty) querySearchList() else emptyBody(),
+      ],
     );
+    return transactions.isEmpty
+        ? child
+        : SingleChildScrollView(
+            child: child,
+          );
   }
 
   Widget querySearchList() {

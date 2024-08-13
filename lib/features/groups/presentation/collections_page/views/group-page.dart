@@ -70,7 +70,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
                   pinned: true,
                   delegate:
                       _SliverTabBarDelegate(child: tabBar(), context: context)),
-              isGroupsTab? const CollectionsTab(): const FriendsTab(),
+              isGroupsTab ? const CollectionsTab() : const FriendsTab(),
             ],
           )),
       floatingActionButton: Padding(
@@ -127,7 +127,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
           SearchBarWidget(
               label: "Search",
               onChanged: (v) {
-                ref.watch(groupSearchProvider.notifier).state = v;
+                ref.watch(collectionsSearchProvider.notifier).state = v;
               }),
           const Spacer(),
         ],
@@ -154,8 +154,8 @@ class _GroupPageState extends ConsumerState<GroupPage>
                   text: "Friends",
                 )
               ],
-              onTap: (value){
-                setState(()=> isGroupsTab=value==0);
+              onTap: (value) {
+                setState(() => isGroupsTab = value == 0);
               },
               dividerHeight: 0,
               indicatorColor: Colors.white,
@@ -196,7 +196,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
         itemCount: groups.length);
   }
 
-  Future<void> addFriends()async{
+  Future<void> addFriends() async {
     Navigator.pushNamed(context, Routes.viewContacts);
   }
 

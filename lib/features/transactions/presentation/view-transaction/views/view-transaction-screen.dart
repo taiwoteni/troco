@@ -47,7 +47,8 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     controller = PageController();
     salesItems = widget.transaction.salesItem;
     transaction = widget.transaction;
-    log(transaction.toJson().toString());
+    debugPrint(
+        !transaction.hasDriver ? "null" : transaction.driver.companyName);
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
       (timeStamp) {

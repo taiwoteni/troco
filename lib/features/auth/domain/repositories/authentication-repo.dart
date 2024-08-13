@@ -38,11 +38,13 @@ class AuthenticationRepo {
       {required final String email,
       required final String phoneNumber,
       required final String password,
+      final String? referralCode,
       Map<String, String>? headers}) async {
     final body = {
       "email": email,
       "password": password,
       'phoneNumber': phoneNumber,
+      'referralCode': referralCode
     };
     final result = await ApiInterface.postRequest(
         url: "createUser", okCode: 200, data: body, headers: headers);
@@ -104,7 +106,7 @@ class AuthenticationRepo {
 
   static Future<HttpResponseModel> updateOnlineStatus() async {
     final result = await ApiInterface.patchRequest(
-        url: "updatelastseen/${ClientProvider.readOnlyClient!.userId}",
+        url: "getlastseen/${ClientProvider.readOnlyClient!.userId}",
         data: null);
     return result;
   }

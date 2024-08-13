@@ -4,16 +4,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/utils/phone-number-converter.dart';
 import 'package:troco/features/groups/presentation/friends_tab/widgets/contact-widget.dart';
+import 'package:troco/features/groups/utils/enums.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/others/spacer.dart';
+import '../../../../auth/domain/entities/client.dart';
+import '../../../../notifications/presentation/widgets/notification-menu-button.dart';
 import '../../collections_page/widgets/empty-screen.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
@@ -27,6 +31,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   late List<Contact> contacts, allContacts;
   final TextEditingController controller = TextEditingController();
   late Widget searchBar;
+  ContactsFilter filter = ContactsFilter.Unregistered;
 
   @override
   void initState() {
@@ -82,6 +87,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           title(),
           largeSpacer(),
           searchBar,
+          mediumSpacer(),
+          menuButtons(),
           contactsList(),
         ],
       ),
@@ -119,8 +126,36 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
   //gnnfbf
 
+  Widget menuButtons() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          ...ContactsFilter.values.map((filter) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ToggleWidget(
+                    selected: filter == this.filter,
+                    onChecked: () => setState(() => this.filter = filter),
+                    label: filter.name.toLowerCase()),
+                regularSpacer(),
+                smallSpacer(),
+              ],
+            );
+          })
+        ],
+      ),
+    );
+  }
+
   Widget contactsList() {
-    return contacts.isEmpty
+    final filteredContacts = contacts
+        .where((element) => filter == ContactsFilter.Unregistered
+            ? !isRegistered(contact: element)
+            : isRegistered(contact: element))
+        .toList();
+    return filteredContacts.isEmpty
         ? Flexible(
             child: EmptyScreen(
               expanded: false,
@@ -135,9 +170,10 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) => ContactWidget(
-                key: ObjectKey(contacts[index]), contact: contacts[index]),
+                key: ObjectKey(filteredContacts[index]),
+                contact: filteredContacts[index]),
             separatorBuilder: (context, index) {
-              if (index == contacts.length - 1) {
+              if (index == filteredContacts.length - 1) {
                 return const Gap(SizeManager.bottomBarHeight);
               } else {
                 return Divider(
@@ -146,7 +182,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 );
               }
             },
-            itemCount: contacts.length);
+            itemCount: filteredContacts.length);
   }
 
   Future<bool> requestPermissions() async {
@@ -156,19 +192,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
   Future<void> initiatePermissions() async {
     if (await requestPermissions()) {
-      final phoneNumbers = AppStorage.getFriends()
-          .map(
-            (e) => e.phoneNumber,
-          )
-          .toList();
-      Iterable<Contact> contacts =
-          (await ContactsService.getContacts()).where((element) =>
-              element.phones != null &&
-              element.phones!.every(
-                (phone) => !phoneNumbers.contains(
-                    PhoneNumberConverter.convertToFull(
-                        phone.value!.replaceAll(" ", ""))),
-              ));
+      Iterable<Contact> contacts = (await ContactsService.getContacts())
+          .where((element) => element.phones != null);
 
       setState(() {
         this.contacts = contacts.toList();
@@ -219,5 +244,18 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         borderSide:
             BorderSide(color: ColorManager.themeColor, style: BorderStyle.none),
         borderRadius: BorderRadius.circular(SizeManager.large));
+  }
+
+  bool isRegistered({required final Contact contact}) {
+    final phoneNumbers = (contact.phones ?? [])
+        .map(
+          (e) => PhoneNumberConverter.convertToFull((e.value ?? "00000000000")),
+        )
+        .toList();
+    final trocoUser = AppStorage.getAllUsersPhone().any((element) =>
+        phoneNumbers
+            .contains(PhoneNumberConverter.convertToFull(element.phoneNumber)));
+
+    return trocoUser;
   }
 }

@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../chat/domain/entities/chat.dart';
@@ -22,12 +22,12 @@ class GroupList extends ConsumerStatefulWidget {
 class _GroupListState extends ConsumerState<GroupList> {
   @override
   Widget build(BuildContext context) {
-    final groups = ref.watch(groupSearchProvider).trim().isEmpty
+    final groups = ref.watch(collectionsSearchProvider).trim().isEmpty
         ? widget.groups
         : widget.groups
             .where(
               (element) => element.groupName.toLowerCase().trim().contains(
-                  ref.watch(groupSearchProvider).trim().toLowerCase()),
+                  ref.watch(collectionsSearchProvider).trim().toLowerCase()),
             )
             .toList();
 
@@ -49,9 +49,18 @@ class _GroupListState extends ConsumerState<GroupList> {
     });
 
     return groups.isEmpty
-        ? const SliverFillRemaining(
+        ? SliverFillRemaining(
             child: EmptyScreen(
-              label: "No Business Groups.\nCreate a Business Group",
+              scale: ref.watch(collectionsSearchProvider).isEmpty ? 1.5 : 1,
+              xIndex: ref.watch(collectionsSearchProvider).isEmpty ? 1 : 0.25,
+              forward: true,
+              lottie: AssetManager.lottieFile(
+                  name: ref.watch(collectionsSearchProvider).isEmpty
+                      ? "create-group"
+                      : "no-search-results"),
+              label: ref.watch(collectionsSearchProvider).isEmpty
+                  ? "Create a group to speak with your buyer"
+                  : "No Search result for '${ref.watch(collectionsSearchProvider)}'",
             ),
           )
         : SliverList.builder(

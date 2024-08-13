@@ -1,22 +1,24 @@
 import 'dart:developer';
 
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
-import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/customer%20care/domain/repositories/customer-care-repository.dart';
+import 'package:troco/features/home/presentation/providers/blocked-provider.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
+import 'package:troco/features/home/presentation/widgets/blocked-screen.dart';
 import 'package:troco/features/notifications/domain/entities/notification.dart'
     as n;
 import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
-import '../../../auth/utils/phone-number-converter.dart';
+import '../../../../core/api/data/repositories/api-interface.dart';
+import '../../../../core/app/asset-manager.dart';
+import '../../../auth/domain/entities/client.dart';
 import '../../../transactions/utils/enums.dart';
+import '../../../wallet/presentation/views/wallet-page.dart';
+import '../../data/models/home-item-model.dart';
 import '../widgets/bottom-bar.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -27,16 +29,33 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final pages = homeItems;
+  var pages = List.of(homeItems);
+  bool showBlockedScreen = ClientProvider.readOnlyClient?.blocked ?? false;
   @override
   void initState() {
-    if(ClientProvider.readOnlyClient!.accountCategory == Category.Personal){
-      pages.remove(1);
+    if (ClientProvider.readOnlyClient!.accountCategory == Category.Personal) {
+      pages.removeAt(1);
+    } else {
+      if (homeItems.length == 4) {
+        homeItems.insert(
+          1,
+          HomeItemModel(
+              icon: AssetManager.svgFile(name: 'wallet'),
+              label: "Wallet",
+              page: const WalletPage()),
+        );
+      }
     }
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
       final result = await NotificationRepo.getAllNotifications();
+      debugPrint(AppStorage.getReferrals()
+          .map(
+            (e) => e.toJson(),
+          )
+          .toList()
+          .toString());
 
       if (!result.error) {
         final notifs = result.messageListBody as List;
@@ -67,12 +86,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       }
 
-      getFriends();
+      saveAllUsersPhones();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    listenToBlockedChanges();
     return PopScope(
       canPop: ref.watch(homeProvider) == 0,
       onPopInvoked: (didPop) {
@@ -86,58 +106,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         resizeToAvoidBottomInset: false,
         backgroundColor: ColorManager.background,
         extendBody: true,
-        body: Padding(
-          padding: const EdgeInsets.only(
-            bottom: SizeManager.regular,
-          ),
-          child: pages[ref.watch(homeProvider)].page,
-        ),
-        bottomNavigationBar: const BottomBar(),
+        body: !showBlockedScreen
+            ? const BlockScreen()
+            : Padding(
+                padding: const EdgeInsets.only(
+                  bottom: SizeManager.regular,
+                ),
+                child: pages[ref.watch(homeProvider)].page,
+              ),
+        bottomNavigationBar: !showBlockedScreen
+            ? null
+            : BottomBar(
+                pages: pages,
+              ),
       ),
     );
   }
 
-  Future<bool> requestPermissions() async {
-    PermissionStatus status = await Permission.contacts.request();
-    return status.isGranted;
-  }
+  Future<void> saveAllUsersPhones() async {
+    final response = await ApiInterface.searchUser(query: "");
+    if (!response.error) {
+      final users = response.messageBody!["data"] as List;
+      final allUsersPhone = users.map(
+        (e) {
+          final json = e as Map<dynamic, dynamic>;
+          e.remove("groups");
+          e.remove("transactions");
 
-  Future<void> getFriends() async {
-    if (await requestPermissions()) {
-      final contacts = (await ContactsService.getContacts())
-          .where(
-            (element) => element.phones != null,
-          )
-          .toList();
-      final phoneNumbers = contacts
-          .expand(
-            (element) => element.phones!.map(
-              (e) => PhoneNumberConverter.convertToFull(
-                  e.value!.replaceAll(" ", "")),
-            ),
-          )
-          .toList();
-
-      final response = await ApiInterface.searchUser(query: "");
-      if (!response.error) {
-        log(response.messageBody!["data"].toString());
-        final usersList = (response.messageBody!["data"] as List)
-            .map(
-              (e) => Client.fromJson(json: e),
-            )
-            .where(
-              (element) =>
-                  element.userId != ClientProvider.readOnlyClient!.userId,
-            )
-            .toList();
-
-        AppStorage.saveFriends(
-            friends: usersList
-                .where(
-                  (element) => phoneNumbers.contains(element.phoneNumber),
-                )
-                .toList());
-      }
+          return Client.fromJson(json: json);
+        },
+      ).toList();
+      AppStorage.saveAllUsersPhone(phones: allUsersPhone);
     }
   }
+
+  void listenToBlockedChanges() {
+    ref.listen(
+      blockedStreamProvider,
+      (previous, next) {
+        next.when(
+          data: (data) => setState(() {
+            showBlockedScreen = data;
+          }),
+          error: (error, stackTrace) => null,
+          loading: () => null,
+        );
+      },
+    );
+  }
+
+  //5781e0
 }

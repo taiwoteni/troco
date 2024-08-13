@@ -43,6 +43,8 @@ class AppStorage {
   static String CC_CHAT_STORAGE_KEY = "cc_chats";
   static String UNSENT_CC_CHAT_STORAGE_KEY = "cc_unsent-chats";
 
+  static String ALL_USERS_PHONE = "all-users-phone";
+
   static String CHAT_STORAGE_KEY({required String groupId}) =>
       "groups.$groupId.chats";
   static String UNSENT_CHAT_STORAGE_KEY({required String groupId}) =>
@@ -376,5 +378,25 @@ class AppStorage {
     return walletTransactionsJson
         .map((e) => WalletTransaction.fromJson(json: e))
         .toList();
+  }
+
+  static Future<void> saveAllUsersPhone(
+      {required final List<Client> phones}) async {
+    _pref!.setString(
+        ALL_USERS_PHONE,
+        json.encode(phones
+            .map(
+              (e) => e.toJson(),
+            )
+            .toList()));
+  }
+
+  static List<Client> getAllUsersPhone() {
+    final jsonString = _pref!.getString(ALL_USERS_PHONE);
+    if (jsonString == null) {
+      return [];
+    }
+    final List<dynamic> groupsJson = json.decode(jsonString);
+    return groupsJson.map((e) => Client.fromJson(json: e)).toList();
   }
 }

@@ -65,6 +65,8 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
               mediumSpacer(),
               driverName(),
               mediumSpacer(),
+              companyName(),
+              mediumSpacer(),
               phoneNumber(),
               mediumSpacer(),
               destination(),
@@ -385,7 +387,9 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
     setState(() => loading = false);
-    if (formKey.currentState!.validate() && plateNumber != null && backPlateNumber != null) {
+    if (formKey.currentState!.validate() &&
+        plateNumber != null &&
+        backPlateNumber != null) {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       formKey.currentState!.save();
       DriverDetailsHolder.backPlateNumber = backPlateNumber!;

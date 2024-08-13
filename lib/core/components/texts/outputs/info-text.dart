@@ -9,10 +9,12 @@ class InfoText extends StatelessWidget {
   final FontWeight? fontWeight;
   final void Function()? onPressed;
   final Alignment? alignment;
+  final bool underline;
   const InfoText(
       {super.key,
       this.fontSize,
       required this.text,
+      this.underline = false,
       this.alignment,
       this.onPressed,
       this.fontWeight,
@@ -30,6 +32,8 @@ class InfoText extends StatelessWidget {
               ? TextAlign.center
               : TextAlign.left,
           style: TextStyle(
+            decoration: underline ? TextDecoration.underline : null,
+            decorationColor: color ?? ColorManager.themeColor,
             color: color ?? ColorManager.themeColor,
             fontFamily: 'Lato',
             fontWeight: fontWeight ?? FontWeightManager.medium,

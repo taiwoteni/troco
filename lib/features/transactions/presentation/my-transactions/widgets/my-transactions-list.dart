@@ -27,6 +27,7 @@ class _MyTransactionsListState extends ConsumerState<MyTransactionsList> {
       fontWeight: FontWeightManager.bold);
 
   List<Transaction> transactions = AppStorage.getAllTransactions();
+
   @override
   void initState() {
     transactions.sort(

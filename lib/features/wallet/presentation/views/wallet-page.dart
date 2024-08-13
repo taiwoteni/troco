@@ -1,3 +1,5 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -166,12 +168,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
                             fontSize: FontSizeManager.medium * 0.9,
                             fontWeight: FontWeightManager.semibold)),
                     const Spacer(),
-                    Text("#${ClientProvider.readOnlyClient!.referralCode}",
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Quicksand',
-                            fontSize: FontSizeManager.medium * 0.8,
-                            fontWeight: FontWeightManager.regular))
+                    codeWidget()
                   ]))
         ]));
   }
@@ -225,6 +222,46 @@ class _WalletPageState extends ConsumerState<WalletPage>
                                 fontSize: FontSizeManager.small * 0.85))
                       ])));
         });
+  }
+
+  Widget codeWidget() {
+    return InkWell(
+      onTap: () {
+        FlutterClipboard.copy(ClientProvider.readOnlyClient!.referralCode)
+            .then((value) {
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              mode: ContentType.help,
+              message: "Copied Referral Code");
+        });
+      },
+      splashColor: Colors.white.withOpacity(0.8),
+      borderRadius: BorderRadius.circular(FontSizeManager.large),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+            vertical: SizeManager.small, horizontal: SizeManager.regular),
+        decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(FontSizeManager.large)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.link_rounded,
+              color: Colors.white,
+              size: IconSizeManager.small,
+            ),
+            smallSpacer(),
+            Text(ClientProvider.readOnlyClient!.referralCode,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Quicksand',
+                    fontSize: FontSizeManager.medium * 0.7,
+                    fontWeight: FontWeightManager.semibold))
+          ],
+        ),
+      ),
+    );
   }
 
   List<WalletMenuItemModel> menuItems() {

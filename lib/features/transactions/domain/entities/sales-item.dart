@@ -16,6 +16,13 @@ abstract class SalesItem extends Equatable {
       NumberFormat.currency(locale: "en_NG", decimalDigits: 2, symbol: "")
           .format(price);
 
+  double get finalPrice => double.parse(toJson()["finalPrice"].toString());
+
+  double get escrowCharge => double.parse(toJson()["escrowCharges"].toString());
+
+  double get escrowPercentage =>
+      double.parse(toJson()["escrowPercentage"].toString());
+
   Map<dynamic, dynamic> toJson();
 
   @override

@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -26,26 +27,27 @@ class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
       _CreateTransactonProgressScreenState();
 }
 
-class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransactonProgressScreen> {
+class _CreateTransactonProgressScreenState
+    extends ConsumerState<CreateTransactonProgressScreen> {
   late Group group;
 
   @override
   void initState() {
     final bool transactionAlreadyCreated = TransactionDataHolder.id != null;
-    if(transactionAlreadyCreated){
-      group = AppStorage.getGroups().firstWhere((element) => element.groupId == TransactionDataHolder.id);
+    if (transactionAlreadyCreated) {
+      group = AppStorage.getGroups()
+          .firstWhere((element) => element.groupId == TransactionDataHolder.id);
     }
     maxValue = TransactionDataHolder.items!.length + 1;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
-          if(!transactionAlreadyCreated){
-            setState((){
-    group = ModalRoute.of(context)!.settings.arguments! as Group;
+      if (!transactionAlreadyCreated) {
+        setState(() {
+          group = ModalRoute.of(context)!.settings.arguments! as Group;
+        });
+      }
 
-          });
-          }
-          
       createTransaction();
     });
   }
@@ -224,7 +226,7 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
           transactionId: transaction.transactionId,
           group: group,
           item: item);
-      log("Ended process ${i + 1} :${response.body}");
+      debugPrint("Ended process ${i + 1} :${response.body}");
 
       if (!response.error) {
         TransactionDataHolder.items!.removeAt(0);
@@ -242,9 +244,8 @@ class _CreateTransactonProgressScreenState extends ConsumerState<CreateTransacto
       }
     }
     setState(() {
-      error = successful == items.length - 1;
+      error = successful != items.length - 1;
     });
-    return error;
+    return successful != items.length - 1;
   }
-
 }

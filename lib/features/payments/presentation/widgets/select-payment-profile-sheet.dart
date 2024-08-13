@@ -41,7 +41,7 @@ class _SelectPaymentMethodSheetState
     methods = ref
         .watch(paymentMethodProvider)
         .where(
-          (element) => widget.onlyAccount ? element is AccountMethod : false,
+          (element) => widget.onlyAccount ? element is AccountMethod : true,
         )
         .toList();
     return Container(

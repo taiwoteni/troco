@@ -106,9 +106,6 @@ class Routes {
   static const withdrawRoute = "/withdraw";
   static const referredRoute = "/referred";
   static const walletHistoryRoute = "/wallet-history";
-
-
-
 }
 
 class RouteGenerator {
@@ -287,7 +284,7 @@ class RouteGenerator {
               final group = arguments[1] as Group;
               return ViewAttachmentScreen(
                 chat: chat,
-                group:group,
+                group: group,
               );
             });
       case Routes.viewContacts:
@@ -299,7 +296,7 @@ class RouteGenerator {
             settings: routeSettings,
             builder: (context) => const AboutUsScreen());
       case Routes.cardPaymentScreen:
-      final redirectLink = routeSettings.arguments as String;
+        final redirectLink = routeSettings.arguments as String;
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => PaymentScreen(redirectLink: redirectLink));
@@ -310,23 +307,23 @@ class RouteGenerator {
       case Routes.blockedScreenRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context) => const BlockScreen(),);
-       case Routes.withdrawRoute:
+          builder: (context) => const BlockScreen(),
+        );
+      case Routes.withdrawRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context) => const WithdrawScreen(),);
+          builder: (context) => const WithdrawScreen(),
+        );
       case Routes.referredRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context) => const ReferredScreen(),);
+          builder: (context) => const ReferredScreen(),
+        );
       case Routes.walletHistoryRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context) => const WalletHstoryScreen(),);
-
-
-          
-
+          builder: (context) => const WalletHstoryScreen(),
+        );
 
       default:
         return MaterialPageRoute(

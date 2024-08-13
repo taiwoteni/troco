@@ -1,9 +1,16 @@
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/texts/outputs/info-text.dart';
@@ -28,6 +35,7 @@ import 'package:troco/features/transactions/domain/repository/transaction-repo.d
 import 'package:troco/features/transactions/presentation/view-transaction/views/troco-details-sheet.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-driver-details-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/add-driver-details-form.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/receipt-widget.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
@@ -47,6 +55,8 @@ class _TransactionsDetailPageState
     extends ConsumerState<TransactionsDetailPage> {
   late Transaction transaction;
   late Group group;
+
+  final pdfBoundaryKey = GlobalKey();
 
   final okKey = UniqueKey();
   final neutralKey = UniqueKey();
@@ -464,7 +474,7 @@ class _TransactionsDetailPageState
               fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
-          "${NumberFormat.currency(symbol: '', locale: 'en_NG', decimalDigits: 2).format(transaction.transactionAmount * 0.05)} NGN",
+          "${NumberFormat.currency(symbol: '', locale: 'en_NG', decimalDigits: 2).format(transaction.escrowCharges)} NGN",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.accentColor,
@@ -1001,7 +1011,9 @@ class _TransactionsDetailPageState
       isDismissible: false,
       backgroundColor: ColorManager.background,
       context: context,
-      builder: (context) => const SelectPaymentProfileSheet(),
+      builder: (context) => const SelectPaymentProfileSheet(
+        onlyAccount: false,
+      ),
     );
 
     return method;
@@ -1032,7 +1044,7 @@ class _TransactionsDetailPageState
     // endpoint to add driver details
     final response =
         await TransactionRepo.uploadDriverDetails(driver: driver, group: group);
-    log(response.body);
+    debugPrint(response.body);
 
     if (response.error) {
       ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
@@ -1124,5 +1136,48 @@ class _TransactionsDetailPageState
         }
       });
     });
+  }
+
+  Widget pdfWidget() {
+    return RepaintBoundary(
+      key: pdfBoundaryKey,
+      child: ReceiptWidget(
+          transaction: transaction.copyWith(
+              transactionStatus: TransactionStatus.Completed)),
+    );
+  }
+
+  Future<Uint8List?> capturePdfWidget() async {
+    RenderRepaintBoundary boundary = pdfBoundaryKey.currentContext!
+        .findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
+  }
+
+  Future<void> generatePdfFromOffScreenWidget() async {
+    Uint8List? capturedImage = await capturePdfWidget();
+    if (capturedImage != null) {
+      final pdf = pw.Document();
+
+      final image = pw.MemoryImage(capturedImage);
+
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Center(
+              child: pw.Image(image),
+            );
+          },
+        ),
+      );
+
+      // Save or share the PDF
+      final output = await getApplicationDocumentsDirectory();
+      final name =
+          transaction.transactionName.replaceAll(" ", "_").toLowerCase();
+      final file = File("${output.path}/$name.pdf");
+      await file.writeAsBytes(await pdf.save());
+    }
   }
 }

@@ -13,6 +13,7 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/home/presentation/providers/blocked-provider.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp._internal(); //private constructor
@@ -66,7 +67,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     // This way, wether a user has internet connection or not, we would be able to tell wether
     // ...he is online or not.
     userRefreshTimer = Timer.periodic(
-      const Duration(seconds: 10),
+      const Duration(seconds: 40),
       (timer) async {
         // We get the user to try to  know if the user is logged in
         // or not.
@@ -78,6 +79,8 @@ class _MyAppState extends ConsumerState<MyApp> {
 
         final response = await ApiInterface.findUser(userId: client.userId);
         debugPrint(response.body);
+        debugPrint(response.messageBody!["data"]["lastSeen"]);
+        debugPrint(response.messageBody!["data"]["friends"].toString());
         // log(response.body, name: "User");
 
         if (!response.error) {
@@ -89,16 +92,9 @@ class _MyAppState extends ConsumerState<MyApp> {
           AppStorage.saveClient(client: updatedClient);
 
           // To check if user is blocked.
-          final blocked = response.messageBody!["data"]["blocked"] == true;
-          final currentRoute = ModalRoute.of(context);
+          final blocked = updatedClient.blocked;
 
-          if (blocked &&
-              currentRoute != null &&
-              currentRoute.settings.name != Routes.blockedScreenRoute) {
-            // Change to blocked screen;
-            Navigator.pushNamedAndRemoveUntil(
-                context, Routes.blockedScreenRoute, (route) => false);
-          }
+          kIsBlocked = blocked;
         }
       },
     );

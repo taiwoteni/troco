@@ -5,7 +5,9 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/groups/presentation/friends_tab/providers/friends-provider.dart';
 import 'package:troco/features/groups/presentation/friends_tab/widgets/friend-widget.dart';
+import 'package:troco/features/groups/presentation/group_tab/providers/search-provider.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -31,22 +33,42 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return friends.isEmpty
+    listenToFriendsChanges();
+
+    //Because of queries from the searchProvider
+
+    final filteredFriends = ref.watch(collectionsSearchProvider).isEmpty
+        ? friends
+        : friends
+            .where((element) => element.fullName
+                .toLowerCase()
+                .contains(ref.watch(collectionsSearchProvider).toLowerCase()))
+            .toList();
+
+    return filteredFriends.isEmpty
         ? SliverFillRemaining(
             child: EmptyScreen(
-              scale: 1.5,
-              lottie: AssetManager.lottieFile(name: "add-friends"),
-              label: "Invite a friend to Troco",
+              scale: ref.watch(collectionsSearchProvider).isEmpty ? 1.5 : 1,
+              xIndex: ref.watch(collectionsSearchProvider).isEmpty ? 1 : 0.25,
+              forward: true,
+              lottie: AssetManager.lottieFile(
+                  name: ref.watch(collectionsSearchProvider).isEmpty
+                      ? "add-friends"
+                      : "no-search-results"),
+              label: ref.watch(collectionsSearchProvider).isEmpty
+                  ? "Invite a friend to Troco"
+                  : "No Search result for '${ref.watch(collectionsSearchProvider)}'",
             ),
           )
         : SliverList.separated(
-            itemCount: friends.length,
+            itemCount: filteredFriends.length,
             itemBuilder: (context, index) {
               return Column(
                 children: [
                   FriendWidget(
-                      key: ObjectKey(friends[index]), client: friends[index]),
-                  if (index == friends.length - 1) ...[
+                      key: ObjectKey(filteredFriends[index]),
+                      client: filteredFriends[index]),
+                  if (index == filteredFriends.length - 1) ...[
                     mediumSpacer(),
                     Padding(
                         padding: const EdgeInsets.symmetric(
@@ -67,5 +89,21 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
               color: ColorManager.secondary.withOpacity(0.08),
             ),
           );
+  }
+
+  Future<void> listenToFriendsChanges() async {
+    ref.listen(friendsStreamProvider, (previous, next) {
+      next.when(
+        data: (data) {
+          setState(() {
+            setState(
+              () => friends = data,
+            );
+          });
+        },
+        error: (error, stackTrace) => null,
+        loading: () => null,
+      );
+    });
   }
 }

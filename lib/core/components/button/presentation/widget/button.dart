@@ -15,7 +15,7 @@ class CustomButton extends ConsumerStatefulWidget {
   final String label;
   final String size;
   final void Function()? onPressed;
-  final Color? color;
+  final Color? color, textColor;
   final bool usesProvider, disabled;
   final EdgeInsets? margin;
 
@@ -28,6 +28,7 @@ class CustomButton extends ConsumerStatefulWidget {
     this.onPressed,
     this.disabled = false,
     this.color,
+    this.textColor,
     this.margin,
   }) {
     if (usesProvider) {
@@ -46,6 +47,7 @@ class CustomButton extends ConsumerStatefulWidget {
     this.onPressed,
     this.disabled = false,
     this.margin,
+    this.textColor,
     this.color,
   }) {
     if (usesProvider) {
@@ -65,6 +67,7 @@ class CustomButton extends ConsumerStatefulWidget {
     this.onPressed,
     this.color,
     this.margin,
+    this.textColor,
   }) {
     if (usesProvider) {
       if (buttonKey == null) {
@@ -147,14 +150,14 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
                           widget.size == "large" || widget.size == "medium"
                               ? IconSizeManager.large
                               : IconSizeManager.large * 0.7),
-                      color: Colors.white,
+                      color: widget.textColor ?? Colors.white,
                     )
                   : Text(
                       widget.label,
                       style: TextStyle(
                           color: !enabled
                               ? ColorManager.secondary
-                              : ColorManager.primaryDark,
+                              : widget.textColor ?? ColorManager.primaryDark,
                           fontSize: (widget.size == "medium")
                               ? FontSizeManager.large * 0.7
                               : widget.size == "large"

@@ -98,7 +98,7 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget> {
               )
             : ListView.separated(
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 key: const Key("add-member-list"),
                 itemBuilder: (context, index) => Padding(
                       padding: EdgeInsets.only(

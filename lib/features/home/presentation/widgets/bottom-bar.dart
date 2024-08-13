@@ -4,28 +4,27 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
+import 'package:troco/features/home/data/models/home-item-model.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 
 import '../../../auth/presentation/providers/client-provider.dart';
 import '../../../transactions/utils/enums.dart';
 
 class BottomBar extends ConsumerStatefulWidget {
-  const BottomBar({super.key});
+  final List<HomeItemModel> pages;
+  const BottomBar({super.key, required this.pages});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _BottomBarState();
 }
 
 class _BottomBarState extends ConsumerState<BottomBar> {
-final pages = homeItems;
+  late List<HomeItemModel> pages;
   @override
   void initState() {
-    if(ClientProvider.readOnlyClient!.accountCategory == Category.Personal){
-      pages.remove(1);
-    }
-  super.initState();
-  
-}
+    pages = widget.pages;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,7 @@ final pages = homeItems;
                 fontFamily: 'Lato', fontSize: FontSizeManager.small),
             items: pages.map((homeItem) {
               final bool isSelected =
-                  homeItems.indexOf(homeItem) == ref.watch(homeProvider);
+                  pages.indexOf(homeItem) == ref.watch(homeProvider);
               return BottomNavigationBarItem(
                   icon: Align(
                     child: SvgIcon(

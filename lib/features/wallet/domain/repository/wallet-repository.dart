@@ -25,7 +25,7 @@ class WalletRepository {
 
   Future<List<Referral>> getReferrals() async {
     final clientJson = AppStorage.getUser()!.toJson();
-    final userReferrals = clientJson["referrals"] as List<String>;
+    final userReferrals = clientJson["referrals"] as List;
 
     final List<Referral> referrals = [];
 
@@ -34,7 +34,7 @@ class WalletRepository {
       if (!response.error) {
         final userJson = response.messageBody!["data"] as Map<dynamic, dynamic>;
 
-        final transactionsList = userJson["transactions"] as List<Map>;
+        final transactionsList = userJson["transactions"] as List;
 
         final bool referralCompleted = !transactionsList
             .every((element) => element["status"] != "completed");

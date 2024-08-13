@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
+import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/components/images/svg.dart';
+import '../../../../../core/components/others/spacer.dart';
 import '../../../../auth/domain/entities/client.dart';
 
 class FriendWidget extends ConsumerStatefulWidget {
@@ -61,8 +65,22 @@ class _ClientWidgetState extends ConsumerState<FriendWidget> {
             arguments: client),
         child: profileIcon(),
       ),
-      title: Text(
-        client.fullName,
+      title: Row(
+        children: [
+          Text(
+            client.phoneNumber == ClientProvider.readOnlyClient!.phoneNumber
+                ? "You"
+                : client.fullName,
+          ),
+          if (client.verified) ...[
+            smallSpacer(),
+            SvgIcon(
+              svgRes: AssetManager.svgFile(name: "verification"),
+              color: ColorManager.accentColor,
+              size: const Size.square(IconSizeManager.small),
+            )
+          ]
+        ],
       ),
       titleTextStyle: TextStyle(
           overflow: TextOverflow.ellipsis,
