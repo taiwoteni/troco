@@ -22,12 +22,23 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       ..setBackgroundColor(ColorManager.background)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
-        onPageStarted: (url) => log("Start Loading: $url"),
-        onPageFinished: (url) => log("Finished Loading: $url"),
-        onUrlChange: (change) => log("Changed to new url: ${change.url}"),
-      ))
-      ..loadRequest(Uri.parse(widget.redirectLink));
+        onPageStarted: (url) => debugPrint("Start Loading: $url"),
+        onPageFinished: (url) => debugPrint("Finished Loading: $url"),
+        onUrlChange: (change) =>
+            debugPrint("Changed to new url: ${change.url}"),
+      ));
+
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) async {
+        if (widget.redirectLink.startsWith(RegExp(r'file://'))) {
+          debugPrint(widget.redirectLink.replaceFirst(RegExp(r'file://'), ""));
+          await controller.loadFile(widget.redirectLink);
+        } else {
+          await controller.loadRequest(Uri.parse(widget.redirectLink));
+        }
+      },
+    );
   }
 
   @override

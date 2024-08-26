@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/features/services/domain/entities/escrow-fee.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/color-manager.dart';
@@ -67,15 +69,15 @@ class _SelectCategoryPageState extends ConsumerState<FeeCalculationPage> {
     );
     return Text(
       calculated
-          ? "Calculated price with charges (${formatter.format(double.parse(charges))}):"
+          ? "Escrow Charge: (${formatter.format(double.parse(charges))})"
           : "Enter your estimated price:",
       textAlign: TextAlign.left,
       style: TextStyle(
-          color:
-              !calculated ? ColorManager.secondary : ColorManager.accentColor,
+          color: !calculated ? ColorManager.secondary : Colors.red,
           fontFamily: 'lato',
           fontSize: FontSizeManager.small * 1.1,
-          fontWeight: FontWeightManager.regular),
+          fontWeight:
+              calculated ? FontWeightManager.bold : FontWeightManager.regular),
     );
   }
 
@@ -125,9 +127,8 @@ class _SelectCategoryPageState extends ConsumerState<FeeCalculationPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               FeeKeypadWidget(
-                  onTap: () => setState(() => price = price.contains(".")
-                      ? "${price.replaceAll(".", ".")}."
-                      : "$price."),
+                  onTap: () => setState(
+                      () => price = price.contains(".") ? price : "$price."),
                   text: "."),
               FeeKeypadWidget(
                   onTap: () => setState(() => price = "${price}0"),
@@ -206,19 +207,21 @@ class _SelectCategoryPageState extends ConsumerState<FeeCalculationPage> {
       ref.watch(feePageViewProvider.notifier).state.previousPage(
           duration: const Duration(milliseconds: 450), curve: Curves.ease);
     } else {
-      if (ref.watch(feeCategoryProvider) == TransactionCategory.Product) {
-        setState(() {
-          charges = ((double.parse(price) * 0.05)).toString();
-          price = ((double.parse(price) * 1.05)).toString();
-        }, calculation: true);
-      } else if (ref.watch(feeCategoryProvider) ==
-          TransactionCategory.Service) {
-        double charge = double.parse(price) > 500000 ? 0.03 : 0.05;
-        setState(() {
-          charges = ((double.parse(price) * charge)).toString();
-          price = ((double.parse(price) * (1 + charge))).toString();
-        }, calculation: true);
-      }
+      final defaultCharge = EscrowCharge.fromJson(json: {
+        "category": ref.read(feeCategoryProvider).name.toLowerCase(),
+        "percentage": 10
+      });
+
+      final escrowCharge = AppStorage.getEscrowCharges().firstWhere(
+        (element) => element.category == ref.read(feeCategoryProvider),
+        orElse: () => defaultCharge,
+      );
+      setState(() {
+        charges = ((double.parse(price) * escrowCharge.percentage)).toString();
+        price = ((double.parse(price) +
+                (double.parse(price) * escrowCharge.percentage)))
+            .toString();
+      }, calculation: true);
     }
   }
 }

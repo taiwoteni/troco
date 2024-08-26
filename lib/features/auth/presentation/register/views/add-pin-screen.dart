@@ -14,6 +14,7 @@ import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
+import '../../../../customer care/domain/repositories/customer-care-repository.dart';
 import '../../../domain/entities/client.dart';
 import '../../success/views/auth-success-screen.dart';
 import '../../../../../core/app/color-manager.dart';
@@ -242,7 +243,8 @@ class _SetTransactionPinScreenState
         userId: LoginData.id!, body: LoginData.toClientJson());
     final userResponse = await ApiInterface.findUser(userId: LoginData.id!);
     log(response.messageBody.toString());
-    if (!response.error && !userResponse.error) {
+    final createdSession = await createCustomerCareSession();
+    if (!response.error && !userResponse.error && createdSession) {
       final Map<dynamic, dynamic> userJson = LoginData.toClientJson();
       userJson["wallet"] = 0;
       userJson["referralCode"] = LoginData.referralCode;
@@ -258,5 +260,24 @@ class _SetTransactionPinScreenState
       ButtonProvider.stopLoading(buttonKey: key, ref: ref);
       log(response.messageBody.toString());
     }
+  }
+
+  Future<bool> createCustomerCareSession() async {
+    AppStorage.saveCustomerCareChats(chats: []);
+    final response = await CustomerCareRepository.createChatSession();
+    log(response.body);
+    if (!response.error) {
+      final id = response.messageBody!["chatSession"]["_id"].toString();
+      log(id);
+
+      AppStorage.saveCustomerCareSessionId(sessionId: id);
+      // We are saving a preset customer care chat for the intro.
+      final result = await CustomerCareRepository.sendIntroCustomerCareChat(
+          customerCareId: response.messageBody!["chatSession"]["customerCare"],
+          sessionId: id);
+
+      log(result.body);
+    }
+    return !response.error;
   }
 }

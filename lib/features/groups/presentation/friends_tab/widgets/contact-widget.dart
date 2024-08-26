@@ -43,7 +43,8 @@ class _ContactWidgetState extends ConsumerState<ContactWidget> {
 
     final phoneNumbers = (contact.phones ?? [])
         .map(
-          (e) => PhoneNumberConverter.convertToFull((e.value ?? "00000000000")),
+          (e) => PhoneNumberConverter.convertToFull(
+              (e.value?.replaceAll(" ", "") ?? "00000000000")),
         )
         .toList();
     trocoUser = AppStorage.getAllUsersPhone().any((element) => phoneNumbers
@@ -91,8 +92,8 @@ class _ContactWidgetState extends ConsumerState<ContactWidget> {
           fontSize: FontSizeManager.medium * 1.1,
           fontWeight: FontWeightManager.semibold),
       subtitle: (contact.phones ?? []).isNotEmpty
-          ? Text(
-              PhoneNumberConverter.convertToFull(contact.phones!.first.value!))
+          ? Text(PhoneNumberConverter.convertToFull(
+              contact.phones!.first.value!.replaceAll(" ", "")))
           : null,
       trailing: button(),
       subtitleTextStyle: TextStyle(

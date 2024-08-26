@@ -73,10 +73,10 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
 
             List<Group> groupsList = groupsJson
                 .map((e) => Group.fromJson(json: e))
-                .where(
-                  (group) => group.members
-                      .contains(ClientProvider.readOnlyClient!.userId),
-                )
+                // .where(
+                //   (group) => group.members
+                //       .contains(ClientProvider.readOnlyClient!.userId),
+                // )
                 .toList();
 
             // log("Data Group Names from API: ${groupsList.map((e) => e.groupName).toList()}");

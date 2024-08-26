@@ -12,6 +12,7 @@ import "package:troco/features/settings/domain/repository/settings-repository.da
 import "../../../../../core/app/asset-manager.dart";
 import "../../../../../core/app/color-manager.dart";
 import "../../../../../core/app/font-manager.dart";
+import "../../../../../core/app/routes-manager.dart";
 import "../../../../../core/app/size-manager.dart";
 import "../../../../../core/components/button/presentation/provider/button-provider.dart";
 import "../../../../../core/components/images/svg.dart";
@@ -71,6 +72,8 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
           children: [
             largeSpacer(),
             oldPin(),
+            mediumSpacer(),
+            forgotPin(),
             mediumSpacer(),
             mediumSpacer(),
             newPin(),
@@ -226,16 +229,17 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
     );
   }
 
-  // Widget forgotPin() {
-  //   return const Padding(
-  //     padding: EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
-  //     child: InfoText(
-  //       text: "Forgot Pin?",
-  //       alignment: Alignment.centerRight,
-  //       fontWeight: FontWeightManager.semibold,
-  //     ),
-  //   );
-  // }
+  Widget forgotPin() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
+      child: InfoText(
+        onPressed: () => Navigator.pushNamed(context, Routes.forgotPin),
+        text: "Forgot Pin?",
+        alignment: Alignment.centerRight,
+        fontWeight: FontWeightManager.semibold,
+      ),
+    );
+  }
 
   Widget button() {
     return CustomButton(

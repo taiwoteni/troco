@@ -4,9 +4,11 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:troco/core/app/asset-manager.dart';
@@ -19,11 +21,14 @@ import 'package:troco/features/auth/presentation/providers/client-provider.dart'
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
+import 'package:troco/features/chat/presentation/widgets/edit-chat-sheet.dart';
 
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
+import '../../../../core/app/snackbar-manager.dart';
 import '../../../../core/components/animations/lottie.dart';
+import '../../../customer care/domain/repositories/customer-care-repository.dart';
 import '../../../groups/domain/entities/group.dart';
 
 class ChatWidget extends ConsumerStatefulWidget {
@@ -51,6 +56,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
   late String groupId;
   late Group group;
   late bool showViews;
+  late FocusNode focusNode;
 
   @override
   void initState() {
@@ -67,6 +73,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
     failed = chat.loading &&
         AppStorage.getUnsentChats(groupId: groupId).contains(chat);
     showViews = (lastMessage ? true : lastSender) && isSender;
+    focusNode = FocusNode();
     super.initState();
   }
 
@@ -101,22 +108,15 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
             children: [
               GestureDetector(
                 onTap: failed ? resend : null,
-                child: Container(
-                  constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * .6),
-                  child: Column(
-                    crossAxisAlignment: isSender
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
-                    children: [
-                      if (chat.hasAttachment) ...[
-                        attachmentWidget(),
-                        smallSpacer(),
-                      ],
-                      if (chat.hasMessage) content(),
-                    ],
-                  ),
-                ),
+                child: isSender
+                    ? CustomPopup(
+                        isLongPress: true,
+                        content: options(),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: SizeManager.large * 1.2),
+                        child: bubbleWidget(),
+                      )
+                    : bubbleWidget(),
               ),
               profileIcon(isSender: isSender),
               loadingWidget(),
@@ -178,6 +178,24 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
                   fontWeight: FontWeightManager.medium),
             ),
           );
+  }
+
+  Widget bubbleWidget() {
+    return Container(
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * .6),
+      child: Column(
+        crossAxisAlignment:
+            isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          if (chat.hasAttachment) ...[
+            attachmentWidget(),
+            smallSpacer(),
+          ],
+          if (chat.hasMessage) content(),
+        ],
+      ),
+    );
   }
 
   Widget content() {
@@ -425,6 +443,73 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> deleteMessage() async {
+    FocusScope.of(context).requestFocus(focusNode);
+
+    final result =
+        await ChatRepo.deleteChat(chat: chat, groupId: group.groupId);
+
+    debugPrint(result.body);
+
+    if (result.error) {
+      SnackbarManager.showBasicSnackbar(
+        context: context,
+        mode: ContentType.failure,
+        message: "Error deleting message",
+      );
+      return;
+    }
+  }
+
+  Future<void> editMessage() async {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: true,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) {
+        return SingleChildScrollView(
+            child: EditChatSheet(
+          chat: chat,
+          group: group,
+        ));
+      },
+    );
+  }
+
+  Widget options() {
+    final textStyle = TextStyle(
+        color: ColorManager.primary,
+        fontFamily: 'lato',
+        fontSize: FontSizeManager.regular,
+        fontWeight: FontWeightManager.bold);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (chat.hasMessage) ...[
+          GestureDetector(
+            onTap: editMessage,
+            child: Text(
+              "Edit",
+              style: textStyle.copyWith(color: ColorManager.accentColor),
+            ),
+          ),
+          mediumSpacer()
+        ],
+        GestureDetector(
+          onTap: deleteMessage,
+          child: Text(
+            "Delete",
+            style: textStyle.copyWith(color: Colors.red),
+          ),
+        )
+      ],
     );
   }
 }

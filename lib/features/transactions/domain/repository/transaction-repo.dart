@@ -4,6 +4,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
 
@@ -42,7 +43,7 @@ class TransactionRepo {
           // "role":"Seller",
           "transactionName": transaction.transactionName,
           "aboutService": transaction.transactionDetail,
-          "location": ClientProvider.readOnlyClient!.address,
+          "location": transaction.location,
           "inspectionPeriod": transaction.inspectionPeriod.name.toLowerCase(),
           "inspectionDays": transaction.inspectionDays,
           "DateOfWork": dateOfWork,
@@ -245,7 +246,7 @@ class TransactionRepo {
 
   static Future<HttpResponseModel> uploadDriverDetails({
     required final Driver driver,
-    required final Group group,
+    required final Transaction transaction,
   }) async {
     var parsedfile = File(driver.plateNumber);
     var parsedFile2 = File(driver.backPlateNumber);
@@ -276,27 +277,30 @@ class TransactionRepo {
 
     final response = await ApiInterface.multipartPostRequest(
         url:
-            "createdriver/${ClientProvider.readOnlyClient!.userId}/${group.groupId}/${group.groupId}/${group.adminId}",
+            "createdriver/${ClientProvider.readOnlyClient!.userId}/${transaction.transactionId}/${transaction.transactionId}/${transaction.group.adminId}",
         multiparts: multiparts);
+    debugPrint(response.body);
     return response;
   }
 
   static Future<HttpResponseModel> hasReceivedProduct({
-    required final Group group,
+    required final Transaction transaction,
     required final bool yes,
   }) async {
+    final group = transaction.group;
     final response = await ApiInterface.patchRequest(
         url:
-            "updatetofinalizing/${group.groupId}/${group.buyer!.userId}/${group.seller.userId}",
+            "updatetofinalizing/${group.groupId}/${group.buyerId}/${group.creator}",
         data: {"status": yes ? "approved" : "declined"});
 
     return response;
   }
 
   static Future<HttpResponseModel> satisfiedWithProduct({
-    required final Group group,
+    required final Transaction transaction,
     required final bool yes,
   }) async {
+    final group = transaction.group;
     final reqParams =
         "${group.groupId}/${group.buyerId}/${group.adminId}/${group.creator}";
 

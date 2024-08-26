@@ -41,6 +41,7 @@ import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/app/theme-manager.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
+import '../../../../customer care/domain/repositories/customer-care-repository.dart';
 import '../../../../settings/domain/entity/settings.dart';
 import '../../../utils/phone-number-converter.dart';
 
@@ -300,7 +301,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           : AuthenticationRepo.loginUserPhone(
               phoneNumber: LoginData.phoneNumber!,
               password: LoginData.password!));
-      log("login:${response.body}");
+      debugPrint("login:${response.body}");
 
       if (response.error) {
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
@@ -409,13 +410,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> saveCollections({required final String userId}) async {
     final newResponse = await ApiInterface.findUser(userId: userId);
     if (newResponse.error) {
-      log(newResponse.body.toString());
+      debugPrint(newResponse.body.toString());
 
       // We have to clear all progress done in saving any data to cache.
       await AppStorage.clear();
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     } else {
       final Map<dynamic, dynamic> data = newResponse.messageBody!["data"];
+      debugPrint(data["groups"].toString());
       AppStorage.saveGroups(
           groups: ((data["groups"] ?? []) as List)
               .map((e) => Group.fromJson(json: e))
@@ -434,6 +436,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final friends = await FriendRepository().getFriends();
 
     AppStorage.saveFriends(friends: friends);
+
+    if (AppStorage.getCustomerCareSessionId() == null) {
+      AppStorage.saveCustomerCareChats(chats: []);
+      final response = await CustomerCareRepository.createChatSession();
+      log(response.body);
+      if (!response.error) {
+        final id = response.messageBody!["chatSession"]["_id"].toString();
+        log(id);
+
+        AppStorage.saveCustomerCareSessionId(sessionId: id);
+        // We are saving a preset customer care chat for the intro.
+        final result = await CustomerCareRepository.sendIntroCustomerCareChat(
+            customerCareId: response.messageBody!["chatSession"]
+                ["customerCare"],
+            sessionId: id);
+
+        log(result.body);
+      }
+    }
   }
 
   /// User data must have been saved in Cache
@@ -445,6 +466,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.read(walletProvider.notifier).state = WalletRepository();
     final referrals = await WalletRepository().getReferrals();
     AppStorage.saveReferrals(referrals: referrals);
+
+    final walletHistory = await WalletRepository().getWalletHistory();
+    AppStorage.saveWalletTransactions(walletTransactions: walletHistory);
   }
 
   PreferredSizeWidget appBar() {
@@ -516,10 +540,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> save({required final Map<dynamic, dynamic> map}) async {
     // We have to save user data first
+
     ClientProvider.saveUserData(ref: ref, json: map);
     ref.watch(clientProvider.notifier).state = ClientProvider.readOnlyClient;
 
-    if (map["kycTier"] <= map["kyccurrentTier"]) {
+    if (map["kycTier"] < map["kyccurrentTier"]) {
       //To save kyc status, if currently verifying or not.
       AppStorage.savekycVerificationStatus(
           tier: KycConverter.convertToEnum(

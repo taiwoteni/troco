@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/wallet/domain/entities/referral.dart';
+import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
 
@@ -13,6 +15,7 @@ class WalletRepository {
   }) async {
     final result = await ApiInterface.postRequest(
         url: "requestwithdrawal/${ClientProvider.readOnlyClient!.userId}",
+        okCode: 201,
         data: {
           "amount": amount,
           "accountName": account.accountName,
@@ -36,8 +39,8 @@ class WalletRepository {
 
         final transactionsList = userJson["transactions"] as List;
 
-        final bool referralCompleted = !transactionsList
-            .every((element) => element["status"] != "completed");
+        final bool referralCompleted = !transactionsList.every((element) =>
+            element["status"].toString().toLowerCase() != "completed");
 
         final referralJson = {};
         referralJson["referralStatus"] =
@@ -57,5 +60,23 @@ class WalletRepository {
     }
 
     return referrals;
+  }
+
+  Future<List<WalletTransaction>> getWalletHistory() async {
+    final request = await ApiInterface.getRequest(
+        url: "getwallethistory/${ClientProvider.readOnlyClient!.userId}",
+        data: null);
+
+    debugPrint(request.body);
+
+    if (request.error) {
+      return AppStorage.getWalletTransactions();
+    }
+
+    return (request.messageBody!["data"] as List)
+        .map(
+          (e) => WalletTransaction.fromJson(json: e),
+        )
+        .toList();
   }
 }

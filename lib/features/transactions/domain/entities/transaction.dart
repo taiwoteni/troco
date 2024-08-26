@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/transactions/domain/entities/driver.dart';
@@ -24,19 +25,47 @@ class Transaction extends Equatable {
       _json["transaction detail"] ?? _json["aboutService"];
   String get transactionName =>
       _json["transaction name"] ?? _json["transactionName"];
+  String get location =>
+      _json["transaction location"] ?? _json["location"] ?? _json["address"];
 
   Group get group {
     return AppStorage.getGroups().firstWhere(
-      (element) => element.groupId == transactionId,
+      (element) {
+        debugPrint("group id for ${element.groupName} is ${element.groupId}");
+        return element.groupId == transactionId;
+      },
     );
   }
 
-  DateTime get transactionTime =>
-      DateTime.parse(_json["transaction time"] ?? _json["DateOfWork"]);
+  String get sellerName {
+    if (transactionPurpose == TransactionPurpose.Selling) {
+      return ClientProvider.readOnlyClient!.fullName;
+    }
+
+    final seller = AppStorage.getFriends().firstWhere(
+      (element) => element.userId == creator,
+    );
+
+    return seller.fullName;
+  }
+
+  String get buyerName {
+    if (transactionPurpose != TransactionPurpose.Selling) {
+      return ClientProvider.readOnlyClient!.fullName;
+    }
+
+    final client = AppStorage.getFriends().firstWhere(
+      (element) => element.userId == buyer,
+    );
+
+    return client.fullName;
+  }
+
+  DateTime get transactionTime => DateTime.parse(_json["transaction time"] ??
+      _json["DateOfWork"] ??
+      group.transactionTime.toIso8601String());
 
   DateTime get creationTime => DateTime.parse(_json["creation time"] ??
-      _json["createdTime"] ??
-      _json["timestamp"] ??
       _json["createdAt"] ??
       DateTime.now().toIso8601String());
 
@@ -74,7 +103,6 @@ class Transaction extends Equatable {
       TransactionStatusConverter.convertToStatus(
           status: _json["transaction status"] ?? _json["status"] ?? "pending");
 
-  /// We have to think these through as a transaction can have many products.
   List<SalesItem> get salesItem {
     return ((_json["products"] ?? _json["pricing"]) as List).map((e) {
       var product = transactionCategory == TransactionCategory.Product;
@@ -85,6 +113,40 @@ class Transaction extends Equatable {
               : Service.fromJson(json: e);
     }).toList();
   }
+
+  List<SalesItem> get returnItems {
+    // we call toSet().toList() to remove duplicating values
+    final list = ((_json["returnedItems"] ?? []) as List).toSet().toList();
+    if (list.isEmpty) {
+      return [];
+    }
+    return (list.last["products"] as List)
+        .map(
+          (e) => salesItem.firstWhere(
+            (element) => element.id == e.toString(),
+          ),
+        )
+        .toList();
+
+    // return ((_json["returnedItems"] ?? []) as List).map((e) {
+    //   var product = transactionCategory == TransactionCategory.Product;
+    //   return product
+    //       ? Product.fromJson(json: e)
+    //       : transactionCategory == TransactionCategory.Virtual
+    //           ? VirtualService.fromJson(json: e)
+    //           : Service.fromJson(json: e);
+    // }).toList();
+  }
+
+  String get pricingName {
+    if (transactionCategory == TransactionCategory.Product) {
+      return "Product";
+    }
+    return "Service";
+  }
+
+  bool get hasReturnTransaction =>
+      _json["returnedItems"] == null ? false : returnItems.isNotEmpty;
 
   String? get adminId => _json["adminId"];
   String get buyer => _json["buyer"];
@@ -101,7 +163,11 @@ class Transaction extends Equatable {
 
   bool get paymentDone => _json["paymentMade"] ?? false;
   bool get adminApprovesPayment => _json["adminPaymentApproved"] ?? false;
-  bool get adminApprovesDriver => false;
+  bool get adminApprovesDriver => [
+        TransactionStatus.Ongoing,
+        TransactionStatus.Finalizing,
+        TransactionStatus.Completed,
+      ].contains(transactionStatus);
   bool get buyerSatisfied => _json["buyerSatisfied"] ?? false;
   bool get trocoPaysSeller => _json["trocopaidSeller"] ?? false;
 
@@ -159,6 +225,14 @@ class Transaction extends Equatable {
     }
 
     return Transaction.fromJson(json: old);
+  }
+
+  Transaction clone() {
+    final json = {};
+    toJson().forEach((key, value) {
+      json[key] = value;
+    });
+    return Transaction.fromJson(json: json);
   }
 
   @override

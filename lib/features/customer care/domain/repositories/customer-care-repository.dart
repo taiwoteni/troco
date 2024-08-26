@@ -1,6 +1,7 @@
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/chat/domain/entities/chat.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
 
@@ -18,28 +19,41 @@ class CustomerCareRepository {
     required final String customerCareId,
     required final String sessionId,
   }) async {
-    final result = await ApiInterface.postRequest(
-        url: "sendMessage/$sessionId/${ClientProvider.readOnlyClient!.userId}",
-        data: {
-          "senderId": customerCareId,
-          "content":
-              "Welcome to Troco Customer Service, ${ClientProvider.readOnlyClient!.fullName}. If you have any complaints, issues or uncertainties, feel free to ask. We're here.",
-          "sessionId": sessionId
-        });
+    final result = await ApiInterface.postRequest(url: "sendMessage", data: {
+      "senderId": customerCareId,
+      "content":
+          "Welcome to Troco Customer Service, ${ClientProvider.readOnlyClient!.fullName}. If you have any complaints, issues or uncertainties, feel free to ask. We're here.",
+      "sessionId": sessionId
+    });
 
     return result;
   }
 
   static Future<HttpResponseModel> sendChat(
       {required final String sessionId, required final String content}) async {
-    final result = await ApiInterface.postRequest(
-        url: "sendMessage/$sessionId/${ClientProvider.readOnlyClient!.userId}",
-        data: {
-          "senderId": ClientProvider.readOnlyClient!.userId,
-          "content": content,
-          "sessionId": sessionId
-        });
+    final result = await ApiInterface.postRequest(url: "sendMessage", data: {
+      "senderId": ClientProvider.readOnlyClient!.userId,
+      "content": content,
+      "sessionId": sessionId
+    });
 
+    return result;
+  }
+
+  static Future<HttpResponseModel> deleteChat(
+      {required final Chat chat}) async {
+    final result = await ApiInterface.deleteRequest(
+        url:
+            "deletemessage/${chat.chatId}/${ClientProvider.readOnlyClient!.userId}");
+    return result;
+  }
+
+  static Future<HttpResponseModel> editChat(
+      {required final Chat oldChat, required final String newMessage}) async {
+    final result = await ApiInterface.patchRequest(
+        url:
+            "updatemessage/${oldChat.chatId}/${ClientProvider.readOnlyClient!.userId}",
+        data: {"content": newMessage});
     return result;
   }
 

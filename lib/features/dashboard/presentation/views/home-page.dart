@@ -21,7 +21,7 @@ import 'package:troco/core/components/clippers/bottom-rounded.dart';
 import 'package:troco/features/dashboard/presentation/widgets/latest-transactions-list.dart';
 import 'package:troco/features/dashboard/presentation/widgets/transaction-overview.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
-
+import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 import '../../../transactions/domain/entities/transaction.dart';
@@ -41,8 +41,36 @@ class _HomePageState extends ConsumerState<HomePage> {
       fontSize: FontSizeManager.large * 0.85,
       fontWeight: FontWeightManager.bold);
 
+  late double completedTransactions, ongoingTransactions, cancelledTransactions;
+
   @override
   void initState() {
+    transactions = AppStorage.getAllTransactions();
+    final completed = transactions.where(
+      (element) => element.transactionStatus == TransactionStatus.Completed,
+    );
+    final ongoing = transactions.where(
+      (element) =>
+          element.transactionStatus != TransactionStatus.Completed &&
+          element.transactionStatus != TransactionStatus.Cancelled,
+    );
+    final cancelled = transactions.where(
+      (element) => element.transactionStatus == TransactionStatus.Cancelled,
+    );
+
+    completedTransactions = completed.fold(
+      0,
+      (previousValue, element) => previousValue + element.transactionAmount,
+    );
+    ongoingTransactions = ongoing.fold(
+      0,
+      (previousValue, element) => previousValue + element.transactionAmount,
+    );
+    cancelledTransactions = cancelled.fold(
+      0,
+      (previousValue, element) => previousValue + element.transactionAmount,
+    );
+
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
@@ -57,6 +85,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: SizedBox(
         width: double.maxFinite,
         height: double.maxFinite,
+
         /// We are using the getTransactions method here because
         /// The transactionOverview widget (The bar chart), will throw errors
         /// if the sum total of all transactions is 0
@@ -227,9 +256,30 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget carouselWidget() {
     // final bo ongoingTransactionBool = element.transactionStatus != TransactionStatus.Pending;
-    final int totalTransactions = transactions
-        .map((e) => e.transactionAmount)
-        .fold(0, (previousValue, element) => (previousValue + element).toInt());
+    final completed = transactions.where(
+      (element) => element.transactionStatus == TransactionStatus.Completed,
+    );
+    final ongoing = transactions.where(
+      (element) =>
+          element.transactionStatus != TransactionStatus.Completed &&
+          element.transactionStatus != TransactionStatus.Cancelled,
+    );
+    final cancelled = transactions.where(
+      (element) => element.transactionStatus == TransactionStatus.Cancelled,
+    );
+
+    completedTransactions = completed.fold(
+      0,
+      (previousValue, element) => previousValue + element.transactionAmount,
+    );
+    ongoingTransactions = ongoing.fold(
+      0,
+      (previousValue, element) => previousValue + element.transactionAmount,
+    );
+    cancelledTransactions = cancelled.fold(
+      0,
+      (previousValue, element) => previousValue + element.transactionAmount,
+    );
     const defaultStyle = TextStyle(
         fontFamily: 'Quicksand',
         color: Colors.white,
@@ -273,9 +323,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ),
                         const Spacer(),
                         Text(
-                          index == 1
-                              ? "${NumberFormat.currency(symbol: '', locale: 'en_NG', decimalDigits: 0).format(totalTransactions)} NGN"
-                              : "0 NGN",
+                          "${NumberFormat.currency(symbol: '', locale: 'en_NG', decimalDigits: 0).format(index == 0 ? completedTransactions : index == 1 ? ongoingTransactions : cancelledTransactions)} NGN",
                           style: defaultStyle.copyWith(
                               fontWeight: FontWeightManager.bold,
                               fontSize: FontSizeManager.large * 0.9),

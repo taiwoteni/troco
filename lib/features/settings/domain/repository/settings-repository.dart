@@ -56,17 +56,42 @@ class SettingsRepository {
   }
 
   static Future<HttpResponseModel> verifyPasswordResetOtp(
-      {required final String email,required final String otp}) async {
+      {required final String email, required final String otp}) async {
     final request = await ApiInterface.postRequest(
-        url: "verifypasswordresetotp", data: {"email": email,"otp":otp});
+        url: "verifypasswordresetotp", data: {"email": email, "otp": otp});
 
     return request;
   }
 
   static Future<HttpResponseModel> resetPassword(
-      {required final String email,required final String newPassword}) async {
+      {required final String email, required final String newPassword}) async {
     final request = await ApiInterface.postRequest(
-        url: "resetPassword", data: {"email": email,"newPassword":newPassword});
+        url: "resetPassword",
+        data: {"email": email, "newPassword": newPassword});
+
+    return request;
+  }
+
+  static Future<HttpResponseModel> requestPinReset(
+      {required final String email}) async {
+    final request = await ApiInterface.postRequest(
+        url: "requestpinreset", data: {"email": email});
+
+    return request;
+  }
+
+  static Future<HttpResponseModel> verifyPinResetOtp(
+      {required final String email, required final String otp}) async {
+    final request = await ApiInterface.postRequest(
+        url: "verifypinresetotp", data: {"email": email, "otp": otp});
+
+    return request;
+  }
+
+  static Future<HttpResponseModel> resetPin(
+      {required final String email, required final String newPin}) async {
+    final request = await ApiInterface.postRequest(
+        url: "resetPin", data: {"email": email, "newPin": newPin});
 
     return request;
   }

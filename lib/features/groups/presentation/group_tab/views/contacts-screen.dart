@@ -159,7 +159,12 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         ? Flexible(
             child: EmptyScreen(
               expanded: false,
-              lottie: AssetManager.lottieFile(name: "plane-cloud"),
+              lottie: AssetManager.lottieFile(
+                  name: controller.text.trim().isNotEmpty
+                      ? "no-search-results"
+                      : "plane-cloud"),
+              forward: controller.text.trim().isNotEmpty,
+              xIndex: controller.text.trim().isEmpty ? 0 : 0.25,
               label: controller.text.trim().isNotEmpty
                   ? "No results for '${controller.text}'"
                   : "Getting Contacts",
@@ -249,7 +254,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   bool isRegistered({required final Contact contact}) {
     final phoneNumbers = (contact.phones ?? [])
         .map(
-          (e) => PhoneNumberConverter.convertToFull((e.value ?? "00000000000")),
+          (e) => PhoneNumberConverter.convertToFull(
+              (e.value?.replaceAll(" ", "") ?? "00000000000")),
         )
         .toList();
     final trocoUser = AppStorage.getAllUsersPhone().any((element) =>

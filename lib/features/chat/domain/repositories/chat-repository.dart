@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart' as Path;
 
 import 'package:http/http.dart';
@@ -9,6 +10,7 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import '../../../../core/api/data/model/response-model.dart';
 import '../../../../core/api/data/repositories/api-interface.dart';
 import '../../../auth/presentation/providers/client-provider.dart';
+import '../entities/chat.dart';
 
 class ChatRepo {
   Future<List<dynamic>> getChats({required final String groupId}) async {
@@ -49,7 +51,6 @@ class ChatRepo {
     required final String attachment,
     final Uint8List? thumbnail,
     final String? message,
-
   }) async {
     final parsedfile = File(attachment);
     final stream = ByteStream(parsedfile.openRead());
@@ -57,14 +58,12 @@ class ChatRepo {
 
     final file = MultipartFile("attachment", stream, length,
         filename: Path.basename(attachment));
-    
+
     MultipartFile? thumbnailFile;
 
-    if(thumbnail != null){
+    if (thumbnail != null) {
       thumbnailFile = MultipartFile.fromBytes("thumbnail", thumbnail);
     }
-
-       
 
     final result = await ApiInterface.multipartPostRequest(
         url: "addattachment",
@@ -74,8 +73,7 @@ class ChatRepo {
           MultiPartModel.field(field: "groupId", value: groupId),
           MultiPartModel.field(field: "content", value: message),
           MultiPartModel.file(file: file),
-          if(thumbnail!=null)
-          MultiPartModel.file(file: thumbnailFile!)
+          if (thumbnail != null) MultiPartModel.file(file: thumbnailFile!)
         ]);
 
     return result;
@@ -89,6 +87,26 @@ class ChatRepo {
       "messageId": messageId,
     });
 
+    return result;
+  }
+
+  static Future<HttpResponseModel> deleteChat(
+      {required final Chat chat, required final String groupId}) async {
+    debugPrint("Chat Id: ${chat.chatId}");
+    final result = await ApiInterface.deleteRequest(
+        url:
+            "deletemessage/${chat.chatId}/${ClientProvider.readOnlyClient!.userId}/$groupId");
+    return result;
+  }
+
+  static Future<HttpResponseModel> editChat(
+      {required final Chat oldChat,
+      required final String newMessage,
+      required final String groupId}) async {
+    final result = await ApiInterface.patchRequest(
+        url:
+            "updatemessage/${oldChat.chatId}/${ClientProvider.readOnlyClient!.userId}/$groupId",
+        data: {"content": newMessage});
     return result;
   }
 }

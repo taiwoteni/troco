@@ -41,6 +41,9 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
         lottie: AssetManager.lottieFile(name: getAnimationName()),
         scale: getAnimationScale(),
         label: getAnimationLabel(),
+        flip: transaction.transactionStatus == TransactionStatus.Processing &&
+            transaction.hasReturnTransaction &&
+            transaction.transactionPurpose == TransactionPurpose.Buying,
         expanded: false,
       ),
     );
@@ -61,7 +64,10 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
 
       /// At this stage seller is to upload driver details.
       case TransactionStatus.Processing:
-        return "pending";
+        return transaction.hasReturnTransaction &&
+                transaction.transactionPurpose == TransactionPurpose.Buying
+            ? "delivery"
+            : "pending";
 
       /// At this stage goods have been received.
       /// Buyer is to show satisfaction
@@ -118,7 +124,9 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
                 ? (transaction.hasDriver
                     ? "Awaiting admin's approval"
                     : "Upload driver details")
-                : "Seller is uploading driver details");
+                : transaction.hasReturnTransaction
+                    ? "Returning items"
+                    : "Seller is uploading driver details");
       case TransactionStatus.Ongoing:
         return isVirtual
             ? "Leading and Inspection period"

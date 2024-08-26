@@ -71,9 +71,7 @@ class _TransactionPieChartState extends ConsumerState<TransactionPieChart>
         fontWeight: FontWeightManager.semibold);
     return [
       PieChartSectionData(
-          value: (completedTransactions)
-                  .toDouble() *
-              controller.value,
+          value: (completedTransactions).toDouble() * controller.value,
           color: ColorManager.accentColor,
           radius: SizeManager.extralarge * 1.4,
           title:
@@ -81,19 +79,14 @@ class _TransactionPieChartState extends ConsumerState<TransactionPieChart>
           showTitle: true,
           titleStyle: style),
       PieChartSectionData(
-          value: (ongoingTransactions)
-                  .toDouble()
-                  .toDouble() *
-              controller.value,
+          value: (ongoingTransactions).toDouble() * controller.value,
           color: Colors.purple,
           radius: SizeManager.extralarge * 1.4,
           title: "${((ongoingTransactions * 100) / totalTransaction).round()}%",
           showTitle: true,
           titleStyle: style),
       PieChartSectionData(
-          value: (cancelledTransactions == 0 ? 0.1 : cancelledTransactions)
-                  .toDouble() *
-              controller.value,
+          value: (cancelledTransactions).toDouble() * controller.value,
           color: Colors.red,
           radius: SizeManager.extralarge * 1.4,
           title:

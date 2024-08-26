@@ -37,7 +37,7 @@ class Client extends Equatable {
   bool get online {
     final difference = DateTime.now().difference(lastSeen);
 
-    return difference.inMinutes < 2;
+    return difference.inMinutes < 3;
 
     // return userId == ClientProvider.readOnlyClient!.userId;
   }
@@ -47,7 +47,9 @@ class Client extends Equatable {
       return DateTime.now();
     }
 
-    return DateTime.parse(_json["lastSeen"]);
+    final lastSeen = DateTime.parse(_json["lastSeen"]);
+
+    return lastSeen.toLocal();
   }
 
   VerificationTier get kycTier =>

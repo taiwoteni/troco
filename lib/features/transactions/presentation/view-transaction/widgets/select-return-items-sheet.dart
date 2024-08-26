@@ -31,28 +31,29 @@ class _SelectPaymentMethodSheetState
 
   @override
   void initState() {
-    items = widget.transaction.salesItem;
+    items = widget.transaction.hasReturnTransaction
+        ? widget.transaction.returnItems
+        : widget.transaction.salesItem;
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
-    },);
-    
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
+      },
+    );
   }
 
   @override
   void setState(VoidCallback fn) {
-
-    if(!mounted){
+    if (!mounted) {
       return;
     }
 
     super.setState(fn);
 
-    if(selectedIds.isEmpty){
+    if (selectedIds.isEmpty) {
       ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
-    }else{
+    } else {
       ButtonProvider.enable(buttonKey: buttonKey, ref: ref);
-    
     }
   }
 
@@ -97,7 +98,7 @@ class _SelectPaymentMethodSheetState
           padding: const EdgeInsets.symmetric(vertical: SizeManager.small),
           alignment: Alignment.center,
           child: Text(
-            "Select Unsatisfactory ${widget.transaction.transactionCategory == TransactionCategory.Product? "Product":"Service"}(s)",
+            "Select Unsatisfactory ${widget.transaction.transactionCategory == TransactionCategory.Product ? "Product" : "Service"}(s)",
             style: TextStyle(
                 color: ColorManager.primary,
                 fontWeight: FontWeightManager.bold,
@@ -126,28 +127,26 @@ class _SelectPaymentMethodSheetState
   }
 
   Widget itemsList() {
-
     return ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: SizeManager.regular),
-                child: SelectReturnProductWidget(
-                    selected: selectedIds.contains(items[index].id),
-                    onChecked: () =>
-                        setState((){
-                          if(selectedIds.contains(items[index].id)){
-                            selectedIds.remove(items[index].id);
-                          }else{
-                            selectedIds.add(items[index].id);
-                          }
-                        }),
-                    item: items[index],),
-              );
-            },
-            shrinkWrap: true,
-          );
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
+          child: SelectReturnProductWidget(
+            selected: selectedIds.contains(items[index].id),
+            onChecked: () => setState(() {
+              if (selectedIds.contains(items[index].id)) {
+                selectedIds.remove(items[index].id);
+              } else {
+                selectedIds.add(items[index].id);
+              }
+            }),
+            item: items[index],
+          ),
+        );
+      },
+      shrinkWrap: true,
+    );
   }
 
   Widget button() {

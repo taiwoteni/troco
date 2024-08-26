@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +13,9 @@ import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/home/presentation/providers/blocked-provider.dart';
+
+import '../../features/kyc/utils/enums.dart';
+import '../../features/kyc/utils/kyc-converter.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp._internal(); //private constructor
@@ -67,7 +69,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     // This way, wether a user has internet connection or not, we would be able to tell wether
     // ...he is online or not.
     userRefreshTimer = Timer.periodic(
-      const Duration(seconds: 40),
+      const Duration(seconds: 60),
       (timer) async {
         // We get the user to try to  know if the user is logged in
         // or not.
@@ -78,9 +80,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         await updateOnlineStatus();
 
         final response = await ApiInterface.findUser(userId: client.userId);
-        debugPrint(response.body);
-        debugPrint(response.messageBody!["data"]["lastSeen"]);
-        debugPrint(response.messageBody!["data"]["friends"].toString());
         // log(response.body, name: "User");
 
         if (!response.error) {
@@ -88,8 +87,19 @@ class _MyAppState extends ConsumerState<MyApp> {
           final userJson = response.messageBody!["data"];
           userJson["password"] = ClientProvider.readOnlyClient!.password;
           final updatedClient = Client.fromJson(json: userJson);
-          ref.watch(clientProvider.notifier).state = updatedClient;
+          if (AppStorage.getUser() != null) {
+            ref.watch(clientProvider.notifier).state = updatedClient;
+          }
           AppStorage.saveClient(client: updatedClient);
+
+          if (userJson["kycTier"] < userJson["kyccurrentTier"]) {
+            //To save kyc status, if currently verifying or not.
+            AppStorage.savekycVerificationStatus(
+                tier: KycConverter.convertToEnum(
+                    tier: userJson["kyccurrentTier"].toString()));
+          } else {
+            AppStorage.savekycVerificationStatus(tier: VerificationTier.None);
+          }
 
           // To check if user is blocked.
           final blocked = updatedClient.blocked;
@@ -102,7 +112,5 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   Future<void> updateOnlineStatus() async {
     final response = await AuthenticationRepo.updateOnlineStatus();
-    debugPrint(response.body);
-    log(response.body, name: "Online");
   }
 }

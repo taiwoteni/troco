@@ -1,5 +1,6 @@
 // ignore_for_file: unused_element
 
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -48,13 +49,16 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     salesItems = widget.transaction.salesItem;
     transaction = widget.transaction;
     debugPrint(
-        !transaction.hasDriver ? "null" : transaction.driver.companyName);
+        "Driver Information : ${transaction.clone().toJson()["driverInformation"]}");
+
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
       (timeStamp) {
-        // Still keeping transaction as a named argument
-        //but later override it during initState
-        transaction = ref.watch(currentTransactionProvider);
+        final json = ref.read(currentTransactionProvider).clone().toJson();
+        json.remove("pricing");
+        json.remove("accountDetailes");
+        json.remove("driverInformation");
+        debugPrint(json.toString());
       },
     );
   }
@@ -209,8 +213,8 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
         physics: const BouncingScrollPhysics(),
         controller: ref.watch(tabControllerProvider),
         children: [
-          TransactionsDetailPage(transaction: widget.transaction),
-          TransactionProgressPage(transaction: widget.transaction),
+          TransactionsDetailPage(transaction: transaction),
+          TransactionProgressPage(transaction: transaction),
         ],
       ),
     );

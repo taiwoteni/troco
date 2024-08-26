@@ -260,9 +260,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     child: InfoText(
                       text:
                           "* Optional. If you were referred to Troco by a friend, type in their referral code.",
-                      color: primaryPasswordError
-                          ? Colors.red
-                          : ColorManager.secondary,
+                      color: ColorManager.secondary,
                     ),
                   ),
                   largeSpacer(),

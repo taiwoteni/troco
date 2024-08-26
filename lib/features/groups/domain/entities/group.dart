@@ -49,8 +49,8 @@ class Group extends Equatable {
 
   Transaction get transaction {
     final transactions = AppStorage.getAllTransactions();
-    final _transaction = transactions.firstWhere(
-        (transaction) => transaction.transactionId == _transactions[0]);
+    final _transaction = transactions
+        .firstWhere((transaction) => transaction.transactionId == groupId);
     return _transaction;
   }
 
@@ -79,7 +79,7 @@ class Group extends Equatable {
 
   Client get seller {
     return sortedMembers.firstWhere(
-      (element) => element.userId == members.first,
+      (element) => element.userId == creator,
     );
   }
 

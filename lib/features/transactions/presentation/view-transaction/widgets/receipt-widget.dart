@@ -9,11 +9,8 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
+import '../../../../splash/presentation/splash-screen.dart';
 import '../../../domain/entities/transaction.dart';
-
-var kReceiptHorizontalMargin = 0.0;
-var kReceiptWatermarkWidth = 0.0;
-var kReceiptViewInsetsTop = 0.0;
 
 class ReceiptWidget extends StatefulWidget {
   final Transaction transaction;
@@ -34,16 +31,16 @@ class _ReceiptWidgetState extends State<ReceiptWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SizedBox.expand(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            watermark(),
-            details(),
-          ],
-        ),
+    return Container(
+      color: Colors.white,
+      width: double.maxFinite,
+      height: double.maxFinite,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          watermark(),
+          details(),
+        ],
       ),
     );
   }
@@ -57,7 +54,7 @@ class _ReceiptWidgetState extends State<ReceiptWidget> {
           colorFilter: ColorFilter.mode(ColorManager.tertiary, BlendMode.srcIn),
           child: Image.asset(
             AssetManager.imageFile(name: "troco-white", ext: Extension.png),
-            width: kReceiptWatermarkWidth,
+            width: SplashScreen.receiptViewWatermarkWidth,
             fit: BoxFit.fitWidth,
           ),
         ),
@@ -69,10 +66,11 @@ class _ReceiptWidgetState extends State<ReceiptWidget> {
     return Container(
       width: double.maxFinite,
       height: double.maxFinite,
-      padding: EdgeInsets.symmetric(horizontal: kReceiptHorizontalMargin),
+      padding: EdgeInsets.symmetric(
+          horizontal: SplashScreen.receiptViewHorizontalMargin),
       child: Column(
         children: [
-          Gap(kReceiptViewInsetsTop),
+          Gap(SplashScreen.receiptViewInsetsTop),
           extraLargeSpacer(),
           header(),
           mediumSpacer(),
@@ -109,11 +107,9 @@ class _ReceiptWidgetState extends State<ReceiptWidget> {
               title: "Escrow Charges",
               information: "${transaction.escrowChargesString} NGN"),
           divider(),
-          detailItem(
-              title: "Seller", information: transaction.group.seller.fullName),
+          detailItem(title: "Seller", information: transaction.sellerName),
           divider(),
-          detailItem(
-              title: "Buyer", information: transaction.group.buyer!.fullName),
+          detailItem(title: "Buyer", information: transaction.buyerName),
           divider(),
           detailItem(
               title: "Transaction Status",

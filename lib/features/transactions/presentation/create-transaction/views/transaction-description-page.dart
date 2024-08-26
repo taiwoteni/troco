@@ -33,6 +33,8 @@ class _TransactionDescriptionPageState
       TextEditingController(text: TransactionDataHolder.aboutProduct ?? "");
   final TextEditingController dateController =
       TextEditingController(text: TransactionDataHolder.date?.toString() ?? "");
+  final TextEditingController locationController =
+      TextEditingController(text: TransactionDataHolder.location ?? "");
   final formKey = GlobalKey<FormState>();
   bool inspectByDay = TransactionDataHolder.inspectionPeriod ?? true;
   int inspectionDay = TransactionDataHolder.inspectionDays ?? 1;
@@ -66,7 +68,13 @@ class _TransactionDescriptionPageState
               inspectionPeriod(),
               mediumSpacer(),
               regularSpacer(),
-              dateOfWork(),
+              if (TransactionDataHolder.transactionCategory ==
+                  TransactionCategory.Virtual) ...[
+                dateOfWork(),
+                mediumSpacer(),
+                regularSpacer()
+              ],
+              transactionLocation(),
               extraLargeSpacer(),
               button(),
               largeSpacer(),
@@ -332,6 +340,36 @@ class _TransactionDescriptionPageState
               )
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget transactionLocation() {
+    return Column(
+      children: [
+        InfoText(
+          text: " Location",
+          color: ColorManager.secondary,
+          fontWeight: FontWeightManager.medium,
+        ),
+        regularSpacer(),
+        InputFormField(
+          controller: locationController,
+          label: 'Location',
+          validator: (value) {
+            if (value == null) {
+              return "* enter a location";
+            }
+            if (value.trim().isEmpty) {
+              return "* enter a location";
+            }
+            return null;
+          },
+          onSaved: (value) {
+            TransactionDataHolder.location = value;
+          },
+          prefixIcon: null,
         ),
       ],
     );

@@ -49,7 +49,7 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
         ? SliverFillRemaining(
             child: EmptyScreen(
               scale: ref.watch(collectionsSearchProvider).isEmpty ? 1.5 : 1,
-              xIndex: ref.watch(collectionsSearchProvider).isEmpty ? 1 : 0.25,
+              xIndex: ref.watch(collectionsSearchProvider).isEmpty ? 0 : 0.25,
               forward: true,
               lottie: AssetManager.lottieFile(
                   name: ref.watch(collectionsSearchProvider).isEmpty

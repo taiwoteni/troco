@@ -79,9 +79,10 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
         back(),
         mediumSpacer(),
         Align(alignment: Alignment.centerLeft, child: title()),
-        if (this.transactions.isNotEmpty) ...[
+        if (AppStorage.getAllTransactions().isNotEmpty) ...[
           extraLargeSpacer(),
-          searchBarWidget
+          searchBarWidget,
+          mediumSpacer(),
         ],
         if (transactions.isNotEmpty) querySearchList() else emptyBody(),
       ],
@@ -94,6 +95,7 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
   }
 
   Widget querySearchList() {
+    transactions.sort((a, b) => b.creationTime.compareTo(a.creationTime));
     return ListView.separated(
         key: const Key("latestTransactionsList"),
         padding: EdgeInsets.zero,

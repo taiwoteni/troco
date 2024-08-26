@@ -19,7 +19,9 @@ import '../../../domain/entities/service.dart';
 
 class TransactionPricingListWidget extends ConsumerStatefulWidget {
   final SalesItem item;
-  const TransactionPricingListWidget({super.key, required this.item});
+  final bool editable;
+  const TransactionPricingListWidget(
+      {super.key, required this.item, this.editable = true});
 
   @override
   ConsumerState<TransactionPricingListWidget> createState() =>
@@ -63,7 +65,7 @@ class _TransactionPricingListWidgetState
           mediumSpacer(),
           Expanded(child: productDetails()),
           smallSpacer(),
-          quantityWidget(),
+          if (widget.editable) quantityWidget(),
         ],
       ),
     );

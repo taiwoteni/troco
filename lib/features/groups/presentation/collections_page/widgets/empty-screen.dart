@@ -9,7 +9,7 @@ import '../../../../../core/app/font-manager.dart';
 
 class EmptyScreen extends StatefulWidget {
   final String? lottie, label;
-  final bool expanded, forward;
+  final bool expanded, forward, loop, flip;
   final double scale, xIndex;
   const EmptyScreen(
       {super.key,
@@ -17,7 +17,9 @@ class EmptyScreen extends StatefulWidget {
       this.expanded = false,
       this.xIndex = 0,
       this.forward = false,
+      this.loop = true,
       this.lottie,
+      this.flip = false,
       this.label});
 
   @override
@@ -48,10 +50,14 @@ class _EmptyScreenState extends State<EmptyScreen> {
               1),
           child: Transform.scale(
             scale: widget.scale,
-            child: LottieWidget(
-                lottieRes:
-                    widget.lottie ?? AssetManager.lottieFile(name: 'empty'),
-                size: const Size.square(IconSizeManager.extralarge * 2)),
+            child: Transform.flip(
+              flipX: widget.flip,
+              child: LottieWidget(
+                  loop: widget.loop,
+                  lottieRes:
+                      widget.lottie ?? AssetManager.lottieFile(name: 'empty'),
+                  size: const Size.square(IconSizeManager.extralarge * 2)),
+            ),
           ),
         ),
         mediumSpacer(),

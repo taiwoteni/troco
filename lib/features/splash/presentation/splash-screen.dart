@@ -18,6 +18,10 @@ import 'package:troco/features/transactions/presentation/view-transaction/widget
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
+  static late double receiptViewInsetsTop;
+  static late double receiptViewWatermarkWidth;
+  static late double receiptViewHorizontalMargin;
+
   @override
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
@@ -31,9 +35,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
-      kReceiptViewInsetsTop = MediaQuery.of(context).viewInsets.top;
-      kReceiptHorizontalMargin = MediaQuery.of(context).size.width * .09;
-      kReceiptWatermarkWidth = MediaQuery.of(context).size.width * 4;
+      SplashScreen.receiptViewInsetsTop =
+          MediaQuery.viewInsetsOf(context).top.toDouble();
+      SplashScreen.receiptViewHorizontalMargin =
+          (MediaQuery.sizeOf(context).width * .09).toDouble();
+      SplashScreen.receiptViewWatermarkWidth =
+          (MediaQuery.sizeOf(context).width * 4).toDouble();
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getSplashUiOverlayStyle());
       await Future.delayed(const Duration(seconds: 4));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/progress-details-page.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/progress-timeline-page.dart';
 import '../../../domain/entities/transaction.dart';
@@ -22,9 +23,8 @@ class _TransactionProgressPageState
   void initState() {
     transaction = widget.transaction;
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      countDown();
-    });
+    WidgetsFlutterBinding.ensureInitialized()
+        .addPostFrameCallback((timeStamp) => countDown());
   }
 
   @override
@@ -37,6 +37,9 @@ class _TransactionProgressPageState
 
   @override
   Widget build(BuildContext context) {
+    // Inorder to listen to the current transaction's changes from the
+    // stream provider listener put in place
+    transaction = ref.watch(currentTransactionProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

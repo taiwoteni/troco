@@ -51,15 +51,16 @@ class _GroupListState extends ConsumerState<GroupList> {
     return groups.isEmpty
         ? SliverFillRemaining(
             child: EmptyScreen(
-              scale: ref.watch(collectionsSearchProvider).isEmpty ? 1.5 : 1,
-              xIndex: ref.watch(collectionsSearchProvider).isEmpty ? 1 : 0.25,
-              forward: true,
+              scale: ref.watch(collectionsSearchProvider).isEmpty ? 1.2 : 1,
+              xIndex: ref.watch(collectionsSearchProvider).isEmpty ? 0 : 0.25,
+              forward: ref.watch(collectionsSearchProvider).isEmpty,
+              loop: ref.watch(collectionsSearchProvider).isNotEmpty,
               lottie: AssetManager.lottieFile(
                   name: ref.watch(collectionsSearchProvider).isEmpty
                       ? "create-group"
                       : "no-search-results"),
               label: ref.watch(collectionsSearchProvider).isEmpty
-                  ? "Create a group to speak with your buyer"
+                  ? "Create a group.\nTransact with clients."
                   : "No Search result for '${ref.watch(collectionsSearchProvider)}'",
             ),
           )

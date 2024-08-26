@@ -39,7 +39,7 @@ class _ClientWidgetState extends ConsumerState<FriendWidget> {
     if (now.year == lastSeen.year) {
       if (now.month == lastSeen.month) {
         if (now.day == lastSeen.day) {
-          lastSeenText = DateFormat('hh:mm a').format(lastSeen);
+          lastSeenText = "today at ${DateFormat('hh:mm a').format(lastSeen)}";
         } else if (now.day == lastSeen.day - 1) {
           lastSeenText = "yesterday";
         }

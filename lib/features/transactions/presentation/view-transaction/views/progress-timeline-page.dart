@@ -29,22 +29,16 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
   @override
   void initState() {
     transaction = widget.transaction;
-    timelines = timeline();
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
-      (timeStamp) {
-        // Still keeping transaction as a named argument
-        //but later override it during initState
-        setState(() {
-          transaction = ref.watch(currentTransactionProvider);
-        });
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Inorder to listen to the current transaction's changes from the
+    // stream provider listener put in place
+    transaction = ref.watch(currentTransactionProvider);
     listenToTransactionsChanges();
+    timelines = timeline();
     return Container(
         width: double.maxFinite,
         color: ColorManager.background,
@@ -224,6 +218,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
   }
 
   List<Process> timeline() {
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
     final isVirtual =
         transaction.transactionCategory == TransactionCategory.Virtual;
     Process acceptanceOfTerms =
@@ -249,6 +244,12 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
           SubProcess(
               message: "Admin approves payment",
               done: transaction.adminApprovesPayment),
+          if (transaction.hasReturnTransaction &&
+              transaction.transactionCategory != TransactionCategory.Virtual)
+            SubProcess(
+                message:
+                    "${isBuyer ? "Returning " : "Buyer returned"} ${transaction.returnItems.length} ${transaction.pricingName}${transaction.returnItems.length == 1 ? "" : "s"}",
+                done: transaction.hasReturnTransaction),
           SubProcess(
               message: isVirtual
                   ? "Seller starts leading"
@@ -262,11 +263,14 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
                   : "Admin approves driver details",
               done: isVirtual
                   ? transaction.leadStarted
-                  : paymentStatus.contains(transaction.transactionStatus)),
-          SubProcess(
-              message:
-                  isVirtual ? "Inspection Started" : "Seller sends the driver",
-              done: paymentStatus.contains(transaction.transactionStatus))
+                  : transaction.hasDriver &&
+                      (paymentStatus.contains(transaction.transactionStatus) ||
+                          transaction.transactionStatus ==
+                              TransactionStatus.Ongoing)),
+          if (isVirtual)
+            SubProcess(
+                message: "Inspection Started",
+                done: paymentStatus.contains(transaction.transactionStatus))
         ]);
 
     var deliveryStatus = <TransactionStatus>[
@@ -280,10 +284,11 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
     Process deliveryOfTransaction =
         Process(message: "Delivery of ${category.titleCase}", subProcesses: [
       SubProcess(
-          message: "Driver delivers $category",
+          message:
+              "Driver delivers ${transaction.hasReturnTransaction ? "returned" : ""} $category",
           done: deliveryStatus.contains(transaction.transactionStatus)),
       SubProcess(
-          message: "Buyer recieves $category",
+          message: "Buyer receives $category",
           done: deliveryStatus.contains(transaction.transactionStatus)),
     ]);
 
@@ -298,9 +303,6 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
         ]);
     Process completed =
         Process(message: "Completed Transaction", subProcesses: [
-      SubProcess(
-          message: "Seller confirms payment",
-          done: transaction.transactionStatus == TransactionStatus.Completed),
       SubProcess(
           message: "Transaction is completed",
           done: transaction.transactionStatus == TransactionStatus.Completed),
@@ -328,9 +330,6 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
             .contains(transaction.transactionId)) {
           final t = value.firstWhere(
               (tr) => tr.transactionId == transaction.transactionId);
-          setState(() {
-            transaction = t;
-          });
           ref.watch(currentTransactionProvider.notifier).state = t;
         }
       });

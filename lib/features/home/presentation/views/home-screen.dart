@@ -13,6 +13,8 @@ import 'package:troco/features/home/presentation/widgets/blocked-screen.dart';
 import 'package:troco/features/notifications/domain/entities/notification.dart'
     as n;
 import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
+import 'package:troco/features/services/domain/entities/escrow-fee.dart';
+import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import '../../../../core/api/data/repositories/api-interface.dart';
 import '../../../../core/app/asset-manager.dart';
 import '../../../auth/domain/entities/client.dart';
@@ -87,6 +89,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       saveAllUsersPhones();
+      getLatestEscrowCharges();
     });
   }
 
@@ -106,7 +109,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         resizeToAvoidBottomInset: false,
         backgroundColor: ColorManager.background,
         extendBody: true,
-        body: !showBlockedScreen
+        body: showBlockedScreen
             ? const BlockScreen()
             : Padding(
                 padding: const EdgeInsets.only(
@@ -114,7 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 child: pages[ref.watch(homeProvider)].page,
               ),
-        bottomNavigationBar: !showBlockedScreen
+        bottomNavigationBar: showBlockedScreen
             ? null
             : BottomBar(
                 pages: pages,
@@ -153,6 +156,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       },
     );
+  }
+
+  Future<void> getLatestEscrowCharges() async {
+    final response = await TransactionRepo.getEscrowCharges();
+    if (!response.error) {
+      AppStorage.saveEscrowCharges(
+          escrowCharges: (response.messageBody!["data"] as List)
+              .map(
+                (e) => EscrowCharge.fromJson(json: e),
+              )
+              .toList());
+    }
+
+    debugPrint(response.body);
   }
 
   //5781e0

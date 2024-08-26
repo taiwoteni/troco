@@ -5,12 +5,12 @@ import '../../utils/enums.dart';
 
 class TransactionDataHolder {
   static TransactionCategory? transactionCategory;
-  static String? transactionName;
+  static String? transactionName, location;
   static String? aboutProduct;
   static int? inspectionDays;
   static bool? inspectionPeriod;
   static List<SalesItem>? items;
-  static String? date,id;
+  static String? date, id;
 
   static void clear() {
     transactionCategory = null;
@@ -19,17 +19,19 @@ class TransactionDataHolder {
     aboutProduct = null;
     inspectionDays = null;
     inspectionPeriod = null;
+    location = null;
     items = null;
     date = null;
   }
 
-  static void assignFrom({required final Transaction transaction}){
+  static void assignFrom({required final Transaction transaction}) {
     transactionCategory = transaction.transactionCategory;
     transactionName = transaction.transactionName;
     aboutProduct = transaction.transactionDetail;
     inspectionPeriod = transaction.inspectionPeriod == InspectionPeriod.Day;
     inspectionDays = transaction.inspectionDays;
     items = transaction.salesItem;
+    location = transaction.location;
     date = DateFormat("dd/MM/yyyy").format(transaction.transactionTime);
     id = transaction.transactionId;
   }

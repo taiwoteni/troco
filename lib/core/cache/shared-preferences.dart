@@ -10,6 +10,7 @@ import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
+import 'package:troco/features/services/domain/entities/escrow-fee.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
@@ -35,6 +36,7 @@ class AppStorage {
   static const String NOTIFICATION_STORAGE_KEY = "notifications";
   static const String TRANSACTION_STORAGE_KEY = "transactions";
   static const String SETTINGS_STORAGE_KEY = "settings";
+  static const String ESCROW_CHARGES_KEY = "escrow-charges";
 
   static const String REFERRALS_STORAGE_KEY = "referrals";
   static const String WALLET_HISTORY_STORAGE_KEY = "wallet-history";
@@ -77,13 +79,7 @@ class AppStorage {
       return [];
     }
     final List<dynamic> groupsJson = json.decode(jsonString);
-    return groupsJson
-        .map((e) => Group.fromJson(json: e))
-        .where(
-          (element) =>
-              element.members.contains(ClientProvider.readOnlyClient!.userId),
-        )
-        .toList();
+    return groupsJson.map((e) => Group.fromJson(json: e)).toList();
   }
 
   static Future<void> saveGroups({required final List<Group> groups}) async {
@@ -398,5 +394,22 @@ class AppStorage {
     }
     final List<dynamic> groupsJson = json.decode(jsonString);
     return groupsJson.map((e) => Client.fromJson(json: e)).toList();
+  }
+
+  static List<EscrowCharge> getEscrowCharges() {
+    final jsonString = _pref!.getString(ESCROW_CHARGES_KEY);
+    if (jsonString == null) {
+      return [];
+    }
+    final List<dynamic> chargesJson = json.decode(jsonString);
+    return chargesJson.map((e) => EscrowCharge.fromJson(json: e)).toList();
+  }
+
+  static Future<void> saveEscrowCharges(
+      {required final List<EscrowCharge> escrowCharges}) async {
+    List<Map<dynamic, dynamic>> escrowChargesJson =
+        escrowCharges.map((e) => e.toJson()).toList();
+
+    _pref!.setString(ESCROW_CHARGES_KEY, json.encode(escrowCharges));
   }
 }

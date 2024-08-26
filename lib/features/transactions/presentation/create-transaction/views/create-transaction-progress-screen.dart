@@ -170,18 +170,21 @@ class _CreateTransactonProgressScreenState
       Transaction transaction = Transaction.fromJson(json: {
         "transactionName": TransactionDataHolder.transactionName!,
         "aboutService": TransactionDataHolder.aboutProduct!,
+        "location": TransactionDataHolder.location,
         "inspectionDays": TransactionDataHolder.inspectionDays!,
         "inspectionPeriod":
             TransactionDataHolder.inspectionPeriod! ? "day" : "hour",
         "transaction category":
             TransactionDataHolder.transactionCategory!.name.toLowerCase(),
       });
-      final day = TransactionDataHolder.date!.substring(0, 2).padLeft(2, '0');
-      final month = TransactionDataHolder.date!.substring(3, 5).padLeft(2, '0');
-      final year = TransactionDataHolder.date!.substring(6, 10);
+      final day = TransactionDataHolder.date?.substring(0, 2).padLeft(2, '0');
+      final month = TransactionDataHolder.date?.substring(3, 5).padLeft(2, '0');
+      final year = TransactionDataHolder.date?.substring(6, 10);
 
       final response = await TransactionRepo.createTransaction(
-          dateOfWork: "$year-$month-${day}T00:00:00Z",
+          dateOfWork: TransactionDataHolder.date == null
+              ? group.transactionTime.toIso8601String()
+              : "$year-$month-${day}T00:00:00Z",
           groupId: group.groupId,
           transaction: transaction);
       log("Creating Transaction :${response.body}");

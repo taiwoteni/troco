@@ -2,7 +2,8 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
+import 'package:flutter/painting.dart';
+import 'package:path/path.dart' as Path;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -10,6 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
@@ -21,6 +25,7 @@ import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/payments/domain/repo/payment-repository.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-sheet.dart';
 import 'package:troco/features/transactions/domain/entities/driver.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/widgets/transaction-pricing-list-item.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -35,7 +40,9 @@ import 'package:troco/features/transactions/domain/repository/transaction-repo.d
 import 'package:troco/features/transactions/presentation/view-transaction/views/troco-details-sheet.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-driver-details-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/add-driver-details-form.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/receipt-sheet.dart.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/receipt-widget.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/select-return-product-widget.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
@@ -55,6 +62,7 @@ class _TransactionsDetailPageState
     extends ConsumerState<TransactionsDetailPage> {
   late Transaction transaction;
   late Group group;
+  final screenshot = ScreenshotController();
 
   final pdfBoundaryKey = GlobalKey();
 
@@ -63,27 +71,29 @@ class _TransactionsDetailPageState
   final cancelKey = UniqueKey();
 
   bool driverDetailsExpanded = false;
+  bool returnItemsIsExpanded = false;
 
   @override
   void initState() {
     transaction = widget.transaction;
-    group = AppStorage.getGroups().firstWhere(
+    debugPrint(transaction.transactionId.toString());
+
+    if (AppStorage.getGroups().any(
       (element) => element.groupId == transaction.transactionId,
-    );
+    )) {
+      group = AppStorage.getGroups().firstWhere(
+        (element) => element.groupId == transaction.transactionId,
+      );
+    }
+
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
-      (timeStamp) {
-        // Still keeping transaction as a named argument
-        //but later override it during initState
-        setState(() {
-          transaction = ref.watch(currentTransactionProvider);
-        });
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Inorder to listen to the current transaction's changes from the
+    // stream provider listener put in place
+    transaction = ref.watch(currentTransactionProvider);
     listenToTransactionsChanges();
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -130,6 +140,12 @@ class _TransactionsDetailPageState
           regularSpacer(),
           driverDetailsTitle(),
           divider(),
+          regularSpacer(),
+          if (transaction.hasReturnTransaction) ...[
+            returnItemTitle(),
+            divider(),
+            regularSpacer()
+          ]
         ],
         extraLargeSpacer(),
 
@@ -138,18 +154,7 @@ class _TransactionsDetailPageState
         regularSpacer(),
         extraLargeSpacer(),
         extraLargeSpacer(),
-        if (!transaction.paymentDone &&
-            transaction.buyer == ClientProvider.readOnlyClient!.userId)
-          Padding(
-              padding: const EdgeInsets.only(
-                  left: SizeManager.small,
-                  right: SizeManager.small,
-                  bottom: SizeManager.medium),
-              child: InfoText(
-                  fontSize: FontSizeManager.small,
-                  color: ColorManager.secondary,
-                  text:
-                      "* If payment was previously made with Card, hold on for admin to approve. Do NOT Pay again. There will be no refunds for 'mistakes'")),
+        questionsText(),
 
         button(),
         extraLargeSpacer()
@@ -222,6 +227,57 @@ class _TransactionsDetailPageState
         deliveryFee(),
         regularSpacer(),
       ],
+    );
+  }
+
+  Widget returnItemTitle() {
+    return ExpansionPanelList(
+      expansionCallback: (panelIndex, isExpanded) =>
+          setState(() => returnItemsIsExpanded = isExpanded),
+      elevation: 0,
+      expandedHeaderPadding: EdgeInsets.zero,
+      materialGapSize: 0,
+      dividerColor: Colors.transparent,
+      expandIconColor: ColorManager.primary,
+      children: [
+        ExpansionPanel(
+          backgroundColor: Colors.transparent,
+          canTapOnHeader: true,
+          headerBuilder: (context, isExpanded) {
+            return Text(
+              "Returned Items",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                  color: ColorManager.primary,
+                  fontFamily: 'Quicksand',
+                  wordSpacing: -0.5,
+                  fontWeight: FontWeightManager.bold,
+                  fontSize: FontSizeManager.medium * 0.9),
+            );
+          },
+          body: returnItemsBody(),
+          isExpanded: returnItemsIsExpanded,
+        )
+      ],
+    );
+  }
+
+  Widget returnItemsBody() {
+    return Column(
+      children: transaction.returnItems
+          .map(
+            (e) => Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: SizeManager.regular),
+              child: SelectReturnProductWidget(
+                item: e,
+                onChecked: () {},
+                selected: false,
+                isDisplay: true,
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -347,30 +403,40 @@ class _TransactionsDetailPageState
   }
 
   Widget location() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "Address: ",
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              color: ColorManager.secondary,
-              fontFamily: 'quicksand',
-              height: 1.4,
-              fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.8),
-        ),
-        Text(
-          transaction.address,
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              color: ColorManager.primary,
-              fontFamily: 'quicksand',
-              height: 1.4,
-              fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.8),
-        ),
-      ],
+    return SizedBox(
+      width: double.maxFinite,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Address: ",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                color: ColorManager.secondary,
+                fontFamily: 'quicksand',
+                height: 1.4,
+                fontWeight: FontWeightManager.extrabold,
+                fontSize: FontSizeManager.medium * 0.8),
+          ),
+          Expanded(
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Text(
+                transaction.address,
+                textAlign: TextAlign.right,
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                style: TextStyle(
+                    color: ColorManager.primary,
+                    fontFamily: 'quicksand',
+                    height: 1.4,
+                    fontWeight: FontWeightManager.extrabold,
+                    fontSize: FontSizeManager.medium * 0.8),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -488,32 +554,43 @@ class _TransactionsDetailPageState
   }
 
   Widget driverDestination() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "Destination: ",
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              color: ColorManager.secondary,
-              fontFamily: 'quicksand',
-              height: 1.4,
-              fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.8),
-        ),
-        Text(
-          !transaction.hasDriver
-              ? "---"
-              : transaction.driver.destinationLocation,
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              color: ColorManager.primary,
-              fontFamily: 'quicksand',
-              height: 1.4,
-              fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.8),
-        ),
-      ],
+    return SizedBox(
+      width: double.maxFinite,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Destination: ",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                color: ColorManager.secondary,
+                fontFamily: 'quicksand',
+                height: 1.4,
+                fontWeight: FontWeightManager.extrabold,
+                fontSize: FontSizeManager.medium * 0.8),
+          ),
+          Expanded(
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Text(
+                !transaction.hasDriver
+                    ? "---"
+                    : transaction.driver.destinationLocation,
+                textAlign: TextAlign.right,
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                style: TextStyle(
+                    color: ColorManager.primary,
+                    fontFamily: 'quicksand',
+                    height: 1.4,
+                    fontWeight: FontWeightManager.extrabold,
+                    fontSize: FontSizeManager.medium * 0.8),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -674,6 +751,85 @@ class _TransactionsDetailPageState
     );
   }
 
+  Widget questionsText() {
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+
+    final toAccept =
+        transaction.transactionStatus == TransactionStatus.Pending && isBuyer;
+    final toCancel =
+        transaction.transactionStatus == TransactionStatus.Pending && !isBuyer;
+    final toPay =
+        transaction.transactionStatus == TransactionStatus.Inprogress &&
+            !transaction.paymentDone;
+    final toApprovePayment =
+        transaction.transactionStatus == TransactionStatus.Inprogress &&
+            transaction.paymentDone &&
+            isBuyer;
+    final didReturnTransactions = transaction.hasReturnTransaction &&
+        transaction.transactionStatus == TransactionStatus.Processing &&
+        !isBuyer;
+    final toReceiveGoods =
+        transaction.transactionStatus == TransactionStatus.Ongoing &&
+            transaction.adminApprovesDriver &&
+            isBuyer;
+    final toExpressSatisfaction =
+        transaction.transactionStatus == TransactionStatus.Finalizing &&
+            isBuyer &&
+            !transaction.buyerSatisfied;
+    final toAcceptLeading =
+        transaction.transactionCategory == TransactionCategory.Virtual &&
+            transaction.transactionStatus == TransactionStatus.Processing &&
+            transaction.sellerStarteedLeading &&
+            isBuyer;
+
+    final visible = toAccept ||
+        toCancel ||
+        toPay ||
+        didReturnTransactions ||
+        toReceiveGoods ||
+        toExpressSatisfaction ||
+        toAcceptLeading;
+
+    String text = "";
+
+    if (toAccept) {
+      text = "Do you approve of this transaction?";
+    } else if (toCancel) {
+      text = "Do you wish to cancel your transaction?";
+    } else if (toPay) {
+      text =
+          "Please pay for the ${transaction.pricingName}(s) you agreed to purchase";
+    } else if (didReturnTransactions) {
+      text = "Buyer returned items. Re-upload driver details";
+    } else if (toReceiveGoods) {
+      text = isVirtual
+          ? "Start Inspecting"
+          : "Has your ${transaction.pricingName}(s) delivered?";
+    } else if (toExpressSatisfaction) {
+      text =
+          "Are you satisfied with the ${transaction.pricingName}(s) delivered to you?";
+    } else if (toAcceptLeading) {
+      text = "Do you accept this leading?";
+    }
+
+    // When buyer wants to approve
+    return Visibility(
+      visible: visible,
+      child: Padding(
+          padding: const EdgeInsets.only(
+              left: SizeManager.small,
+              right: SizeManager.small,
+              bottom: SizeManager.medium),
+          child: InfoText(
+              fontSize: FontSizeManager.small,
+              color: ColorManager.secondary,
+              alignment: Alignment.center,
+              text: text)),
+    );
+  }
+
   Widget button() {
     final isPending =
         transaction.transactionStatus == TransactionStatus.Pending;
@@ -731,7 +887,9 @@ class _TransactionsDetailPageState
                           ? "Awaiting buyer.."
                           : "Start Leading"))
                   : (isBuyer
-                      ? "Awaiting driver.."
+                      ? transaction.hasReturnTransaction
+                          ? "Returning items..."
+                          : "Awaiting driver.."
                       : (transaction.hasDriver
                           ? "Awaiting admin's approval.."
                           : "Add driver details")),
@@ -758,7 +916,9 @@ class _TransactionsDetailPageState
               positive: !isBuyer ? null : true,
               label: isBuyer
                   ? (!isVirtual ? "Received Product" : "Inspect Service")
-                  : "Sending Product...",
+                  : isVirtual
+                      ? "Awaiting Inspection..."
+                      : "Sending Product...",
               onPressed: isBuyer
                   ? (isVirtual ? inspectService : markReceivedProduct)
                   : () {}),
@@ -769,14 +929,10 @@ class _TransactionsDetailPageState
                 label: "Satisfied",
                 onPressed: () => showSatisfaction(satisfied: true)),
           actionButton(
-              positive: transaction.buyerSatisfied
-                  ? (null)
-                  : isBuyer
-                      ? false
-                      : null,
+              positive: isBuyer ? transaction.buyerSatisfied : null,
               label: transaction.buyerSatisfied
                   ? (isBuyer
-                      ? "Enjoy.."
+                      ? "View Receipt"
                       : transaction.trocoPaysSeller
                           ? "Payment done.."
                           : "Revenue underway..")
@@ -784,14 +940,17 @@ class _TransactionsDetailPageState
                       ? "Unsatisfied"
                       : "Waiting for response...",
               //No function to delete yet.
-              onPressed:
-                  isBuyer ? () => showSatisfaction(satisfied: false) : () {}),
+              onPressed: transaction.buyerSatisfied && isBuyer
+                  ? viewReceipt
+                  : isBuyer
+                      ? () => showSatisfaction(satisfied: false)
+                      : () {}),
         ],
         if (isCompleted || isCancelled)
           actionButton(
-              positive: isCompleted && !isBuyer ? null : null,
-              label: isCompleted ? "Completed" : "Cancelled..",
-              onPressed: isCompleted && !isBuyer ? viewReceipt : () {}),
+              positive: isCompleted,
+              label: isCompleted ? "View Receipt" : "Cancelled..",
+              onPressed: viewReceipt),
 
         // Expanded(
         //     child: CustomButton.medium(
@@ -867,53 +1026,60 @@ class _TransactionsDetailPageState
     }
   }
 
-  Future<void> viewReceipt() async {}
+  Future<void> viewReceipt() async {
+    await generatePdfFromOffScreenWidget(context: context);
+  }
 
   Future<void> showSatisfaction({required bool satisfied}) async {
     ButtonProvider.startLoading(
         buttonKey: satisfied ? okKey : cancelKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
 
-    if (!satisfied) {
-      final items = (await showModalBottomSheet<List<String>?>(
-              isScrollControlled: true,
-              enableDrag: true,
-              useSafeArea: false,
-              isDismissible: false,
-              backgroundColor: ColorManager.background,
+    late HttpResponseModel response;
+    if (transaction.transactionCategory == TransactionCategory.Virtual) {
+      response = await TransactionRepo.satisfiedWithProduct(
+          transaction: transaction, yes: satisfied);
+    } else {
+      if (!satisfied) {
+        final items = (await showModalBottomSheet<List<String>?>(
+                isScrollControlled: true,
+                enableDrag: true,
+                useSafeArea: false,
+                isDismissible: false,
+                backgroundColor: ColorManager.background,
+                context: context,
+                builder: (context) => SelectReturnItemsSheet(
+                      transaction: transaction,
+                    ))) ??
+            [];
+
+        if (items.isEmpty) {
+          ButtonProvider.stopLoading(
+              buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+          return;
+        }
+
+        final response = await TransactionRepo.returnTransaction(
+            transaction: transaction, itemIds: items);
+
+        log(response.code.toString());
+        log(response.body);
+
+        if (response.error) {
+          ButtonProvider.stopLoading(
+              buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+          SnackbarManager.showBasicSnackbar(
               context: context,
-              builder: (context) => SelectReturnItemsSheet(
-                    transaction: transaction,
-                  ))) ??
-          [];
+              mode: ContentType.failure,
+              message: "An unknown error occurred");
+        }
 
-      log(items.toString());
-
-      if (items.isEmpty) {
-        ButtonProvider.stopLoading(
-            buttonKey: satisfied ? okKey : cancelKey, ref: ref);
         return;
       }
-
-      final response = await TransactionRepo.returnTransaction(
-          transaction: transaction, itemIds: items);
-
-      log(response.body);
-
-      if (response.error) {
-        ButtonProvider.stopLoading(
-            buttonKey: satisfied ? okKey : cancelKey, ref: ref);
-        SnackbarManager.showBasicSnackbar(
-            context: context,
-            mode: ContentType.failure,
-            message: "An unknown error occurred");
-      }
-
-      return;
+      response = await TransactionRepo.satisfiedWithProduct(
+          transaction: transaction, yes: satisfied);
     }
 
-    final response = await TransactionRepo.satisfiedWithProduct(
-        group: group, yes: satisfied);
     log(response.body);
 
     if (response.error) {
@@ -928,9 +1094,9 @@ class _TransactionsDetailPageState
 
   Future<void> markReceivedProduct() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
-    final result =
-        await TransactionRepo.hasReceivedProduct(group: group, yes: true);
-    log(result.body);
+    final result = await TransactionRepo.hasReceivedProduct(
+        transaction: transaction, yes: true);
+    debugPrint(result.body);
     if (result.error) {
       ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
       SnackbarManager.showBasicSnackbar(
@@ -1012,7 +1178,7 @@ class _TransactionsDetailPageState
       backgroundColor: ColorManager.background,
       context: context,
       builder: (context) => const SelectPaymentProfileSheet(
-        onlyAccount: false,
+        onlyAccount: true,
       ),
     );
 
@@ -1042,8 +1208,8 @@ class _TransactionsDetailPageState
     }
 
     // endpoint to add driver details
-    final response =
-        await TransactionRepo.uploadDriverDetails(driver: driver, group: group);
+    final response = await TransactionRepo.uploadDriverDetails(
+        driver: driver, transaction: transaction);
     debugPrint(response.body);
 
     if (response.error) {
@@ -1109,75 +1275,53 @@ class _TransactionsDetailPageState
         if (value
             .map((t) => t.transactionId)
             .contains(transaction.transactionId)) {
+          ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+          ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
+
           final t = value.firstWhere(
               (tr) => tr.transactionId == transaction.transactionId);
-
-          if (transaction.transactionStatus == TransactionStatus.Pending &&
-                  t.transactionStatus == TransactionStatus.Inprogress ||
-              transaction.transactionStatus == TransactionStatus.Ongoing &&
-                  t.transactionStatus == TransactionStatus.Finalizing ||
-              transaction.transactionStatus == TransactionStatus.Inprogress &&
-                  !transaction.paymentDone &&
-                  t.paymentDone ||
-              transaction.transactionStatus == TransactionStatus.Processing &&
-                  !transaction.hasDriver &&
-                  t.transactionStatus == TransactionStatus.Ongoing &&
-                  t.hasDriver ||
-              transaction.buyerSatisfied != t.buyerSatisfied ||
-              t.sellerStarteedLeading != transaction.sellerStarteedLeading ||
-              t.leadStarted != transaction.leadStarted) {
-            ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
-            ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
-          }
           ref.watch(currentTransactionProvider.notifier).state = t;
-          setState(() {
-            transaction = ref.watch(currentTransactionProvider);
-          });
         }
       });
     });
   }
 
-  Widget pdfWidget() {
-    return RepaintBoundary(
-      key: pdfBoundaryKey,
-      child: ReceiptWidget(
-          transaction: transaction.copyWith(
-              transactionStatus: TransactionStatus.Completed)),
+  Future<void> generatePdfFromOffScreenWidget(
+      {required final BuildContext context}) async {
+    Uint8List capturedImage = (await screenshot
+        .captureFromWidget(ReceiptWidget(transaction: transaction)));
+    final pdf = pw.Document();
+
+    final image = pw.MemoryImage(capturedImage);
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.Image(image),
+          );
+        },
+      ),
     );
-  }
 
-  Future<Uint8List?> capturePdfWidget() async {
-    RenderRepaintBoundary boundary = pdfBoundaryKey.currentContext!
-        .findRenderObject() as RenderRepaintBoundary;
-    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    return byteData?.buffer.asUint8List();
-  }
+    // Save or share the PDF
+    final output = (await (Platform.isAndroid
+        ? getExternalStorageDirectory()
+        : getApplicationDocumentsDirectory()))!;
+    final name = transaction.transactionName.replaceAll(" ", "_").toLowerCase();
+    final file = File("${output.path}/$name.jpg");
+    await file.writeAsBytes(capturedImage);
 
-  Future<void> generatePdfFromOffScreenWidget() async {
-    Uint8List? capturedImage = await capturePdfWidget();
-    if (capturedImage != null) {
-      final pdf = pw.Document();
-
-      final image = pw.MemoryImage(capturedImage);
-
-      pdf.addPage(
-        pw.Page(
-          build: (pw.Context context) {
-            return pw.Center(
-              child: pw.Image(image),
-            );
-          },
-        ),
-      );
-
-      // Save or share the PDF
-      final output = await getApplicationDocumentsDirectory();
-      final name =
-          transaction.transactionName.replaceAll(" ", "_").toLowerCase();
-      final file = File("${output.path}/$name.pdf");
-      await file.writeAsBytes(await pdf.save());
+    if (Platform.isAndroid) {
+      final permsion =
+          (await Permission.manageExternalStorage.request()).isGranted;
+      if (permsion) {
+        final copy = await file.copy("/storage/emulated/0/Download/$name.jpg");
+        debugPrint(copy.path);
+      }
     }
+
+    Navigator.pushNamed(context, Routes.cardPaymentScreen,
+        arguments: 'file://${file.absolute.path}');
   }
 }

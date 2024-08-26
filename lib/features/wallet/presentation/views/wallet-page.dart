@@ -11,8 +11,10 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/images/svg.dart';
+import 'package:troco/features/wallet/presentation/providers/wallet-history-provider.dart';
 import 'package:troco/features/wallet/presentation/widgets/wallet-transaction-item-widget.dart';
 import 'package:troco/features/wallet/data/models/wallet-menu-item-model.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
@@ -34,7 +36,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
   late List<WalletTransaction> walletHistory;
   @override
   void initState() {
-    walletHistory = [];
+    walletHistory = AppStorage.getWalletTransactions();
     controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 1));
     super.initState();
@@ -57,6 +59,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
         right: SizeManager.medium,
         left: SizeManager.medium,
         bottom: SizeManager.bottomBarHeight);
+    listenToWalletChanges();
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -304,38 +307,46 @@ class _WalletPageState extends ConsumerState<WalletPage>
   }
 
   Widget transactionWidget() {
+    walletHistory.sort((a, b) => b.time.compareTo(a.time));
     final defaultStyle = TextStyle(
-        fontFamily: 'Lato',
+        fontFamily: 'quicksand',
         color: ColorManager.primary,
-        fontSize: FontSizeManager.large,
+        fontSize: FontSizeManager.large * 0.85,
         fontWeight: FontWeightManager.bold);
     return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Text("Transactions",
+            Text("Wallet Transactions",
                 style: defaultStyle, textAlign: TextAlign.start),
             const Spacer(),
             TextButton(
-                onPressed: null,
-                child: Text('View All',
-                    style: defaultStyle.copyWith(
-                        fontSize: FontSizeManager.regular,
-                        color: ColorManager.accentColor,
-                        fontWeight: FontWeightManager.semibold,
-                        fontFamily: 'Quicksand')))
+                onPressed: () async {
+                  /// to wait for my transactions page to open, then later,
+                  /// then change it back to home Ui  overlay style
+                  await Navigator.pushNamed(context, Routes.walletHistoryRoute);
+                  SystemChrome.setSystemUIOverlayStyle(
+                      ThemeManager.getHomeUiOverlayStyle());
+                },
+                child: Text(
+                  "View All",
+                  style: defaultStyle.copyWith(
+                      color: ColorManager.accentColor,
+                      fontSize: FontSizeManager.regular * 0.9,
+                      fontWeight: FontWeightManager.semibold),
+                ))
           ]),
           ListView.separated(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: SizeManager.small),
+              padding: EdgeInsets.zero,
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               itemBuilder: (context, index) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       WalletTransactionWidget(
                           transaction: walletHistory[index]),
-                      if (index == 2 || index == walletHistory.last)
+                      if (index == 2 || index == walletHistory.length - 1)
                         const Gap(SizeManager.bottomBarHeight)
                     ],
                   ),
@@ -344,5 +355,19 @@ class _WalletPageState extends ConsumerState<WalletPage>
                   color: ColorManager.secondary.withOpacity(0.08)),
               itemCount: walletHistory.length >= 3 ? 3 : walletHistory.length)
         ]);
+  }
+
+  void listenToWalletChanges() {
+    ref.listen(
+      walletHistoryStreamProvider,
+      (previous, next) {
+        next.whenData(
+          (value) {
+            setState(() => walletHistory = value);
+            debugPrint(value.toString());
+          },
+        );
+      },
+    );
   }
 }

@@ -12,11 +12,13 @@ class SelectReturnProductWidget extends StatefulWidget {
   bool selected;
   final void Function() onChecked;
   final SalesItem item;
+  final bool isDisplay;
 
   SelectReturnProductWidget(
       {super.key,
       required this.selected,
       required this.onChecked,
+      this.isDisplay = false,
       required this.item});
 
   @override
@@ -24,8 +26,7 @@ class SelectReturnProductWidget extends StatefulWidget {
       _SelectPaymentMethodWidgetState();
 }
 
-class _SelectPaymentMethodWidgetState
-    extends State<SelectReturnProductWidget> {
+class _SelectPaymentMethodWidgetState extends State<SelectReturnProductWidget> {
   late SalesItem item;
 
   @override
@@ -44,7 +45,7 @@ class _SelectPaymentMethodWidgetState
       },
       child: Container(
         width: double.maxFinite,
-        height: 95,
+        height: widget.isDisplay ? 85 : 95,
         padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
         decoration: BoxDecoration(
             color: widget.selected
@@ -64,7 +65,8 @@ class _SelectPaymentMethodWidgetState
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.name,
+                Text(
+                  item.name,
                   style: TextStyle(
                       fontFamily: "quicksand",
                       color: ColorManager.primary,
@@ -82,18 +84,20 @@ class _SelectPaymentMethodWidgetState
               ],
             ),
             const Spacer(),
-            Radio(
-                value: widget.selected,
-                groupValue: true,
-                fillColor: MaterialStatePropertyAll(ColorManager.accentColor),
-                activeColor: ColorManager.accentColor,
-                toggleable: false,
-                onChanged: null),
+            if (!widget.isDisplay)
+              Radio(
+                  value: widget.selected,
+                  groupValue: true,
+                  fillColor: MaterialStatePropertyAll(ColorManager.accentColor),
+                  activeColor: ColorManager.accentColor,
+                  toggleable: false,
+                  onChanged: null),
           ],
         ),
       ),
     );
   }
+
   Widget productImage() {
     return Container(
       width: 65,
@@ -106,5 +110,4 @@ class _SelectPaymentMethodWidgetState
           )),
     );
   }
-
 }

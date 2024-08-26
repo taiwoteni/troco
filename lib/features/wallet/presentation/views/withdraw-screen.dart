@@ -42,6 +42,9 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
     controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 1));
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+      controller.forward();
+    });
   }
 
   @override
@@ -368,7 +371,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
         final response = await WalletRepository.requestWithdrawal(
             amount: double.parse(amountController.text),
             account: selectedAccount!);
-        debugPrint(response.body);
+        debugPrint(response.code.toString());
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
 
         if (response.error) {

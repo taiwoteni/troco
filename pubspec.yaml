@@ -75,7 +75,8 @@ dependencies:
   webview_flutter: ^4.8.0
   pdf: ^3.6.0
   printing: ^5.9.0
-  screenshot: ^1.2.3
+  screenshot:
+  flutter_popup: ^3.3.0
 
 dev_dependencies:
   flutter_test:

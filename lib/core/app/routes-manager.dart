@@ -26,6 +26,7 @@ import 'package:troco/features/profile/presentation/view-profile/views/view-prof
 import 'package:troco/features/settings/presentation/language/views/change-language-screen.dart';
 import 'package:troco/features/settings/presentation/password/views/change-password-screen.dart';
 import 'package:troco/features/settings/presentation/pin/views/change-pin-screen.dart';
+import 'package:troco/features/settings/presentation/pin/views/forget-pin.dart';
 import 'package:troco/features/settings/presentation/two-factor-authentication/views/two-factor-authentication-screen.dart';
 import 'package:troco/features/splash/presentation/splash-screen.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
@@ -56,6 +57,8 @@ class Routes {
   static const otpRoute = "/otp";
   static const otpPhoneRoute = "/otp";
   static const forgotPasswordRoute = "/forgot-password";
+  static const forgotPin = "/forgot-pin";
+
   static const setupAccountRoute = '/setup-account';
   static const addProfileRoute = '/add-profile';
   static const addTransactionPinRoute = "/add-transaction-pin";
@@ -167,6 +170,10 @@ class RouteGenerator {
         return MaterialPageRoute(
             settings: routeSettings,
             builder: (context) => const ForgotPasswordScreen());
+      case Routes.forgotPin:
+        return MaterialPageRoute(
+            settings: routeSettings,
+            builder: (context) => const ForgotPinScreen());
       case Routes.homeRoute:
         return MaterialPageRoute(
           settings: routeSettings,
@@ -322,7 +329,7 @@ class RouteGenerator {
       case Routes.walletHistoryRoute:
         return MaterialPageRoute(
           settings: routeSettings,
-          builder: (context) => const WalletHstoryScreen(),
+          builder: (context) => const WalletHistoryScreen(),
         );
 
       default:
