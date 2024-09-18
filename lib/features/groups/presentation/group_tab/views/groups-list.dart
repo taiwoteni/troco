@@ -60,7 +60,7 @@ class _GroupListState extends ConsumerState<GroupList> {
                       ? "create-group"
                       : "no-search-results"),
               label: ref.watch(collectionsSearchProvider).isEmpty
-                  ? "Create a group.\nTransact with clients."
+                  ? "Create an order.\nTransact with clients."
                   : "No Search result for '${ref.watch(collectionsSearchProvider)}'",
             ),
           )

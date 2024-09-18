@@ -13,13 +13,27 @@ enum TransactionCategory { Product, Service, Virtual }
 
 enum ProductCondition { New, ForeignUsed, NigerianUsed }
 
-enum ProductQuality {Good, Faulty, High, Low}
+enum ProductQuality { Good, Faulty, High, Low }
 
-enum ServiceRequirement{Produce, Repair, Replacement, Design, Create, Manufacture}
+enum ServiceRequirement {
+  Produce,
+  Repair,
+  Replacement,
+  Design,
+  Create,
+  Manufacture
+}
 
-enum VirtualServiceRequirement{Create,Exchange,Develop,Buying,Selling,Design}
+enum VirtualServiceRequirement {
+  Create,
+  Exchange,
+  Develop,
+  Buying,
+  Selling,
+  Design
+}
 
-enum InspectionPeriod { Hour, Day }
+enum InspectionPeriod { Hour, Day, Minute }
 
 enum TransactionStatus {
   /// When buyer has not yet approved. Transaction has been created.

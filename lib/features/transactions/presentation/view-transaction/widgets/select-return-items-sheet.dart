@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
@@ -80,6 +81,10 @@ class _SelectPaymentMethodSheetState
             ),
             mediumSpacer(),
             itemsList(),
+            mediumSpacer(),
+            escrowCharge(),
+            regularSpacer(),
+            price(),
             extraLargeSpacer(),
             button(),
             extraLargeSpacer()
@@ -155,6 +160,76 @@ class _SelectPaymentMethodSheetState
         usesProvider: true,
         onPressed: selectProfile,
         label: "Return");
+  }
+
+  Widget price() {
+    final totalPrice = items.fold(
+      0.0,
+      (previousValue, element) => previousValue + element.finalPrice,
+    );
+    final totalPriceString =
+        NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
+            .format(totalPrice);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Total Amount Returned: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.8),
+        ),
+        Text(
+          "$totalPriceString NGN",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.accentColor,
+              fontFamily: 'lato',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.8),
+        ),
+      ],
+    );
+  }
+
+  Widget escrowCharge() {
+    final totalPrice = items.fold(
+      0.0,
+      (previousValue, element) => previousValue + element.escrowCharge,
+    );
+    final totalPriceString =
+        NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
+            .format(totalPrice);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Total Charges Returned: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.8),
+        ),
+        Text(
+          "$totalPriceString NGN",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.accentColor,
+              fontFamily: 'lato',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.8),
+        ),
+      ],
+    );
   }
 
   Future<void> selectProfile() async {

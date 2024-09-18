@@ -158,8 +158,16 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
       },
       itemBuilder: (context, index) {
         final product = items[index];
+        if (product.noImage) {
+          return Image.asset(
+            AssetManager.imageFile(name: "task"),
+            width: double.maxFinite,
+            height: double.maxFinite,
+            fit: BoxFit.cover,
+          );
+        }
         return CachedNetworkImage(
-          imageUrl: product.image,
+          imageUrl: product.mainImage(),
           fit: BoxFit.cover,
           height: double.maxFinite,
           fadeInCurve: Curves.ease,

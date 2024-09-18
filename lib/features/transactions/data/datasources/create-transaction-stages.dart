@@ -5,6 +5,7 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
 
 List<Widget> createTransactionStages({required WidgetRef ref}) {
   int currentIndex = ref.watch(createTransactionProgressProvider);
@@ -18,12 +19,8 @@ List<Widget> createTransactionStages({required WidgetRef ref}) {
     GestureDetector(
       onTap: () {
         if (currentIndex > 0) {
-          ref
-              .read(createTransactionPageController.notifier)
-              .state
-              .animateToPage(0,
-                  duration: const Duration(milliseconds: 450),
-                  curve: Curves.ease);
+          ref.read(transactionPageController).animateToPage(0,
+              duration: const Duration(milliseconds: 450), curve: Curves.ease);
         }
       },
       child: TimelineTile(
@@ -54,12 +51,8 @@ List<Widget> createTransactionStages({required WidgetRef ref}) {
     GestureDetector(
       onTap: () {
         if (currentIndex >= 1) {
-          ref
-              .read(createTransactionPageController.notifier)
-              .state
-              .animateToPage(1,
-                  duration: const Duration(milliseconds: 450),
-                  curve: Curves.ease);
+          ref.read(transactionPageController).animateToPage(1,
+              duration: const Duration(milliseconds: 450), curve: Curves.ease);
         }
       },
       child: TimelineTile(
@@ -92,12 +85,8 @@ List<Widget> createTransactionStages({required WidgetRef ref}) {
     GestureDetector(
       onTap: () {
         if (currentIndex >= 2) {
-          ref
-              .read(createTransactionPageController.notifier)
-              .state
-              .animateToPage(2,
-                  duration: const Duration(milliseconds: 450),
-                  curve: Curves.ease);
+          ref.read(transactionPageController).animateToPage(2,
+              duration: const Duration(milliseconds: 450), curve: Curves.ease);
         }
       },
       child: TimelineTile(
@@ -130,12 +119,8 @@ List<Widget> createTransactionStages({required WidgetRef ref}) {
     GestureDetector(
       onTap: () {
         if (currentIndex >= 3) {
-          ref
-              .read(createTransactionPageController.notifier)
-              .state
-              .animateToPage(3,
-                  duration: const Duration(milliseconds: 450),
-                  curve: Curves.ease);
+          ref.read(transactionPageController).animateToPage(3,
+              duration: const Duration(milliseconds: 450), curve: Curves.ease);
         }
       },
       child: TimelineTile(

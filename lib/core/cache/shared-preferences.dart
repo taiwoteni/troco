@@ -92,9 +92,16 @@ class AppStorage {
     if (!_pref!.containsKey(USER_STORAGE_KEY)) {
       return null;
     }
-    final jsonString = _pref!.getString(USER_STORAGE_KEY)!;
-    final client = Client.fromJson(json: jsonDecode(jsonString));
-    return client;
+
+    // In case of any unusual errors, we should wrap in a try...catch
+
+    try {
+      final jsonString = _pref!.getString(USER_STORAGE_KEY)!;
+      final client = Client.fromJson(json: jsonDecode(jsonString));
+      return client;
+    } catch (e) {
+      return null;
+    }
   }
 
   static List<Chat> getChats({required final String groupId}) {

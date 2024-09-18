@@ -31,23 +31,10 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  var pages = List.of(homeItems);
+  var pages = homeItems;
   bool showBlockedScreen = ClientProvider.readOnlyClient?.blocked ?? false;
   @override
   void initState() {
-    if (ClientProvider.readOnlyClient!.accountCategory == Category.Personal) {
-      pages.removeAt(1);
-    } else {
-      if (homeItems.length == 4) {
-        homeItems.insert(
-          1,
-          HomeItemModel(
-              icon: AssetManager.svgFile(name: 'wallet'),
-              label: "Wallet",
-              page: const WalletPage()),
-        );
-      }
-    }
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {

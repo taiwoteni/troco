@@ -92,6 +92,10 @@ class _WalletPageState extends ConsumerState<WalletPage>
   }
 
   Widget appBar() {
+    final walletBalance = ref.watch(clientProvider)?.walletBalance ?? 0;
+    final truncatedWalletBalance = walletBalance.truncate();
+    final decimalBalance = walletBalance - truncatedWalletBalance;
+
     final NumberFormat formatter = NumberFormat.currency(
         locale: 'en_NG',
         // symbol: '₦',
@@ -104,6 +108,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
         color: Colors.white,
         fontSize: FontSizeManager.extralarge * 1.1,
         fontWeight: FontWeightManager.extrabold);
+
     return Container(
         margin: EdgeInsets.only(
             top: MediaQuery.of(context).viewPadding.top + SizeManager.medium),
@@ -153,10 +158,12 @@ class _WalletPageState extends ConsumerState<WalletPage>
                           return RichText(
                               text: TextSpan(style: defaultStyle, children: [
                             TextSpan(
-                                text: formatter.format(controller.value *
-                                    ref.watch(clientProvider)!.walletBalance)),
+                                text: formatter.format(
+                                    controller.value * truncatedWalletBalance)),
                             TextSpan(
-                                text: ".00",
+                                text: (controller.value * decimalBalance)
+                                    .toStringAsFixed(2)
+                                    .substring(1),
                                 style: defaultStyle.copyWith(
                                     fontSize: FontSizeManager.large,
                                     color: Colors.white.withOpacity(0.4))),

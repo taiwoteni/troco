@@ -8,6 +8,7 @@ import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/pricings-notifier.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/asset-manager.dart';
@@ -18,9 +19,9 @@ import '../../../domain/entities/product.dart';
 import '../../../domain/entities/service.dart';
 
 class TransactionPricingListWidget extends ConsumerStatefulWidget {
-  final SalesItem item;
+  SalesItem item;
   final bool editable;
-  const TransactionPricingListWidget(
+  TransactionPricingListWidget(
       {super.key, required this.item, this.editable = true});
 
   @override
@@ -30,11 +31,8 @@ class TransactionPricingListWidget extends ConsumerStatefulWidget {
 
 class _TransactionPricingListWidgetState
     extends ConsumerState<TransactionPricingListWidget> {
-  int quantity = 0;
-
   @override
   void initState() {
-    quantity = widget.item.quantity;
     super.initState();
   }
 
@@ -79,7 +77,9 @@ class _TransactionPricingListWidgetState
           borderRadius: BorderRadius.circular(SizeManager.regular),
           image: DecorationImage(
             fit: BoxFit.cover,
-            image: FileImage(File(widget.item.image)),
+            image: widget.item.noImage
+                ? AssetImage(AssetManager.imageFile(name: "task"))
+                : FileImage(File(widget.item.mainImage())),
           )),
     );
   }
@@ -118,31 +118,39 @@ class _TransactionPricingListWidgetState
       children: [
         IconButton(
           onPressed: () {
-            /// I get the products from transactionProductions.
-            /// and overwite it by affecting changes there.
+            if (widget.item.quantity <= 1) {
+              return;
+            }
+            ref
+                .read(pricingsProvider.notifier)
+                .reduceQuantity(item: widget.item);
+            TransactionDataHolder.items = ref.read(pricingsProvider);
 
-            final items = List<SalesItem>.from(TransactionDataHolder.items!);
-            final currentItem =
-                items.firstWhere((element) => element.id == widget.item.id);
-            final currentItemJson = currentItem.toJson();
-            final int formerQuantity = quantity;
-            currentItemJson["quantity"] =
-                formerQuantity == 1 ? 1 : formerQuantity - 1;
-            setState(() {
-              quantity = quantity == 1 ? 1 : quantity - 1;
-            });
-
-            final formerIndex = items.indexOf(currentItem);
-            final itemObject = TransactionDataHolder.transactionCategory ==
-                    TransactionCategory.Service
-                ? Service.fromJson(json: currentItemJson)
-                : TransactionDataHolder.transactionCategory ==
-                        TransactionCategory.Virtual
-                    ? VirtualService.fromJson(json: currentItemJson)
-                    : Product.fromJson(json: currentItemJson);
-            items.insert(formerIndex, itemObject);
-            items.removeAt(formerIndex + 1);
-            TransactionDataHolder.items = items;
+            // /// I get the products from transactionProductions.
+            // /// and overwite it by affecting changes there.
+            //
+            // final items = List<SalesItem>.from(TransactionDataHolder.items!);
+            // final currentItem =
+            //     items.firstWhere((element) => element.id == widget.item.id);
+            // final currentItemJson = currentItem.toJson();
+            // final int formerQuantity = quantity;
+            // currentItemJson["quantity"] =
+            //     formerQuantity == 1 ? 1 : formerQuantity - 1;
+            // setState(() {
+            //   quantity = quantity == 1 ? 1 : quantity - 1;
+            // });
+            //
+            // final formerIndex = items.indexOf(currentItem);
+            // final itemObject = TransactionDataHolder.transactionCategory ==
+            //         TransactionCategory.Service
+            //     ? Service.fromJson(json: currentItemJson)
+            //     : TransactionDataHolder.transactionCategory ==
+            //             TransactionCategory.Virtual
+            //         ? VirtualService.fromJson(json: currentItemJson)
+            //         : Product.fromJson(json: currentItemJson);
+            // items.insert(formerIndex, itemObject);
+            // items.removeAt(formerIndex + 1);
+            // TransactionDataHolder.items = items;
           },
           icon: SvgIcon(
             svgRes: AssetManager.svgFile(name: "minus"),
@@ -152,7 +160,7 @@ class _TransactionPricingListWidgetState
         ),
         const Gap(SizeManager.regular),
         Text(
-          quantity.toString(),
+          widget.item.quantity.toString(),
           style: TextStyle(
               fontFamily: "quicksand",
               color: ColorManager.secondary,
@@ -162,31 +170,35 @@ class _TransactionPricingListWidgetState
         const Gap(SizeManager.regular),
         IconButton(
           onPressed: () {
-            /// I get the products from transactionProductions.
-            /// and overwite it by affecting changes there.
-
-            final items = List<SalesItem>.from(TransactionDataHolder.items!);
-
-            final currentItem =
-                items.firstWhere((element) => element.id == widget.item.id);
-            final currentItemJson = currentItem.toJson();
-            final int formerQuantity = quantity;
-            currentItemJson["quantity"] = formerQuantity + 1;
-            setState(() {
-              quantity = quantity + 1;
-            });
-
-            final formerIndex = items.indexOf(currentItem);
-            final itemObject = TransactionDataHolder.transactionCategory ==
-                    TransactionCategory.Service
-                ? Service.fromJson(json: currentItemJson)
-                : TransactionDataHolder.transactionCategory ==
-                        TransactionCategory.Virtual
-                    ? VirtualService.fromJson(json: currentItemJson)
-                    : Product.fromJson(json: currentItemJson);
-            items.insert(formerIndex, itemObject);
-            items.removeAt(formerIndex + 1);
-            TransactionDataHolder.items = items;
+            ref
+                .read(pricingsProvider.notifier)
+                .increaseQuantity(item: widget.item);
+            TransactionDataHolder.items = ref.read(pricingsProvider);
+            // /// I get the products from transactionProductions.
+            // /// and overwite it by affecting changes there.
+            //
+            // final items = List<SalesItem>.from(TransactionDataHolder.items!);
+            //
+            // final currentItem =
+            //     items.firstWhere((element) => element.id == widget.item.id);
+            // final currentItemJson = currentItem.toJson();
+            // final int formerQuantity = quantity;
+            // currentItemJson["quantity"] = formerQuantity + 1;
+            // setState(() {
+            //   quantity = quantity + 1;
+            // });
+            //
+            // final formerIndex = items.indexOf(currentItem);
+            // final itemObject = TransactionDataHolder.transactionCategory ==
+            //         TransactionCategory.Service
+            //     ? Service.fromJson(json: currentItemJson)
+            //     : TransactionDataHolder.transactionCategory ==
+            //             TransactionCategory.Virtual
+            //         ? VirtualService.fromJson(json: currentItemJson)
+            //         : Product.fromJson(json: currentItemJson);
+            // items.insert(formerIndex, itemObject);
+            // items.removeAt(formerIndex + 1);
+            // TransactionDataHolder.items = items;
           },
           icon: SvgIcon(
             svgRes: AssetManager.svgFile(name: "add"),

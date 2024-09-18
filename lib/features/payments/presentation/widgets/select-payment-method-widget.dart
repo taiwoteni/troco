@@ -9,6 +9,7 @@ import 'package:troco/core/components/others/spacer.dart';
 
 class SelectPaymentMethodWidget extends StatefulWidget {
   bool selected;
+  final bool moveLeft;
   final void Function() onChecked;
   final String label, lottie;
 
@@ -16,6 +17,7 @@ class SelectPaymentMethodWidget extends StatefulWidget {
       {super.key,
       required this.selected,
       required this.onChecked,
+      this.moveLeft = false,
       required this.label,
       required this.lottie});
 
@@ -50,11 +52,15 @@ class _SelectPaymentMethodWidgetState extends State<SelectPaymentMethodWidget> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Transform.scale(
-                scale: 1.2,
-                child: LottieWidget(
-                    lottieRes: widget.lottie,
-                    size: const Size.square(IconSizeManager.medium)),
+              Transform.translate(
+                offset:
+                    widget.moveLeft ? const Offset(-8, 0) : const Offset(0, 0),
+                child: Transform.scale(
+                  scale: 1.2,
+                  child: LottieWidget(
+                      lottieRes: widget.lottie,
+                      size: const Size.square(IconSizeManager.medium)),
+                ),
               ),
               smallSpacer(),
               Text(

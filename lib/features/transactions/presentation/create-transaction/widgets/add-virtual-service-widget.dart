@@ -35,7 +35,8 @@ class AddVirtualServiceWidget extends ConsumerStatefulWidget {
       _AddVirtualServiceWidgetState();
 }
 
-class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidget> {
+class _AddVirtualServiceWidgetState
+    extends ConsumerState<AddVirtualServiceWidget> {
   VirtualServiceRequirement? selectedRequirement;
   int quantity = 1;
   bool productImageError = false;
@@ -44,6 +45,7 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
   bool loading = false;
   String price = "";
   String name = "";
+  String description = "";
 
   @override
   void setState(VoidCallback fn) {
@@ -88,6 +90,9 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
               serviceName(),
               mediumSpacer(),
               regularSpacer(),
+              serviceDescription(),
+              mediumSpacer(),
+              regularSpacer(),
               serviceRequirements(),
               mediumSpacer(),
               regularSpacer(),
@@ -100,6 +105,7 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
               uploadDocument(),
               largeSpacer(),
               button(),
+              extraLargeSpacer(),
             ],
           ),
         ),
@@ -116,7 +122,7 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
           padding: const EdgeInsets.symmetric(vertical: SizeManager.small),
           alignment: Alignment.center,
           child: Text(
-            "Add Virtual Service",
+            "Add Virtual Product",
             style: TextStyle(
                 color: ColorManager.primary,
                 fontWeight: FontWeightManager.bold,
@@ -148,13 +154,13 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
     return Column(
       children: [
         InfoText(
-          text: "Service Name",
+          text: "Name of Item",
           color: ColorManager.primary,
           fontWeight: FontWeightManager.medium,
         ),
         regularSpacer(),
         InputFormField(
-          label: 'name of service',
+          label: 'name of product/service',
           validator: (value) {
             if (value == null) {
               return "* enter a service name";
@@ -173,11 +179,40 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
     );
   }
 
+  Widget serviceDescription() {
+    return Column(
+      children: [
+        InfoText(
+          text: "Description of item",
+          color: ColorManager.primary,
+          fontWeight: FontWeightManager.medium,
+        ),
+        regularSpacer(),
+        InputFormField(
+          label: 'e.g this facebook page has.....',
+          validator: (value) {
+            if (value == null) {
+              return "* enter item description";
+            }
+            if (value.trim().isEmpty) {
+              return "* enter item description";
+            }
+            return null;
+          },
+          onSaved: (value) {
+            setState(() => description = value?.toString() ?? "");
+          },
+          prefixIcon: null,
+        ),
+      ],
+    );
+  }
+
   Widget serviceRequirements() {
     return Column(
       children: [
         InfoText(
-          text: "Service Requirement",
+          text: "Requirement of Item",
           color: ColorManager.primary,
           fontWeight: FontWeightManager.medium,
         ),
@@ -214,7 +249,7 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
     return Column(
       children: [
         InfoText(
-          text: " Price",
+          text: " Price of item",
           color: ColorManager.primary,
           fontWeight: FontWeightManager.medium,
         ),
@@ -229,13 +264,14 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
             if (value.trim().isEmpty) {
               return "* enter price";
             }
-            if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+            if (!RegExp(r'^[0-9]+$')
+                .hasMatch(value.trim().replaceAll(",", ""))) {
               return "* enter valid price";
             }
             return null;
           },
           onSaved: (value) {
-            setState(() => price = value?.toString() ?? "");
+            setState(() => price = value?.toString().replaceAll(",", "") ?? "");
           },
           prefixIcon: null,
         ),
@@ -370,7 +406,7 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
 
   Widget button() {
     return CustomButton.medium(
-      label: "Add Virtual Service",
+      label: "Add Virtual Item",
       usesProvider: true,
       buttonKey: buttonKey,
       color: ColorManager.themeColor,
@@ -389,10 +425,11 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
           Map<dynamic, dynamic> serviceJson = {
             "serviceId": const Uuid().v4(),
             "virtualName": name,
+            "description": description,
             "virtualPrice": int.parse(price),
             "virtualRequirement": selectedRequirement!.name,
             "quantity": quantity,
-            "pricingImage": serviceImages[0],
+            "pricingImage": serviceImages,
           };
           if (mounted) {
             Navigator.pop(context, VirtualService.fromJson(json: serviceJson));
@@ -452,11 +489,12 @@ class _AddVirtualServiceWidgetState extends ConsumerState<AddVirtualServiceWidge
           width: 70,
           height: 80,
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(SizeManager.regular * 1.3),
-              image: DecorationImage(
-                  image: FileImage(
-                      File(ref.watch(productImagesProvider)[position])),
-                  fit: BoxFit.cover)),
+            borderRadius: BorderRadius.circular(SizeManager.regular * 1.3),
+            image: DecorationImage(
+                image:
+                    FileImage(File(ref.watch(productImagesProvider)[position])),
+                fit: BoxFit.cover),
+          ),
         );
       },
       openBuilder: (context, action) {

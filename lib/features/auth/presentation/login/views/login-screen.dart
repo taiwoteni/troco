@@ -21,12 +21,14 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/data/models/otp-data.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/auth/presentation/welcome-back/views/pin-entry-screen.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/groups/domain/repositories/friend-repository.dart';
+import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 import 'package:troco/features/kyc/utils/enums.dart';
 import 'package:troco/features/kyc/utils/kyc-converter.dart';
@@ -221,11 +223,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void navigateForgetPassword() {
-    // Navigator.pushNamed(context, Routes.forgotPasswordRoute);
-    SnackbarManager.showBasicSnackbar(
-        context: context,
-        seconds: 4,
-        message: "This is still under construction");
+    Navigator.pushNamed(context, Routes.forgotPasswordRoute);
+    // SnackbarManager.showBasicSnackbar(
+    //     context: context,
+    //     seconds: 4,
+    //     message: "This is still under construction");
   }
 
   String? validate(String? value) {
@@ -330,13 +332,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Navigator.pushNamed(context, Routes.setupAccountRoute);
               return;
             }
+            LoginData.initializeFromClient(client: Client.fromJson(json: map));
             Navigator.pushNamed(context, Routes.addProfileRoute);
             return;
           }
           if (map["transactionPin"] == null) {
+            LoginData.initializeFromClient(client: Client.fromJson(json: map));
             Navigator.pushNamed(context, Routes.addTransactionPinRoute);
             return;
           }
+          LoginData.initializeFromClient(client: Client.fromJson(json: map));
+
           Navigator.pushNamed(context, Routes.setupAccountRoute);
 
           return;
@@ -348,7 +354,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         map.remove("__v");
         // map.remove("password");
         map.remove("groups");
-        AppStorage.clear();
+        await AppStorage.clear();
 
         AppStorage.saveSettings(
             settings: Settings.fromJson(map: {
@@ -408,7 +414,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> saveCollections({required final String userId}) async {
-    final newResponse = await ApiInterface.findUser(userId: userId);
+    final newResponse = await GroupRepo.getGroupsOneTime();
     if (newResponse.error) {
       debugPrint(newResponse.body.toString());
 
@@ -416,13 +422,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await AppStorage.clear();
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     } else {
-      final Map<dynamic, dynamic> data = newResponse.messageBody!["data"];
-      debugPrint(data["groups"].toString());
+      final List? data = newResponse.messageBody!["data"];
+      debugPrint(data.toString());
       AppStorage.saveGroups(
-          groups: ((data["groups"] ?? []) as List)
-              .map((e) => Group.fromJson(json: e))
-              .toList());
-      List groups = data["groups"] ?? [];
+          groups: ((data ?? [])).map((e) => Group.fromJson(json: e)).toList());
+      List groups = data ?? [];
 
       for (final group in groups) {
         AppStorage.saveChats(
@@ -434,7 +438,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     final friends = await FriendRepository().getFriends();
-
     AppStorage.saveFriends(friends: friends);
 
     if (AppStorage.getCustomerCareSessionId() == null) {
@@ -541,6 +544,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> save({required final Map<dynamic, dynamic> map}) async {
     // We have to save user data first
 
+    AppStorage.saveClient(client: Client.fromJson(json: map));
     ClientProvider.saveUserData(ref: ref, json: map);
     ref.watch(clientProvider.notifier).state = ClientProvider.readOnlyClient;
 

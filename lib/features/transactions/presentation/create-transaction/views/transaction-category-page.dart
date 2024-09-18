@@ -5,6 +5,7 @@ import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -104,9 +105,7 @@ class _TransactionTermsPageState extends ConsumerState<TransactionTermsPage> {
         TransactionDataHolder.transactionCategory = category;
         TransactionDataHolder.id = null;
         TransactionDataHolder.items = [];
-        ref.read(createTransactionPageController.notifier).state.nextPage(
-            duration: const Duration(milliseconds: 450), curve: Curves.ease);
-        ref.read(createTransactionProgressProvider.notifier).state = 1;
+        ref.read(transactionPageController.notifier).moveNext(nextPageIndex: 1);
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },
     );

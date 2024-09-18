@@ -176,7 +176,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             if (value.trim().isEmpty) {
               return "* enter a product name";
             }
-            
+
             return null;
           },
           onSaved: (value) {
@@ -478,7 +478,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             "productQuality": ProductQualityConverter.convertToString(
                 quality: selectedProductQuality!),
             "quantity": quantity,
-            "pricingImage": productImages[0],
+            "pricingImage": productImages,
           };
           if (mounted) {
             Navigator.pop(context, Product.fromJson(json: productJson));

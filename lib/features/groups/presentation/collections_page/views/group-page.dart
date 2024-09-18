@@ -148,7 +148,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
               controller: tabController,
               tabs: const [
                 Tab(
-                  text: "Groups",
+                  text: "Orders",
                 ),
                 Tab(
                   text: "Friends",

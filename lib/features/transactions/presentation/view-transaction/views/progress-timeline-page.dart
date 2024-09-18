@@ -245,11 +245,16 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
               message: "Admin approves payment",
               done: transaction.adminApprovesPayment),
           if (transaction.hasReturnTransaction &&
-              transaction.transactionCategory != TransactionCategory.Virtual)
+              transaction.transactionCategory !=
+                  TransactionCategory.Virtual) ...[
             SubProcess(
                 message:
                     "${isBuyer ? "Returning " : "Buyer returned"} ${transaction.returnItems.length} ${transaction.pricingName}${transaction.returnItems.length == 1 ? "" : "s"}",
                 done: transaction.hasReturnTransaction),
+            SubProcess(
+                message: "Buyer uploaded returning driver details",
+                done: transaction.hasReturnTransaction)
+          ],
           SubProcess(
               message: isVirtual
                   ? "Seller starts leading"

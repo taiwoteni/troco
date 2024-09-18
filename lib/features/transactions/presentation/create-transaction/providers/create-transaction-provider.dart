@@ -6,8 +6,6 @@ import '../views/transaction-finalize-page.dart';
 import '../views/transaction-pricing-page.dart';
 
 final createTransactionProgressProvider = StateProvider<int>((ref) => 0);
-final createTransactionPageController =
-    StateProvider<PageController>((ref) => PageController());
 final createTransactionStagesProvider =
     StateProvider<List<Widget>>((ref) => const [
           TransactionTermsPage(),

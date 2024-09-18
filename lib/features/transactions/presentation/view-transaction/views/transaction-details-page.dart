@@ -1,9 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
-import 'package:path/path.dart' as Path;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -13,19 +12,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/texts/outputs/info-text.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
 import 'package:troco/features/payments/domain/repo/payment-repository.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-sheet.dart';
 import 'package:troco/features/transactions/domain/entities/driver.dart';
-import 'package:troco/features/transactions/presentation/create-transaction/widgets/transaction-pricing-list-item.dart';
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 import 'package:troco/core/app/color-manager.dart';
@@ -40,12 +37,15 @@ import 'package:troco/features/transactions/domain/repository/transaction-repo.d
 import 'package:troco/features/transactions/presentation/view-transaction/views/troco-details-sheet.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-driver-details-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/add-driver-details-form.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/widgets/receipt-sheet.dart.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/comment-return-items-sheet.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/receipt-widget.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/select-return-product-widget.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/transaction-terms-and-conditions-sheet.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/widgets/upload-task-sheet.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
+import '../../../domain/entities/service.dart';
 import '../../../../groups/domain/entities/group.dart';
 import '../widgets/select-return-items-sheet.dart';
 
@@ -62,6 +62,7 @@ class _TransactionsDetailPageState
     extends ConsumerState<TransactionsDetailPage> {
   late Transaction transaction;
   late Group group;
+  String text = "Approve Transaction";
   final screenshot = ScreenshotController();
 
   final pdfBoundaryKey = GlobalKey();
@@ -69,6 +70,8 @@ class _TransactionsDetailPageState
   final okKey = UniqueKey();
   final neutralKey = UniqueKey();
   final cancelKey = UniqueKey();
+
+  bool serviceReceivedTasks = false;
 
   bool driverDetailsExpanded = false;
   bool returnItemsIsExpanded = false;
@@ -136,7 +139,7 @@ class _TransactionsDetailPageState
         largeSpacer(),
 
         //Driver details
-        if (transaction.transactionCategory != TransactionCategory.Virtual) ...[
+        if (transaction.transactionCategory == TransactionCategory.Product) ...[
           regularSpacer(),
           driverDetailsTitle(),
           divider(),
@@ -441,11 +444,13 @@ class _TransactionsDetailPageState
   }
 
   Widget inspectionPeriod() {
+    final isProduct =
+        transaction.transactionCategory == TransactionCategory.Product;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "Inspection Period: ",
+          isProduct ? "Inspection Period: " : "Transaction Duration: ",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.secondary,
@@ -751,86 +756,7 @@ class _TransactionsDetailPageState
     );
   }
 
-  Widget questionsText() {
-    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
-    final isVirtual =
-        transaction.transactionCategory == TransactionCategory.Virtual;
-
-    final toAccept =
-        transaction.transactionStatus == TransactionStatus.Pending && isBuyer;
-    final toCancel =
-        transaction.transactionStatus == TransactionStatus.Pending && !isBuyer;
-    final toPay =
-        transaction.transactionStatus == TransactionStatus.Inprogress &&
-            !transaction.paymentDone;
-    final toApprovePayment =
-        transaction.transactionStatus == TransactionStatus.Inprogress &&
-            transaction.paymentDone &&
-            isBuyer;
-    final didReturnTransactions = transaction.hasReturnTransaction &&
-        transaction.transactionStatus == TransactionStatus.Processing &&
-        !isBuyer;
-    final toReceiveGoods =
-        transaction.transactionStatus == TransactionStatus.Ongoing &&
-            transaction.adminApprovesDriver &&
-            isBuyer;
-    final toExpressSatisfaction =
-        transaction.transactionStatus == TransactionStatus.Finalizing &&
-            isBuyer &&
-            !transaction.buyerSatisfied;
-    final toAcceptLeading =
-        transaction.transactionCategory == TransactionCategory.Virtual &&
-            transaction.transactionStatus == TransactionStatus.Processing &&
-            transaction.sellerStarteedLeading &&
-            isBuyer;
-
-    final visible = toAccept ||
-        toCancel ||
-        toPay ||
-        didReturnTransactions ||
-        toReceiveGoods ||
-        toExpressSatisfaction ||
-        toAcceptLeading;
-
-    String text = "";
-
-    if (toAccept) {
-      text = "Do you approve of this transaction?";
-    } else if (toCancel) {
-      text = "Do you wish to cancel your transaction?";
-    } else if (toPay) {
-      text =
-          "Please pay for the ${transaction.pricingName}(s) you agreed to purchase";
-    } else if (didReturnTransactions) {
-      text = "Buyer returned items. Re-upload driver details";
-    } else if (toReceiveGoods) {
-      text = isVirtual
-          ? "Start Inspecting"
-          : "Has your ${transaction.pricingName}(s) delivered?";
-    } else if (toExpressSatisfaction) {
-      text =
-          "Are you satisfied with the ${transaction.pricingName}(s) delivered to you?";
-    } else if (toAcceptLeading) {
-      text = "Do you accept this leading?";
-    }
-
-    // When buyer wants to approve
-    return Visibility(
-      visible: visible,
-      child: Padding(
-          padding: const EdgeInsets.only(
-              left: SizeManager.small,
-              right: SizeManager.small,
-              bottom: SizeManager.medium),
-          child: InfoText(
-              fontSize: FontSizeManager.small,
-              color: ColorManager.secondary,
-              alignment: Alignment.center,
-              text: text)),
-    );
-  }
-
-  Widget button() {
+  String getQuestionText() {
     final isPending =
         transaction.transactionStatus == TransactionStatus.Pending;
     final isInProgress =
@@ -849,129 +775,898 @@ class _TransactionsDetailPageState
     final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
     final isVirtual =
         transaction.transactionCategory == TransactionCategory.Virtual;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+
+    String description = isBuyer
+        ? "Accept the Terms and Conditions"
+        : "Waiting for buyer to accept terms.";
+
+    if (isPending) {
+      return description;
+    }
+    if (isCompleted) {
+      return "Transaction Completed!";
+    }
+    if (isCancelled) {
+      return "Transaction Cancelled!";
+    }
+
+    if (isService) {
+      if (isInProgress) {
+        final tasks = transaction.salesItem
+            .map(
+              (e) => e as Service,
+            )
+            .toList();
+        // We get the current task being done
+        final pendingTask = tasks.firstWhere((task) =>
+            !task.taskUploaded ||
+            !task.paymentMade ||
+            !task.approvePayment ||
+            !task.clientSatisfied ||
+            !task.paymentReleased);
+
+        int index = tasks.indexOf(pendingTask);
+
+        if (!pendingTask.paymentMade) {
+          description = isBuyer
+              ? "Make payment for Task ${index + 1}"
+              : "Waiting for buyer's payment";
+          return description;
+        }
+
+        if (!pendingTask.approvePayment) {
+          return "Admin approving payment for task ${index + 1}..";
+        }
+
+        if (!pendingTask.taskUploaded) {
+          description = isBuyer
+              ? "Waiting for developer's work...."
+              : "Upload your work for task ${index + 1}";
+          return description;
+        }
+
+        if (!pendingTask.clientSatisfied) {
+          if (isBuyer) {
+            if (!serviceReceivedTasks) {
+              return "Have you received the developer's work?";
+            }
+            return "Are you satisfied with the developer's work?";
+          }
+
+          return "Waiting for client's impression...";
+        }
+      }
+    }
+    //For Virtual Transactions
+    if (isVirtual) {
+      if (isInProgress) {
+        final tasks = transaction.salesItem
+            .map(
+              (e) => e as VirtualService,
+            )
+            .toList();
+        // We get the current task being done
+        final pendingTask = tasks.firstWhere((task) =>
+            !task.taskUploaded ||
+            !task.paymentMade ||
+            !task.approvePayment ||
+            !task.clientSatisfied ||
+            !task.paymentReleased);
+
+        int index = tasks.indexOf(pendingTask);
+
+        if (!pendingTask.paymentMade) {
+          description = isBuyer
+              ? "Make payment for virtual-product ${index + 1}"
+              : "Waiting for buyer's payment";
+          return description;
+        }
+
+        if (!pendingTask.approvePayment) {
+          return "Admin approving payment for virtual-product ${index + 1}..";
+        }
+
+        if (!pendingTask.taskUploaded) {
+          description = isBuyer
+              ? "Waiting for seller's document...."
+              : "Upload the required document/file for virtual-product ${index + 1}";
+          return description;
+        }
+
+        if (!pendingTask.clientSatisfied) {
+          if (isBuyer) {
+            if (!serviceReceivedTasks) {
+              return "Have you received the developer's work?";
+            }
+            return "Are you satisfied with the developer's work?";
+          }
+
+          return "Waiting for client's impression...";
+        }
+      }
+    }
+
+    // For Product Transactions
+    if (isInProgress) {
+      if (isBuyer) {
+        return "Make payment for products";
+      }
+
+      return text = transaction.paymentDone
+          ? "Admin is approving payment..."
+          : "Buyer making payment...";
+    }
+    if (isProcessing) {
+      if (isBuyer) {
+        return transaction.hasReturnTransaction
+            ? "Your Items are being returned..."
+            : "Waiting for driver details..";
+      }
+
+      return transaction.hasDriver
+          ? "Admin approving.."
+          : "Add delivery driver's details";
+    }
+    if (isOngoing) {
+      if (isBuyer) {
+        return "Have you received the delivered products?";
+      }
+      return "Delivery ongoing...";
+    }
+    if (isFinalizing) {
+      if (isService || isVirtual) {
+        return "Admin is finalizing service transaction...";
+      }
+      if (isBuyer) {
+        return "Are you satisfied with these products?";
+      }
+      return transaction.buyerSatisfied
+          ? "Rounding up transaction..."
+          : "Waiting for client's impression..";
+    }
+
+    return description;
+  }
+
+  Widget questionsText() {
+    // When buyer wants to approve
+    return Padding(
+        padding: const EdgeInsets.only(
+            left: SizeManager.small,
+            right: SizeManager.small,
+            bottom: SizeManager.medium),
+        child: InfoText(
+            fontSize: FontSizeManager.regular,
+            color: ColorManager.secondary,
+            alignment: Alignment.center,
+            text: getQuestionText()));
+  }
+
+  Widget button() {
+    final isPending =
+        transaction.transactionStatus == TransactionStatus.Pending;
+    final isInProgress =
+        transaction.transactionStatus == TransactionStatus.Inprogress;
+    final isProcessing =
+        transaction.transactionStatus == TransactionStatus.Processing;
+    final isOngoing =
+        transaction.transactionStatus == TransactionStatus.Ongoing;
+    final isFinalizing =
+        transaction.transactionStatus == TransactionStatus.Finalizing;
+    final isCompleted =
+        transaction.transactionStatus == TransactionStatus.Completed;
+    final isCancelled =
+        transaction.transactionStatus == TransactionStatus.Cancelled;
     return Row(
       children: [
-        if (isPending) ...[
-          if (isBuyer)
-            actionButton(
-                positive: true, label: "Accept", onPressed: acceptTransaction),
-          actionButton(
-              positive: false,
-              label: isBuyer ? "Reject" : "Cancel",
-              //No function to delete yet.
-              onPressed: rejectTransaction),
-        ],
-        if (isInProgress)
-          actionButton(
-              positive:
-                  isBuyer ? (transaction.paymentDone ? null : true) : null,
-              label: isBuyer
-                  ? (transaction.paymentDone
-                      ? "Awaiting admin's approval.."
-                      : "Make Payment")
-                  : "Awaiting buyer's payment",
-              onPressed: transaction.paymentDone ? () {} : makePayment),
-        if (isProcessing) ...[
-          actionButton(
-              positive: isVirtual
-                  ? (isBuyer
-                      ? (transaction.sellerStarteedLeading ? true : null)
-                      : (transaction.sellerStarteedLeading ? null : true))
-                  : (isBuyer ? null : (transaction.hasDriver ? null : true)),
-              label: isVirtual
-                  ? (isBuyer
-                      ? (transaction.sellerStarteedLeading
-                          ? "Accept"
-                          : "Awaiting seller..")
-                      : (transaction.sellerStarteedLeading
-                          ? "Awaiting buyer.."
-                          : "Start Leading"))
-                  : (isBuyer
-                      ? transaction.hasReturnTransaction
-                          ? "Returning items..."
-                          : "Awaiting driver.."
-                      : (transaction.hasDriver
-                          ? "Awaiting admin's approval.."
-                          : "Add driver details")),
-              onPressed: isVirtual
-                  ? (isBuyer
-                      ? (transaction.sellerStarteedLeading
-                          ? () => respondToLeading(yes: true)
-                          : () {})
-                      : (transaction.sellerStarteedLeading
-                          ? () {}
-                          : startLeading))
-                  : (isBuyer
-                      ? () {}
-                      : (transaction.hasDriver ? () {} : addDriverDetails))),
-          if (isVirtual && isBuyer && transaction.sellerStarteedLeading)
-            actionButton(
-              positive: false,
-              label: "Decline",
-              onPressed: () => respondToLeading(yes: false),
-            )
-        ],
-        if (isOngoing)
-          actionButton(
-              positive: !isBuyer ? null : true,
-              label: isBuyer
-                  ? (!isVirtual ? "Received Product" : "Inspect Service")
-                  : isVirtual
-                      ? "Awaiting Inspection..."
-                      : "Sending Product...",
-              onPressed: isBuyer
-                  ? (isVirtual ? inspectService : markReceivedProduct)
-                  : () {}),
-        if (isFinalizing) ...[
-          if (isBuyer && !transaction.buyerSatisfied)
-            actionButton(
-                positive: true,
-                label: "Satisfied",
-                onPressed: () => showSatisfaction(satisfied: true)),
-          actionButton(
-              positive: isBuyer ? transaction.buyerSatisfied : null,
-              label: transaction.buyerSatisfied
-                  ? (isBuyer
-                      ? "View Receipt"
-                      : transaction.trocoPaysSeller
-                          ? "Payment done.."
-                          : "Revenue underway..")
-                  : isBuyer
-                      ? "Unsatisfied"
-                      : "Waiting for response...",
-              //No function to delete yet.
-              onPressed: transaction.buyerSatisfied && isBuyer
-                  ? viewReceipt
-                  : isBuyer
-                      ? () => showSatisfaction(satisfied: false)
-                      : () {}),
-        ],
-        if (isCompleted || isCancelled)
-          actionButton(
-              positive: isCompleted,
-              label: isCompleted ? "View Receipt" : "Cancelled..",
-              onPressed: viewReceipt),
-
-        // Expanded(
-        //     child: CustomButton.medium(
-        //       label: "Accept",
-        //       usesProvider: true,
-        //       buttonKey: okKey,
-        //       color: ColorManager.accentColor,
-        //     ),
-        //   ),
-
-        // Expanded(
-        //   child: CustomButton.medium(
-        //     buttonKey: cancelKey,
-        //     usesProvider: true,
-        //     label: !isBuyer ? "Cancel" : "Reject",
-        //     color: Colors.red.shade800,
-        //   ),
-        // ),
+        if (isPending) ...pendingButtons(),
+        if (isInProgress) ...inProgressButtons(),
+        if (isProcessing) ...processingButtons(),
+        if (isOngoing) ...ongoingButtons(),
+        if (isFinalizing) ...finalizingButtons(),
+        if (isCompleted) ...completedButtons(),
+        if (isCancelled) ...cancelledButtons(),
       ],
     );
   }
+
+  Widget actionButton(
+      {required final bool? positive,
+      required final String label,
+      required void Function() onPressed}) {
+    return Expanded(
+      child: CustomButton(
+        margin: const EdgeInsets.symmetric(horizontal: SizeManager.small),
+        label: label,
+        buttonKey: positive == null
+            ? neutralKey
+            : positive
+                ? okKey
+                : cancelKey,
+        usesProvider: true,
+        disabled: positive == null,
+        onPressed: onPressed,
+        color: positive == null
+            ? null
+            : positive
+                ? ColorManager.themeColor
+                : Colors.red.shade700,
+      ),
+    );
+  }
+
+  List<Widget> pendingButtons() {
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+
+    final buttons = <Widget>[];
+    if (isBuyer) {
+      if (isService) {
+        buttons.add(actionButton(
+            positive: true,
+            label: "Terms & Conditions",
+            onPressed: openTermsAndConditions));
+        return buttons;
+      }
+      // If it isn't the service
+      buttons.addAll([
+        actionButton(
+            positive: true, label: "Accept", onPressed: acceptTransaction),
+        actionButton(
+            positive: false,
+            label: "Reject",
+            //No function to delete yet.
+            onPressed: rejectTransaction)
+      ]);
+      return buttons;
+    }
+    buttons.add(actionButton(
+        positive: false, label: "Cancel", onPressed: rejectTransaction));
+
+    return buttons;
+  }
+
+  List<Widget> inProgressButtons() {
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+    final buttons = <Widget>[];
+
+    bool paymentDone = transaction.paymentDone;
+
+    if (isService) {
+      final tasks = transaction.salesItem
+          .map(
+            (e) => e as Service,
+          )
+          .toList();
+      // We get the current task being done
+      final pendingTask = tasks.firstWhere((task) =>
+          !task.taskUploaded ||
+          !task.paymentMade ||
+          !task.approvePayment ||
+          !task.clientSatisfied ||
+          !task.paymentReleased);
+
+      int index = tasks.indexOf(pendingTask);
+
+      if (!pendingTask.paymentMade) {
+        setState(() {
+          text = isBuyer
+              ? "Make payment for Task ${index + 1}"
+              : "Waiting for buyer's payment";
+        });
+        buttons.add(actionButton(
+            positive: isBuyer ? true : null,
+            label: isBuyer ? "Make Payment" : "Hold On..",
+            onPressed: isBuyer ? makePayment : () {}));
+        return buttons;
+      }
+
+      if (!pendingTask.approvePayment) {
+        setState(() {
+          text = "Admin approving payment for task ${index + 1}..";
+        });
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+
+      if (!pendingTask.taskUploaded) {
+        setState(() {
+          text = isBuyer
+              ? "Waiting for developer's work...."
+              : "Upload your work for task ${index + 1}";
+        });
+        if (DateTime.now().isAfter(pendingTask.deadlineTime) && isBuyer) {
+          buttons.add(actionButton(
+              positive: false, label: "Report Delay", onPressed: reportDelay));
+          return buttons;
+        }
+
+        buttons.add(actionButton(
+            positive: isBuyer ? null : true,
+            label: isBuyer ? "Hold On.." : "Upload Work",
+            onPressed: isBuyer ? () {} : uploadWork));
+        return buttons;
+      }
+
+      if (!pendingTask.clientSatisfied) {
+        if (isBuyer) {
+          if (!serviceReceivedTasks) {
+            setState(() {
+              text = "Have you received the developer's work?";
+            });
+            buttons.add(actionButton(
+                positive: true,
+                label: "Received Task",
+                onPressed: markReceivedProduct));
+            return buttons;
+          }
+
+          setState(() {
+            text = "Are you satisfied with the developer's work";
+          });
+          buttons.addAll([
+            actionButton(
+              positive: true,
+              label: "Satisfied",
+              onPressed: () =>
+                  showSatisfactionForTask(task: pendingTask, satisfied: true),
+            ),
+            actionButton(
+              positive: false,
+              label: "Unsatisfied",
+              onPressed: () =>
+                  showSatisfactionForTask(task: pendingTask, satisfied: false),
+            )
+          ]);
+          return buttons;
+        }
+
+        setState(() {
+          text = "Waiting for client's impression";
+        });
+
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+
+      return buttons;
+    }
+
+    if (isVirtual) {
+      final tasks = transaction.salesItem
+          .map(
+            (e) => e as VirtualService,
+          )
+          .toList();
+      // We get the current task being done
+      final pendingTask = tasks.firstWhere((task) =>
+          !task.taskUploaded ||
+          !task.paymentMade ||
+          !task.approvePayment ||
+          !task.clientSatisfied ||
+          !task.paymentReleased);
+
+      int index = tasks.indexOf(pendingTask);
+
+      if (!pendingTask.paymentMade) {
+        setState(() {
+          text = isBuyer
+              ? "Make payment for virtual-product ${index + 1}"
+              : "Waiting for buyer's payment";
+        });
+        buttons.add(actionButton(
+            positive: isBuyer ? true : null,
+            label: isBuyer ? "Make Payment" : "Hold On..",
+            onPressed: isBuyer ? makePayment : () {}));
+        return buttons;
+      }
+
+      if (!pendingTask.approvePayment) {
+        setState(() {
+          text = "Admin approving payment for virtual-product ${index + 1}..";
+        });
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+
+      if (!pendingTask.taskUploaded) {
+        setState(() {
+          text = isBuyer
+              ? "Waiting for seller's work...."
+              : "Upload required document/credentials for task ${index + 1}";
+        });
+        buttons.add(actionButton(
+            positive: isBuyer ? null : true,
+            label: isBuyer ? "Hold On.." : "Upload Item",
+            onPressed: isBuyer ? () {} : uploadWork));
+        return buttons;
+      }
+
+      if (!pendingTask.clientSatisfied) {
+        if (isBuyer) {
+          if (!serviceReceivedTasks) {
+            setState(() {
+              text = "Have you received the seller's document?";
+            });
+            buttons.add(actionButton(
+                positive: true,
+                label: "Received Doc",
+                onPressed: markReceivedProduct));
+            return buttons;
+          }
+
+          buttons.addAll([
+            actionButton(
+              positive: true,
+              label: "Satisfied",
+              onPressed: () => showSatisfactionForVirtual(
+                  task: pendingTask, satisfied: true),
+            ),
+            actionButton(
+              positive: false,
+              label: "Unsatisfied",
+              onPressed: () => showSatisfactionForVirtual(
+                  task: pendingTask, satisfied: false),
+            )
+          ]);
+          return buttons;
+        }
+
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+      return buttons;
+    }
+
+    // If it is product transaction
+
+    if (isBuyer) {
+      setState(() {
+        text = "Make payment for products";
+      });
+      buttons.add(actionButton(
+          positive: paymentDone ? null : true,
+          label: paymentDone ? "Admin approving" : "Make Payment",
+          onPressed: paymentDone ? () {} : makePayment));
+      return buttons;
+    }
+
+    setState(() => text = paymentDone
+        ? "Admin is approving payment..."
+        : "Buyer making payment...");
+    buttons.add(
+        actionButton(positive: null, label: "Hold on...", onPressed: () {}));
+
+    return buttons;
+  }
+
+  List<Widget> processingButtons() {
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+    final startedLeading = transaction.sellerStarteedLeading;
+
+    final buttons = <Widget>[];
+
+    if (isVirtual) {
+      final tasks = transaction.salesItem
+          .map(
+            (e) => e as VirtualService,
+          )
+          .toList();
+      // We get the current task being done
+      final pendingTask = tasks.firstWhere((task) =>
+          !task.taskUploaded ||
+          !task.paymentMade ||
+          !task.approvePayment ||
+          !task.clientSatisfied ||
+          !task.paymentReleased);
+
+      int index = tasks.indexOf(pendingTask);
+
+      if (!pendingTask.paymentMade) {
+        setState(() {
+          text = isBuyer
+              ? "Make payment for virtual-product ${index + 1}"
+              : "Waiting for buyer's payment";
+        });
+        buttons.add(actionButton(
+            positive: isBuyer ? true : null,
+            label: isBuyer ? "Make Payment" : "Hold On..",
+            onPressed: isBuyer ? makePayment : () {}));
+        return buttons;
+      }
+
+      if (!pendingTask.approvePayment) {
+        setState(() {
+          text = "Admin approving payment for virtual-product ${index + 1}..";
+        });
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+
+      if (!pendingTask.taskUploaded) {
+        setState(() {
+          text = isBuyer
+              ? "Waiting for seller's work...."
+              : "Upload required document/credentials for task ${index + 1}";
+        });
+        buttons.add(actionButton(
+            positive: isBuyer ? null : true,
+            label: isBuyer ? "Hold On.." : "Upload Item",
+            onPressed: isBuyer ? () {} : uploadWork));
+        return buttons;
+      }
+
+      if (!pendingTask.clientSatisfied) {
+        if (isBuyer) {
+          if (!serviceReceivedTasks) {
+            setState(() {
+              text = "Have you received the seller's document?";
+            });
+            buttons.add(actionButton(
+                positive: true,
+                label: "Received Doc",
+                onPressed: markReceivedProduct));
+            return buttons;
+          }
+
+          buttons.addAll([
+            actionButton(
+              positive: true,
+              label: "Satisfied",
+              onPressed: () => showSatisfactionForVirtual(
+                  task: pendingTask, satisfied: true),
+            ),
+            actionButton(
+              positive: false,
+              label: "Unsatisfied",
+              onPressed: () => showSatisfactionForVirtual(
+                  task: pendingTask, satisfied: false),
+            )
+          ]);
+          return buttons;
+        }
+
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+      return buttons;
+    }
+
+    if (isService) {
+      final tasks = transaction.salesItem
+          .map(
+            (e) => e as Service,
+          )
+          .toList();
+      // We get the current task being done
+      final pendingTask = tasks.firstWhere((task) =>
+          !task.taskUploaded ||
+          !task.paymentMade ||
+          !task.approvePayment ||
+          !task.clientSatisfied ||
+          !task.paymentReleased);
+
+      int index = tasks.indexOf(pendingTask);
+
+      if (!pendingTask.paymentMade) {
+        setState(() {
+          text = isBuyer
+              ? "Make payment for Task ${index + 1}"
+              : "Waiting for buyer's payment";
+        });
+        buttons.add(actionButton(
+            positive: isBuyer ? true : null,
+            label: isBuyer ? "Make Payment" : "Hold On..",
+            onPressed: isBuyer ? makePayment : () {}));
+        return buttons;
+      }
+
+      if (!pendingTask.approvePayment) {
+        setState(() {
+          text = "Admin approving payment for task ${index + 1}..";
+        });
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+
+      if (!pendingTask.taskUploaded) {
+        setState(() {
+          text = isBuyer
+              ? "Waiting for developer's work...."
+              : "Upload your work for task ${index + 1}";
+        });
+        if (DateTime.now().isAfter(pendingTask.deadlineTime) && isBuyer) {
+          buttons.add(actionButton(
+              positive: false, label: "Report Delay", onPressed: reportDelay));
+          return buttons;
+        }
+
+        buttons.add(actionButton(
+            positive: isBuyer ? null : true,
+            label: isBuyer ? "Hold On.." : "Upload Work",
+            onPressed: isBuyer ? () {} : uploadWork));
+        return buttons;
+      }
+
+      if (!pendingTask.clientSatisfied) {
+        if (isBuyer) {
+          if (!serviceReceivedTasks) {
+            setState(() {
+              text = "Have you received the developer's work?";
+            });
+            buttons.add(actionButton(
+                positive: true,
+                label: "Received Task",
+                onPressed: markReceivedProduct));
+            return buttons;
+          }
+
+          setState(() {
+            text = "Are you satisfied with the developer's work";
+          });
+          buttons.addAll([
+            actionButton(
+              positive: true,
+              label: "Satisfied",
+              onPressed: () => showSatisfaction(satisfied: true),
+            ),
+            actionButton(
+              positive: false,
+              label: "Unsatisfied",
+              onPressed: () => showSatisfaction(satisfied: false),
+            )
+          ]);
+          return buttons;
+        }
+
+        setState(() {
+          text = "Waiting for client's impression";
+        });
+
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+
+      return buttons;
+    }
+    // Else if it isn't service
+
+    if (isBuyer) {
+      buttons.add(actionButton(
+          positive: null,
+          label: transaction.hasReturnTransaction
+              ? "Returning items"
+              : "Waiting for driver",
+          onPressed: () {}));
+      return buttons;
+    }
+
+    final hasDriver = transaction.hasDriver;
+    buttons.add(actionButton(
+        positive: hasDriver ? null : true,
+        label: hasDriver ? "Admin approving.." : "Add driver details",
+        onPressed: hasDriver ? () {} : addDriverDetails));
+    return buttons;
+  }
+
+  List<Widget> ongoingButtons() {
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+    final buttons = <Widget>[];
+
+    // Only for Product in the meanwhile
+    buttons.add(actionButton(
+        positive: isBuyer ? true : null,
+        label: isBuyer ? "Received Product" : "Sending Product..",
+        onPressed: markReceivedProduct));
+
+    return buttons;
+  }
+
+  List<Widget> finalizingButtons() {
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+    final buttons = <Widget>[];
+
+    if (isService || isVirtual) {
+      buttons
+          .add(actionButton(positive: null, label: "Done..", onPressed: () {}));
+      return buttons;
+    }
+
+    if (isBuyer) {
+      if (!transaction.buyerSatisfied) {
+        buttons.add(actionButton(
+            positive: true,
+            label: "Satisfied",
+            onPressed: () => showSatisfaction(satisfied: true)));
+      }
+      buttons.add(actionButton(
+          positive: isBuyer ? transaction.buyerSatisfied : null,
+          label: transaction.buyerSatisfied
+              ? (isBuyer
+                  ? "View Receipt"
+                  : transaction.trocoPaysSeller
+                      ? "Payment done.."
+                      : "Revenue underway..")
+              : isBuyer
+                  ? "Unsatisfied"
+                  : "Waiting for response...",
+          //No function to delete yet.
+          onPressed: transaction.buyerSatisfied && isBuyer
+              ? viewReceipt
+              : isBuyer
+                  ? () => showSatisfaction(satisfied: false)
+                  : () {}));
+
+      return buttons;
+    }
+
+    buttons.add(actionButton(
+        positive: null,
+        label: transaction.buyerSatisfied
+            ? (transaction.trocoPaysSeller
+                ? "Payment done.."
+                : "Revenue underway..")
+            : "Waiting for response...",
+        //No function to delete yet.
+        onPressed: () {}));
+
+    return buttons;
+  }
+
+  List<Widget> cancelledButtons() {
+    return [
+      actionButton(positive: null, label: "Cancelled..", onPressed: () {})
+    ];
+  }
+
+  List<Widget> completedButtons() {
+    return [
+      actionButton(
+          positive: true, label: "View Receipt", onPressed: viewReceipt)
+    ];
+  }
+
+  // Methods
+
+  Future<void> openTermsAndConditions() async {
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 3));
+    final accept = await showModalBottomSheet<bool?>(
+        isScrollControlled: true,
+        enableDrag: true,
+        useSafeArea: false,
+        isDismissible: false,
+        backgroundColor: ColorManager.background,
+        context: context,
+        builder: (context) =>
+            TransactionTermsAndConditionsSheet(transaction: transaction));
+    // Once Buyer is done opening the terms and conditions
+
+    if (accept == null) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      return;
+    }
+
+    if (accept) {
+      acceptTransaction();
+    } else {
+      rejectTransaction();
+    }
+  }
+
+  Future<void> uploadWork() async {
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (isVirtual) {
+      final tasks = transaction.salesItem
+          .map(
+            (e) => e as VirtualService,
+          )
+          .toList();
+      // We get the current task being done
+      final pendingTask = tasks.firstWhere((task) =>
+          !task.taskUploaded ||
+          !task.paymentMade ||
+          !task.approvePayment ||
+          !task.clientSatisfied ||
+          !task.paymentReleased);
+
+      final result = await FileManager.pickMedia();
+      if (result == null) {
+        SnackbarManager.showBasicSnackbar(
+            context: context, message: "Empty file", mode: ContentType.failure);
+        ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+        return;
+      }
+
+      final response = await TransactionRepo.uploadProofOfWork(
+          transaction: transaction,
+          taskId: pendingTask.id,
+          link: false,
+          fileOrLink: result.path);
+
+      debugPrint(response.body);
+
+      if (response.error) {
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            message: "Failed to upload document",
+            mode: ContentType.failure);
+        ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+        return;
+      }
+      SnackbarManager.showBasicSnackbar(
+          context: context, message: "Sent document!");
+
+      return;
+    }
+
+    final tasks = transaction.salesItem
+        .map(
+          (e) => e as Service,
+        )
+        .toList();
+    // We get the current task being done
+    final pendingTask = tasks.firstWhere((task) =>
+        !task.taskUploaded ||
+        !task.paymentMade ||
+        !task.approvePayment ||
+        !task.clientSatisfied ||
+        !task.paymentReleased);
+
+    final result = await showModalBottomSheet<bool?>(
+          isScrollControlled: true,
+          enableDrag: true,
+          useSafeArea: false,
+          isDismissible: false,
+          backgroundColor: ColorManager.background,
+          context: context,
+          builder: (context) => UploadTaskSheet(
+            transaction: transaction,
+            service: pendingTask,
+          ),
+        ) ??
+        false;
+
+    // If it had an error
+    if (!result) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+    }
+  }
+
+  Future<void> reportDelay() async {}
 
   Future<void> startLeading() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
@@ -1031,57 +1726,91 @@ class _TransactionsDetailPageState
   }
 
   Future<void> showSatisfaction({required bool satisfied}) async {
+    final isReturnTransaction =
+        transaction.transactionCategory != TransactionCategory.Virtual;
     ButtonProvider.startLoading(
         buttonKey: satisfied ? okKey : cancelKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
 
-    late HttpResponseModel response;
-    if (transaction.transactionCategory == TransactionCategory.Virtual) {
-      response = await TransactionRepo.satisfiedWithProduct(
+    if (!isReturnTransaction || satisfied) {
+      final response = await TransactionRepo.satisfiedWithProduct(
           transaction: transaction, yes: satisfied);
-    } else {
-      if (!satisfied) {
-        final items = (await showModalBottomSheet<List<String>?>(
-                isScrollControlled: true,
-                enableDrag: true,
-                useSafeArea: false,
-                isDismissible: false,
-                backgroundColor: ColorManager.background,
-                context: context,
-                builder: (context) => SelectReturnItemsSheet(
-                      transaction: transaction,
-                    ))) ??
-            [];
-
-        if (items.isEmpty) {
-          ButtonProvider.stopLoading(
-              buttonKey: satisfied ? okKey : cancelKey, ref: ref);
-          return;
-        }
-
-        final response = await TransactionRepo.returnTransaction(
-            transaction: transaction, itemIds: items);
-
-        log(response.code.toString());
-        log(response.body);
-
-        if (response.error) {
-          ButtonProvider.stopLoading(
-              buttonKey: satisfied ? okKey : cancelKey, ref: ref);
-          SnackbarManager.showBasicSnackbar(
-              context: context,
-              mode: ContentType.failure,
-              message: "An unknown error occurred");
-        }
-
-        return;
+      if (response.error) {
+        ButtonProvider.stopLoading(
+            buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            mode: ContentType.failure,
+            message: "An unknown error occurred");
       }
-      response = await TransactionRepo.satisfiedWithProduct(
-          transaction: transaction, yes: satisfied);
+      return;
     }
 
-    log(response.body);
+    //We ask for the items to be returned;
+    final items = await askReturnProductsId();
+    if (items.isEmpty) {
+      ButtonProvider.stopLoading(
+          buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+      return;
+    }
 
+    // We ask for the reason why the buyer is not satisfied.
+    final comment = await askReturnComment();
+    if (comment.trim().isEmpty) {
+      ButtonProvider.stopLoading(
+          buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+      return;
+    }
+
+    //We ask for the new driver details to upload.
+    final driver = await askDriverInformation();
+    if (driver == null) {
+      ButtonProvider.stopLoading(
+          buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+      return;
+    }
+
+    //We first of all create a return transaction first.
+    final returnTransactionResponse = await TransactionRepo.returnTransaction(
+        transaction: transaction, itemIds: items, comment: comment);
+    debugPrint(returnTransactionResponse.body);
+    if (returnTransactionResponse.error) {
+      ButtonProvider.stopLoading(
+          buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Error creating driver details");
+      return;
+    }
+
+    //then we upload the new driver details
+    final driverResponse = await TransactionRepo.uploadDriverDetails(
+        driver: driver, transaction: transaction);
+    if (driverResponse.error) {
+      ButtonProvider.stopLoading(
+          buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Error uploading return driver details");
+      return;
+    }
+
+    SnackbarManager.showBasicSnackbar(
+        context: context,
+        message: "Returning ${transaction.pricingName} underway");
+  }
+
+  Future<void> showSatisfactionForTask(
+      {required final Service task, required bool satisfied}) async {
+    ButtonProvider.startLoading(
+        buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    final response = await TransactionRepo.satisfiedWithTask(
+        transaction: transaction, task: task, yes: satisfied);
     if (response.error) {
       ButtonProvider.stopLoading(
           buttonKey: satisfied ? okKey : cancelKey, ref: ref);
@@ -1089,11 +1818,65 @@ class _TransactionsDetailPageState
           context: context,
           mode: ContentType.failure,
           message: "An unknown error occurred");
+      return;
     }
+  }
+
+  Future<void> showSatisfactionForVirtual(
+      {required final VirtualService task, required bool satisfied}) async {
+    ButtonProvider.startLoading(
+        buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    final response = await TransactionRepo.satisfiedWithVirtualProduct(
+        transaction: transaction, task: task, yes: satisfied);
+    if (response.error) {
+      ButtonProvider.stopLoading(
+          buttonKey: satisfied ? okKey : cancelKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "An unknown error occurred");
+      return;
+    }
+  }
+
+  Future<List<String>> askReturnProductsId() async {
+    return (await showModalBottomSheet<List<String>?>(
+            isScrollControlled: true,
+            enableDrag: true,
+            useSafeArea: false,
+            isDismissible: false,
+            backgroundColor: ColorManager.background,
+            context: context,
+            builder: (context) => SelectReturnItemsSheet(
+                  transaction: transaction,
+                ))) ??
+        [];
+  }
+
+  Future<String> askReturnComment() async {
+    return (await showModalBottomSheet<String?>(
+            isScrollControlled: true,
+            enableDrag: true,
+            useSafeArea: false,
+            isDismissible: false,
+            backgroundColor: ColorManager.background,
+            context: context,
+            builder: (context) => const CommentReturnItemsSheet())) ??
+        "";
   }
 
   Future<void> markReceivedProduct() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    if (transaction.transactionCategory == TransactionCategory.Service) {
+      await Future.delayed(const Duration(seconds: 3));
+      setState(() => serviceReceivedTasks = true);
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      return;
+    }
+
     final result = await TransactionRepo.hasReceivedProduct(
         transaction: transaction, yes: true);
     debugPrint(result.body);
@@ -1185,10 +1968,8 @@ class _TransactionsDetailPageState
     return method;
   }
 
-  Future<void> addDriverDetails() async {
-    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
-    await Future.delayed(const Duration(seconds: 2));
-    final driver = await showModalBottomSheet<Driver?>(
+  Future<Driver?> askDriverInformation() async {
+    return await showModalBottomSheet<Driver?>(
       isScrollControlled: true,
       enableDrag: true,
       useSafeArea: false,
@@ -1197,6 +1978,12 @@ class _TransactionsDetailPageState
       context: context,
       builder: (context) => const AddDriverDetailsForm(),
     );
+  }
+
+  Future<bool> addDriverDetails() async {
+    ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
+    final driver = await askDriverInformation();
 
     if (driver == null) {
       ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
@@ -1204,7 +1991,7 @@ class _TransactionsDetailPageState
           context: context,
           mode: ContentType.failure,
           message: "Empty Driver details");
-      return;
+      return false;
     }
 
     // endpoint to add driver details
@@ -1218,33 +2005,10 @@ class _TransactionsDetailPageState
           context: context,
           mode: ContentType.failure,
           message: "Unable to add driver details");
-      return;
+      return false;
     }
-  }
 
-  Widget actionButton(
-      {required final bool? positive,
-      required final String label,
-      required void Function() onPressed}) {
-    return Expanded(
-      child: CustomButton(
-        margin: const EdgeInsets.symmetric(horizontal: SizeManager.small),
-        label: label,
-        buttonKey: positive == null
-            ? neutralKey
-            : positive
-                ? okKey
-                : cancelKey,
-        usesProvider: true,
-        disabled: positive == null,
-        onPressed: onPressed,
-        color: positive == null
-            ? null
-            : positive
-                ? ColorManager.themeColor
-                : Colors.red.shade700,
-      ),
-    );
+    return true;
   }
 
   Future<void> acceptTransaction() async {
@@ -1257,7 +2021,7 @@ class _TransactionsDetailPageState
       SnackbarManager.showBasicSnackbar(
           context: context,
           mode: ContentType.failure,
-          message: "Failed to approve transaction");
+          message: "Failed to accept transaction");
     }
   }
 

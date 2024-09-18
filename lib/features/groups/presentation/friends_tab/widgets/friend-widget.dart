@@ -16,7 +16,9 @@ import '../../../../auth/domain/entities/client.dart';
 
 class FriendWidget extends ConsumerStatefulWidget {
   final Client client;
-  const FriendWidget({super.key, required this.client});
+  final bool applyHorizontalPadding;
+  const FriendWidget(
+      {super.key, required this.client, this.applyHorizontalPadding = true});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _ClientWidgetState();
@@ -50,12 +52,13 @@ class _ClientWidgetState extends ConsumerState<FriendWidget> {
       lastSeenText = DateFormat('EEE, MMM d yyyy').format(lastSeen);
     }
 
+    final applyHorizontalPadding = widget.applyHorizontalPadding;
     return ListTile(
       dense: true,
       tileColor: Colors.transparent,
-      contentPadding: const EdgeInsets.only(
-        left: SizeManager.medium,
-        right: SizeManager.medium,
+      contentPadding: EdgeInsets.only(
+        left: applyHorizontalPadding ? SizeManager.medium : 0,
+        right: applyHorizontalPadding ? SizeManager.medium : 0,
         top: SizeManager.small,
         bottom: SizeManager.small,
       ),
@@ -98,13 +101,14 @@ class _ClientWidgetState extends ConsumerState<FriendWidget> {
   }
 
   Widget profileIcon() {
-    return SizedBox.square(
-      dimension: 53,
+    return Container(
+      width: 53,
+      height: 53,
+      decoration: const BoxDecoration(shape: BoxShape.circle),
       child: Stack(
-        alignment: Alignment.center,
         children: [
           ProfileIcon(
-            size: 53,
+            size: double.maxFinite,
             url: client.profile,
           ),
           Positioned(

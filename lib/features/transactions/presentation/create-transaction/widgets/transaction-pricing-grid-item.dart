@@ -9,6 +9,9 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/pricings-notifier.dart';
+
+import '../../../../../core/app/asset-manager.dart';
 
 class TransactionPricingGridWidget extends ConsumerWidget {
   final SalesItem item;
@@ -46,7 +49,10 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                   borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(SizeManager.regular)),
                   image: DecorationImage(
-                      image: FileImage(File(item.image)), fit: BoxFit.cover)),
+                      image: item.noImage
+                          ? AssetImage(AssetManager.imageFile(name: "task"))
+                          : FileImage(File(item.mainImage())),
+                      fit: BoxFit.cover)),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: SizeManager.small),
@@ -70,7 +76,11 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                         iconSize: 0,
                         onPressed: () {
                           onDelete?.call();
-                          TransactionDataHolder.items!.remove(item);
+                          ref
+                              .read(pricingsProvider.notifier)
+                              .removeItem(item: item);
+                          TransactionDataHolder.items =
+                              ref.read(pricingsProvider);
                         },
                         icon: const Icon(
                           size: IconSizeManager.regular * 1.3,

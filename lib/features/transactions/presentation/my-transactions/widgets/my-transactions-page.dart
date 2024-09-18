@@ -62,9 +62,10 @@ class _TransactionsPageState extends ConsumerState<MyTransactionsPage> {
         lottie: AssetManager.lottieFile(
             name: controller.text.trim().isNotEmpty
                 ? "no-search-results"
-                : "empty-transaction"),
+                : "empty-transactions"),
         forward: true,
-        xIndex: controller.text.trim().isEmpty ? 1 : 0.25,
+        xIndex: controller.text.trim().isEmpty ? 0 : 0.25,
+        scale: controller.text.trim().isEmpty ? 1.5 : 1,
         label: controller.text.trim().isEmpty
             ? "You don't have any transaction"
             : "No search results for '${controller.text.toString().trim()}'",

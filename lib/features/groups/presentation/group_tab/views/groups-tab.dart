@@ -50,4 +50,3 @@ class _CollectionsTabState extends ConsumerState<CollectionsTab> {
     });
   }
 }
-

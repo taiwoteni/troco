@@ -7,6 +7,7 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/ction-screen-provider.dart';
 import '../../../../../core/app/color-manager.dart';
 
 class TransactionSuccessScreen extends ConsumerStatefulWidget {
@@ -88,10 +89,9 @@ class _AuthSuccessScreenState extends ConsumerState<TransactionSuccessScreen> {
           bottom: SizeManager.extralarge),
       child: CustomButton(
         onPressed: () {
+          ref.watch(popTransactionScreen.notifier).state = true;
           ref.read(createTransactionProgressProvider.notifier).state = 0;
-          Navigator.popUntil(
-            context, 
-            ModalRoute.withName(Routes.chatRoute));
+          Navigator.popUntil(context, ModalRoute.withName(Routes.chatRoute));
         },
         label: "Continue",
         margin: const EdgeInsets.symmetric(

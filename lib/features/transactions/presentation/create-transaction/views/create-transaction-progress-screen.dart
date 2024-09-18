@@ -5,13 +5,17 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
+import '../../../../../core/api/data/model/response-model.dart';
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../groups/domain/entities/group.dart';
@@ -30,15 +34,23 @@ class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
 class _CreateTransactonProgressScreenState
     extends ConsumerState<CreateTransactonProgressScreen> {
   late Group group;
+  late List<SalesItem> pricings;
+  double value = 0.0;
+  double maxValue = 0.0;
+  bool canPop = false;
+  bool error = false;
+  String errorMessage = "An unknown error occurred.";
 
   @override
   void initState() {
+    pricings = List.from(TransactionDataHolder.items ?? []);
     final bool transactionAlreadyCreated = TransactionDataHolder.id != null;
     if (transactionAlreadyCreated) {
       group = AppStorage.getGroups()
           .firstWhere((element) => element.groupId == TransactionDataHolder.id);
     }
-    maxValue = TransactionDataHolder.items!.length + 1;
+
+    maxValue = pricings.length + 1;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
@@ -46,6 +58,10 @@ class _CreateTransactonProgressScreenState
         setState(() {
           group = ModalRoute.of(context)!.settings.arguments! as Group;
         });
+
+        if (group.hasTransaction) {
+          TransactionDataHolder.id = group.groupId;
+        }
       }
 
       createTransaction();
@@ -60,11 +76,6 @@ class _CreateTransactonProgressScreenState
     super.setState(fn);
   }
 
-  double value = 0.0;
-  double maxValue = 0.0;
-  bool canPop = false;
-  bool error = false;
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -77,16 +88,53 @@ class _CreateTransactonProgressScreenState
             height: double.maxFinite,
             alignment: Alignment.center,
             color: ColorManager.background,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                progressWidget(),
-                mediumSpacer(),
-                regularSpacer(),
-                descriptionText(),
-              ],
-            ),
+            child: error
+                ? errorWidget()
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      progressWidget(),
+                      mediumSpacer(),
+                      regularSpacer(),
+                      descriptionText(),
+                    ],
+                  ),
           )),
+    );
+  }
+
+  Widget errorWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        LottieWidget(
+            lottieRes: AssetManager.lottieFile(name: "error"),
+            size: const Size.square(IconSizeManager.extralarge * 2)),
+        mediumSpacer(),
+        Text(
+          errorMessage,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'Quicksand',
+              fontWeight: FontWeightManager.medium,
+              fontSize: FontSizeManager.regular * 1.1),
+        ),
+        regularSpacer(),
+        GestureDetector(
+          onTap: createTransaction,
+          child: Text(
+            "Retry?",
+            style: TextStyle(
+              color: ColorManager.accentColor,
+              fontFamily: 'lato',
+              fontWeight: FontWeightManager.medium,
+              fontSize: FontSizeManager.regular * 1.1,
+              decorationColor: ColorManager.accentColor,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        )
+      ],
     );
   }
 
@@ -133,88 +181,193 @@ class _CreateTransactonProgressScreenState
     if (error) {
       text = "Error occurred.\nCheck your internet.";
     }
-    return GestureDetector(
-      onTap: () => Navigator.pop(context),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-            fontFamily: 'quicksand',
-            fontSize: FontSizeManager.regular * 0.85,
-            color: !error ? ColorManager.secondary : Colors.redAccent,
-            fontWeight: FontWeightManager.medium),
-      ),
+    return Text(
+      text,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+          fontFamily: 'quicksand',
+          fontSize: FontSizeManager.regular * 0.85,
+          color: !error ? ColorManager.secondary : Colors.redAccent,
+          fontWeight: FontWeightManager.medium),
     );
   }
 
   Future<void> createTransaction() async {
+    setState(() {
+      error = false;
+    });
     // This means a transaction has been created but it wasn't successful
     // We get the transaction
     // So we carry on and just add pricing
-    if (TransactionDataHolder.id != null) {
-      final transactionId = TransactionDataHolder.id!;
+    try {
+      if (TransactionDataHolder.id != null) {
+        debugPrint("Transaction Already Exists");
+        final transactionId = TransactionDataHolder.id!;
 
-      final response =
-          await TransactionRepo.getOneTransaction(transactionId: transactionId);
-      log("Fetching Transaction :${response.body}");
-      if (response.error) {
-        setState(() {
-          error = true;
-        });
+        final response = await TransactionRepo.getOneTransaction(
+            transactionId: transactionId);
+        log("Fetching Transaction :${response.body}");
+        if (response.error) {
+          setState(() {
+            error = true;
+          });
+        } else {
+          setState(() {
+            if (value == 0) {
+              value = 1;
+            }
+          });
+          Transaction transaction =
+              Transaction.fromJson(json: response.messageBody!["data"]);
+          await carryOn(transaction: transaction);
+        }
       } else {
-        Transaction transaction =
-            Transaction.fromJson(json: response.messageBody!["data"]);
-        await carryOn(transaction: transaction);
-      }
-    } else {
-      Transaction transaction = Transaction.fromJson(json: {
-        "transactionName": TransactionDataHolder.transactionName!,
-        "aboutService": TransactionDataHolder.aboutProduct!,
-        "location": TransactionDataHolder.location,
-        "inspectionDays": TransactionDataHolder.inspectionDays!,
-        "inspectionPeriod":
-            TransactionDataHolder.inspectionPeriod! ? "day" : "hour",
-        "transaction category":
-            TransactionDataHolder.transactionCategory!.name.toLowerCase(),
-      });
-      final day = TransactionDataHolder.date?.substring(0, 2).padLeft(2, '0');
-      final month = TransactionDataHolder.date?.substring(3, 5).padLeft(2, '0');
-      final year = TransactionDataHolder.date?.substring(6, 10);
-
-      final response = await TransactionRepo.createTransaction(
-          dateOfWork: TransactionDataHolder.date == null
-              ? group.transactionTime.toIso8601String()
-              : "$year-$month-${day}T00:00:00Z",
-          groupId: group.groupId,
-          transaction: transaction);
-      log("Creating Transaction :${response.body}");
-
-      if (response.error) {
-        setState(() {
-          error = true;
+        Transaction transaction = Transaction.fromJson(json: {
+          "transactionName": TransactionDataHolder.transactionName!,
+          "aboutService": TransactionDataHolder.aboutProduct!,
+          "location": TransactionDataHolder.location,
+          "inspectionDays": TransactionDataHolder.inspectionDays!,
+          "inspectionPeriod":
+              TransactionDataHolder.inspectionPeriod! ? "day" : "hour",
+          "transaction category":
+              TransactionDataHolder.transactionCategory!.name.toLowerCase(),
         });
-        log(response.body);
-      } else {
-        TransactionDataHolder.id = response.messageBody!["data"]["_id"];
-        await carryOn(
-            transaction:
-                Transaction.fromJson(json: response.messageBody!["data"]));
+
+        final dateOffWork = DateFormat("dd/MM/yyyy").parse(TransactionDataHolder
+                .date ??
+            DateFormat("dd/MM/yyyy")
+                .format(TransactionDataHolder.inspectionPeriodToDateTime()!));
+
+        final response = await TransactionRepo.createTransaction(
+            dateOfWork:
+                transaction.transactionCategory == TransactionCategory.Service
+                    ? TransactionDataHolder.inspectionPeriodToDateTime()!
+                        .toIso8601String()
+                    : TransactionDataHolder.date == null
+                        ? group.transactionTime.toIso8601String()
+                        : dateOffWork.toIso8601String(),
+            groupId: group.groupId,
+            transaction: transaction);
+        log("Creating Transaction :${response.body}");
+
+        if (response.error) {
+          setState(() {
+            error = true;
+            errorMessage = response.messageBody?["message"]
+                        .toString()
+                        .contains("duplicat") ??
+                    false
+                ? "Transaction already exists."
+                : "An unknown error occurred.";
+          });
+          log(response.body);
+        } else {
+          setState(() {
+            if (value == 0) {
+              value = 1;
+            }
+          });
+          TransactionDataHolder.id = response.messageBody!["data"]["_id"];
+          await carryOn(
+              transaction:
+                  Transaction.fromJson(json: response.messageBody!["data"]));
+        }
       }
+    } on Exception catch (e) {
+      debugPrint(e.toString());
+      setState(
+        () {
+          errorMessage = "Error occurred when creating transaction";
+          error = true;
+        },
+      );
     }
   }
 
   Future<void> carryOn({required Transaction transaction}) async {
-    setState(() {
-      value += 1;
-    });
+    //
+    // setState(() {
+    //   value += 1;
+    // });
+    // final addedPricing = await addPricing(transaction: transaction);
+    // if (addedPricing) {
+    //   TransactionDataHolder.clear();
+    //   Navigator.pushNamed(context, Routes.transactionSuccessRoute);
+    // } else {
+    //   setState(() {
+    //     error = true;
+    //     errorMessage =
+    //         "Error occurred when adding ${transaction.pricingName}s.";
+    //   });
+    // }
 
-    final addedPricing = await addPricing(transaction: transaction);
-    if (addedPricing) {
-      TransactionDataHolder.clear();
+    try {
+      final futures = addPricingTasks(transactionId: transaction.transactionId);
+      final successfulPricings = await futures;
+
+      TransactionDataHolder.clear(ref: ref);
       Navigator.pushNamed(context, Routes.transactionSuccessRoute);
-    } else {
-      setState(() => error = true);
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(
+        () {
+          errorMessage = "Error occurred when uploading items";
+          error = true;
+        },
+      );
     }
+  }
+
+  Future<HttpResponseModel> addPricingItem(
+      {required final String transactionId,
+      required final SalesItem item}) async {
+    final response = await TransactionRepo.createPricing(
+        type: TransactionDataHolder.transactionCategory!,
+        transactionId: transactionId,
+        group: group,
+        item: item);
+    debugPrint(response.body);
+
+    if (response.error) {
+      throw Exception("Error occurred when uploading pricing: ${item.name}");
+    }
+
+    return response;
+  }
+
+  /// Method that
+  Future<List<HttpResponseModel>> addPricingTasks(
+      {required final String transactionId}) async {
+    final list = <HttpResponseModel>[];
+    for (final pricing in pricings) {
+      final response =
+          await addPricingItem(transactionId: transactionId, item: pricing);
+
+      // The remaining line would execute if no error was thrown
+      TransactionDataHolder.items!.remove(pricing);
+      setState(() => value += 1);
+      list.add(response);
+    }
+    return list;
+    // return pricings.map(
+    //   (e) {
+    //     return addPricingItem(transactionId: transactionId, item: e)
+    //         .onError<Exception>(
+    //       (error, stackTrace) {
+    //         throw error;
+    //       },
+    //     ).then<HttpResponseModel>(
+    //       (response) {
+    //         if (!response.error) {
+    //           TransactionDataHolder.items!.remove(e);
+    //           setState(() => value += 1);
+    //         }
+    //
+    //         return response;
+    //       },
+    //     );
+    //   },
+    // ).toList();
   }
 
   Future<bool> addPricing({required final Transaction transaction}) async {
@@ -233,13 +386,13 @@ class _CreateTransactonProgressScreenState
 
       if (!response.error) {
         TransactionDataHolder.items!.removeAt(0);
-        if (value + 1 == maxValue) {
-          setState(() {
-            value += 1;
-          });
-          log("Successfully added all pricings");
-          return true;
-        }
+        // if (value + 1 == maxValue) {
+        //   setState(() {
+        //     value += 1;
+        //   });
+        //   log("Successfully added all pricings");
+        //   return true;
+        // }
         successful += 1;
         setState(() {
           value += 1;
@@ -249,6 +402,6 @@ class _CreateTransactonProgressScreenState
     setState(() {
       error = successful != items.length - 1;
     });
-    return successful != items.length - 1;
+    return successful == items.length - 1;
   }
 }

@@ -15,6 +15,8 @@ import 'package:troco/features/auth/utils/category-converter.dart';
 import 'package:troco/features/kyc/utils/enums.dart';
 import 'package:troco/features/kyc/utils/kyc-converter.dart';
 
+import '../../../../transactions/utils/enums.dart';
+
 class ProfileHeader extends ConsumerStatefulWidget {
   final Client client;
   const ProfileHeader({super.key, required this.client});
@@ -105,6 +107,19 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
     );
   }
 
+  Color getColor() {
+    switch (widget.client.accountCategory) {
+      case Category.Personal:
+        return Colors.amber;
+      case Category.Business:
+        return Colors.blue;
+      case Category.Company:
+        return Colors.purple;
+      case Category.Merchant:
+        return Colors.deepOrangeAccent;
+    }
+  }
+
   Widget mainDetails() {
     Client client = widget.client;
     return Container(
@@ -136,14 +151,14 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                 textAlign: TextAlign.left,
                 style: TextStyle(
                     fontWeight: FontWeightManager.semibold,
-                    color: ColorManager.secondary.withOpacity(0.4),
+                    color: getColor(),
                     fontFamily: 'lato',
                     fontSize: FontSizeManager.small),
               ),
               smallSpacer(),
               SvgIcon(
                   size: const Size.square(IconSizeManager.regular * 0.8),
-                  color: ColorManager.secondary,
+                  color: getColor(),
                   svgRes: AssetManager.svgFile(
                       name:
                           "${client.accountCategory.name.toLowerCase()}-icon"))

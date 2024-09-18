@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/file-manager.dart';
@@ -28,9 +29,11 @@ import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
 import 'package:troco/features/chat/presentation/widgets/add-group-member.dart';
 import 'package:troco/features/chat/presentation/widgets/chat-header.dart';
 import 'package:troco/features/chat/presentation/widgets/chats-list.dart';
+import 'package:troco/features/chat/presentation/widgets/leave-group-sheet.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -57,7 +60,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController controller = TextEditingController();
   bool isCreator = false;
   String? path;
-  Uint8List? thumbnail; 
+  Uint8List? thumbnail;
   FileStat? fileStat;
   late List<Chat> chats;
   bool sending = false;
@@ -150,6 +153,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// Do not remove from here.
     listenToChatChanges();
     listenToGroupChanges();
+    listenToTransactionChanges();
 
     return Padding(
       padding:
@@ -564,7 +568,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                   smallSpacer(),
                   Visibility(
-                    visible: false,
+                    visible: !group.hasTransaction,
                     child: IconButton(
                       onPressed: deleteGroup,
                       highlightColor:
@@ -581,11 +585,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   size: const Size.square(
                                       IconSizeManager.regular * 1.3)),
                             )
-                          : const Icon(
-                              CupertinoIcons.delete_solid,
+                          : SvgIcon(
+                              flip: true,
+                              size: const Size.square(
+                                  IconSizeManager.regular * 1.3),
                               color: Colors.red,
-                              size: IconSizeManager.regular * 1.3,
-                            ),
+                              svgRes:
+                                  AssetManager.svgFile(name: "remove-user")),
                     ),
                   )
                 ],
@@ -596,21 +602,114 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> deleteGroup() async {
-    setState(() => deleting = true);
-    final result = await GroupRepo.deleteGroup(
-        userId: ClientProvider.readOnlyClient!.userId, groupId: group.groupId);
-    log(result.body);
-    setState(() => deleting = !result.error);
+    final hasBuyer = group.members.length >= 3;
+    final isSeller = group.creator == ClientProvider.readOnlyClient!.userId;
+    bool deletedGroup = false;
+    late HttpResponseModel response;
 
-    if (result.error) {
+    if (isSeller) {
+      if (hasBuyer) {
+        final deleteBuyer = await showModalBottomSheet<bool?>(
+          isScrollControlled: true,
+          enableDrag: true,
+          useSafeArea: true,
+          backgroundColor: ColorManager.background,
+          context: context,
+          builder: (context) => LeaveGroupSheet(group: group),
+        );
+
+        if (deleteBuyer == null) {
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              message: "Select who should leave",
+              mode: ContentType.failure);
+          return;
+        }
+        if (deleteBuyer) {
+          setState(() => deleting = true);
+
+          response =
+              await GroupRepo.leaveGroup(userId: group.buyerId, group: group);
+        } else {
+          deletedGroup = true;
+          setState(() => deleting = true);
+          final leaveBuyerResponse =
+              await GroupRepo.leaveGroup(userId: group.buyerId, group: group);
+          if (leaveBuyerResponse.error) {
+            setState(() => deleting = false);
+
+            SnackbarManager.showBasicSnackbar(
+                context: context,
+                message: "Error occurred when leaving group",
+                mode: ContentType.failure);
+            return;
+          }
+
+          final leaveResponse =
+              await GroupRepo.leaveGroup(userId: group.creator, group: group);
+          log(leaveResponse.body);
+
+          if (leaveResponse.error) {
+            setState(() => deleting = false);
+
+            SnackbarManager.showBasicSnackbar(
+                context: context,
+                message: "Error occurred when leaving group",
+                mode: ContentType.failure);
+            return;
+          }
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              mode: ContentType.help,
+              message: "Deleted Group");
+          Navigator.pop(context);
+        }
+      } else {
+        deletedGroup = true;
+        setState(() => deleting = true);
+        response =
+            await GroupRepo.leaveGroup(userId: group.creator, group: group);
+        log(response.code.toString());
+        log(response.body);
+      }
+    } else {
+      deletedGroup = true;
+      setState(() => deleting = true);
+      final leaveResponse =
+          await GroupRepo.leaveGroup(userId: group.buyerId, group: group);
+      log(leaveResponse.body);
+      if (leaveResponse.error) {
+        setState(() => deleting = false);
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            message: "Error occurred when leaving group",
+            mode: ContentType.failure);
+        return;
+      }
+      response = await GroupRepo.deleteGroup(
+          userId: group.buyerId, groupId: group.groupId);
+    }
+
+    // final result = await GroupRepo.deleteGroup(
+    //     userId: ClientProvider.readOnlyClient!.userId, groupId: group.groupId);
+    // log(result.body);
+    setState(() => deleting = false);
+
+    if (response.error) {
       SnackbarManager.showBasicSnackbar(
           context: context,
           mode: ContentType.failure,
-          message: "Could not delete group");
+          message: deletedGroup
+              ? "Could not delete group"
+              : "Could not remove user");
     } else {
       SnackbarManager.showBasicSnackbar(
-          context: context, mode: ContentType.help, message: "Deleted group");
-      Navigator.pop(context);
+          context: context,
+          mode: ContentType.help,
+          message: deletedGroup ? "Deleted Group" : "Removed user");
+      if (deletedGroup) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -860,6 +959,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             );
           }
         }
+      });
+    });
+  }
+
+  Future<void> listenToTransactionChanges() async {
+    ref.listen(transactionsStreamProvider, (previous, next) {
+      next.whenData((value) {
+        setState(() {});
       });
     });
   }

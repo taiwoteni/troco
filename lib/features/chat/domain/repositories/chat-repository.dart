@@ -31,17 +31,12 @@ class ChatRepo {
     required final String groupId,
     required final String message,
   }) async {
-    final result = await ApiInterface.postRequest(
-        url: "addMessageToGroup",
-
-        /// For now to know that the code works.
-        /// This mishap is due to Finbarr's backend.
-
-        data: {
-          "groupId": groupId,
-          "userId": ClientProvider.readOnlyClient!.userId,
-          "content": message,
-        });
+    final result =
+        await ApiInterface.postRequest(url: "addMessageToGroup", data: {
+      "groupId": groupId,
+      "userId": ClientProvider.readOnlyClient!.userId,
+      "content": message,
+    });
 
     return result;
   }

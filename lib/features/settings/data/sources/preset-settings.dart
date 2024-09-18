@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
@@ -17,6 +19,16 @@ List<SettingsModel> presetSettings(
         icon: AssetManager.svgFile(name: "edit"),
         onTap: () => Navigator.pushNamed(context, Routes.editProfileRoute),
         iconType: IconType.svg),
+    SettingsModel(
+        label: "Change Email",
+        icon: AssetManager.svgFile(name: "email"),
+        // onTap: () => Navigator.pushNamed(context, Routes.editProfileRoute),
+        iconType: IconType.svg),
+    const SettingsModel(
+        label: "Change Phone Number",
+        icon: CupertinoIcons.phone_fill,
+        // onTap: () => Navigator.pushNamed(context, Routes.editProfileRoute),
+        iconType: IconType.icon),
     SettingsModel(
         label: "Two Factor Authentication",
         icon: AssetManager.svgFile(name: "two-factor-authentication"),

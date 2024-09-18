@@ -63,6 +63,9 @@ class Group extends Equatable {
       return [];
     } else {
       final clientList = (_json["sortedMembers"] as List)
+          .where(
+            (element) => members.contains(element["id"]),
+          )
           .map(
             (e) => Client.fromJson(json: e),
           )

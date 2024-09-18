@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
@@ -48,7 +50,7 @@ class GroupRepo {
 
   Future<List<dynamic>> getGroupsJson() async {
     final result = await ApiInterface.getRequest(
-        url: 'findoneuser/${ClientProvider.readOnlyClient!.userId}');
+        url: 'findoneuser/${AppStorage.getUser()!.userId}');
     if (!result.error) {
       Map<dynamic, dynamic> userJson = result.messageBody!["data"];
       List userGroupsList = userJson["groups"];
@@ -64,7 +66,6 @@ class GroupRepo {
       /// We are trying to get and save all the firstName,lastName,userImage and Id;
       /// And also send all unsent Chats in a group
       for (final group in groupsList) {
-        
         Group g = group;
 
         /// Now, im trying to save the user's details seperately on my end.
@@ -80,7 +81,9 @@ class GroupRepo {
 
           /// If it contains this group, we then check if the members are the same;
           final sameMembers = group.members.every(
-            (element) => cachedGroup.sortedMembers.map((e) => e.userId).contains(element),
+            (element) => cachedGroup.sortedMembers
+                .map((e) => e.userId)
+                .contains(element),
           );
 
           /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.
@@ -109,7 +112,142 @@ class GroupRepo {
     return AppStorage.getGroups().map((e) => e.toJson()).toList();
   }
 
-  Future<Group> _getMembersDetailsInGroup({required final Group group}) async {
+  static Future<HttpResponseModel> getGroupsOneTime() async {
+    final result = await ApiInterface.getRequest(
+        url: 'findoneuser/${AppStorage.getUser()!.userId}');
+    if (!result.error) {
+      Map<dynamic, dynamic> userJson = result.messageBody!["data"];
+      List userGroupsList = userJson["groups"];
+
+      final groupsList = userGroupsList
+          .map(
+            (e) => Group.fromJson(json: e),
+          )
+          .toList();
+      final sortedGroupsList = <Group>[];
+      final cachedGroupsList = AppStorage.getGroups();
+
+      /// We are trying to get and save all the firstName,lastName,userImage and Id;
+      /// And also send all unsent Chats in a group
+      for (final group in groupsList) {
+        Group g = group;
+
+        /// Now, im trying to save the user's details seperately on my end.
+        /// Only if the members have changed
+        /// First check if the cachedGroupsList contains this group
+
+        final containsGroup =
+            cachedGroupsList.map((e) => e.groupId).contains(group.groupId);
+        if (containsGroup) {
+          final cachedGroup = cachedGroupsList.firstWhere(
+            (element) => element.groupId == group.groupId,
+          );
+
+          /// If it contains this group, we then check if the members are the same;
+          final sameMembers = group.members.every(
+            (element) => cachedGroup.sortedMembers
+                .map((e) => e.userId)
+                .contains(element),
+          );
+
+          /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.
+          if (sameMembers) {
+            // Intentionaly not assign it directly as, messages (chats) may differ
+            final gJson = g.toJson();
+            gJson["sortedMembers"] = cachedGroup.toJson()["sortedMembers"];
+            g = Group.fromJson(json: gJson);
+          } else {
+            g = await _getMembersDetailsInGroup(group: group);
+          }
+        } else {
+          g = await _getMembersDetailsInGroup(group: group);
+        }
+
+        sortedGroupsList.add(g);
+      }
+
+      final body = result.messageBody ?? {};
+      body["data"] = sortedGroupsList
+          .map(
+            (e) => e.toJson(),
+          )
+          .toList();
+
+      return HttpResponseModel(
+          error: false, body: jsonEncode(body), code: result.code);
+    }
+    // log(result.body.toString());
+    return result;
+  }
+
+  static Future<HttpResponseModel> getUserGroups(
+      {required final String userId}) async {
+    final result = await ApiInterface.getRequest(url: 'findoneuser/$userId');
+    if (!result.error) {
+      Map<dynamic, dynamic> userJson = result.messageBody!["data"];
+      List userGroupsList = userJson["groups"];
+
+      final groupsList = userGroupsList
+          .map(
+            (e) => Group.fromJson(json: e),
+          )
+          .toList();
+      final sortedGroupsList = <Map<dynamic, dynamic>>[];
+      final cachedGroupsList = [];
+
+      /// We are trying to get and save all the firstName,lastName,userImage and Id;
+      /// And also send all unsent Chats in a group
+      for (final group in groupsList) {
+        Group g = group;
+
+        /// Now, im trying to save the user's details seperately on my end.
+        /// Only if the members have changed
+        /// First check if the cachedGroupsList contains this group
+
+        final containsGroup =
+            cachedGroupsList.map((e) => e.groupId).contains(group.groupId);
+        if (containsGroup) {
+          final cachedGroup = cachedGroupsList.firstWhere(
+            (element) => element.groupId == group.groupId,
+          );
+
+          /// If it contains this group, we then check if the members are the same;
+          final sameMembers = group.members.every(
+            (element) => cachedGroup.sortedMembers
+                .map((e) => e.userId)
+                .contains(element),
+          );
+
+          /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.
+          if (sameMembers) {
+            // Intentionaly not assign it directly as, messages (chats) may differ
+            final gJson = g.toJson();
+            gJson["sortedMembers"] = cachedGroup.toJson()["sortedMembers"];
+            g = Group.fromJson(json: gJson);
+          } else {
+            g = await _getMembersDetailsInGroup(group: group);
+          }
+        } else {
+          g = await _getMembersDetailsInGroup(group: group);
+        }
+
+        sortedGroupsList.add(g.toJson());
+      }
+
+      return HttpResponseModel(
+          error: false,
+          body: jsonEncode({
+            "message": result.messageBody?["message"],
+            "data": sortedGroupsList
+          }),
+          code: result.code);
+    }
+    // log(result.body.toString());
+    return result;
+  }
+
+  static Future<Group> _getMembersDetailsInGroup(
+      {required final Group group}) async {
     final fullMembersList = <Client>[];
     final membersList = group.members
         .where((element) => element.toString() != group.adminId)
@@ -146,5 +284,12 @@ class GroupRepo {
     final sortedGroup = Group.fromJson(json: groupJson);
 
     return sortedGroup;
+  }
+
+  static Future<HttpResponseModel> leaveGroup(
+      {required final String userId, required final Group group}) async {
+    final response = await ApiInterface.patchRequest(
+        url: "leavegroup/$userId/${group.groupId}", data: {});
+    return response;
   }
 }

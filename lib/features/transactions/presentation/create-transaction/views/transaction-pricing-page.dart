@@ -1,15 +1,21 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/pricings-notifier.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/widgets/add-service-widget.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/widgets/add-virtual-service-widget.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/widgets/select-role-sheet.dart';
+import 'package:troco/features/transactions/utils/service-role.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/button/presentation/provider/button-provider.dart';
@@ -33,7 +39,6 @@ class _TransactionPricingPageState
     extends ConsumerState<TransactionPricingPage> {
   final formKey = GlobalKey<FormState>();
   final buttonKey = UniqueKey();
-  final List<SalesItem> items = TransactionDataHolder.items ?? [];
   bool listAsGrid = false;
   bool error = false;
 
@@ -45,7 +50,7 @@ class _TransactionPricingPageState
       body: Padding(
         padding: const EdgeInsets.only(
             left: SizeManager.large, right: SizeManager.large),
-        child: items.isEmpty
+        child: ref.watch(pricingsProvider).isEmpty
             ? Column(
                 children: [
                   Expanded(child: body()),
@@ -113,15 +118,18 @@ class _TransactionPricingPageState
   }
 
   Widget pricingGrid() {
+    final items = ref.watch(pricingsProvider);
     final TransactionCategory category =
         TransactionDataHolder.transactionCategory ??
             TransactionCategory.Product;
 
     if (items.isEmpty) {
+      final text = category == TransactionCategory.Service
+          ? "\n\nAdd a Task"
+          : "\n\nDemonstrate your ${category.name.toLowerCase()}${category == TransactionCategory.Virtual ? "-product" : ""}(s)";
+
       return EmptyScreen(
-        label: error
-            ? "\n\nDemonstrate your ${category.name.toLowerCase()}${category == TransactionCategory.Virtual ? "-service" : ""}(s) 🤨"
-            : "\n\nDemonstrate your ${category.name.toLowerCase()}${category == TransactionCategory.Virtual ? "-service" : ""}(s)",
+        label: " $text",
         scale: 1.8,
         lottie: AssetManager.lottieFile(name: "add-product"),
         expanded: true,
@@ -138,7 +146,10 @@ class _TransactionPricingPageState
         itemCount: items.length,
         itemBuilder: (context, index) {
           return TransactionPricingListWidget(
-              key: ObjectKey(items[index]), item: items[index]);
+              editable: TransactionDataHolder.transactionCategory !=
+                  TransactionCategory.Service,
+              key: ObjectKey(items[index]),
+              item: items[index]);
         },
       );
     }
@@ -170,13 +181,51 @@ class _TransactionPricingPageState
       onPressed: () async {
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 3));
-        if (TransactionDataHolder.items?.isNotEmpty ?? false) {
-          ref.read(createTransactionPageController.notifier).state.nextPage(
-              duration: const Duration(milliseconds: 450), curve: Curves.ease);
-          ref.read(createTransactionProgressProvider.notifier).state = 3;
-        } else {
+        if (TransactionDataHolder.items?.isEmpty ?? true) {
           setState(() => error = true);
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              mode: ContentType.failure,
+              message: "Add an item");
+          ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+          return;
         }
+
+        if (TransactionDataHolder.transactionCategory ==
+            TransactionCategory.Service) {
+          final totalCost = TransactionDataHolder.items!.fold(
+            0,
+            (previousValue, element) => previousValue + element.price,
+          );
+          if (totalCost != TransactionDataHolder.totalCost) {
+            setState(() => error = true);
+            SnackbarManager.showBasicSnackbar(
+                context: context,
+                mode: ContentType.failure,
+                message:
+                    "Total price of items doesn't add up to the total cost");
+            ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+            return;
+          }
+          final role = await showModalBottomSheet<ServiceRole?>(
+            isScrollControlled: true,
+            enableDrag: true,
+            useSafeArea: true,
+            backgroundColor: ColorManager.background,
+            context: context,
+            builder: (context) => const SelectRolesSheet(),
+          );
+
+          if (role == null) {
+            SnackbarManager.showBasicSnackbar(
+                context: context,
+                mode: ContentType.failure,
+                message: "Select your role in this transaction.");
+            return;
+          }
+          TransactionDataHolder.role = role;
+        }
+        ref.read(transactionPageController.notifier).moveNext(nextPageIndex: 3);
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },
     );
@@ -192,6 +241,7 @@ class _TransactionPricingPageState
   }
 
   Widget body() {
+    final items = ref.watch(pricingsProvider);
     return Column(
       children: [
         mediumSpacer(),
@@ -251,10 +301,9 @@ class _TransactionPricingPageState
     );
 
     if (item != null) {
-      setState(() {
-        items.add(item);
-      });
-      TransactionDataHolder.items = items;
+      ref.watch(pricingsProvider.notifier).addItem(item: item);
+      setState(() {});
+      TransactionDataHolder.items = ref.read(pricingsProvider);
     }
     ref.read(productImagesProvider.notifier).state.clear();
   }

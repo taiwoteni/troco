@@ -135,6 +135,7 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
             fillColor: ColorManager.tertiary,
             hintStyle: defaultStyle().copyWith(color: ColorManager.secondary),
             hintText: widget.label,
+            hintMaxLines: widget.lines,
             errorText: widget.errorText,
             errorStyle: defaultStyle()
                 .copyWith(color: Colors.red, fontSize: FontSizeManager.regular),

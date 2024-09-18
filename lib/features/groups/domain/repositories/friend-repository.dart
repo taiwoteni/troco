@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:troco/core/api/data/repositories/api-interface.dart';
+import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
@@ -49,5 +52,36 @@ class FriendRepository {
     }
 
     return friends;
+  }
+
+  static Future<HttpResponseModel> getUsersFriends(
+      {required final String userId}) async {
+    final friends = <Map<dynamic, dynamic>>[];
+    final res = await ApiInterface.findUser(userId: userId);
+    if (res.error) {
+      return res;
+    }
+
+    final clientJson = res.messageBody!["data"];
+    final userFriends = (clientJson["friends"] ?? []) as List;
+
+    for (final String friend in userFriends) {
+      final response = await ApiInterface.findUser(userId: friend);
+      if (!response.error) {
+        final userJson = response.messageBody!["data"] as Map<dynamic, dynamic>;
+
+        // To remove bulky data
+        userJson.remove("transactions");
+        userJson.remove("groups");
+
+        friends.add(userJson);
+      }
+    }
+
+    return HttpResponseModel(
+        error: false,
+        body: jsonEncode(
+            {"message": res.messageBody?["message"], "data": friends}),
+        code: res.code);
   }
 }

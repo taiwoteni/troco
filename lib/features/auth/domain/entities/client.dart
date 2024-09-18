@@ -16,8 +16,7 @@ class Client extends Equatable {
   String get fullName => "$firstName $lastName";
   String get email => _json["email"];
   String get referralCode => _json["referralCode"];
-  int get walletBalance =>
-      double.parse((_json["wallet"] ?? "0").toString()).toInt();
+  double get walletBalance => double.parse((_json["wallet"] ?? "0").toString());
   String get phoneNumber => _json["phoneNumber"];
   String get businessName => _json["businessName"] ?? "$firstName Ventures";
   Category get accountCategory => CategoryConverter.convertToCategory(
@@ -56,6 +55,8 @@ class Client extends Equatable {
       KycConverter.convertToEnum(tier: _json["kycTier"].toString());
 
   String? get password => _json["password"];
+
+  List<String> get blockedUsers => _json["blockedUsers"] ?? [];
 
   Map<dynamic, dynamic> toJson() {
     return _json;

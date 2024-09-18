@@ -104,6 +104,36 @@ class AuthenticationRepo {
     return result;
   }
 
+  static Future<HttpResponseModel> reportUser(
+      {required final String reportedUserId,
+      required final String reason}) async {
+    final response = await ApiInterface.postRequest(
+        url:
+            "report_user/${ClientProvider.readOnlyClient!.userId}/$reportedUserId",
+        data: {"reason": reason});
+    return response;
+  }
+
+  static Future<HttpResponseModel> blockUser(
+      {required final String userId, required final String reason}) async {
+    final response = await ApiInterface.patchRequest(
+        url:
+            "block_fellow_user/${ClientProvider.readOnlyClient!.userId}/$userId",
+        data: {"reason": reason});
+
+    return response;
+  }
+
+  static Future<HttpResponseModel> unblockUser(
+      {required final String userId, required final String reason}) async {
+    final response = await ApiInterface.patchRequest(
+        url:
+            "unblock_fellow_user/${ClientProvider.readOnlyClient!.userId}/$userId",
+        data: {"reason": reason});
+
+    return response;
+  }
+
   static Future<HttpResponseModel> updateOnlineStatus() async {
     final result = await ApiInterface.patchRequest(
         url: "updatelastseen/${ClientProvider.readOnlyClient!.userId}",

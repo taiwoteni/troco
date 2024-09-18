@@ -1,13 +1,14 @@
 import 'package:troco/features/transactions/utils/enums.dart';
 
-class InspectionPeriodConverter{
-
-  static InspectionPeriod converToEnum ({required String inspectionPeriod}){
+class InspectionPeriodConverter {
+  static InspectionPeriod converToEnum({required String inspectionPeriod}) {
     switch (inspectionPeriod.trim().toLowerCase()) {
       case "hour":
-      return InspectionPeriod.Hour;
+        return InspectionPeriod.Hour;
+      case "minute":
+        return InspectionPeriod.Minute;
       default:
-      return InspectionPeriod.Day;
+        return InspectionPeriod.Day;
     }
   }
 }

@@ -14,8 +14,13 @@ import '../../../../groups/domain/entities/group.dart';
 class GroupsInCommonWidget extends ConsumerStatefulWidget {
   final Group group;
   final Client client;
+  final bool inCommon, applyHorizontalPadding;
   const GroupsInCommonWidget(
-      {super.key, required this.group, required this.client});
+      {super.key,
+      required this.group,
+      this.inCommon = true,
+      this.applyHorizontalPadding = true,
+      required this.client});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -27,6 +32,9 @@ class _GroupsInCommonWidgetState extends ConsumerState<GroupsInCommonWidget> {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () async {
+        if (!widget.inCommon) {
+          return;
+        }
         ref.watch(chatsGroupProvider.notifier).state = widget.group.groupId;
         await Navigator.pushNamed(context, Routes.chatRoute,
             arguments: widget.group);
@@ -38,9 +46,8 @@ class _GroupsInCommonWidgetState extends ConsumerState<GroupsInCommonWidget> {
         size: IconSizeManager.large,
       ),
       title: Text(widget.group.groupName),
-      subtitle: Text(widget.group.members.first == widget.client.userId
-          ? "Seller"
-          : "Buyer"),
+      subtitle: Text(
+          widget.group.creator == widget.client.userId ? "Seller" : "Buyer"),
       titleTextStyle: TextStyle(
           fontFamily: 'Lato',
           color: ColorManager.primary,

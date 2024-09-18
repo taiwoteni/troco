@@ -13,18 +13,9 @@ import '../animations/lottie.dart';
 /// If [badge] is given, [showOnline] and [online] will be overriden
 class ProfileIcon extends ConsumerStatefulWidget {
   final String? url;
-  final bool showOnline;
-  final bool online;
-  final Positioned? badge;
   final double? size;
 
-  const ProfileIcon(
-      {super.key,
-      required this.url,
-      this.showOnline = false,
-      this.badge,
-      this.online = false,
-      this.size});
+  const ProfileIcon({super.key, required this.url, this.size});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _ProfileIconState();
@@ -38,56 +29,53 @@ class _ProfileIconState extends ConsumerState<ProfileIcon> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        ClipOval(
-          child: Container(
-            width: widget.size ?? IconSizeManager.medium,
-            height: widget.size ?? IconSizeManager.medium,
-            decoration: const BoxDecoration(shape: BoxShape.circle),
-            child: widget.url == null
-                ? Image.asset(
-                    AssetManager.imageFile(name: "profile_img"),
-                    fit: BoxFit.cover,
+    return Container(
+      width: widget.size ?? IconSizeManager.medium,
+      height: widget.size ?? IconSizeManager.medium,
+      decoration: const BoxDecoration(shape: BoxShape.circle),
+      child: widget.url == null
+          ? ClipOval(
+              child: Image.asset(
+                AssetManager.imageFile(name: "profile_img"),
+                fit: BoxFit.cover,
+                width: double.maxFinite,
+                height: double.maxFinite,
+              ),
+            )
+          : ClipOval(
+              child: CachedNetworkImage(
+                width: double.maxFinite,
+                imageUrl: widget.url!,
+                fit: BoxFit.cover,
+                height: double.maxFinite,
+                fadeInCurve: Curves.ease,
+                fadeOutCurve: Curves.ease,
+                placeholder: (context, url) {
+                  return Container(
                     width: double.maxFinite,
                     height: double.maxFinite,
-                  )
-                : CachedNetworkImage(
+                    color: ColorManager.lottieLoading,
+                    child: LottieWidget(
+                        lottieRes:
+                            AssetManager.lottieFile(name: "loading-image"),
+                        size: Size.square(
+                            widget.size ?? IconSizeManager.medium * 0.8)),
+                  );
+                },
+                errorWidget: (context, url, error) {
+                  return Container(
                     width: double.maxFinite,
-                    imageUrl: widget.url!,
-                    fit: BoxFit.cover,
                     height: double.maxFinite,
-                    fadeInCurve: Curves.ease,
-                    fadeOutCurve: Curves.ease,
-                    placeholder: (context, url) {
-                      return Container(
-                        width: double.maxFinite,
-                        height: double.maxFinite,
-                        color: ColorManager.lottieLoading,
-                        child: LottieWidget(
-                            lottieRes:
-                                AssetManager.lottieFile(name: "loading-image"),
-                            size: Size.square(
-                                widget.size ?? IconSizeManager.medium * 0.8)),
-                      );
-                    },
-                    errorWidget: (context, url, error) {
-                      return Container(
-                        width: double.maxFinite,
-                        height: double.maxFinite,
-                        color: ColorManager.lottieLoading,
-                        child: LottieWidget(
-                            lottieRes:
-                                AssetManager.lottieFile(name: "loading-image"),
-                            size: Size.square(
-                                widget.size ?? IconSizeManager.medium * 0.8)),
-                      );
-                    },
-                  ),
-          ),
-        ),
-        if (widget.badge != null) widget.badge!
-      ],
+                    color: ColorManager.lottieLoading,
+                    child: LottieWidget(
+                        lottieRes:
+                            AssetManager.lottieFile(name: "loading-image"),
+                        size: Size.square(
+                            widget.size ?? IconSizeManager.medium * 0.8)),
+                  );
+                },
+              ),
+            ),
     );
   }
 }

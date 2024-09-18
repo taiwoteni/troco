@@ -247,7 +247,6 @@ class _SetTransactionPinScreenState
     if (!response.error && !userResponse.error && createdSession) {
       final Map<dynamic, dynamic> userJson = LoginData.toClientJson();
       userJson["wallet"] = 0;
-      userJson["referralCode"] = LoginData.referralCode;
       await AppStorage.clear();
       AppStorage.saveClient(client: Client.fromJson(json: userJson));
       AppStorage.saveTransactions(transactions: []);

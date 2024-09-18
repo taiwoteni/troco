@@ -174,8 +174,15 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
       },
       itemBuilder: (context, index) {
         final item = salesItems[index];
+        if (item.noImage) {
+          return Image.asset(
+            AssetManager.imageFile(name: "task"),
+            width: double.maxFinite,
+            height: double.maxFinite,
+          );
+        }
         return CachedNetworkImage(
-          imageUrl: item.image,
+          imageUrl: item.mainImage(),
           fit: BoxFit.cover,
           height: double.maxFinite,
           fadeInCurve: Curves.ease,

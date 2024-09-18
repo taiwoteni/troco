@@ -48,21 +48,37 @@ class LoginData {
     lat = null;
   }
 
+  static void initializeFromClient({required final Client client}) {
+    id = client.userId;
+    nearestBustop = client.bustop;
+    businessName = client.businessName;
+    category = client.accountCategory;
+    state = client.state;
+    profile = client.profile != "" ? client.profile : null;
+    zipCode = client.zipcode;
+    firstName = client.firstName;
+    lastName = client.lastName;
+    address = client.address;
+    city = client.city;
+    email = client.email;
+    phoneNumber = client.phoneNumber;
+  }
+
   static Map<String, dynamic> toClientJson() {
     return {
       "id": id,
       "firstName": firstName,
       "lastName": lastName,
-      "password":password,
+      "password": password,
       "email": email,
       "profile": profile,
       "phoneNumber": phoneNumber,
       "businessName": businessName,
-      "accountType": CategoryConverter.convertToString(category: category!).titleCase,
+      "accountType":
+          CategoryConverter.convertToString(category: category!).titleCase,
       "address": address,
       "city": city,
       "state": state,
-      "referralCode":referralCode,
       "nearestBustop": nearestBustop,
       "transactionPin": transactionPin,
       "zipcode": zipCode,

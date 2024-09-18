@@ -2,6 +2,8 @@ import 'dart:developer';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
@@ -11,8 +13,11 @@ import 'package:troco/core/components/texts/outputs/info-text.dart';
 import 'package:troco/features/payments/data/sources/troco-account-details.dart';
 import 'package:troco/features/payments/domain/repo/payment-repository.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-widget.dart';
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 
+import '../../../domain/entities/service.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -76,7 +81,53 @@ class _TrocoDetailsSheetState extends ConsumerState<TrocoDetailsSheet> {
 
   Widget paymentDirection() {
     final transaction = ref.watch(currentTransactionProvider);
-    final amount = transaction.transactionAmountString;
+    var amount = transaction.transactionAmountString;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+    late String taskPosition;
+
+    final formatter =
+        NumberFormat.currency(symbol: '', decimalDigits: 2, locale: 'en_NG');
+
+    if (isService) {
+      final tasks = transaction.salesItem
+          .map<Service>(
+            (e) => e as Service,
+          )
+          .toList();
+      final pendingTask = tasks.firstWhere((task) => !task.taskUploaded);
+      final position = tasks.indexOf(pendingTask) + 1;
+      taskPosition = position == 1
+          ? "1st"
+          : position == 2
+              ? "2nd"
+              : position == 3
+                  ? "3rd"
+                  : "${position}th";
+
+      amount = "${formatter.format(pendingTask.finalPrice)} NGN";
+    }
+
+    if (isVirtual) {
+      final tasks = transaction.salesItem
+          .map<VirtualService>(
+            (e) => e as VirtualService,
+          )
+          .toList();
+      final pendingTask = tasks.firstWhere((task) => !task.taskUploaded);
+      final position = tasks.indexOf(pendingTask) + 1;
+      taskPosition = position == 1
+          ? "1st"
+          : position == 2
+              ? "2nd"
+              : position == 3
+                  ? "3rd"
+                  : "${position}th";
+
+      amount = "${formatter.format(pendingTask.finalPrice)} NGN";
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +136,7 @@ class _TrocoDetailsSheetState extends ConsumerState<TrocoDetailsSheet> {
           fontSize: FontSizeManager.small,
           color: ColorManager.secondary,
           text:
-              "* You are prompted to transfer $amount NGN to the above account. Payment will be made to Troco being the middle man in this transaction. After you have made payment, assure the admin by uploading the receipt.",
+              "* You are prompted to transfer $amount NGN to the above account${isService ? " for the $taskPosition task" : ""}. Payment will be made to Troco being the middle man in this transaction. After you have made payment, assure the admin by uploading the receipt.",
         ),
         smallSpacer(),
         InfoText(
@@ -98,7 +149,7 @@ class _TrocoDetailsSheetState extends ConsumerState<TrocoDetailsSheet> {
           fontSize: FontSizeManager.small,
           color: ColorManager.secondary,
           text:
-              "* Adultered, fake or illegitimate receipts will NOT be tolerated.",
+              "* Adulterated, fake or illegitimate receipts will NOT be tolerated.",
         ),
       ],
     );
@@ -158,6 +209,12 @@ class _TrocoDetailsSheetState extends ConsumerState<TrocoDetailsSheet> {
   }
 
   Future<void> uploadReceipt() async {
+    final transaction = ref.watch(currentTransactionProvider);
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+
     setState(() => loading = true);
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
@@ -176,10 +233,37 @@ class _TrocoDetailsSheetState extends ConsumerState<TrocoDetailsSheet> {
         Navigator.pop(context);
         return;
       }
-      final result = await PaymentRepository.uploadReceipt(
-          transaction: ref.read(currentTransactionProvider), path: file.path);
 
-      log(result.body);
+      late HttpResponseModel result;
+      if (isService) {
+        final tasks = transaction.salesItem
+            .map(
+              (e) => e as Service,
+            )
+            .toList();
+        final pendingTask = tasks.firstWhere((task) => !task.taskUploaded);
+
+        result = await PaymentRepository.makePaymentForTask(
+            transaction: ref.read(currentTransactionProvider),
+            task: pendingTask,
+            receiptPath: file.path);
+      } else if (isVirtual) {
+        final tasks = transaction.salesItem
+            .map(
+              (e) => e as VirtualService,
+            )
+            .toList();
+        final pendingTask = tasks.firstWhere((task) => !task.taskUploaded);
+
+        result = await PaymentRepository.makePaymentForVirtualProduct(
+            transaction: ref.read(currentTransactionProvider),
+            task: pendingTask,
+            receiptPath: file.path);
+      } else {
+        result = await PaymentRepository.uploadReceipt(
+            transaction: ref.read(currentTransactionProvider), path: file.path);
+      }
+      debugPrint(result.body);
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       if (result.error) {
         setState(() => loading = false);

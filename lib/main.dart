@@ -6,7 +6,10 @@ import 'core/cache/shared-preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  AppStorage.initialize();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((value) => runApp(const ProviderScope(child: MyApp.instance)));
+  AppStorage.initialize().then(
+    (value) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+          .then((value) => runApp(const ProviderScope(child: MyApp.instance)));
+    },
+  );
 }

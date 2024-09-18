@@ -5,8 +5,10 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
+import 'package:troco/features/transactions/utils/service-role.dart';
 
 import '../../../groups/domain/entities/group.dart';
 import '../entities/driver.dart';
@@ -31,9 +33,23 @@ class TransactionRepo {
       required final Transaction transaction,
       required final String dateOfWork}) async {
     final cat = transaction.transactionCategory;
+    var sellerId = ClientProvider.readOnlyClient!.userId;
+    var buyerId = AppStorage.getGroups()
+        .firstWhere((element) => element.groupId == groupId)
+        .buyerId;
+
+    /// We have to invert the sellers and buyers if the users
+    /// selected that he's the Client;
+    if (cat == TransactionCategory.Service &&
+        (TransactionDataHolder.role ?? ServiceRole.Developer) ==
+            ServiceRole.Client) {
+      final buyerPlaceHolder = buyerId;
+      buyerId = sellerId;
+      sellerId = buyerPlaceHolder;
+    }
+
     final result = await ApiInterface.postRequest(
-        url:
-            "createtransaction/${ClientProvider.readOnlyClient!.userId}/$groupId",
+        url: "createtransaction/$sellerId/$groupId/$buyerId",
         data: {
           "typeOftransaction":
               transaction.transactionCategory.name.toLowerCase(),
@@ -63,16 +79,22 @@ class TransactionRepo {
 
     log(type.name.toString());
 
-    var parsedfile = File(item.image);
-    var stream = ByteStream(parsedfile.openRead());
-    var length = await parsedfile.length();
-    final file = MultipartFile("pricingImage", stream, length,
-        filename: Path.basename(item.image.toString()));
-
     /// We start with the default fields like,
     /// 'price', 'quantity', 'pricingImage'
     final multiparts = <MultiPartModel>[];
-    multiparts.add(MultiPartModel.file(file: file));
+
+    if (!item.noImage) {
+      for (final image in item.images) {
+        var parsedfile = File(image);
+        var stream = ByteStream(parsedfile.openRead());
+        var length = await parsedfile.length();
+        final file = MultipartFile("pricingImage", stream, length,
+            filename: Path.basename(image));
+
+        multiparts.add(MultiPartModel.file(file: file));
+      }
+    }
+
     multiparts.add(MultiPartModel.field(field: "price", value: item.price));
     multiparts
         .add(MultiPartModel.field(field: "quantity", value: item.quantity));
@@ -89,6 +111,10 @@ class TransactionRepo {
         final serviceRequirement = MultiPartModel.field(
             field: "serviceRequirement",
             value: service.serviceRequirement.name.toLowerCase());
+
+        multiparts.add(MultiPartModel.field(
+            field: "deadlineTime",
+            value: service.deadlineTime.toIso8601String()));
 
         multiparts.add(serviceName);
         multiparts.add(serviceRequirement);
@@ -133,14 +159,29 @@ class TransactionRepo {
 
         multiparts.add(virtualName);
         multiparts.add(virtualRequirement);
+        multiparts.add(MultiPartModel.field(
+            field: "description", value: virtual.description));
       }
     } on Exception catch (e) {
       log("Uploading Pricing$e");
     }
 
+    var sellerId = ClientProvider.readOnlyClient!.userId;
+    var buyerId = group.buyerId;
+
+    /// We have to invert the sellers and buyers if the users
+    /// selected that he's the Client;
+    if (type == TransactionCategory.Service &&
+        (TransactionDataHolder.role ?? ServiceRole.Developer) ==
+            ServiceRole.Client) {
+      final buyerPlaceHolder = buyerId;
+      buyerId = sellerId;
+      sellerId = buyerPlaceHolder;
+    }
+
     final result = await ApiInterface.multipartPostRequest(
         url:
-            "createpricing/${ClientProvider.readOnlyClient!.userId}/${group.groupId}/${group.groupId}/${group.buyer!.userId}/${group.admin.userId}",
+            "createpricing/$sellerId/${group.groupId}/${group.groupId}/$buyerId/${group.admin.userId}",
         multiparts: multiparts);
     return result;
   }
@@ -313,11 +354,12 @@ class TransactionRepo {
   static Future<HttpResponseModel> returnTransaction({
     required final Transaction transaction,
     required final List<String> itemIds,
+    required final String comment,
   }) async {
     final response =
         await ApiInterface.postRequest(url: "returntransaction", data: {
       "transactionId": transaction.transactionId,
-      "comments": "Not Satisfied With Products",
+      "comments": comment,
       "productIds": itemIds,
       "userId": ClientProvider.readOnlyClient!.userId
     });
@@ -355,6 +397,73 @@ class TransactionRepo {
         url:
             "startledingtransaction/${transaction.transactionId}/${transaction.buyer}/${transaction.creator}",
         data: {"status": yes ? "approved" : "no"});
+
+    return response;
+  }
+
+  /// !!!! Service and Virtual transaction Specific endpoints !!!!
+
+  static Future<HttpResponseModel> uploadProofOfWork(
+      {required final Transaction transaction,
+      required final String taskId,
+      required final bool link,
+      required final String fileOrLink}) async {
+    late HttpResponseModel model;
+
+    if (link) {
+      model = await ApiInterface.postRequest(
+          url: "upload_each_task/$taskId",
+          data: {
+            "proofLink": fileOrLink,
+            "transactionType":
+                transaction.transactionCategory.name.toLowerCase()
+          });
+      return model;
+    }
+    final multiparts = <MultiPartModel>[];
+    var parsedfile = File(fileOrLink);
+    var stream = ByteStream(parsedfile.openRead());
+    var length = await parsedfile.length();
+    final file = MultipartFile("proofOfWork", stream, length,
+        filename: Path.basename(fileOrLink));
+    multiparts.add(MultiPartModel.field(
+        field: "transactionType",
+        value: transaction.transactionCategory.name.toLowerCase()));
+
+    multiparts.add(MultiPartModel.file(file: file));
+
+    model = await ApiInterface.multipartPostRequest(
+        url: "upload_each_task/$taskId", multiparts: multiparts);
+
+    return model;
+  }
+
+  static Future<HttpResponseModel> satisfiedWithTask({
+    required final Transaction transaction,
+    required final Service task,
+    required final bool yes,
+  }) async {
+    final response = await ApiInterface.patchRequest(
+        url:
+            "${yes ? "accept" : "reject"}_task/${transaction.transactionId}/${task.id}/${transaction.creator}/${transaction.buyer}",
+        data: {
+          "transactionType": transaction.transactionCategory.name.toLowerCase()
+        });
+
+    return response;
+  }
+
+  static Future<HttpResponseModel> satisfiedWithVirtualProduct({
+    required final Transaction transaction,
+    required final VirtualService task,
+    required final bool yes,
+  }) async {
+    final response = await ApiInterface.patchRequest(
+        url:
+            "${yes ? "accept" : "reject"}_task/${transaction.transactionId}/${task.id}/${transaction.creator}/${transaction.buyer}",
+        data: {
+          "transactionType": transaction.transactionCategory.name.toLowerCase()
+        });
 
     return response;
   }

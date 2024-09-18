@@ -145,16 +145,27 @@ class Transaction extends Equatable {
     return "Service";
   }
 
+  String get formattedPricingName {
+    switch (transactionCategory) {
+      case TransactionCategory.Service:
+        return "Task";
+      case TransactionCategory.Virtual:
+        return "Virtual Product";
+      default:
+        return "Product";
+    }
+  }
+
   bool get hasReturnTransaction =>
       _json["returnedItems"] == null ? false : returnItems.isNotEmpty;
 
-  String? get adminId => _json["adminId"];
+  String get adminId => _json["adminId"] ?? group.adminId;
   String get buyer => _json["buyer"];
 
-  bool get hasAdmin => _json.containsKey("adminId") ? adminId != null : false;
+  bool get hasAdmin => true;
 
   Driver get driver =>
-      Driver.fromJson(json: (_json["driverInformation"] as List)[0]);
+      Driver.fromJson(json: (_json["driverInformation"] as List).last);
 
   bool get hasDriver => ((_json["driverInformation"] ?? []) as List).isNotEmpty;
 
@@ -169,7 +180,10 @@ class Transaction extends Equatable {
         TransactionStatus.Completed,
       ].contains(transactionStatus);
   bool get buyerSatisfied => _json["buyerSatisfied"] ?? false;
-  bool get trocoPaysSeller => _json["trocopaidSeller"] ?? false;
+
+  /// [trocoPaysSeller] is always true now...
+  /// simply because money is always sent to seller's wallet after transaction.
+  bool get trocoPaysSeller => true;
 
   bool get leadStarted =>
       [

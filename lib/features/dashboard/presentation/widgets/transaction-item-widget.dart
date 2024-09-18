@@ -61,8 +61,7 @@ class TransactionItemWidget extends ConsumerWidget {
               if (transaction.creator ==
                   ClientProvider.readOnlyClient!.userId) {
                 final Group group = transaction.group;
-                TransactionDataHolder.assignFrom(
-                    transaction: group.transaction);
+                TransactionDataHolder.assignFrom(transaction: transaction);
                 ref.read(createTransactionProgressProvider.notifier).state = 2;
                 await Navigator.pushNamed(
                     context, Routes.createTransactionRoute,

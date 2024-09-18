@@ -67,7 +67,7 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
             const DragHandle(),
             largeSpacer(),
             Text(
-              "Create Collection",
+              "Create Order",
               style: TextStyle(
                   color: ColorManager.primary,
                   fontWeight: FontWeightManager.bold,

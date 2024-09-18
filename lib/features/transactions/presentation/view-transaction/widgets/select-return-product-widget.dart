@@ -106,7 +106,7 @@ class _SelectPaymentMethodWidgetState extends State<SelectReturnProductWidget> {
           borderRadius: BorderRadius.circular(SizeManager.regular),
           image: DecorationImage(
             fit: BoxFit.cover,
-            image: CachedNetworkImageProvider(item.image),
+            image: CachedNetworkImageProvider(item.mainImage()),
           )),
     );
   }

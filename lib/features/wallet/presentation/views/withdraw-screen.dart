@@ -9,12 +9,14 @@ import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-widget.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/wallet/domain/repository/wallet-repository.dart';
 
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
+import '../../../../core/cache/shared-preferences.dart';
 import '../../../../core/components/images/svg.dart';
 import '../../../../core/components/others/spacer.dart';
 import '../../../../core/components/texts/inputs/text-form-field.dart';
@@ -121,6 +123,10 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
   }
 
   Widget walletWidget() {
+    final walletBalance = ref.watch(clientProvider)?.walletBalance ?? 0;
+    final truncatedWalletBalance = walletBalance.truncate();
+    final decimalBalance = walletBalance - truncatedWalletBalance;
+
     final NumberFormat formatter = NumberFormat.currency(
         locale: 'en_NG',
         // symbol: '₦',
@@ -133,6 +139,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
         color: Colors.white,
         fontSize: FontSizeManager.extralarge * 1.1,
         fontWeight: FontWeightManager.extrabold);
+
     return Container(
         padding: const EdgeInsets.only(
             bottom: SizeManager.medium, left: SizeManager.medium * 1.5),
@@ -180,10 +187,12 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
                           return RichText(
                               text: TextSpan(style: defaultStyle, children: [
                             TextSpan(
-                                text: formatter.format(controller.value *
-                                    ref.watch(clientProvider)!.walletBalance)),
+                                text: formatter.format(
+                                    controller.value * truncatedWalletBalance)),
                             TextSpan(
-                                text: ".00",
+                                text: (controller.value * decimalBalance)
+                                    .toStringAsFixed(2)
+                                    .substring(1),
                                 style: defaultStyle.copyWith(
                                     fontSize: FontSizeManager.large,
                                     color: Colors.white.withOpacity(0.4))),
@@ -348,6 +357,13 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
     return regex.hasMatch(text);
   }
 
+  Future<bool> noPendingWithdrawals() async {
+    final withdrawalRequests = await WalletRepository().getWalletHistory();
+
+    return withdrawalRequests.every(
+        (element) => element.transactionStatus == TransactionStatus.Completed);
+  }
+
   Widget button() {
     return CustomButton(
       label: "Withdraw",
@@ -368,6 +384,14 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
           return;
         }
 
+        if (!(await noPendingWithdrawals())) {
+          SnackbarManager.showBasicSnackbar(
+              context: context,
+              mode: ContentType.failure,
+              header: "Wallet",
+              message: "You can only withdraw one at a time.");
+          return;
+        }
         final response = await WalletRepository.requestWithdrawal(
             amount: double.parse(amountController.text),
             account: selectedAccount!);

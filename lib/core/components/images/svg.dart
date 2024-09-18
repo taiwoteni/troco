@@ -5,6 +5,9 @@ class SvgIcon extends StatelessWidget {
   /// The [svgRes] is the FULL asset path of the svg file.
   final String svgRes;
 
+  /// Set [flip] to true if you want to side flip the svg
+  final bool flip;
+
   /// The [size] of the svg
   final Size? size;
 
@@ -23,18 +26,22 @@ class SvgIcon extends StatelessWidget {
       this.angle = 0,
       this.size,
       this.color,
+      this.flip = false,
       this.fit});
 
   @override
   Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: angle,
-      child: SvgPicture.asset(
-        svgRes,
-        color: color,
-        width: size == null ? null : size!.width,
-        height: size == null ? null : size!.height,
-        fit: fit ?? BoxFit.contain,
+    return Transform.flip(
+      flipX: flip,
+      child: Transform.rotate(
+        angle: angle,
+        child: SvgPicture.asset(
+          svgRes,
+          color: color,
+          width: size == null ? null : size!.width,
+          height: size == null ? null : size!.height,
+          fit: fit ?? BoxFit.contain,
+        ),
       ),
     );
   }
