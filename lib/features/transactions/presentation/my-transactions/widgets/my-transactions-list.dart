@@ -70,7 +70,7 @@ class _MyTransactionsListState extends ConsumerState<MyTransactionsList> {
       next.whenData((value) {
         log("loaded");
         setState(() {
-          transactions = value;
+          transactions = value.toSet().toList();
         });
       });
     });

@@ -49,6 +49,12 @@ class PricingsNotifier extends Notifier<List<SalesItem>> {
             : VirtualService.fromJson(json: json);
   }
 
+  void editItem(
+      {required final SalesItem oldItem, required final SalesItem newItem}) {
+    final index = state.indexOf(oldItem);
+    state[index] = newItem;
+  }
+
   void clear() {
     state.clear();
   }

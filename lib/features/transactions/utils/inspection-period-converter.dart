@@ -5,8 +5,8 @@ class InspectionPeriodConverter {
     switch (inspectionPeriod.trim().toLowerCase()) {
       case "hour":
         return InspectionPeriod.Hour;
-      case "minute":
-        return InspectionPeriod.Minute;
+      case "month":
+        return InspectionPeriod.Month;
       default:
         return InspectionPeriod.Day;
     }

@@ -6,7 +6,7 @@ import 'package:troco/core/api/data/model/multi-part-model.dart';
 import 'package:troco/core/api/data/model/response-model.dart';
 
 class ApiInterface {
-  static const _serverUrl = "https://trocco-app-be-3-oou2.onrender.com/api/v1";
+  static const _serverUrl = "https://trocco-app-be-3-h0ht.onrender.com/api/v1";
 
   static Future<HttpResponseModel> getRequest(
       {required final String url,

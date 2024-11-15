@@ -10,7 +10,8 @@ class Product extends SalesItem {
       : _json = json,
         super(
           id: json["productId"] ?? json["_id"],
-          price: int.parse((json["productPrice"] ?? json["price"]).toString()),
+          price:
+              double.parse((json["productPrice"] ?? json["price"]).toString()),
           name: json["productName"] ?? json["name"],
           images: ((json["pricingImage"] ?? []) as List).toListString(),
           quantity: int.parse((json["quantity"] ?? 0).toString()),

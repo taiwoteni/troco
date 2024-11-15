@@ -1,3 +1,5 @@
+import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/settings/utils/enums.dart';
 
 import '../../../../core/api/data/model/response-model.dart';
@@ -14,6 +16,28 @@ class SettingsRepository {
         data: {"oldpassword": oldPassword, "newpassword": newPassword});
 
     return request;
+  }
+
+  static Future<HttpResponseModel> changeEmail(
+      {required String newEmail}) async {
+    final json = AppStorage.getUser()!.toJson();
+    json["email"] = newEmail;
+    final response = await ApiInterface.patchRequest(
+        url: "updateusersetting/${ClientProvider.readOnlyClient!.userId}",
+        data: json);
+
+    return response;
+  }
+
+  static Future<HttpResponseModel> changePhoneNumber(
+      {required String newPhoneNumber}) async {
+    final json = AppStorage.getUser()!.toJson();
+    json["phoneNumber"] = newPhoneNumber;
+    final response = await ApiInterface.patchRequest(
+        url: "updateusersetting/${ClientProvider.readOnlyClient!.userId}",
+        data: json);
+
+    return response;
   }
 
   static Future<HttpResponseModel> updateTransactionPin({
@@ -48,50 +72,60 @@ class SettingsRepository {
   }
 
   static Future<HttpResponseModel> requestPasswordReset(
-      {required final String email}) async {
+      {required final String emailOrPhone}) async {
     final request = await ApiInterface.postRequest(
-        url: "requestpasswordreset", data: {"email": email});
+        url: "requestpasswordreset", data: {"emailOrPhone": emailOrPhone});
 
     return request;
   }
 
   static Future<HttpResponseModel> verifyPasswordResetOtp(
-      {required final String email, required final String otp}) async {
+      {required final String emailOrPhone, required final String otp}) async {
     final request = await ApiInterface.postRequest(
-        url: "verifypasswordresetotp", data: {"email": email, "otp": otp});
+        url: "verifypasswordresetotp",
+        data: {"emailOrPhone": emailOrPhone, "otp": otp});
 
     return request;
   }
 
   static Future<HttpResponseModel> resetPassword(
-      {required final String email, required final String newPassword}) async {
+      {required final String emailOrPhone,
+      required final String newPassword}) async {
     final request = await ApiInterface.postRequest(
         url: "resetPassword",
-        data: {"email": email, "newPassword": newPassword});
+        data: {"emailOrPhone": emailOrPhone, "newPassword": newPassword});
 
     return request;
   }
 
   static Future<HttpResponseModel> requestPinReset(
-      {required final String email}) async {
+      {required final String? email,
+      required final String? phoneNumber}) async {
     final request = await ApiInterface.postRequest(
-        url: "requestpinreset", data: {"email": email});
+        url: "requestpinreset",
+        data: {"email": email, "phoneNumber": phoneNumber});
 
     return request;
   }
 
   static Future<HttpResponseModel> verifyPinResetOtp(
-      {required final String email, required final String otp}) async {
+      {required final String? email,
+      required final String? phoneNumber,
+      required final String otp}) async {
     final request = await ApiInterface.postRequest(
-        url: "verifypinresetotp", data: {"email": email, "otp": otp});
+        url: "verifypinresetotp",
+        data: {"email": email, "phoneNumber": phoneNumber, "otp": otp});
 
     return request;
   }
 
   static Future<HttpResponseModel> resetPin(
-      {required final String email, required final String newPin}) async {
+      {required final String? email,
+      required final String? phoneNumber,
+      required final String newPin}) async {
     final request = await ApiInterface.postRequest(
-        url: "resetPin", data: {"email": email, "newPin": newPin});
+        url: "resetPin",
+        data: {"email": email, "phoneNumber": phoneNumber, "newPin": newPin});
 
     return request;
   }

@@ -16,6 +16,7 @@ class InputFormField extends ConsumerStatefulWidget {
   final Future<String?> Function()? onRedirect;
   final List<TextInputFormatter>? inputFormatters;
   final String label;
+  final String? initialValue;
   final int lines;
   final String? prefixText, errorText;
   final bool showtrailingIcon, readOnly;
@@ -31,6 +32,7 @@ class InputFormField extends ConsumerStatefulWidget {
     required this.label,
     required this.prefixIcon,
     this.inputFormatters,
+    this.initialValue,
     this.suffixIcon,
     this.lines = 1,
     this.errorText,
@@ -53,7 +55,8 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
   @override
   void initState() {
     obscure = widget.isPassword ? true : false;
-    controller = widget.controller ?? TextEditingController();
+    controller =
+        widget.controller ?? TextEditingController(text: widget.initialValue);
     super.initState();
   }
 
@@ -91,7 +94,9 @@ class _InputFormFieldState extends ConsumerState<InputFormField> {
           cursorColor: ColorManager.themeColor,
           cursorRadius: const Radius.circular(20),
           readOnly: widget.readOnly,
-          keyboardType: widget.inputType,
+          textInputAction: widget.lines > 1 ? TextInputAction.newline : null,
+          keyboardType:
+              widget.lines > 1 ? TextInputType.multiline : widget.inputType,
           style: defaultStyle(),
           decoration: InputDecoration(
             prefixIcon: widget.prefixIcon != null

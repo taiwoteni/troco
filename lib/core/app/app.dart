@@ -14,6 +14,7 @@ import 'package:troco/features/auth/domain/repositories/authentication-repo.dart
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/home/presentation/providers/blocked-provider.dart';
 
+import '../../features/groups/presentation/friends_tab/providers/friends-provider.dart';
 import '../../features/kyc/utils/enums.dart';
 import '../../features/kyc/utils/kyc-converter.dart';
 
@@ -69,7 +70,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     // This way, wether a user has internet connection or not, we would be able to tell wether
     // ...he is online or not.
     userRefreshTimer = Timer.periodic(
-      const Duration(seconds: 60),
+      const Duration(seconds: 30),
       (timer) async {
         // We get the user to try to  know if the user is logged in
         // or not.
@@ -112,5 +113,15 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   Future<void> updateOnlineStatus() async {
     final response = await AuthenticationRepo.updateOnlineStatus();
+  }
+
+  Future<void> listenToFriendsChanges() async {
+    ref.listen(friendsStreamProvider, (previous, next) {
+      next.when(
+        data: (data) {},
+        error: (error, stackTrace) => null,
+        loading: () => null,
+      );
+    });
   }
 }

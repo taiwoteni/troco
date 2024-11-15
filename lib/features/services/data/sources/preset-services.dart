@@ -41,7 +41,7 @@ List<SettingsModel> presetServices({required BuildContext context}) {
                 ? Routes.kycVerificationRoute
                 : Routes.kycVerificationIntroRoute),
         iconType: IconType.svg),
-    
+
     SettingsModel(
         label: "Terms and Conditions",
         icon: AssetManager.svgFile(name: "policy"),
@@ -51,8 +51,21 @@ List<SettingsModel> presetServices({required BuildContext context}) {
     SettingsModel(
         label: "Privacy Policy",
         icon: AssetManager.svgFile(name: "policy"),
+        onTap: () => Navigator.pushNamed(context, Routes.privacyPolicyRoute),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        iconType: IconType.svg),
+    SettingsModel(
+        label: "Disclaimer",
+        icon: AssetManager.svgFile(name: "disclaimer"),
+        onTap: () => Navigator.pushNamed(context, Routes.disclaimerRoute),
+        settingsType: SettingsType.financial,
+        iconType: IconType.svg),
+    SettingsModel(
+        label: "Protection & Safety",
+        icon: AssetManager.svgFile(name: "protection-and-safety-icon"),
+        onTap: () =>
+            Navigator.pushNamed(context, Routes.protectionAndSafetyRoute),
+        settingsType: SettingsType.financial,
         iconType: IconType.svg),
     SettingsModel(
         label: "Customer Care",
@@ -65,7 +78,7 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         icon: AssetManager.svgFile(name: "audio-call"),
         settingsType: SettingsType.financial,
         // onTap: () => Navigator.pushNamed(context, Routes.customerCareRoute),
-        iconType: IconType.svg),    
+        iconType: IconType.svg),
     SettingsModel(
         label: "About  Us",
         icon: AssetManager.svgFile(name: "about"),

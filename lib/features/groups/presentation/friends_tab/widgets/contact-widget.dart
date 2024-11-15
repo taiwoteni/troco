@@ -7,13 +7,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
+import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/utils/phone-number-converter.dart';
+import 'package:troco/features/wallet/domain/repository/wallet-repository.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -64,6 +67,12 @@ class _ContactWidgetState extends ConsumerState<ContactWidget> {
   Widget build(BuildContext context) {
     return ListTile(
       dense: true,
+      onTap: () {
+        if (trocoUser) {
+          context.pushNamed(
+              routeName: Routes.viewProfileRoute, arguments: client);
+        }
+      },
       tileColor: Colors.transparent,
       contentPadding: EdgeInsets.zero,
       leading: contactImage(),
@@ -190,7 +199,26 @@ class _ContactWidgetState extends ConsumerState<ContactWidget> {
     debugPrint(response.body);
   }
 
-  Future<void> refer() async {}
+  Future<void> refer() async {
+    try {
+      ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+      await Future.delayed(const Duration(seconds: 2));
+      final response = await WalletRepository.referPhoneNumber(
+          phoneNumber: PhoneNumberConverter.convertToFull(
+              contact.phones!.first.value!.replaceAll(" ", "")));
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: response.error ? ContentType.failure : null,
+          message: response.error
+              ? "Unable to refer contact"
+              : "Referred contact successfully");
+      debugPrint(response.body);
+    } catch (e) {
+      SnackbarManager.showErrorSnackbar(
+          context: context, message: "Unable to refer use");
+    }
+  }
 
   Widget button() {
     return SizedBox(

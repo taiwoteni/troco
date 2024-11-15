@@ -85,23 +85,23 @@ class _AboutUsScreenState extends ConsumerState<AboutUsScreen> {
                               "Business technology entrepreneur Bonaventure Ibeh studied Seo Marketing and information engineering and was an adjunct associate at the University of England Huddersfield's Department of ICT Institutions Afriserver. He spent five years teaching secure communication and then moved on to teach technology venture creation. More than three NG. patent applications are authored by him. In the past, he established a corporation as a director and Executive for writers.")
                     ],
                   )),
-              FadeSlideWidget(
-                  delay: const Duration(seconds: 10),
-                  direction: SlideDirection.right,
-                  mustBeVisible: true,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      mediumSpacer(),
-                      subHeader(text: "Mr. Nwoye Somto"),
-                      regularSpacer(),
-                      author(),
-                      regularSpacer(),
-                      content(
-                          text:
-                              "Nwoye Somto is a remarkable individual whose innovation and leadership has brought a significant revolution in the tech industry. He is one of the founding members of the esteemed Troco Technology Escrow Company. His adept skills in technology and his penchant for making a difference served as the building blocks towards the inception of this company. Troco Technology Escrow Company is well known for its function as a neutral third party, securing patents, technological software, and other intellectual property. Our team act as trusted partners, holding these critical assets under legal agreement, ensuring none of them are improperly used or infringed thereby ensuring we create a safe environment where technological contracts can be stored and protected professionally.")
-                    ],
-                  ))
+              // FadeSlideWidget(
+              //     delay: const Duration(seconds: 10),
+              //     direction: SlideDirection.right,
+              //     mustBeVisible: true,
+              //     child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         mediumSpacer(),
+              //         subHeader(text: "Mr. Nwoye Somto"),
+              //         regularSpacer(),
+              //         author(),
+              //         regularSpacer(),
+              //         content(
+              //             text:
+              //                 "Nwoye Somto is a remarkable individual whose innovation and leadership has brought a significant revolution in the tech industry. He is one of the founding members of the esteemed Troco Technology Escrow Company. His adept skills in technology and his penchant for making a difference served as the building blocks towards the inception of this company. Troco Technology Escrow Company is well known for its function as a neutral third party, securing patents, technological software, and other intellectual property. Our team act as trusted partners, holding these critical assets under legal agreement, ensuring none of them are improperly used or infringed thereby ensuring we create a safe environment where technological contracts can be stored and protected professionally.")
+              //       ],
+              //     ))
             ],
           ),
         ),

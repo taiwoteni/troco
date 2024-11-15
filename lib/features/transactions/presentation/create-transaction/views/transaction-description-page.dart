@@ -44,7 +44,7 @@ class _TransactionDescriptionPageState
   int? selectedDay;
   bool timeError = false;
   final formKey = GlobalKey<FormState>();
-  bool inspectByDay = TransactionDataHolder.inspectionPeriod ?? true;
+  InspectionPeriod? selectedInspectionPeriod;
   int inspectionDay = TransactionDataHolder.inspectionDays ?? 1;
   final buttonKey = UniqueKey();
 
@@ -55,6 +55,8 @@ class _TransactionDescriptionPageState
     final totalCost = TransactionDataHolder.totalCost;
     totalCostController = TextEditingController(
         text: totalCost == null ? "" : formatter.format(totalCost));
+    inspectionDay = TransactionDataHolder.inspectionDays ?? 0;
+    selectedInspectionPeriod = TransactionDataHolder.inspectionPeriod;
 
     final transactionHolderDate = TransactionDataHolder.date;
     if (transactionHolderDate != null) {
@@ -87,24 +89,23 @@ class _TransactionDescriptionPageState
               regularSpacer(),
               aboutProducts(),
               mediumSpacer(),
-              inspectionDays(),
-              mediumSpacer(),
-              regularSpacer(),
-              inspectionPeriod(),
+              inspectionTime(),
               mediumSpacer(),
               regularSpacer(),
               if (TransactionDataHolder.transactionCategory ==
                   TransactionCategory.Service) ...[largeSpacer(), totalCost()],
               if (TransactionDataHolder.transactionCategory !=
                   TransactionCategory.Service) ...[
+                largeSpacer(),
                 dateOfWork(),
                 regularSpacer(),
                 if (timeError)
                   const InfoText(
                       color: Colors.red,
                       text: " * Time must be on or after today"),
-                mediumSpacer(),
               ],
+              regularSpacer(),
+              largeSpacer(),
               transactionLocation(),
               extraLargeSpacer(),
               button(),
@@ -215,110 +216,11 @@ class _TransactionDescriptionPageState
     );
   }
 
-  Widget inspectionPeriod() {
+  Widget inspectionTime() {
     final isService = TransactionDataHolder.transactionCategory ==
         TransactionCategory.Service;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SingleChildScrollView(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              InkWell(
-                onTap: () => setState(() => inspectByDay = true),
-                child: Container(
-                    width: 150,
-                    alignment: Alignment.center,
-                    height: 50,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: ColorManager.secondary.withOpacity(0.15),
-                            width: 1.5),
-                        borderRadius:
-                            BorderRadius.circular(SizeManager.regular)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Checkbox(
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          value: inspectByDay,
-                          tristate: false,
-                          checkColor: Colors.white,
-                          activeColor: ColorManager.accentColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(2),
-                              side: BorderSide(
-                                  color: ColorManager.accentColor, width: 1)),
-                          onChanged: (value) => null,
-                        ),
-                        Text(
-                          "By Day",
-                          style: TextStyle(
-                              color: ColorManager.primary,
-                              fontFamily: "Lato",
-                              fontSize: FontSizeManager.small,
-                              fontWeight: FontWeightManager.medium),
-                        )
-                      ],
-                    )),
-              ),
-              mediumSpacer(),
-              InkWell(
-                onTap: () => setState(() => inspectByDay = false),
-                child: Container(
-                    width: 150,
-                    alignment: Alignment.center,
-                    height: 50,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: ColorManager.secondary.withOpacity(0.15),
-                            width: 1.5),
-                        borderRadius:
-                            BorderRadius.circular(SizeManager.regular)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Checkbox(
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          value: !inspectByDay,
-                          tristate: false,
-                          checkColor: Colors.white,
-                          activeColor: ColorManager.accentColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(2),
-                              side: BorderSide(
-                                  color: ColorManager.accentColor, width: 1)),
-                          onChanged: (value) => null,
-                        ),
-                        Text(
-                          "By Hour",
-                          style: TextStyle(
-                              color: ColorManager.primary,
-                              fontFamily: "Lato",
-                              fontSize: FontSizeManager.small,
-                              fontWeight: FontWeightManager.medium),
-                        )
-                      ],
-                    )),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget inspectionDays() {
-    final isService = TransactionDataHolder.transactionCategory ==
-        TransactionCategory.Service;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InfoText(
           text: isService ? " Transaction Duration" : " Inspection Period",
@@ -326,77 +228,77 @@ class _TransactionDescriptionPageState
           fontWeight: FontWeightManager.medium,
         ),
         regularSpacer(),
-        Container(
-          width: 165,
-          height: 45,
-          decoration: BoxDecoration(
-              border: Border.all(
-                  color: ColorManager.secondary.withOpacity(0.15), width: 1.5),
-              borderRadius: BorderRadius.circular(SizeManager.regular)),
-          child: Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    if (inspectionDay > 1) {
-                      setState(() {
-                        inspectionDay -= 1;
-                      });
-                    }
-                  },
-                  child: Center(
-                    child: Icon(
-                      CupertinoIcons.minus_circle_fill,
-                      size: IconSizeManager.regular * 1.3,
-                      color: ColorManager.accentColor,
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                height: double.maxFinite,
-                width: 2,
-                color: ColorManager.secondary.withOpacity(0.15),
-              ),
-              Expanded(
-                  flex: 2,
-                  child: Center(
-                    child: Text(
-                      inspectionDay.toString(),
-                      style: TextStyle(
-                          fontFamily: "Lato",
-                          color: ColorManager.primary,
-                          fontWeight: FontWeightManager.extrabold,
-                          fontSize: FontSizeManager.medium),
-                    ),
-                  )),
-              Container(
-                height: double.maxFinite,
-                width: 2,
-                color: ColorManager.secondary.withOpacity(0.15),
-              ),
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    if (inspectionDay < 24) {
-                      setState(() {
-                        inspectionDay += 1;
-                      });
-                    }
-                  },
-                  child: Center(
-                    child: Icon(
-                      CupertinoIcons.plus_circle_fill,
-                      size: IconSizeManager.regular * 1.3,
-                      color: ColorManager.accentColor,
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
+        Row(
+          children: [inspectionDays(), inspectionPeriod()],
+        )
       ],
+    );
+  }
+
+  Widget inspectionPeriod() {
+    return Expanded(
+      flex: 2,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: SizeManager.regular),
+        child: DropdownInputFormField(
+          items: InspectionPeriod.values.map((e) => e.name).toList(),
+          value: selectedInspectionPeriod?.name ?? "",
+          onChanged: (value) {
+            if (value != null) {
+              final index = InspectionPeriod.values
+                  .map(
+                    (e) => e.name.toLowerCase(),
+                  )
+                  .toList()
+                  .indexOf(value.toLowerCase());
+              setState(() {
+                selectedInspectionPeriod = InspectionPeriod.values[index];
+              });
+            }
+          },
+          hint: 'period',
+          onValidate: (value) {
+            if (value == null) {
+              return "* period";
+            }
+            if (value.trim().isEmpty) {
+              return "* period";
+            }
+            return null;
+          },
+          prefixIcon: null,
+        ),
+      ),
+    );
+  }
+
+  Widget inspectionDays() {
+    return Expanded(
+      flex: 3,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: SizeManager.regular),
+        child: InputFormField(
+          initialValue: selectedDay?.toString(),
+          label: 'No. of ${selectedInspectionPeriod?.name ?? "Days"}',
+          inputType: TextInputType.number,
+          validator: (value) {
+            if (value == null) {
+              return "* day";
+            }
+            if (value.trim().isEmpty) {
+              return "* day";
+            }
+            if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+              return "* valid vay";
+            }
+            return null;
+          },
+          onSaved: (value) {
+            setState(() => inspectionDay = int.parse(value?.trim() ?? "0"));
+          },
+          prefixIcon: null,
+        ),
+      ),
     );
   }
 
@@ -435,6 +337,7 @@ class _TransactionDescriptionPageState
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: SizeManager.regular),
         child: InputFormField(
+          initialValue: selectedDay?.toString(),
           label: 'day',
           inputType: TextInputType.phone,
           validator: (value) {
@@ -604,11 +507,12 @@ class _TransactionDescriptionPageState
       children: [
         InfoText(
           text: " Exact Cost of Project",
-          color: ColorManager.primary,
+          color: ColorManager.secondary,
           fontWeight: FontWeightManager.medium,
         ),
         regularSpacer(),
         InputFormField(
+          initialValue: TransactionDataHolder.totalCost.toString(),
           controller: totalCostController,
           label: 'The Total Cost of the Project',
           inputType: TextInputType.phone,
@@ -669,14 +573,13 @@ class _TransactionDescriptionPageState
             ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
             return;
           }
-          TransactionDataHolder.inspectionPeriod = inspectByDay;
+          TransactionDataHolder.inspectionPeriod = selectedInspectionPeriod;
           TransactionDataHolder.inspectionDays = inspectionDay;
-          if(TransactionDataHolder.transactionCategory !=
-              TransactionCategory.Service){
+          if (TransactionDataHolder.transactionCategory !=
+              TransactionCategory.Service) {
             TransactionDataHolder.date =
-            "$selectedDay/${selectedMonth!.toMonthOfYear()}/$selectedYear";
+                "$selectedDay/${selectedMonth!.toMonthOfYear()}/$selectedYear";
           }
-
 
           ref
               .read(transactionPageController.notifier)

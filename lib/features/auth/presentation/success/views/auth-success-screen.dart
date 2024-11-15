@@ -4,6 +4,7 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
@@ -15,8 +16,7 @@ class AuthSuccessScreen extends ConsumerStatefulWidget {
   const AuthSuccessScreen({super.key});
 
   @override
-  ConsumerState<AuthSuccessScreen> createState() =>
-      _AuthSuccessScreenState();
+  ConsumerState<AuthSuccessScreen> createState() => _AuthSuccessScreenState();
 }
 
 class _AuthSuccessScreenState extends ConsumerState<AuthSuccessScreen> {
@@ -47,11 +47,13 @@ class _AuthSuccessScreenState extends ConsumerState<AuthSuccessScreen> {
       children: [
         Align(
           alignment: Alignment.bottomCenter,
-          child: Image.asset(
-            AssetManager.imageFile(name: 'created'),
-            width: IconSizeManager.extralarge * 4,
-            fit: BoxFit.cover,
-            height: IconSizeManager.extralarge * 4,
+          child: LottieWidget(
+            lottieRes: AssetManager.lottieFile(name: 'success'),
+            loop: false,
+            size: const Size(
+              double.maxFinite,
+              IconSizeManager.extralarge * 6,
+            ),
           ),
         ),
         mediumSpacer(),
@@ -90,7 +92,6 @@ class _AuthSuccessScreenState extends ConsumerState<AuthSuccessScreen> {
           bottom: SizeManager.extralarge),
       child: CustomButton(
         onPressed: () {
-          
           ClientProvider.saveUserData(ref: ref, json: LoginData.toClientJson());
           Navigator.pushNamedAndRemoveUntil(
               context, Routes.homeRoute, (route) => false);

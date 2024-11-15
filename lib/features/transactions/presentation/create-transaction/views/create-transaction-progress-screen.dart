@@ -12,7 +12,11 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import 'package:troco/features/transactions/domain/entities/service.dart' as s;
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/api/data/model/response-model.dart';
@@ -22,6 +26,8 @@ import '../../../../groups/domain/entities/group.dart';
 import '../../../data/models/create-transaction-data-holder.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../domain/repository/transaction-repo.dart';
+import '../../view-transaction/providers/ction-screen-provider.dart';
+import '../providers/create-transaction-provider.dart';
 
 class CreateTransactonProgressScreen extends ConsumerStatefulWidget {
   const CreateTransactonProgressScreen({super.key});
@@ -35,6 +41,7 @@ class _CreateTransactonProgressScreenState
     extends ConsumerState<CreateTransactonProgressScreen> {
   late Group group;
   late List<SalesItem> pricings;
+  late bool isEdit;
   double value = 0.0;
   double maxValue = 0.0;
   bool canPop = false;
@@ -43,8 +50,13 @@ class _CreateTransactonProgressScreenState
 
   @override
   void initState() {
+    /// We make a copy of the pricings (sales items) from the static class..
+    /// Used to store currently-created transaction data locally.
     pricings = List.from(TransactionDataHolder.items ?? []);
     final bool transactionAlreadyCreated = TransactionDataHolder.id != null;
+
+    isEdit = TransactionDataHolder.isEditing == true;
+
     if (transactionAlreadyCreated) {
       group = AppStorage.getGroups()
           .firstWhere((element) => element.groupId == TransactionDataHolder.id);
@@ -168,15 +180,17 @@ class _CreateTransactonProgressScreenState
   }
 
   Widget descriptionText() {
-    String text = "Creating Transaction...";
+    String text = isEdit ? "Editing Transaction..." : "Creating Transaction...";
 
     if (value > 0) {
       final itemNo = value.toInt();
+      final editingItem =
+          pricings.elementAtOrNull(itemNo - 1)?.isEditing() ?? false;
       text =
-          "Adding ${TransactionDataHolder.transactionCategory!.name + (TransactionDataHolder.transactionCategory! == TransactionCategory.Virtual ? " Service" : "")} $itemNo...";
+          "${editingItem ? "Editing" : "Creating"} ${TransactionDataHolder.transactionCategory!.name + (TransactionDataHolder.transactionCategory! == TransactionCategory.Virtual ? " Service" : "")} $itemNo...";
     }
     if (value == maxValue) {
-      text = "Created transaction !";
+      text = isEdit ? "Editing Transaction !" : "Created transaction !";
     }
     if (error) {
       text = "Error occurred.\nCheck your internet.";
@@ -192,86 +206,100 @@ class _CreateTransactonProgressScreenState
     );
   }
 
+  Future<void> editOrCreateTransaction() async {
+    Transaction transaction = Transaction.fromJson(json: {
+      "transactionName": TransactionDataHolder.transactionName!,
+      "aboutService": TransactionDataHolder.aboutProduct!,
+      "location": TransactionDataHolder.location,
+      "inspectionDays": TransactionDataHolder.inspectionDays!,
+      "inspectionPeriod":
+          TransactionDataHolder.inspectionPeriod?.name.toLowerCase(),
+      "transaction category":
+          TransactionDataHolder.transactionCategory!.name.toLowerCase(),
+    });
+    final dateOfWork = transaction.transactionCategory ==
+            TransactionCategory.Service
+        ? TransactionDataHolder.inspectionPeriodToDateTime()!.toIso8601String()
+        : TransactionDataHolder.date == null
+            ? group.transactionTime.toIso8601String()
+            : DateFormat("dd/MM/yyyy")
+                .parse(TransactionDataHolder.date!)
+                .toIso8601String();
+
+    final response = await (isEdit
+        ? TransactionRepo.editTransaction(
+            dateOfWork: dateOfWork,
+            groupId: group.groupId,
+            transaction: transaction)
+        : TransactionRepo.createTransaction(
+            dateOfWork: dateOfWork,
+            groupId: group.groupId,
+            transaction: transaction));
+    log("${isEdit ? "Editing" : "Creating"} Transaction :${response.body}");
+
+    if (response.error) {
+      setState(() {
+        error = true;
+        errorMessage =
+            response.messageBody?["message"].toString().contains("duplicat") ??
+                    false
+                ? "Transaction already exists."
+                : "An unknown error occurred.";
+      });
+      log(response.body);
+
+      return;
+    }
+
+    setState(() {
+      if (value == 0) {
+        value = 1;
+      }
+    });
+
+    if (!isEdit) {
+      TransactionDataHolder.id = response.messageBody!["data"]["_id"];
+    }
+
+    await carryOn(transactionId: TransactionDataHolder.id!);
+  }
+
+  Future<void> getTransaction() async {
+    final transactionId = TransactionDataHolder.id!;
+    debugPrint("Transaction Already Exists");
+
+    final response =
+        await TransactionRepo.getOneTransaction(transactionId: transactionId);
+    log("Fetching Transaction :${response.body}");
+    if (response.error) {
+      setState(() {
+        error = true;
+      });
+    } else {
+      setState(() {
+        if (value == 0) {
+          value = 1;
+        }
+      });
+
+      await carryOn(transactionId: response.messageBody!["data"]["_id"]);
+    }
+  }
+
   Future<void> createTransaction() async {
     setState(() {
       error = false;
     });
-    // This means a transaction has been created but it wasn't successful
-    // We get the transaction
-    // So we carry on and just add pricing
+
     try {
-      if (TransactionDataHolder.id != null) {
-        debugPrint("Transaction Already Exists");
-        final transactionId = TransactionDataHolder.id!;
-
-        final response = await TransactionRepo.getOneTransaction(
-            transactionId: transactionId);
-        log("Fetching Transaction :${response.body}");
-        if (response.error) {
-          setState(() {
-            error = true;
-          });
-        } else {
-          setState(() {
-            if (value == 0) {
-              value = 1;
-            }
-          });
-          Transaction transaction =
-              Transaction.fromJson(json: response.messageBody!["data"]);
-          await carryOn(transaction: transaction);
-        }
+      if (!isEdit && TransactionDataHolder.id != null) {
+        // This means a transaction has been created but it wasn't successful
+        // We get the transaction
+        // So we carry on and just add pricing
+        getTransaction();
       } else {
-        Transaction transaction = Transaction.fromJson(json: {
-          "transactionName": TransactionDataHolder.transactionName!,
-          "aboutService": TransactionDataHolder.aboutProduct!,
-          "location": TransactionDataHolder.location,
-          "inspectionDays": TransactionDataHolder.inspectionDays!,
-          "inspectionPeriod":
-              TransactionDataHolder.inspectionPeriod! ? "day" : "hour",
-          "transaction category":
-              TransactionDataHolder.transactionCategory!.name.toLowerCase(),
-        });
-
-        final dateOffWork = DateFormat("dd/MM/yyyy").parse(TransactionDataHolder
-                .date ??
-            DateFormat("dd/MM/yyyy")
-                .format(TransactionDataHolder.inspectionPeriodToDateTime()!));
-
-        final response = await TransactionRepo.createTransaction(
-            dateOfWork:
-                transaction.transactionCategory == TransactionCategory.Service
-                    ? TransactionDataHolder.inspectionPeriodToDateTime()!
-                        .toIso8601String()
-                    : TransactionDataHolder.date == null
-                        ? group.transactionTime.toIso8601String()
-                        : dateOffWork.toIso8601String(),
-            groupId: group.groupId,
-            transaction: transaction);
-        log("Creating Transaction :${response.body}");
-
-        if (response.error) {
-          setState(() {
-            error = true;
-            errorMessage = response.messageBody?["message"]
-                        .toString()
-                        .contains("duplicat") ??
-                    false
-                ? "Transaction already exists."
-                : "An unknown error occurred.";
-          });
-          log(response.body);
-        } else {
-          setState(() {
-            if (value == 0) {
-              value = 1;
-            }
-          });
-          TransactionDataHolder.id = response.messageBody!["data"]["_id"];
-          await carryOn(
-              transaction:
-                  Transaction.fromJson(json: response.messageBody!["data"]));
-        }
+        /// This means we're either trying to create a transaction or edit it
+        editOrCreateTransaction();
       }
     } on Exception catch (e) {
       debugPrint(e.toString());
@@ -284,7 +312,9 @@ class _CreateTransactonProgressScreenState
     }
   }
 
-  Future<void> carryOn({required Transaction transaction}) async {
+  Future<void> carryOn({required String transactionId}) async {
+    debugPrint(
+        'Removed Images: ${ref.read(removedImagesItemsProvider.notifier).state.toString()}');
     //
     // setState(() {
     //   value += 1;
@@ -302,11 +332,19 @@ class _CreateTransactonProgressScreenState
     // }
 
     try {
-      final futures = addPricingTasks(transactionId: transaction.transactionId);
+      final futures = pricingTasks(transactionId: transactionId);
       final successfulPricings = await futures;
 
-      TransactionDataHolder.clear(ref: ref);
-      Navigator.pushNamed(context, Routes.transactionSuccessRoute);
+      if (successfulPricings.length >= pricings.length) {
+        ref.watch(popTransactionScreen.notifier).state = true;
+        ref.read(createTransactionProgressProvider.notifier).state = 0;
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          Routes.transactionSuccessRoute,
+          ModalRoute.withName(
+              isEdit ? Routes.viewTransactionRoute : Routes.chatRoute),
+        );
+      }
     } catch (e) {
       debugPrint(e.toString());
       setState(
@@ -318,14 +356,72 @@ class _CreateTransactonProgressScreenState
     }
   }
 
-  Future<HttpResponseModel> addPricingItem(
+  SalesItem convertItem({required Map json}) {
+    switch (TransactionDataHolder.transactionCategory) {
+      case TransactionCategory.Service:
+        return s.Service.fromJson(json: json);
+      case TransactionCategory.Product:
+        return Product.fromJson(json: json);
+      default:
+        return VirtualService.fromJson(json: json);
+    }
+  }
+
+  Future<HttpResponseModel> addOrEditPricingItem(
       {required final String transactionId,
       required final SalesItem item}) async {
-    final response = await TransactionRepo.createPricing(
-        type: TransactionDataHolder.transactionCategory!,
-        transactionId: transactionId,
-        group: group,
-        item: item);
+    final editing = item.isEditing();
+
+    debugPrint("Id of Item ${pricings.indexOf(item) + 1}: ${item.id}");
+    debugPrint("Editing Item ${pricings.indexOf(item) + 1}: $editing");
+
+    var itemClone = item.toJson();
+    if (item.isEditing()) {
+      // We remove the images that have not changed (i.e) that's are urls.
+      final pricingImage = ((itemClone['pricingImage'] ?? []) as List)
+          .map(
+            (e) => e.toString(),
+          )
+          .where((element) => !element.startsWith('http'))
+          .toList();
+      itemClone['pricingImage'] = pricingImage;
+
+      if (ref.read(removedImagesItemsProvider.notifier).state.any(
+            (element) => element['_id'] == item.id,
+          )) {
+        final imageRemovedItem =
+            ref.read(removedImagesItemsProvider.notifier).state.firstWhere(
+                  (element) => element['_id'] == item.id,
+                );
+        final removedImages = (imageRemovedItem['removedImages'] as List)
+            .map(
+              (e) => e.toString(),
+            )
+            .where(
+              (element) => element.startsWith('http'),
+            )
+            .toList();
+
+        itemClone['removedImages'] = removedImages;
+      }
+
+      // We add a `removedImages` attribute which is a list gotten from mapping
+      // the id to that of the removedImagesProvider.
+    }
+
+    final itemResult = convertItem(json: itemClone);
+
+    final response = await (editing
+        ? TransactionRepo.editPricing(
+            type: TransactionDataHolder.transactionCategory!,
+            transactionId: transactionId,
+            group: group,
+            item: itemResult)
+        : TransactionRepo.createPricing(
+            type: TransactionDataHolder.transactionCategory!,
+            transactionId: transactionId,
+            group: group,
+            item: item));
     debugPrint(response.body);
 
     if (response.error) {
@@ -336,12 +432,12 @@ class _CreateTransactonProgressScreenState
   }
 
   /// Method that
-  Future<List<HttpResponseModel>> addPricingTasks(
+  Future<List<HttpResponseModel>> pricingTasks(
       {required final String transactionId}) async {
     final list = <HttpResponseModel>[];
     for (final pricing in pricings) {
-      final response =
-          await addPricingItem(transactionId: transactionId, item: pricing);
+      final response = await addOrEditPricingItem(
+          transactionId: transactionId, item: pricing);
 
       // The remaining line would execute if no error was thrown
       TransactionDataHolder.items!.remove(pricing);
@@ -349,59 +445,41 @@ class _CreateTransactonProgressScreenState
       list.add(response);
     }
     return list;
-    // return pricings.map(
-    //   (e) {
-    //     return addPricingItem(transactionId: transactionId, item: e)
-    //         .onError<Exception>(
-    //       (error, stackTrace) {
-    //         throw error;
-    //       },
-    //     ).then<HttpResponseModel>(
-    //       (response) {
-    //         if (!response.error) {
-    //           TransactionDataHolder.items!.remove(e);
-    //           setState(() => value += 1);
-    //         }
-    //
-    //         return response;
-    //       },
-    //     );
-    //   },
-    // ).toList();
   }
 
-  Future<bool> addPricing({required final Transaction transaction}) async {
-    final items = List<SalesItem>.from(TransactionDataHolder.items!);
-    log(items.length.toString());
-    int successful = 0;
-    for (int i = 0; i < items.length; i++) {
-      log("Adding pricing ${i + 1}");
-      final item = items[i];
-      final response = await TransactionRepo.createPricing(
-          type: TransactionDataHolder.transactionCategory!,
-          transactionId: transaction.transactionId,
-          group: group,
-          item: item);
-      debugPrint("Ended process ${i + 1} :${response.body}");
-
-      if (!response.error) {
-        TransactionDataHolder.items!.removeAt(0);
-        // if (value + 1 == maxValue) {
-        //   setState(() {
-        //     value += 1;
-        //   });
-        //   log("Successfully added all pricings");
-        //   return true;
-        // }
-        successful += 1;
-        setState(() {
-          value += 1;
-        });
-      }
-    }
-    setState(() {
-      error = successful != items.length - 1;
-    });
-    return successful == items.length - 1;
-  }
+//   Future<bool> addPricing({required final Transaction transaction}) async {
+//     final items = List<SalesItem>.from(TransactionDataHolder.items!);
+//     log(items.length.toString());
+//     int successful = 0;
+//     for (int i = 0; i < items.length; i++) {
+//       log("Adding pricing ${i + 1}");
+//       final item = items[i];
+//       final response = await TransactionRepo.createPricing(
+//           type: TransactionDataHolder.transactionCategory!,
+//           transactionId: transaction.transactionId,
+//           group: group,
+//           item: item);
+//       debugPrint("Ended process ${i + 1} :${response.body}");
+//
+//       if (!response.error) {
+//         TransactionDataHolder.items!.removeAt(0);
+//         // if (value + 1 == maxValue) {
+//         //   setState(() {
+//         //     value += 1;
+//         //   });
+//         //   log("Successfully added all pricings");
+//         //   return true;
+//         // }
+//         successful += 1;
+//         setState(() {
+//           value += 1;
+//         });
+//       }
+//     }
+//     setState(() {
+//       error = successful != items.length - 1;
+//     });
+//     return successful == items.length - 1;
+//   }
+// }
 }

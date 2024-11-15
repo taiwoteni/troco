@@ -79,6 +79,8 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final durationNotExceeded =
+        DateTime.now().difference(chat.time).inMinutes <= 20;
     return Container(
       width: double.maxFinite,
       padding: EdgeInsets.only(
@@ -109,13 +111,16 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
               GestureDetector(
                 onTap: failed ? resend : null,
                 child: isSender
-                    ? CustomPopup(
-                        isLongPress: true,
-                        content: options(),
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 15, horizontal: SizeManager.large * 1.2),
-                        child: bubbleWidget(),
-                      )
+                    ? (durationNotExceeded
+                        ? CustomPopup(
+                            isLongPress: true,
+                            content: options(),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 15,
+                                horizontal: SizeManager.large * 1.2),
+                            child: bubbleWidget(),
+                          )
+                        : bubbleWidget())
                     : bubbleWidget(),
               ),
               profileIcon(isSender: isSender),

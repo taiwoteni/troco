@@ -5,6 +5,8 @@ import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
+import 'package:troco/features/transactions/domain/entities/transaction.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 
@@ -29,79 +31,32 @@ class WalletRepository {
   }
 
   Future<List<Referral>> getReferrals() async {
-    final clientJson = AppStorage.getUser()!.toJson();
-    final userReferrals = clientJson["referrals"] as List;
-
-    final List<Referral> referrals = [];
-
-    for (final String referral in userReferrals) {
-      final response = await ApiInterface.findUser(userId: referral);
-      if (!response.error) {
-        final userJson = response.messageBody!["data"] as Map<dynamic, dynamic>;
-
-        final transactionsList = userJson["transactions"] as List;
-
-        final bool referralCompleted = !transactionsList.every((element) =>
-            element["status"].toString().toLowerCase() != "completed");
-
-        final referralJson = {};
-        referralJson["referralStatus"] =
-            referralCompleted ? "completed" : "pending";
-        // To remove bulky data
-        userJson.remove("transactions");
-        userJson.remove("groups");
-        referralJson["userJson"] = userJson;
-
-        final referral = Referral.fromJson(json: referralJson);
-        referrals.add(referral);
-      }
-    }
-
-    if (referrals.isEmpty) {
+    final response = await ApiInterface.getRequest(
+      url: 'getreferred_users/${ClientProvider.readOnlyClient!.userId}',
+    );
+    if (response.error) {
       return AppStorage.getReferrals();
     }
 
-    return referrals;
+    return ((response.messageBody?["data"] ?? []) as List)
+        .map(
+          (e) => Referral.fromJson(json: e),
+        )
+        .toList();
+  }
+
+  static Future<HttpResponseModel> referPhoneNumber(
+      {required final String phoneNumber}) {
+    return ApiInterface.postRequest(
+        url: "send_referral_message/${ClientProvider.readOnlyClient?.userId}",
+        data: {"phoneNumber": phoneNumber});
   }
 
   static Future<HttpResponseModel> getUserReferrals(
       {required final String userId}) async {
-    final response = await ApiInterface.findUser(userId: userId);
-    if (response.error) {
-      return response;
-    }
-    final clientJson = response.messageBody?["data"] ?? {};
-    final userReferrals = clientJson["referrals"] as List;
-
-    final List<Map> referrals = [];
-
-    for (final String referral in userReferrals) {
-      final response = await ApiInterface.findUser(userId: referral);
-      if (!response.error) {
-        final userJson = response.messageBody!["data"] as Map<dynamic, dynamic>;
-
-        final transactionsList = userJson["transactions"] as List;
-
-        final bool referralCompleted = !transactionsList.every((element) =>
-            element["status"].toString().toLowerCase() != "completed");
-
-        final referralJson = {};
-        referralJson["referralStatus"] =
-            referralCompleted ? "completed" : "pending";
-        // To remove bulky data
-        userJson.remove("transactions");
-        userJson.remove("groups");
-        referralJson["userJson"] = userJson;
-
-        final referral = Referral.fromJson(json: referralJson);
-        referrals.add(referralJson);
-      }
-    }
-
-    return HttpResponseModel(
-        error: false,
-        body: jsonEncode({"message": "Got referrals", "data": referrals}),
-        code: response.code);
+    return await ApiInterface.getRequest(
+      url: 'getreferred_users/$userId',
+    );
   }
 
   Future<List<WalletTransaction>> getWalletHistory() async {

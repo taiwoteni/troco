@@ -39,37 +39,55 @@ class _TransactionTermsPageState extends ConsumerState<TransactionTermsPage> {
             children: [
               title(),
               largeSpacer(),
-              SelectTransactionTypeWidget(
-                label: 'Product',
-                description: "Select if a product-based transaction.",
-                selected: category == TransactionCategory.Product,
-                onChecked: () {
-                  setState(() {
-                    category = TransactionCategory.Product;
-                  });
-                },
+              Opacity(
+                opacity: TransactionDataHolder.isEditing == true ? 0.4 : 1,
+                child: SelectTransactionTypeWidget(
+                  label: 'Product',
+                  description: "Select if a product-based transaction.",
+                  selected: category == TransactionCategory.Product,
+                  onChecked: () {
+                    if (TransactionDataHolder.isEditing ?? false) {
+                      return;
+                    }
+                    setState(() {
+                      category = TransactionCategory.Product;
+                    });
+                  },
+                ),
               ),
               mediumSpacer(),
-              SelectTransactionTypeWidget(
-                label: 'Service',
-                description: "Select if a service-based transaction.",
-                selected: category == TransactionCategory.Service,
-                onChecked: () {
-                  setState(() {
-                    category = TransactionCategory.Service;
-                  });
-                },
+              Opacity(
+                opacity: TransactionDataHolder.isEditing == true ? 0.4 : 1,
+                child: SelectTransactionTypeWidget(
+                  label: 'Service',
+                  description: "Select if a service-based transaction.",
+                  selected: category == TransactionCategory.Service,
+                  onChecked: () {
+                    if (TransactionDataHolder.isEditing ?? false) {
+                      return;
+                    }
+                    setState(() {
+                      category = TransactionCategory.Service;
+                    });
+                  },
+                ),
               ),
               mediumSpacer(),
-              SelectTransactionTypeWidget(
-                label: 'Virtual',
-                description: "Select if a virtual-product based transaction.",
-                selected: category == TransactionCategory.Virtual,
-                onChecked: () {
-                  setState(() {
-                    category = TransactionCategory.Virtual;
-                  });
-                },
+              Opacity(
+                opacity: TransactionDataHolder.isEditing == true ? 0.4 : 1,
+                child: SelectTransactionTypeWidget(
+                  label: 'Virtual',
+                  description: "Select if a virtual-product based transaction.",
+                  selected: category == TransactionCategory.Virtual,
+                  onChecked: () {
+                    if (TransactionDataHolder.isEditing ?? false) {
+                      return;
+                    }
+                    setState(() {
+                      category = TransactionCategory.Virtual;
+                    });
+                  },
+                ),
               ),
               largeSpacer(),
               button(),

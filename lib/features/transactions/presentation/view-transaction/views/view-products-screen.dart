@@ -31,6 +31,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
   late List<SalesItem> items;
   late PageController controller;
   int productIndex = 0;
+  int imageIndex = 0;
 
   @override
   void initState() {
@@ -48,16 +49,37 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorManager.background,
-      body: SizedBox.expand(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            productsSlider(),
-            largeSpacer(),
-            body(),
-          ],
+    return PopScope(
+      canPop: productIndex == 0,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          if (productIndex != 0) {
+            controller.previousPage(
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.ease);
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: ColorManager.background,
+        body: SizedBox.expand(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              productsSlider(),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      largeSpacer(),
+                      body(),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -154,10 +176,20 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
       controller: controller,
       itemCount: items.length,
       onPageChanged: (value) {
-        setState(() => productIndex = value);
+        setState(() {
+          imageIndex = 0;
+          productIndex = value;
+        });
       },
       itemBuilder: (context, index) {
         final product = items[index];
+        String image = "";
+        try {
+          image = product.images[imageIndex];
+        } catch (e) {
+          image = product.images.isEmpty ? "" : product.images[0];
+        }
+
         if (product.noImage) {
           return Image.asset(
             AssetManager.imageFile(name: "task"),
@@ -167,7 +199,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
           );
         }
         return CachedNetworkImage(
-          imageUrl: product.mainImage(),
+          imageUrl: image,
           fit: BoxFit.cover,
           height: double.maxFinite,
           fadeInCurve: Curves.ease,
@@ -380,6 +412,66 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
     );
   }
 
+  Widget escrowFee() {
+    final product = items[productIndex];
+    final no = product.quantity;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Total Escrow Fee: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.8),
+        ),
+        Text(
+          "${NumberFormat.currency(decimalDigits: 2, locale: 'en_NG', symbol: '').format(product.escrowCharge * no)} NG",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.accentColor,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.8),
+        ),
+      ],
+    );
+  }
+
+  Widget escrowPercentage() {
+    final product = items[productIndex];
+    final no = product.quantity;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Escrow Percentage: ",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.secondary,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.8),
+        ),
+        Text(
+          "${product.escrowPercentage}%",
+          textAlign: TextAlign.left,
+          style: TextStyle(
+              color: ColorManager.accentColor,
+              fontFamily: 'quicksand',
+              height: 1.4,
+              fontWeight: FontWeightManager.extrabold,
+              fontSize: FontSizeManager.medium * 0.8),
+        ),
+      ],
+    );
+  }
+
   Widget totalAmount() {
     final product = items[productIndex];
     final no = product.quantity;
@@ -397,7 +489,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
               fontSize: FontSizeManager.medium * 0.8),
         ),
         Text(
-          "${NumberFormat.currency(decimalDigits: 2, locale: 'en_NG', symbol: '').format(product.price * no)} NG",
+          "${NumberFormat.currency(decimalDigits: 2, locale: 'en_NG', symbol: '').format(product.finalPrice * no)} NG",
           textAlign: TextAlign.left,
           style: TextStyle(
               color: ColorManager.accentColor,
@@ -416,11 +508,47 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
     );
   }
 
+  Widget imageItem(
+      {required final String profileUrl, required final int index}) {
+    return GestureDetector(
+      onTap: () => setState(() => imageIndex = index),
+      child: Container(
+        width: IconSizeManager.extralarge,
+        height: IconSizeManager.extralarge,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(SizeManager.regular),
+            image: DecorationImage(
+                image: CachedNetworkImageProvider(profileUrl),
+                fit: BoxFit.cover),
+            border: imageIndex == index
+                ? Border.all(color: ColorManager.accentColor, width: 2)
+                : null),
+      ),
+    );
+  }
+
+  Widget imageRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: items[productIndex].images.map(
+        (e) {
+          return Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: SizeManager.regular),
+            child: imageItem(
+                profileUrl: e, index: items[productIndex].images.indexOf(e)),
+          );
+        },
+      ).toList(),
+    );
+  }
+
   Widget body() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           productName(),
           regularSpacer(),
@@ -442,7 +570,16 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
           regularSpacer(),
           divider(),
           regularSpacer(),
+          escrowPercentage(),
+          regularSpacer(),
+          divider(),
+          regularSpacer(),
+          escrowFee(),
+          regularSpacer(),
+          divider(),
+          regularSpacer(),
           totalAmount(),
+          if (!items[productIndex].noImage) ...[mediumSpacer(), imageRow()]
         ],
       ),
     );

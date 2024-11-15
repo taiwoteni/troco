@@ -6,8 +6,10 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/groups/presentation/collections_page/widgets/empty-screen.dart';
 import 'package:troco/features/groups/presentation/friends_tab/widgets/friend-widget.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-menu-button.dart';
+import 'package:troco/features/profile/presentation/view-profile/providers/client-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/providers/friends-provider.dart';
 
 class FriendsTab extends ConsumerStatefulWidget {
@@ -21,6 +23,14 @@ class _UserDetailsTabState extends ConsumerState<FriendsTab> {
   bool listMutual = false;
   @override
   Widget build(BuildContext context) {
+    if (ref.watch(friendsProfileProvider).isEmpty) {
+      return SliverFillRemaining(
+        child: EmptyScreen(
+          label:
+              "${ref.watch(userProfileProvider)!.firstName} doesn't have any friends.",
+        ),
+      );
+    }
     return SliverPadding(
         padding: const EdgeInsets.only(
           top: SizeManager.large,
@@ -67,11 +77,13 @@ class _UserDetailsTabState extends ConsumerState<FriendsTab> {
     log(ref.watch(friendsProfileProvider).length.toString());
     return Column(
       children: List.generate(
-        ref.watch(friendsProfileProvider).length,
+        ref.watch(friendsProfileProvider).toSet().length,
         (index) {
           return FriendWidget(
-            key: ObjectKey(ref.read(friendsProfileProvider)[index]),
-            client: ref.read(friendsProfileProvider)[index],
+            key: ObjectKey(
+                ref.read(friendsProfileProvider).toSet().toList()[index]),
+            client: ref.read(friendsProfileProvider).toSet().toList()[index],
+            pushReplace: true,
             applyHorizontalPadding: false,
           );
         },

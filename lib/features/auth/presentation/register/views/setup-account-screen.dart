@@ -8,6 +8,7 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/app/value-manager.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
@@ -16,6 +17,7 @@ import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
+import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/register/widgets/search-place.dart';
 
 import '../../../../../core/app/font-manager.dart';
@@ -491,15 +493,7 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
   Widget nextButton() {
     return CustomButton(
       buttonKey: buttonKey,
-      onPressed: () async {
-        ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
-        if (formKey.currentState!.validate()) {
-          formKey.currentState!.save();
-          await Future.delayed(const Duration(seconds: 2));
-          Navigator.pushNamed(context, Routes.addProfileRoute);
-        }
-        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-      },
+      onPressed: setupAccount,
       usesProvider: true,
       label: "NEXT",
       margin: const EdgeInsets.symmetric(
@@ -509,9 +503,23 @@ class _SetupAccountScreenState extends ConsumerState<SetupAccountScreen> {
 
   Future<void> setupAccount() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 2));
+
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
-      await Future.delayed(const Duration(seconds: 2));
+
+      final userResponse = await AuthenticationRepo.updateUser(
+          userId: LoginData.id!, body: LoginData.toClientJson());
+      debugPrint("User Response : ${userResponse.body}");
+
+      if (userResponse.error) {
+        SnackbarManager.showErrorSnackbar(
+            context: context, message: "Error Adding User Details");
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+        return;
+      }
+
       Navigator.pushNamed(context, Routes.addProfileRoute);
     }
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

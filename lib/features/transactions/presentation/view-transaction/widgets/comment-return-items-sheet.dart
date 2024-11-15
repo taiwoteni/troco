@@ -15,16 +15,33 @@ import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/texts/inputs/text-form-field.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 
-class CommentReturnItemsSheet extends ConsumerStatefulWidget {
-  const CommentReturnItemsSheet({super.key});
+class ReasonSheet extends ConsumerStatefulWidget {
+  final String? title, label;
+  const ReasonSheet({super.key, this.title, this.label});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _CommentReturnItemsSheetState();
+
+  static Future<String?> bottomSheet(
+      {required BuildContext context, String? title, String? label}) async {
+    return await showModalBottomSheet<String?>(
+        isScrollControlled: true,
+        enableDrag: true,
+        useSafeArea: false,
+        isDismissible: false,
+        backgroundColor: ColorManager.background,
+        context: context,
+        builder: (context) => SingleChildScrollView(
+              child: ReasonSheet(
+                title: title,
+                label: label,
+              ),
+            ));
+  }
 }
 
-class _CommentReturnItemsSheetState
-    extends ConsumerState<CommentReturnItemsSheet> {
+class _CommentReturnItemsSheetState extends ConsumerState<ReasonSheet> {
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
   late TextEditingController controller;
@@ -58,7 +75,7 @@ class _CommentReturnItemsSheetState
             const DragHandle(),
             largeSpacer(),
             Text(
-              "Comment",
+              widget.title ?? "Comment",
               style: TextStyle(
                   color: ColorManager.primary,
                   fontWeight: FontWeightManager.bold,
@@ -72,7 +89,7 @@ class _CommentReturnItemsSheetState
             ),
             mediumSpacer(),
             InputFormField(
-                label: "What don't you like",
+                label: widget.label ?? "What don't you like",
                 controller: controller,
                 inputType: TextInputType.name,
                 validator: (value) {
@@ -93,7 +110,7 @@ class _CommentReturnItemsSheetState
             mediumSpacer(),
             CustomButton(
               onPressed: comment,
-              label: "Edit Message",
+              label: "Submit",
               usesProvider: true,
               buttonKey: buttonKey,
               margin: const EdgeInsets.symmetric(vertical: SizeManager.regular),

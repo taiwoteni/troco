@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/dialog-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/transactions/data/datasources/create-transaction-stages.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/pricings-notifier.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/ction-screen-provider.dart';
 
@@ -17,6 +19,7 @@ import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/images/svg.dart';
+import '../../../data/models/draft.dart';
 
 class CreateTransactionScreen extends ConsumerStatefulWidget {
   const CreateTransactionScreen({super.key});
@@ -43,7 +46,8 @@ class _CreateTransactionScreenState
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: ref.watch(popTransactionScreen),
+      canPop: (TransactionDataHolder.isEditing ?? false) ||
+          ref.watch(popTransactionScreen),
       onPopInvoked: (didPop) {
         if (!didPop) {
           handlePop();
@@ -109,6 +113,8 @@ class _CreateTransactionScreenState
     );
 
     if (shouldSave == null) {
+      AppStorage.addDraft(
+          draft: Draft.fromJson(json: TransactionDataHolder.toJson()));
       return;
     }
 
@@ -160,7 +166,9 @@ class _CreateTransactionScreenState
                 ),
                 mediumSpacer(),
                 Text(
-                  "Create Transaction",
+                  TransactionDataHolder.isEditing == true
+                      ? "Edit Transaction"
+                      : "Create Transaction",
                   style: TextStyle(
                       color: ColorManager.primary,
                       fontFamily: 'Lato',

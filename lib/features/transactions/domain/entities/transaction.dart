@@ -8,6 +8,7 @@ import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/service.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/utils/inspection-period-converter.dart';
+import 'package:troco/features/transactions/utils/service-role.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
 import '../../../../core/cache/shared-preferences.dart';
@@ -162,12 +163,20 @@ class Transaction extends Equatable {
   String get adminId => _json["adminId"] ?? group.adminId;
   String get buyer => _json["buyer"];
 
+  ServiceRole get role =>
+      ((_json["role"]?.toString() ?? "client").toLowerCase() == 'client'
+          ? ServiceRole.Client
+          : ServiceRole.Developer);
+
   bool get hasAdmin => true;
 
   Driver get driver =>
       Driver.fromJson(json: (_json["driverInformation"] as List).last);
 
   bool get hasDriver => ((_json["driverInformation"] ?? []) as List).isNotEmpty;
+
+  bool get hasReturnDriver =>
+      ((_json["driverInformation"] ?? []) as List).length > 1;
 
   bool get hasAccountDetails =>
       ((_json["accountDetailes"] ?? []) as List).isNotEmpty;
@@ -184,6 +193,21 @@ class Transaction extends Equatable {
   /// [trocoPaysSeller] is always true now...
   /// simply because money is always sent to seller's wallet after transaction.
   bool get trocoPaysSeller => true;
+
+  bool get realClient {
+    final isApparentCreator = creator == ClientProvider.readOnlyClient?.userId;
+    if (transactionCategory != TransactionCategory.Service) {
+      return !isApparentCreator;
+    }
+
+    final realCreatorIsClient = role == ServiceRole.Client;
+
+    if (realCreatorIsClient) {
+      return isApparentCreator;
+    }
+
+    return !isApparentCreator;
+  }
 
   bool get leadStarted =>
       [

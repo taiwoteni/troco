@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/app/dialog-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
+import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
+import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/transactions/utils/enums.dart';
 import '../../domain/entities/wallet-transaction.dart';
 import '../../utils/enums.dart';
 
@@ -13,11 +18,10 @@ class WalletTransactionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isWithdraw = transaction.transactionPurpose == WalletPurpose.Withdraw;
-    Color color = isWithdraw
-        ? Colors.red
-        : ColorManager.accentColor;
-    
+    final bool isWithdraw =
+        transaction.transactionPurpose == WalletPurpose.Withdraw;
+    Color color = isWithdraw ? Colors.red : ColorManager.accentColor;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(SizeManager.medium),
       child: Container(
@@ -44,7 +48,12 @@ class WalletTransactionWidget extends StatelessWidget {
               fontFamily: 'Lato',
               fontSize: FontSizeManager.medium,
               fontWeight: FontWeightManager.semibold),
-          subtitle: Text(transaction.transactionStatus.name),
+          subtitle:
+              Text(transaction.transactionStatus != TransactionStatus.Completed
+                  ? "Pending"
+                  : transaction.transactionPurpose != WalletPurpose.Income
+                      ? "Withdraw Paid"
+                      : "Income Credited"),
           subtitleTextStyle: TextStyle(
               color: ColorManager.secondary,
               fontFamily: 'Quicksand',
@@ -63,12 +72,17 @@ class WalletTransactionWidget extends StatelessWidget {
               size: const Size.square(IconSizeManager.regular),
             ),
           ),
-          trailing: Text("${isWithdraw ? "-" : "+"}${transaction.transactionAmountString} NG"),
+          trailing: Text(
+              "${isWithdraw ? "-" : "+"}${transaction.transactionAmountString} NG"),
           leadingAndTrailingTextStyle: TextStyle(
               color: color,
               fontFamily: 'Lato',
               fontSize: FontSizeManager.medium * 0.8,
               fontWeight: FontWeightManager.bold),
+          onTap: () {
+            Navigator.pushNamed(context, Routes.walletTransactionRoute,
+                arguments: transaction);
+          },
         ),
       ),
     );

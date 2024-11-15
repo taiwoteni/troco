@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/texts/inputs/otp-input-field.dart';
@@ -14,6 +15,8 @@ import 'package:troco/core/components/button/presentation/provider/button-provid
 import 'package:troco/features/auth/data/models/otp-data.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/otp/providers/timer-provider.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/settings/domain/repository/settings-repository.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
@@ -22,9 +25,17 @@ import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../../../core/components/images/svg.dart';
 
+enum OtpVerificationType { Authentication, ForgotPassword, ForgotPin, Update }
+
 class OTPScreen extends ConsumerStatefulWidget {
-  final bool email;
-  const OTPScreen({super.key, required this.email});
+  final OtpVerificationType otpVerificationType;
+  final String target;
+  final bool isEmail;
+  const OTPScreen(
+      {super.key,
+      this.isEmail = true,
+      required this.target,
+      this.otpVerificationType = OtpVerificationType.Authentication});
 
   @override
   ConsumerState<OTPScreen> createState() => _OTPScreenState();
@@ -33,7 +44,9 @@ class OTPScreen extends ConsumerStatefulWidget {
 class _OTPScreenState extends ConsumerState<OTPScreen> {
   final UniqueKey buttonKey = UniqueKey();
   late bool isEmail;
-  bool timerIntialized = false;
+  late OtpVerificationType otpVerificationType;
+  late String target;
+  bool timerInitialized = false;
   bool resendCode = false;
   late TimerProvider timerProvider;
 
@@ -45,7 +58,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
 
   @override
   void dispose() {
-    if (timerIntialized) {
+    if (timerInitialized) {
       timerProvider.cancel();
     }
     super.dispose();
@@ -53,15 +66,9 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
 
   @override
   void initState() {
-    /// We don't need to check if phone number is empty
-    /// because whenever we navigate to login screen, Login Data is cleared.
-    /// And it is from login screen that we come to OTPScreen with the [isFromLogin] argument
-    /// being true.
-
-    bool emailNull = LoginData.email == null;
-    //TODO: For now, Finbarr only does Email
-    bool emailEmpty = emailNull ? true : LoginData.email!.trim().isEmpty;
-    isEmail = /**widget.isFromLogin ? !emailEmpty : false*/ widget.email;
+    isEmail = widget.isEmail;
+    otpVerificationType = widget.otpVerificationType!;
+    target = widget.target;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
@@ -75,7 +82,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
         },
       );
 
-      setState(() => timerIntialized = true);
+      setState(() => timerInitialized = true);
 
       timerProvider.start();
     });
@@ -147,27 +154,47 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
 
   //661011867896deefa607ac81
 
+  Future<HttpResponseModel> verifyOtpRequest() async {
+    switch (otpVerificationType) {
+      case OtpVerificationType.Update:
+        return await AuthenticationRepo.verifyUpdateProfileOTP(
+          userId: OtpData.id ?? ClientProvider.readOnlyClient!.userId,
+          otp: otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5,
+        );
+
+      case OtpVerificationType.ForgotPassword:
+        return await SettingsRepository.verifyPasswordResetOtp(
+          emailOrPhone: target,
+          otp: otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5,
+        );
+
+      case OtpVerificationType.ForgotPin:
+        return await SettingsRepository.verifyPinResetOtp(
+          email: OtpData.email,
+          phoneNumber: OtpData.phoneNumber,
+          otp: otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5,
+        );
+
+      default:
+        return await AuthenticationRepo.verifyOTP(
+          userId: OtpData.id ?? ClientProvider.readOnlyClient!.userId,
+          otp: otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5,
+        );
+    }
+  }
+
   Future<void> verifyOtp() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
     log(otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5);
-    // otp wasnt working so i use normall verification
-    final response = await AuthenticationRepo.verifyOTP(
-      userId: OtpData.id!,
-      otp: otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5,
-    );
-    log(response.body);
+
+    final response = await verifyOtpRequest();
+    debugPrint(response.body);
+
     if (!response.error) {
       Navigator.pop(context, true);
     } else {
-      bool correct = LoginData.otp?.toString() ==
-          otpValue1 + otpValue2 + otpValue3 + otpValue4 + otpValue5;
-
-      if (correct) {
-        Navigator.pop(context, true);
-        return;
-      }
-      SnackbarManager.showBasicSnackbar(
+      SnackbarManager.showErrorSnackbar(
           context: context, message: "Incorrect otp");
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       //..Logic to show error
@@ -209,7 +236,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
             TextSpan(
                 text: resendCode
                     ? "Resend"
-                    : timerIntialized
+                    : timerInitialized
                         ? "${60 - timerProvider.value()}s"
                         : "60s",
                 style: defaultStyle.copyWith(color: ColorManager.themeColor),
@@ -217,10 +244,10 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
                   ..onTap = () async {
                     if (resendCode) {
                       //...Logic to resend code.
+                      await AuthenticationRepo.resendOTP(
+                          userId: OtpData.id!, otp: LoginData.otp!);
                       setState(() => resendCode = false);
                       timerProvider.start();
-                      await AuthenticationRepo.resendOTP(
-                          userId: LoginData.id!, otp: LoginData.otp!);
                     }
                   })
           ])),
@@ -245,7 +272,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
         text: TextSpan(style: defaultStyle, children: [
           const TextSpan(text: "We just sent a 5-digit verification code to\n"),
           TextSpan(
-              text: isEmail ? LoginData.email : LoginData.phoneNumber,
+              text: target,
               style: defaultStyle.copyWith(color: ColorManager.primary)),
           TextSpan(
               text: " Change your ${isEmail ? "email" : "phone number"}?",

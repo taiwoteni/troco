@@ -2,6 +2,7 @@ import 'package:troco/core/extensions/list-extension.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/virtual-service-requirement-converter.dart';
 
+import '../../data/models/virtual-document.dart';
 import '../../utils/task-status.dart';
 import 'sales-item.dart';
 
@@ -13,21 +14,47 @@ class VirtualService extends SalesItem {
         super(
             id: json["serviceId"] ?? json["_id"],
             name: json["virtualName"] ?? json["name"],
-            price:
-                int.parse((json["virtualPrice"] ?? json["price"]).toString()),
+            price: double.parse(
+                (json["virtualPrice"] ?? json["price"]).toString()),
             images: ((json["pricingImage"] ?? []) as List).toListString(),
             quantity: int.parse((json["quantity"] ?? 0).toString()));
 
   String get description =>
       _json["description"] ?? "Description Of this Virtual Product";
 
-  String get proofOfTask => _json["proofOfWork"] ?? "";
+  String get proofOfTask =>
+      _json["proofOfWork"] != null ? _proofOfWorkList.first : "";
+
+  List<String> get _proofOfWorkList {
+    try {
+      return ((_json["proofOfWork"] ?? []) as List)
+          .map(
+            (e) => e.toString(),
+          )
+          .toList();
+    } on TypeError catch (e) {
+      final list = <String>[];
+      list.add(_json["proofOfWork"] ?? "");
+      return list;
+    }
+  }
+
+  List<VirtualDocument> get virtualDocuments {
+    return _proofOfWorkList
+        .map(
+          (e) => VirtualDocument(value: e, taskName: name),
+        )
+        .toList();
+  }
 
   TaskStatus get status => TaskStatusConverter.toTaskStatus(
       status: _json["taskStatus"] ?? "Pending");
 
-  /// [taskUploaded] tells us if this task has it's parts
-  bool get taskUploaded => _json["proofOfWork"] != null;
+  TaskStatus get paymentStatus =>
+      TaskStatusConverter.toTaskStatus(status: _json["payStatus"] ?? "Pending");
+
+  /// [documentsUploaded] tells us if this virtual-item has it's parts
+  bool get documentsUploaded => _proofOfWorkList.isNotEmpty;
 
   /// [clientSatisfied] tells us if the client has been satisfied with this task
   bool get clientSatisfied => _json["clientSatisfied"] ?? false;
@@ -41,7 +68,7 @@ class VirtualService extends SalesItem {
 
   bool get workRejected => status == TaskStatus.Rejected;
 
-  bool get approvePayment => status == TaskStatus.Accepted;
+  bool get approvePayment => paymentStatus == TaskStatus.Accepted;
 
   VirtualServiceRequirement get serviceRequirement =>
       VirtualServiceRequirementsConverter.convertToEnum(

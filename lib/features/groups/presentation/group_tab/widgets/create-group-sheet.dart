@@ -229,10 +229,14 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
           Navigator.pop(context);
         }
       } else {
-        SnackbarManager.showBasicSnackbar(
+        SnackbarManager.showErrorSnackbar(
             context: context,
-            message: "Unable to create group",
-            mode: ContentType.failure);
+            message: (result.messageBody?["message"].toString() ??
+                        result.messageBody?['error'].toString() ??
+                        " ")
+                    .contains("admin")
+                ? "Unable to find admin for group"
+                : "Unable to create group");
         log(result.body);
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       }

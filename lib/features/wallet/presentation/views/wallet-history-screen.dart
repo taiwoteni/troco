@@ -29,6 +29,9 @@ class _WalletHistoryScreenState extends ConsumerState<WalletHistoryScreen> {
   @override
   void initState() {
     walletHistory = AppStorage.getWalletTransactions();
+    walletHistory.sort(
+      (a, b) => b.time.compareTo(a.time),
+    );
     controller = TextEditingController();
     searchBarWidget = searchBar();
     super.initState();
@@ -47,7 +50,7 @@ class _WalletHistoryScreenState extends ConsumerState<WalletHistoryScreen> {
     ref.listen(walletHistoryStreamProvider, (previous, next) {
       next.whenData((value) {
         value.sort(
-          (a, b) => (1.compareTo(0)),
+          (a, b) => (b.time.compareTo(a.time)),
         );
         if (!searching) {
           setState(() {

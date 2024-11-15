@@ -156,7 +156,7 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
   }
 
   Widget total() {
-    final transactions = AppStorage.getTransactions();
+    final transactions = AppStorage.getAllTransactions();
     final totalAmount = transactions.fold(
       0,
       (previousValue, transaction) =>
@@ -182,7 +182,7 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
   }
 
   Widget completed() {
-    final transactions = AppStorage.getTransactions();
+    final transactions = AppStorage.getAllTransactions();
 
     final completedAmount = transactions
         .where(
@@ -221,7 +221,7 @@ class _TransactionsPageState extends ConsumerState<MyStatisticsPage> {
   }
 
   Widget ongoing() {
-    final transactions = AppStorage.getTransactions();
+    final transactions = AppStorage.getAllTransactions();
 
     final ongoingAmount = transactions
         .where(

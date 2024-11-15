@@ -33,7 +33,7 @@ enum VirtualServiceRequirement {
   Design
 }
 
-enum InspectionPeriod { Hour, Day, Minute }
+enum InspectionPeriod { Hour, Day, Month }
 
 enum TransactionStatus {
   /// When buyer has not yet approved. Transaction has been created.

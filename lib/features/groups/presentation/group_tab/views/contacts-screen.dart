@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/auth/utils/phone-number-converter.dart';
 import 'package:troco/features/groups/presentation/friends_tab/widgets/contact-widget.dart';
 import 'package:troco/features/groups/utils/enums.dart';
@@ -39,10 +41,10 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     allContacts = [];
     searchBar = searchBarWidget();
     super.initState();
-    initiatePermissions();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timestamp) {
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getWalletUiOverlayStyle());
+      initiatePermissions();
     });
   }
 
@@ -197,12 +199,50 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
   Future<void> initiatePermissions() async {
     if (await requestPermissions()) {
-      Iterable<Contact> contacts = (await ContactsService.getContacts())
-          .where((element) => element.phones != null);
+      // filter out all the contact with empty phone numbers
+      final notNullContacts =
+          (await ContactsService.getContacts()).where((element) =>
+              element.phones != null &&
+              element.phones != [] &&
+              element.phones!.every(
+                (element) => element.value != null,
+              ));
+
+      // distinct all phone numbers (Not duplicate them)
+      final distinctNumbers = notNullContacts
+          .map(
+              (e) => PhoneNumberConverter.convertToFull(e.phones!.first.value!))
+          .toSet()
+          .toList();
+
+      /// Add the contacts that contain any unique phone number back to an array
+      final contacts = <Contact>[];
+      for (final number in distinctNumbers) {
+        final contact =
+            notNullContacts.firstWhereOrNull((element) => element.phones!.any(
+                  (element) =>
+                      PhoneNumberConverter.convertToFull(element.value!) ==
+                      number,
+                ));
+        if (contact != null) {
+          contacts.add(contact);
+        }
+      }
+
+      /// Remove any contact that contains this logged in user's number;
+      final notUserContacts = contacts
+          .toSet()
+          .where(
+            (element) => element.phones!.any(
+              (element) =>
+                  element.value! != ClientProvider.readOnlyClient!.phoneNumber,
+            ),
+          )
+          .toSet();
 
       setState(() {
-        this.contacts = contacts.toList();
-        this.allContacts = contacts.toList();
+        this.contacts = notUserContacts.toList();
+        allContacts = notUserContacts.toList();
       });
     }
   }

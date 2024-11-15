@@ -5,10 +5,12 @@ import 'package:timelines/timelines.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/features/transactions/domain/entities/service.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../data/models/process-model.dart';
 import '../../../domain/entities/transaction.dart';
+import '../../../domain/entities/virtual-service.dart';
 import '../../../utils/enums.dart';
 import '../providers/transactions-provider.dart';
 
@@ -134,6 +136,11 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
   }
 
   Widget subTimelineWidget({required final List<SubProcess> subProcesses}) {
+    final isVirtual =
+        transaction.transactionCategory == TransactionCategory.Virtual;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+
     final overflowing =
         MediaQuery.of(context).size.width < minPerfectScreenWidth;
     return Padding(
@@ -179,8 +186,9 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
                   direction: Axis.vertical,
                   color: ColorManager.accentColor);
             },
-            itemExtentBuilder: (context, index) =>
-                index == 0 || index == subProcesses.length - 1
+            itemExtentBuilder: (context, index) => (isVirtual || isService)
+                ? 50
+                : index == 0 || index == subProcesses.length - 1
                     ? overflowing
                         ? 40
                         : 30
@@ -221,6 +229,13 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
     final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
     final isVirtual =
         transaction.transactionCategory == TransactionCategory.Virtual;
+    final isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+    final isProduct = !isVirtual && !isService;
+
+    final processes = <Process>[];
+
+    // Acceptance of Terms
     Process acceptanceOfTerms =
         Process(message: "Acceptance Of Terms", subProcesses: [
       SubProcess(
@@ -230,96 +245,170 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
           message: "Buyer approved transaction",
           done: completedAcceptanceOfTerms()),
     ]);
+    processes.add(acceptanceOfTerms);
 
-    List<TransactionStatus> paymentStatus = [
-      TransactionStatus.Finalizing,
-      TransactionStatus.Completed,
-    ];
+    if (isProduct) {
+      // Payment of Transaction
+      List<TransactionStatus> paymentStatus = [
+        TransactionStatus.Finalizing,
+        TransactionStatus.Completed,
+      ];
+      Process paymentOfTransaction = Process(
+          message: "Payment of ${transaction.transactionCategory.name}",
+          subProcesses: [
+            SubProcess(
+                message: "Buyer makes payment", done: transaction.paymentDone),
+            SubProcess(
+                message: "Admin approves payment",
+                done: transaction.adminApprovesPayment),
+            if (transaction.hasReturnTransaction &&
+                transaction.transactionCategory !=
+                    TransactionCategory.Virtual) ...[
+              SubProcess(
+                  message:
+                      "${isBuyer ? "Returning " : "Buyer returned"} ${transaction.returnItems.length} ${transaction.pricingName}${transaction.returnItems.length == 1 ? "" : "s"}",
+                  done: transaction.hasReturnTransaction),
+              SubProcess(
+                  message: "Buyer uploaded returning driver details",
+                  done: transaction.hasReturnTransaction)
+            ],
+            SubProcess(
+                message: isVirtual
+                    ? "Seller starts leading"
+                    : "Seller uploads driver details",
+                done: isVirtual
+                    ? transaction.sellerStarteedLeading
+                    : transaction.hasDriver),
+            SubProcess(
+                message: isVirtual
+                    ? "Buyer accepts lead"
+                    : "Admin approves driver details",
+                done: isVirtual
+                    ? transaction.leadStarted
+                    : transaction.hasDriver &&
+                        (paymentStatus
+                                .contains(transaction.transactionStatus) ||
+                            transaction.transactionStatus ==
+                                TransactionStatus.Ongoing)),
+            if (isVirtual)
+              SubProcess(
+                  message: "Inspection Started",
+                  done: paymentStatus.contains(transaction.transactionStatus))
+          ]);
+      processes.add(paymentOfTransaction);
 
-    Process paymentOfTransaction = Process(
-        message: "Payment of ${transaction.transactionCategory.name}",
-        subProcesses: [
-          SubProcess(
-              message: "Buyer makes payment", done: transaction.paymentDone),
-          SubProcess(
-              message: "Admin approves payment",
-              done: transaction.adminApprovesPayment),
-          if (transaction.hasReturnTransaction &&
-              transaction.transactionCategory !=
-                  TransactionCategory.Virtual) ...[
+      // Delivery of Product
+      var deliveryStatus = <TransactionStatus>[
+        TransactionStatus.Finalizing,
+        TransactionStatus.Completed,
+      ];
+      final category =
+          transaction.transactionCategory == TransactionCategory.Product
+              ? "Product"
+              : "Service";
+      Process deliveryOfTransaction =
+          Process(message: "Delivery of ${category.titleCase}", subProcesses: [
+        SubProcess(
+            message:
+                "Driver delivers ${transaction.hasReturnTransaction ? "returned" : ""} $category",
+            done: deliveryStatus.contains(transaction.transactionStatus)),
+        SubProcess(
+            message: "Buyer receives $category",
+            done: deliveryStatus.contains(transaction.transactionStatus)),
+      ]);
+      processes.add(deliveryOfTransaction);
+
+      // Acceptance of Product
+      Process acceptanceOfProducts = Process(
+          message: "Acceptance of ${transaction.transactionCategory.name}",
+          subProcesses: [
             SubProcess(
-                message:
-                    "${isBuyer ? "Returning " : "Buyer returned"} ${transaction.returnItems.length} ${transaction.pricingName}${transaction.returnItems.length == 1 ? "" : "s"}",
-                done: transaction.hasReturnTransaction),
+                message: "Buyer is satisfied with $category",
+                done: transaction.buyerSatisfied),
             SubProcess(
-                message: "Buyer uploaded returning driver details",
-                done: transaction.hasReturnTransaction)
-          ],
+                message: "Troco pays seller",
+                done: transaction.transactionStatus ==
+                    TransactionStatus.Completed),
+          ]);
+      processes.add(acceptanceOfProducts);
+    }
+
+    if (isService) {
+      // process per task
+
+      final services = transaction.salesItem.map((e) => e as Service).toList();
+
+      final tasksProcesses = <Process>[];
+
+      for (final task in services) {
+        final index = services.indexOf(task) + 1;
+
+        final process = Process(message: "Task $index", subProcesses: [
           SubProcess(
-              message: isVirtual
-                  ? "Seller starts leading"
-                  : "Seller uploads driver details",
-              done: isVirtual
-                  ? transaction.sellerStarteedLeading
-                  : transaction.hasDriver),
+              message: "Buyer made payment for task $index",
+              done: task.paymentMade),
           SubProcess(
-              message: isVirtual
-                  ? "Buyer accepts lead"
-                  : "Admin approves driver details",
-              done: isVirtual
-                  ? transaction.leadStarted
-                  : transaction.hasDriver &&
-                      (paymentStatus.contains(transaction.transactionStatus) ||
-                          transaction.transactionStatus ==
-                              TransactionStatus.Ongoing)),
-          if (isVirtual)
-            SubProcess(
-                message: "Inspection Started",
-                done: paymentStatus.contains(transaction.transactionStatus))
+              message: "Admin approved payment for task $index",
+              done: task.approvePayment),
+          SubProcess(
+              message: "Developer uploaded proof of work for task $index",
+              done: task.taskUploaded),
+          SubProcess(
+              message: "Client satisfied with developer's work",
+              done: task.clientSatisfied),
+          SubProcess(
+              message: "Payment released to the developer's wallet",
+              done: task.paymentReleased)
         ]);
+        tasksProcesses.add(process);
+      }
+      processes.addAll(tasksProcesses);
+    }
 
-    var deliveryStatus = <TransactionStatus>[
-      TransactionStatus.Finalizing,
-      TransactionStatus.Completed,
-    ];
-    final category =
-        transaction.transactionCategory == TransactionCategory.Product
-            ? "Product"
-            : "Service";
-    Process deliveryOfTransaction =
-        Process(message: "Delivery of ${category.titleCase}", subProcesses: [
-      SubProcess(
-          message:
-              "Driver delivers ${transaction.hasReturnTransaction ? "returned" : ""} $category",
-          done: deliveryStatus.contains(transaction.transactionStatus)),
-      SubProcess(
-          message: "Buyer receives $category",
-          done: deliveryStatus.contains(transaction.transactionStatus)),
-    ]);
+    if (isVirtual) {
+      // process per task
 
-    Process acceptanceOfProducts = Process(
-        message: "Acceptance of ${transaction.transactionCategory.name}",
-        subProcesses: [
+      final virtualProducts =
+          transaction.salesItem.map((e) => e as VirtualService).toList();
+
+      final tasksProcesses = <Process>[];
+
+      for (final task in virtualProducts) {
+        final index = virtualProducts.indexOf(task) + 1;
+
+        final process =
+            Process(message: "Virtual-Product $index", subProcesses: [
           SubProcess(
-              message: "Buyer is satisfied with $category",
-              done: transaction.buyerSatisfied),
+              message: "Buyer made payment for product $index",
+              done: task.paymentMade),
           SubProcess(
-              message: "Troco pays seller", done: transaction.trocoPaysSeller),
+              message: "Admin approved payment for product $index",
+              done: task.approvePayment),
+          SubProcess(
+              message:
+                  "Seller uploaded required/specified document for product $index",
+              done: task.documentsUploaded),
+          SubProcess(
+              message: "Buyer satisfied with seller's material",
+              done: task.clientSatisfied),
+          SubProcess(
+              message: "Payment released to the seller's wallet",
+              done: task.paymentReleased)
         ]);
+        tasksProcesses.add(process);
+      }
+      processes.addAll(tasksProcesses);
+    }
+
     Process completed =
         Process(message: "Completed Transaction", subProcesses: [
       SubProcess(
           message: "Transaction is completed",
           done: transaction.transactionStatus == TransactionStatus.Completed),
     ]);
+    processes.add(completed);
 
-    return [
-      acceptanceOfTerms,
-      paymentOfTransaction,
-      if (!isVirtual) deliveryOfTransaction,
-      acceptanceOfProducts,
-      completed
-    ];
+    return processes;
   }
 
   bool completedAcceptanceOfTerms() {

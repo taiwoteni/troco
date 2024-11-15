@@ -136,7 +136,7 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
               height: (widget.size == "medium")
                   ? SizeManager.extralarge * 1.7
                   : (widget.size == "small")
-                      ? SizeManager.large * 1.8
+                      ? SizeManager.large * 2.15
                       : SizeManager.extralarge * 2,
               decoration: BoxDecoration(
                   color: !enabled && !loading

@@ -30,6 +30,7 @@ class EnterLinkSheet extends ConsumerStatefulWidget {
 class _EnterLinkSheetState extends ConsumerState<EnterLinkSheet> {
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
+  bool forceAdd = false;
   String workLink = "";
 
   @override
@@ -75,7 +76,8 @@ class _EnterLinkSheetState extends ConsumerState<EnterLinkSheet> {
             mediumSpacer(),
             InputFormField(
                 label: "(e.g https://my-work.com)",
-                inputType: TextInputType.name,
+                inputType: TextInputType.url,
+                onChanged: (value) => setState(() => forceAdd = false),
                 validator: (value) {
                   if (value == null) {
                     return "* enter link";
@@ -83,11 +85,25 @@ class _EnterLinkSheetState extends ConsumerState<EnterLinkSheet> {
                   if (value.trim().isEmpty) {
                     return "* enter link";
                   }
+                  if (value.trim().endsWith(".")) {
+                    return "* enter valid link";
+                  }
+                  if (value.trim().endsWith("?")) {
+                    return "* enter valid link";
+                  }
+                  if (!value.trim().startsWith("http://")) {
+                    if (!value.trim().startsWith("https://")) {
+                      return "* should start with 'http://' or 'https://'";
+                    }
+                  }
+                  if (!isValidUrl(value.trim()) || forceAdd) {
+                    return "* enter valid link";
+                  }
                   return null;
                 },
                 onSaved: (value) {
                   setState(() {
-                    workLink = value!;
+                    workLink = value!.trim();
                   });
                 },
                 prefixIcon: Icon(
@@ -98,7 +114,7 @@ class _EnterLinkSheetState extends ConsumerState<EnterLinkSheet> {
             mediumSpacer(),
             CustomButton(
               onPressed: sendLink,
-              label: "Send",
+              label: forceAdd ? "Enforce Link" : "Send",
               usesProvider: true,
               buttonKey: buttonKey,
               margin: const EdgeInsets.symmetric(vertical: SizeManager.regular),
@@ -110,10 +126,25 @@ class _EnterLinkSheetState extends ConsumerState<EnterLinkSheet> {
     );
   }
 
+  bool isValidUrl(String url) {
+    final RegExp urlRegex = RegExp(
+      r'^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$',
+      caseSensitive: false,
+      multiLine: false,
+    );
+
+    return urlRegex.hasMatch(url);
+  }
+
   Future<void> sendLink() async {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 2));
-    if (formKey.currentState!.validate()) {
+
+    final valid = formKey.currentState!.validate();
+    if (!valid) {
+      setState(() => forceAdd = true);
+    }
+    if (valid) {
       formKey.currentState!.save();
 
       final response = await TransactionRepo.uploadProofOfWork(

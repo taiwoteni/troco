@@ -35,6 +35,7 @@ import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import 'package:troco/features/settings/utils/enums.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
+import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/domain/repository/wallet-repository.dart';
 import 'package:troco/features/wallet/presentation/providers/referrals-provider.dart';
 
@@ -318,7 +319,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         setState(() => errorText = null);
         Map<dynamic, dynamic> map = response.messageBody!["data"];
 
-        if (map["firstName"] == null ||
+        if ((map["firstName"]?.toString().trim().isEmpty ?? true) ||
             map["userImage"] == null ||
             map["transactionPin"] == null) {
           /// then user did not complete registration
@@ -327,15 +328,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           LoginData.id = map["_id"];
           LoginData.email = map["email"];
           LoginData.phoneNumber = map["phoneNumber"];
-          if (map["userImage"] == null) {
-            if (map["firstName"] == null) {
-              Navigator.pushNamed(context, Routes.setupAccountRoute);
-              return;
-            }
-            LoginData.initializeFromClient(client: Client.fromJson(json: map));
-            Navigator.pushNamed(context, Routes.addProfileRoute);
+          LoginData.transactionPin = map["transactionPin"];
+          // if (map["userImage"] != null) {
+          //   LoginData.profile = map["userImage"];
+          // }
+          if (map["firstName"] == null ||
+              map["firstName"].toString().trim().isEmpty) {
+            Navigator.pushNamed(context, Routes.setupAccountRoute);
             return;
           }
+          // if (map["userImage"] == null) {
+          //
+          //   LoginData.initializeFromClient(client: Client.fromJson(json: map));
+          //   Navigator.pushNamed(context, Routes.addProfileRoute);
+          //   return;
+          // }
           if (map["transactionPin"] == null) {
             LoginData.initializeFromClient(client: Client.fromJson(json: map));
             Navigator.pushNamed(context, Routes.addTransactionPinRoute);
@@ -373,9 +380,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           if (settings.twoFactorMethod == TwoFactorMethod.Otp) {
             /// The otp screen only returns true after verifying.
             OtpData.id = map["_id"];
+            OtpData.email = LoginData.email;
+            OtpData.phoneNumber = map["phoneNumber"];
             LoginData.otp = map["verificationPin"];
-            LoginData.email = map["email"];
-            LoginData.phoneNumber = map["phoneNumber"];
 
             final verified =
                 (await Navigator.pushNamed(context, Routes.otpRoute)
@@ -442,7 +449,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (AppStorage.getCustomerCareSessionId() == null) {
       AppStorage.saveCustomerCareChats(chats: []);
-      final response = await CustomerCareRepository.createChatSession();
+      final response = await CustomerCareRepository.createChatSession(
+          id: ClientProvider.readOnlyClient!.userId);
       log(response.body);
       if (!response.error) {
         final id = response.messageBody!["chatSession"]["_id"].toString();
@@ -557,9 +565,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       AppStorage.savekycVerificationStatus(tier: VerificationTier.None);
     }
 
-    // We have to locally store all the groups and it's respective chats.
-    await saveCollections(userId: map["_id"]);
-    // We have to save transactions
-    await saveTransactions();
+    try {
+      // We have to locally store all the groups and it's respective chats.
+      await saveCollections(userId: map["_id"]);
+      // We have to save transactions
+      await saveTransactions();
+    } catch (e) {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+    }
   }
 }

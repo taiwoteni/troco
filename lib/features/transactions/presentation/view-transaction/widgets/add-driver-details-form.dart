@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/features/transactions/data/models/driver-details-holder.dart';
+import 'package:troco/features/transactions/utils/month-converter.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
@@ -17,11 +18,15 @@ import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/images/svg.dart';
 import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
+import '../../../../../core/components/texts/inputs/dropdown-input-field.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
+import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../auth/utils/phone-number-converter.dart';
 import '../../../domain/entities/driver.dart';
 import '../../../utils/date-input-formatter.dart';
 import '../../../utils/date-verification-validation.dart';
+import '../../../utils/enums.dart';
+import '../../../utils/month-enum.dart';
 
 class AddDriverDetailsForm extends ConsumerStatefulWidget {
   const AddDriverDetailsForm({super.key});
@@ -36,6 +41,8 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
   String? plateNumber, backPlateNumber;
+  InspectionPeriod? selectedPeriod;
+  int? selectedDays;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +78,7 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
               mediumSpacer(),
               destination(),
               mediumSpacer(),
-              estimatedDeliveryTime(),
+              deliveryPeriod(),
               mediumSpacer(),
               row(),
               mediumSpacer(),
@@ -336,40 +343,94 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
     );
   }
 
-  Widget estimatedDeliveryTime() {
-    return InputFormField(
-      label: 'Est. Time (DD/MM/YYYY)',
-      inputType: TextInputType.datetime,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(10,
-            maxLengthEnforcement:
-                MaxLengthEnforcement.truncateAfterCompositionEnds),
-        DateInputFormatter(),
-      ],
-      validator: (value) {
-        if (value == null) {
-          return "* enter date";
-        }
-        if (value.trim().isEmpty) {
-          return "* enter date";
-        }
-        if (!DateValidator.isValidDate(value.trim(), expritation: true)) {
-          return "* enter valid date";
-        }
-        return null;
-      },
-      onSaved: (value) {
-        DriverDetailsHolder.estimatedDeliveryTime = value;
-      },
-      prefixIcon: IconButton(
-        onPressed: null,
-        iconSize: IconSizeManager.regular,
-        icon: Icon(
-          CupertinoIcons.time,
-          color: ColorManager.secondary,
+  Widget deliveryPeriod() {
+    return Column(
+      children: [
+        InfoText(
+          text: "Delivery Period",
+          color: ColorManager.primary,
+          fontWeight: FontWeightManager.medium,
         ),
+        regularSpacer(),
+        Row(
+          children: [noOfDeliveryPeriod(), deliveryPeriodType()],
+        )
+      ],
+    );
+  }
+
+  Widget deliveryPeriodType() {
+    return Expanded(
+      flex: 2,
+      child: DropdownInputFormField(
+        items: InspectionPeriod.values.map((e) => e.name).toList(),
+        value: selectedPeriod?.name ?? "",
+        onChanged: (value) {
+          if (value != null) {
+            final index = InspectionPeriod.values
+                .map(
+                  (e) => e.name.toLowerCase(),
+                )
+                .toList()
+                .indexOf(value.toLowerCase());
+            setState(() {
+              selectedPeriod = InspectionPeriod.values[index];
+            });
+          }
+        },
+        hint: 'period',
+        onValidate: (value) {
+          if (value == null) {
+            return "* period";
+          }
+          if (value.trim().isEmpty) {
+            return "* period";
+          }
+          return null;
+        },
+        prefixIcon: null,
       ),
+    );
+  }
+
+  Widget noOfDeliveryPeriod() {
+    return Expanded(
+      flex: 3,
+      child: InputFormField(
+        label: 'No. of ${selectedPeriod?.name ?? "Period"}',
+        inputType: TextInputType.number,
+        validator: (value) {
+          if (value == null) {
+            return "* day";
+          }
+          if (value.trim().isEmpty) {
+            return "* day";
+          }
+          if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+            return "* valid vay";
+          }
+          return null;
+        },
+        onSaved: (value) {
+          setState(() => selectedDays = int.parse(value?.trim() ?? "0"));
+        },
+        prefixIcon: null,
+      ),
+    );
+  }
+
+  DateTime calculateEstimatedEnd() {
+    final now = DateTime.now();
+    return now.copyWith(
+      hour: selectedPeriod == InspectionPeriod.Hour
+          ? (now.hour + (selectedDays ?? 0))
+          : now.hour,
+      day: selectedPeriod == InspectionPeriod.Day
+          ? (now.day + (selectedDays ?? 0))
+          : now.day,
+      month: selectedPeriod == InspectionPeriod.Month
+          ? (now.month + (selectedDays ?? 0))
+          : now.month,
     );
   }
 
@@ -392,6 +453,7 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
         backPlateNumber != null) {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       formKey.currentState!.save();
+      DriverDetailsHolder.estimatedDeliveryTime = calculateEstimatedEnd();
       DriverDetailsHolder.backPlateNumber = backPlateNumber!;
       DriverDetailsHolder.plateNumber = plateNumber!;
       Navigator.pop(

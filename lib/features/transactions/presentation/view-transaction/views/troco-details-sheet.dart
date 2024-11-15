@@ -116,7 +116,7 @@ class _TrocoDetailsSheetState extends ConsumerState<TrocoDetailsSheet> {
             (e) => e as VirtualService,
           )
           .toList();
-      final pendingTask = tasks.firstWhere((task) => !task.taskUploaded);
+      final pendingTask = tasks.firstWhere((task) => !task.documentsUploaded);
       final position = tasks.indexOf(pendingTask) + 1;
       taskPosition = position == 1
           ? "1st"
@@ -253,7 +253,7 @@ class _TrocoDetailsSheetState extends ConsumerState<TrocoDetailsSheet> {
               (e) => e as VirtualService,
             )
             .toList();
-        final pendingTask = tasks.firstWhere((task) => !task.taskUploaded);
+        final pendingTask = tasks.firstWhere((task) => !task.documentsUploaded);
 
         result = await PaymentRepository.makePaymentForVirtualProduct(
             transaction: ref.read(currentTransactionProvider),

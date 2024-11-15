@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/asset-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
@@ -238,14 +239,19 @@ class _SetTransactionPinScreenState
     LoginData.transactionPin = pin1 + pin2 + pin3 + pin4;
     final pinResponse = await AuthenticationRepo.addTransactionPin(
         userId: LoginData.id!, pin: LoginData.transactionPin!);
-    log(pinResponse.body);
-    final response = await AuthenticationRepo.updateUser(
-        userId: LoginData.id!, body: LoginData.toClientJson());
+    log("Transaction Pin : ${pinResponse.body}");
+    if (pinResponse.error) {
+      SnackbarManager.showErrorSnackbar(
+          context: context, message: "Error when creating transaction pin");
+      return;
+    }
+
     final userResponse = await ApiInterface.findUser(userId: LoginData.id!);
-    log(response.messageBody.toString());
     final createdSession = await createCustomerCareSession();
-    if (!response.error && !userResponse.error && createdSession) {
-      final Map<dynamic, dynamic> userJson = LoginData.toClientJson();
+
+    if (!userResponse.error && createdSession) {
+      final Map<dynamic, dynamic> userJson =
+          userResponse.messageBody?["data"] ?? LoginData.toClientJson();
       userJson["wallet"] = 0;
       await AppStorage.clear();
       AppStorage.saveClient(client: Client.fromJson(json: userJson));
@@ -257,14 +263,14 @@ class _SetTransactionPinScreenState
       setState(() => registerSuccess = true);
     } else {
       ButtonProvider.stopLoading(buttonKey: key, ref: ref);
-      log(response.messageBody.toString());
     }
   }
 
   Future<bool> createCustomerCareSession() async {
     AppStorage.saveCustomerCareChats(chats: []);
-    final response = await CustomerCareRepository.createChatSession();
-    log(response.body);
+    final response =
+        await CustomerCareRepository.createChatSession(id: LoginData.id!);
+    debugPrint(response.body);
     if (!response.error) {
       final id = response.messageBody!["chatSession"]["_id"].toString();
       log(id);

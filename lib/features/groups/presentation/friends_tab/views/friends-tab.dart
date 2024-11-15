@@ -5,6 +5,7 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/block/presentation/provider/blocked-users-provider.dart';
 import 'package:troco/features/groups/presentation/friends_tab/providers/friends-provider.dart';
 import 'package:troco/features/groups/presentation/friends_tab/widgets/friend-widget.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/search-provider.dart';
@@ -23,26 +24,28 @@ class FriendsTab extends ConsumerStatefulWidget {
 }
 
 class _FriendsTabState extends ConsumerState<FriendsTab> {
-  late List<Client> friends;
+  late List<Client> friends, blockedUsers;
 
   @override
   void initState() {
     friends = AppStorage.getFriends();
+    blockedUsers = AppStorage.getBlockedUsers();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     listenToFriendsChanges();
+    listenToBlockedUserChanges();
 
     //Because of queries from the searchProvider
 
-    final filteredFriends = ref.watch(collectionsSearchProvider).isEmpty
-        ? friends
+    final filteredFriends = ref.watch(collectionsSearchProvider).trim().isEmpty
+        ? friends.toSet().toList()
         : friends
-            .where((element) => element.fullName
-                .toLowerCase()
-                .contains(ref.watch(collectionsSearchProvider).toLowerCase()))
+            .where((element) => element.fullName.toLowerCase().contains(
+                ref.watch(collectionsSearchProvider).trim().toLowerCase()))
+            .toSet()
             .toList();
 
     return filteredFriends.isEmpty
@@ -95,11 +98,22 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
     ref.listen(friendsStreamProvider, (previous, next) {
       next.when(
         data: (data) {
-          setState(() {
-            setState(
-              () => friends = data,
-            );
-          });
+          setState(
+            () => friends = data,
+          );
+          setState(() {});
+        },
+        error: (error, stackTrace) => null,
+        loading: () => null,
+      );
+    });
+  }
+
+  Future<void> listenToBlockedUserChanges() async {
+    ref.listen(blockedUsersStreamProvider, (previous, next) {
+      next.when(
+        data: (data) {
+          setState(() {});
         },
         error: (error, stackTrace) => null,
         loading: () => null,

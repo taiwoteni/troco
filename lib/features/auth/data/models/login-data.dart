@@ -73,7 +73,7 @@ class LoginData {
       "email": email,
       "profile": profile,
       "phoneNumber": phoneNumber,
-      "businessName": businessName,
+      "BusinessName": businessName,
       "accountType":
           CategoryConverter.convertToString(category: category!).titleCase,
       "address": address,

@@ -18,6 +18,7 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/data/models/otp-data.dart';
+import 'package:troco/features/auth/presentation/otp/views/otp-screen.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -169,7 +170,9 @@ class _ForgotPinScreenState extends ConsumerState<ForgotPinScreen> {
 
   Future<void> changePin() async {
     final response = await SettingsRepository.resetPin(
-        email: OtpData.email!, newPin: "$newPin1$newPin2$newPin3$newPin4");
+        email: LoginData.email,
+        phoneNumber: LoginData.phoneNumber,
+        newPin: "$newPin1$newPin2$newPin3$newPin4");
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     debugPrint(response.body);
     if (!response.error) {
@@ -186,8 +189,9 @@ class _ForgotPinScreenState extends ConsumerState<ForgotPinScreen> {
 
   Future<void> verifyOtp() async {
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    final verified =
-        (await Navigator.pushNamed(context, Routes.otpRoute)) as bool? ?? false;
+    final verified = (await Navigator.pushNamed(context, Routes.otpRoute,
+            arguments: OtpVerificationType.ForgotPin)) as bool? ??
+        false;
     if (verified) {
       ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
       await changePin();
@@ -200,12 +204,14 @@ class _ForgotPinScreenState extends ConsumerState<ForgotPinScreen> {
   }
 
   Future<void> requestPinReset() async {
-    final response =
-        await SettingsRepository.requestPinReset(email: LoginData.email!);
+    final response = await SettingsRepository.requestPinReset(
+        email: LoginData.email, phoneNumber: LoginData.phoneNumber);
     debugPrint(response.body);
+    OtpData.clear();
     OtpData.id = response.messageBody!["data"]["_id"];
-    OtpData.email = response.messageBody!["data"]["email"];
-    LoginData.otp = response.messageBody!["data"]["verificationPin"];
+    OtpData.email = LoginData.email;
+    OtpData.phoneNumber = response.messageBody!["data"]["phoneNumber"];
+    LoginData.otp = response.messageBody?["data"]["verificationPin"];
 
     if (!response.error) {
       await verifyOtp();

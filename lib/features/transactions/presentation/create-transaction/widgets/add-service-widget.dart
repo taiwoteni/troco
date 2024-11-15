@@ -2,9 +2,11 @@
 
 import 'dart:io';
 import 'package:animations/animations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:troco/core/app/file-manager.dart';
@@ -22,23 +24,42 @@ import 'package:uuid/uuid.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../../core/components/button/presentation/provider/button-provider.dart';
 import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
+import '../../../../services/domain/entities/escrow-fee.dart';
+import '../providers/pricings-notifier.dart';
 import '../views/view-added-products-screen.dart';
 
-class AddServiceWidget extends ConsumerStatefulWidget {
-  const AddServiceWidget({super.key});
+class AddServiceSheet extends ConsumerStatefulWidget {
+  final Service? service;
+  const AddServiceSheet({super.key, this.service});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _AddServiceWidgetState();
+
+  static Future<Service?> bottomSheet(
+      {required BuildContext context, Service? service}) async {
+    return await showModalBottomSheet(
+        isScrollControlled: true,
+        enableDrag: true,
+        useSafeArea: false,
+        backgroundColor: ColorManager.background,
+        context: context,
+        builder: (context) {
+          return AddServiceSheet(
+            service: service,
+          );
+        });
+  }
 }
 
-class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
+class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
   ServiceRequirement? selectedRequirement;
   Month? selectedMonth;
   int? selectedYear;
@@ -52,6 +73,7 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
   bool loading = false;
   String price = "";
   String name = "";
+  String description = "";
 
   @override
   void setState(VoidCallback fn) {
@@ -63,9 +85,21 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
 
   @override
   void initState() {
+    selectedDay = widget.service?.deadlineTime.day;
+    selectedYear = widget.service?.deadlineTime.year;
+    if (widget.service != null) {
+      selectedMonth = Month.values[widget.service!.deadlineTime.month - 1];
+      selectedRequirement = widget.service!.serviceRequirement;
+    }
+
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      ref.watch(productImagesProvider.notifier).state.clear();
+      if (widget.service != null) {
+        ref.watch(pricingsImagesProvider.notifier).state =
+            widget.service!.images;
+        return;
+      }
+      ref.watch(pricingsImagesProvider.notifier).state.clear();
     });
   }
 
@@ -97,6 +131,9 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
               mediumSpacer(),
               regularSpacer(),
               serviceRequirements(),
+              mediumSpacer(),
+              regularSpacer(),
+              serviceDescription(),
               mediumSpacer(),
               regularSpacer(),
               servicePrice(),
@@ -165,6 +202,7 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
         ),
         regularSpacer(),
         InputFormField(
+          initialValue: widget.service?.name,
           label: 'Name of the task',
           validator: (value) {
             if (value == null) {
@@ -177,6 +215,37 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
           },
           onSaved: (value) {
             setState(() => name = value?.toString() ?? "");
+          },
+          prefixIcon: null,
+        ),
+      ],
+    );
+  }
+
+  Widget serviceDescription() {
+    return Column(
+      children: [
+        InfoText(
+          text: "Term of Task (description)",
+          color: ColorManager.primary,
+          fontWeight: FontWeightManager.medium,
+        ),
+        regularSpacer(),
+        InputFormField(
+          initialValue: widget.service?.description,
+          label: 'i.e the terms and description of this task.',
+          lines: 3,
+          validator: (value) {
+            if (value == null) {
+              return "* enter task term";
+            }
+            if (value.trim().isEmpty) {
+              return "* enter task term";
+            }
+            return null;
+          },
+          onSaved: (value) {
+            setState(() => description = value?.toString() ?? "");
           },
           prefixIcon: null,
         ),
@@ -246,6 +315,7 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: SizeManager.regular),
         child: InputFormField(
+          initialValue: selectedDay?.toString(),
           label: 'day',
           inputType: TextInputType.phone,
           validator: (value) {
@@ -409,6 +479,10 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
       setState(() => timeError = "* task Deadline not set");
       return false;
     }
+    debugPrint(TransactionDataHolder.inspectionDays?.toString());
+    debugPrint(TransactionDataHolder.inspectionPeriod?.name);
+    debugPrint(taskDeadlineTime.toIso8601String());
+    debugPrint(transactionDeadlineTime.toIso8601String());
 
     /// Check 1
     if (taskDeadlineTime.isAfter(transactionDeadlineTime)) {
@@ -452,6 +526,7 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
         ),
         regularSpacer(),
         InputFormField(
+          initialValue: widget.service?.price.toString(),
           label: 'NGN',
           inputType: TextInputType.phone,
           validator: (value) {
@@ -559,7 +634,6 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
   }
 
   Widget uploadPicture() {
-    final List<String> productImages = ref.watch(productImagesProvider);
     return Column(
       children: [
         InfoText(
@@ -582,18 +656,18 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (productImages.isEmpty)
+              if (ref.watch(pricingsImagesProvider).isEmpty)
                 pickServiceImage()
               else
                 serviceImage(position: 0),
-              if (productImages.isEmpty || productImages.length < 2)
+              if (ref.watch(pricingsImagesProvider).length < 2)
                 pickServiceImage()
               else
                 serviceImage(position: 1),
-              if (productImages.isEmpty || productImages.length < 3)
+              if (ref.watch(pricingsImagesProvider).length < 3)
                 pickServiceImage()
               else
-                serviceImage(position: 2),
+                serviceImage(position: 2)
             ],
           ),
         ),
@@ -602,8 +676,9 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
   }
 
   Widget button() {
+    final isEditing = widget.service?.isEditing() == true;
     return CustomButton.medium(
-      label: "Add Service",
+      label: widget.service != null ? "Edit Service" : "Add Service",
       usesProvider: true,
       buttonKey: buttonKey,
       color: ColorManager.themeColor,
@@ -626,18 +701,34 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
             ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
             return;
           }
+          const defaultCharge = EscrowCharge.fromJson(
+              json: {"category": "service", "percentage": 10});
+          final serviceCharge = AppStorage.getEscrowCharges().firstWhere(
+            (charge) => charge.category == TransactionCategory.Service,
+            orElse: () => defaultCharge,
+          );
+          final escrowCharge =
+              (double.parse(price) * (serviceCharge.percentage));
+
           final productImages =
-              List<String>.from(ref.read(productImagesProvider));
+              List<String>.from(ref.read(pricingsImagesProvider));
           final DateTime dateTime = DateTime(
               selectedYear!, selectedMonth!.toMonthOfYear(), selectedDay!);
           Map<dynamic, dynamic> serviceJson = {
-            "serviceId": const Uuid().v4(),
+            "serviceId": isEditing
+                ? widget.service!.id
+                : (ref.read(pricingsProvider).length + 1).toString(),
             "serviceName": name,
+            "description": description,
             "servicePrice": double.parse(price),
             "serviceRequirement": selectedRequirement!.name,
             "deadlineTime": taskDeadline()!.toIso8601String(),
+            "escrowPercentage": (serviceCharge.percentage * 100),
+            "escrowCharges": escrowCharge,
+            "finalPrice": double.parse(price) + escrowCharge,
             "quantity": quantity,
           };
+
           if (productImages.isNotEmpty) {
             serviceJson["pricingImage"] = productImages;
           }
@@ -661,7 +752,10 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
             await FileManager.pickImage(imageSource: ImageSource.gallery);
         if (pickedFile != null) {
           setState(() {
-            ref.read(productImagesProvider.notifier).state.add(pickedFile.path);
+            ref
+                .read(pricingsImagesProvider.notifier)
+                .state
+                .add(pickedFile.path);
           });
         }
       },
@@ -695,20 +789,27 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceWidget> {
             ThemeManager.getTransactionScreenUiOverlayStyle());
       },
       closedBuilder: (context, action) {
-        return Container(
-          width: 70,
-          height: 80,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(SizeManager.regular * 1.3),
-              image: DecorationImage(
-                  image: FileImage(
-                      File(ref.watch(productImagesProvider)[position])),
-                  fit: BoxFit.cover)),
-        );
+        final image =
+            ref.watch(pricingsImagesProvider).elementAtOrNull(position);
+        return image == null
+            ? pickServiceImage()
+            : Container(
+                width: 70,
+                height: 80,
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(SizeManager.regular * 1.3),
+                    image: DecorationImage(
+                        image: image.startsWith('http')
+                            ? CachedNetworkImageProvider(image)
+                            : FileImage(File(image)),
+                        fit: BoxFit.cover)),
+              );
       },
       openBuilder: (context, action) {
-        return ViewAddedProductsScreen(
+        return ViewAddedItemsScreen(
           currentPosition: position,
+          itemId: widget.service?.id,
         );
       },
     );

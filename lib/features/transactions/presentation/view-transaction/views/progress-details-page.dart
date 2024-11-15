@@ -5,7 +5,9 @@ import 'package:troco/features/transactions/presentation/view-transaction/provid
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../auth/presentation/providers/client-provider.dart';
 import '../../../../groups/presentation/collections_page/widgets/empty-screen.dart';
+import '../../../domain/entities/service.dart';
 import '../../../domain/entities/transaction.dart';
+import '../../../domain/entities/virtual-service.dart';
 import '../../../utils/enums.dart';
 import '../providers/transactions-provider.dart';
 
@@ -54,29 +56,53 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
         transaction.creator == ClientProvider.readOnlyClient!.userId;
     final bool isVirtual =
         transaction.transactionCategory == TransactionCategory.Virtual;
+    final bool isService =
+        transaction.transactionCategory == TransactionCategory.Service;
     switch (transaction.transactionStatus) {
       case TransactionStatus.Pending:
         return "pending";
 
       /// At this stage goods are being delivered.
       case TransactionStatus.Ongoing:
-        return isVirtual ? "pending" : "delivery";
+        return (isVirtual || isService)
+            ? isVirtual
+                ? getVirtualAnimationName()
+                : isService
+                    ? getServiceAnimationName()
+                    : isSeller
+                        ? "payment-loading"
+                        : (transaction.paymentDone
+                            ? "pending"
+                            : "payment-loading")
+            : "delivery";
 
       /// At this stage seller is to upload driver details.
       case TransactionStatus.Processing:
-        return transaction.hasReturnTransaction &&
-                transaction.transactionPurpose == TransactionPurpose.Buying
-            ? "delivery"
-            : "pending";
+        return (isVirtual || isService)
+            ? isVirtual
+                ? getVirtualAnimationName()
+                : isService
+                    ? getServiceAnimationName()
+                    : isSeller
+                        ? "payment-loading"
+                        : (transaction.paymentDone
+                            ? "pending"
+                            : "payment-loading")
+            : transaction.hasReturnTransaction &&
+                    transaction.transactionPurpose == TransactionPurpose.Buying
+                ? "delivery"
+                : "pending";
 
       /// At this stage goods have been received.
       /// Buyer is to show satisfaction
       case TransactionStatus.Finalizing:
-        return transaction.buyerSatisfied
-            ? (isSeller ? "money-bag" : "happy")
-            : isSeller
-                ? "pending"
-                : "happy";
+        return (isVirtual || isService)
+            ? "pending"
+            : transaction.buyerSatisfied
+                ? (isSeller ? "money-bag" : "happy")
+                : isSeller
+                    ? "pending"
+                    : "happy";
       case TransactionStatus.Completed:
         return "happy";
       case TransactionStatus.Cancelled:
@@ -84,9 +110,13 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
 
       /// At this stage buyer is to pay
       case TransactionStatus.Inprogress:
-        return isSeller
-            ? "payment-loading"
-            : (transaction.paymentDone ? "pending" : "payment-loading");
+        return isVirtual
+            ? getVirtualAnimationName()
+            : isService
+                ? getServiceAnimationName()
+                : isSeller
+                    ? "payment-loading"
+                    : (transaction.paymentDone ? "pending" : "payment-loading");
       default:
         return "pending";
     }
@@ -108,39 +138,64 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
     final bool isVirtual =
         transaction.transactionCategory == TransactionCategory.Virtual;
 
+    final bool isService =
+        transaction.transactionCategory == TransactionCategory.Service;
+
     switch (transaction.transactionStatus) {
       case TransactionStatus.Cancelled:
         return "Cancelled Transaction";
       case TransactionStatus.Inprogress:
-        return isSeller
-            ? "Awaiting buyer's payemnt"
-            : transaction.paymentDone
-                ? "Awaiting admin's approval"
-                : "Waiting for your payment";
+        return isService
+            ? getServiceAnimationLabel()
+            : isVirtual
+                ? getVirtualAnimationLabel()
+                : isSeller
+                    ? "Awaiting buyer's payemnt"
+                    : transaction.paymentDone
+                        ? "Awaiting admin's approval"
+                        : "Waiting for your payment";
       case TransactionStatus.Processing:
-        return isVirtual
-            ? "Leading and Inspection period"
-            : (isSeller
+        return (isVirtual || isService)
+            ? isService
+                ? getServiceAnimationLabel()
+                : isVirtual
+                    ? getVirtualAnimationLabel()
+                    : isSeller
+                        ? "Awaiting buyer's payemnt"
+                        : transaction.paymentDone
+                            ? "Awaiting admin's approval"
+                            : "Waiting for your payment"
+            : isSeller
                 ? (transaction.hasDriver
                     ? "Awaiting admin's approval"
                     : "Upload driver details")
                 : transaction.hasReturnTransaction
                     ? "Returning items"
-                    : "Seller is uploading driver details");
+                    : "Seller is uploading driver details";
       case TransactionStatus.Ongoing:
-        return isVirtual
-            ? "Leading and Inspection period"
+        return (isVirtual || isService)
+            ? isService
+                ? getServiceAnimationLabel()
+                : isVirtual
+                    ? getVirtualAnimationLabel()
+                    : isSeller
+                        ? "Awaiting buyer's payemnt"
+                        : transaction.paymentDone
+                            ? "Awaiting admin's approval"
+                            : "Waiting for your payment"
             : (isSeller
                 ? "Delivering ${transaction.transactionCategory.name}(s)"
                 : "${transaction.transactionCategory.name}(s) are on their way");
       case TransactionStatus.Finalizing:
-        return !transaction.buyerSatisfied
-            ? "Awaiting ${isSeller ? "buyer's" : "your"} satisfaction"
-            : isSeller
-                ? transaction.trocoPaysSeller
-                    ? "You should have received\nyour revenue"
-                    : "Your revenue is on the way"
-                : "Hope you enjoyed our services";
+        return (isService || isVirtual)
+            ? "Admin finalizing transaction..."
+            : !transaction.buyerSatisfied
+                ? "Awaiting ${isSeller ? "buyer's" : "your"} satisfaction"
+                : isSeller
+                    ? transaction.trocoPaysSeller
+                        ? "You should have received\nyour revenue"
+                        : "Your revenue is on the way"
+                    : "Hope you enjoyed our services";
       case TransactionStatus.Completed:
         return "Completed Transaction!";
 
@@ -163,6 +218,193 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
         }
       });
     });
+  }
+
+  String getServiceAnimationLabel() {
+    String description = "Waiting For Admin";
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final tasks = transaction.salesItem
+        .map(
+          (e) => e as Service,
+        )
+        .toList();
+    // We get the current task being done
+    final pendingTask = tasks.firstWhere(
+        (task) =>
+            !task.taskUploaded ||
+            !task.paymentMade ||
+            !task.approvePayment ||
+            !task.clientSatisfied ||
+            !task.paymentReleased,
+        orElse: () => tasks.last);
+
+    int index = tasks.indexOf(pendingTask);
+
+    if (!pendingTask.paymentMade) {
+      description = isBuyer
+          ? "Make payment for Task ${index + 1}"
+          : "Waiting for buyer's payment";
+      return description;
+    }
+
+    if (!pendingTask.approvePayment) {
+      return "Admin approving payment for task ${index + 1}..";
+    }
+
+    if (!pendingTask.taskUploaded) {
+      description = isBuyer
+          ? "Waiting for developer's work...."
+          : "Upload your work for task ${index + 1}";
+      return description;
+    }
+
+    if (!pendingTask.clientSatisfied) {
+      if (isBuyer) {
+        return "Are you satisfied with the developer's work?";
+      }
+      return "Waiting for client's impression...";
+    }
+
+    return description;
+  }
+
+  String getServiceAnimationName() {
+    String animation = "pending";
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final tasks = transaction.salesItem
+        .map(
+          (e) => e as Service,
+        )
+        .toList();
+    // We get the current task being done
+    final pendingTask = tasks.firstWhere(
+        (task) =>
+            !task.taskUploaded ||
+            !task.paymentMade ||
+            !task.approvePayment ||
+            !task.clientSatisfied ||
+            !task.paymentReleased,
+        orElse: () => tasks.last);
+
+    int index = tasks.indexOf(pendingTask);
+
+    if (!pendingTask.paymentMade) {
+      animation = isBuyer ? "payment-loading" : "pending";
+      return animation;
+    }
+
+    if (!pendingTask.approvePayment) {
+      return "pending";
+    }
+
+    if (!pendingTask.taskUploaded) {
+      animation = isBuyer ? "pending" : "kyc-document";
+      return animation;
+    }
+
+    if (!pendingTask.clientSatisfied) {
+      if (isBuyer) {
+        return "happy";
+      }
+
+      return "pending";
+    }
+
+    return animation;
+  }
+
+  String getVirtualAnimationName() {
+    String animation = "pending";
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final tasks = transaction.salesItem
+        .map(
+          (e) => e as VirtualService,
+        )
+        .toList();
+    // We get the current task being done
+    final pendingTask = tasks.firstWhere(
+        (task) =>
+            !task.documentsUploaded ||
+            !task.paymentMade ||
+            !task.approvePayment ||
+            !task.clientSatisfied ||
+            !task.paymentReleased,
+        orElse: () => tasks.last);
+
+    int index = tasks.indexOf(pendingTask);
+
+    if (!pendingTask.paymentMade) {
+      animation = isBuyer ? "payment-loading" : "pending";
+      return animation;
+    }
+
+    if (!pendingTask.approvePayment) {
+      return "pending";
+    }
+
+    if (!pendingTask.documentsUploaded) {
+      animation = isBuyer ? "pending" : "kyc-document";
+      return animation;
+    }
+
+    if (!pendingTask.clientSatisfied) {
+      if (isBuyer) {
+        return "happy";
+      }
+
+      return "pending";
+    }
+
+    return animation;
+  }
+
+  String getVirtualAnimationLabel() {
+    String description = "Waiting For Admin";
+    final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
+    final tasks = transaction.salesItem
+        .map(
+          (e) => e as VirtualService,
+        )
+        .toList();
+    // We get the current task being done
+    final pendingTask = tasks.firstWhere(
+        (task) =>
+            !task.documentsUploaded ||
+            !task.paymentMade ||
+            !task.approvePayment ||
+            !task.clientSatisfied ||
+            !task.paymentReleased,
+        orElse: () => tasks.last);
+
+    int index = tasks.indexOf(pendingTask);
+
+    if (!pendingTask.paymentMade) {
+      description = isBuyer
+          ? "Make payment for virtual-product ${index + 1}"
+          : "Waiting for buyer's payment";
+      return description;
+    }
+
+    if (!pendingTask.approvePayment) {
+      return "Admin approving payment for virtual-product ${index + 1}..";
+    }
+
+    if (!pendingTask.documentsUploaded) {
+      description = isBuyer
+          ? "Waiting for seller's document...."
+          : "Upload the required document/file for virtual-product ${index + 1}";
+      return description;
+    }
+
+    if (!pendingTask.clientSatisfied) {
+      if (isBuyer) {
+        return "Are you satisfied with the developer's work?";
+      }
+
+      return "Waiting for client's impression...";
+    }
+
+    return description;
   }
 }
 

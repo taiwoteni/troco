@@ -9,6 +9,7 @@ import 'package:troco/features/profile/presentation/view-profile/widgets/groups-
 import '../../../../../../core/app/color-manager.dart';
 import '../../../../../../core/app/font-manager.dart';
 import '../../../../../../core/app/size-manager.dart';
+import '../../../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 
 class GroupsTab extends ConsumerStatefulWidget {
   const GroupsTab({super.key});
@@ -20,6 +21,14 @@ class GroupsTab extends ConsumerStatefulWidget {
 class _UserDetailsTabState extends ConsumerState<GroupsTab> {
   @override
   Widget build(BuildContext context) {
+    if (ref.watch(groupsProfileProvider).isEmpty) {
+      return SliverFillRemaining(
+        child: EmptyScreen(
+          label:
+              "${ref.watch(userProfileProvider)!.firstName} doesn't have any group.",
+        ),
+      );
+    }
     return SliverPadding(
         padding: const EdgeInsets.only(
           top: SizeManager.large,

@@ -57,7 +57,18 @@ class AuthenticationRepo {
       final Map<String, String>? headers}) async {
     final result =
         await ApiInterface.postRequest(url: "verifyotp/$userId", data: {
-      "otp": int.parse(otp),
+      "otp": otp,
+    });
+    return result;
+  }
+
+  static Future<HttpResponseModel> verifyUpdateProfileOTP(
+      {required final String userId,
+      required final String otp,
+      final Map<String, String>? headers}) async {
+    final result =
+        await ApiInterface.postRequest(url: "verifyotpupdate/$userId", data: {
+      "otp": otp,
     });
     return result;
   }
@@ -69,7 +80,7 @@ class AuthenticationRepo {
       final Map<String, String>? headers}) async {
     final result =
         await ApiInterface.postRequest(url: "resend-otp/$userId", data: {
-      "otp": int.parse(otp),
+      "otp": otp,
     });
     return result;
   }
@@ -111,26 +122,6 @@ class AuthenticationRepo {
         url:
             "report_user/${ClientProvider.readOnlyClient!.userId}/$reportedUserId",
         data: {"reason": reason});
-    return response;
-  }
-
-  static Future<HttpResponseModel> blockUser(
-      {required final String userId, required final String reason}) async {
-    final response = await ApiInterface.patchRequest(
-        url:
-            "block_fellow_user/${ClientProvider.readOnlyClient!.userId}/$userId",
-        data: {"reason": reason});
-
-    return response;
-  }
-
-  static Future<HttpResponseModel> unblockUser(
-      {required final String userId, required final String reason}) async {
-    final response = await ApiInterface.patchRequest(
-        url:
-            "unblock_fellow_user/${ClientProvider.readOnlyClient!.userId}/$userId",
-        data: {"reason": reason});
-
     return response;
   }
 

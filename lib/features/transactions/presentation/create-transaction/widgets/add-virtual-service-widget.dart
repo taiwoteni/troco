@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:animations/animations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
@@ -25,18 +27,36 @@ import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
+import '../../../../services/domain/entities/escrow-fee.dart';
+import '../providers/pricings-notifier.dart';
 import '../views/view-added-products-screen.dart';
 
-class AddVirtualServiceWidget extends ConsumerStatefulWidget {
-  const AddVirtualServiceWidget({super.key});
+class AddVirtualServiceSheet extends ConsumerStatefulWidget {
+  final VirtualService? virtualService;
+  const AddVirtualServiceSheet({super.key, this.virtualService});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _AddVirtualServiceWidgetState();
+
+  static Future<VirtualService?> bottomSheet(
+      {required BuildContext context, VirtualService? service}) async {
+    return await showModalBottomSheet(
+        isScrollControlled: true,
+        enableDrag: true,
+        useSafeArea: false,
+        backgroundColor: ColorManager.background,
+        context: context,
+        builder: (context) {
+          return AddVirtualServiceSheet(
+            virtualService: service,
+          );
+        });
+  }
 }
 
 class _AddVirtualServiceWidgetState
-    extends ConsumerState<AddVirtualServiceWidget> {
+    extends ConsumerState<AddVirtualServiceSheet> {
   VirtualServiceRequirement? selectedRequirement;
   int quantity = 1;
   bool productImageError = false;
@@ -57,9 +77,16 @@ class _AddVirtualServiceWidgetState
 
   @override
   void initState() {
+    selectedRequirement = widget.virtualService?.serviceRequirement;
+    quantity = widget.virtualService?.quantity ?? 1;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      ref.watch(productImagesProvider.notifier).state.clear();
+      if (widget.virtualService != null) {
+        ref.read(pricingsImagesProvider.notifier).state =
+            widget.virtualService!.images;
+        return;
+      }
+      ref.read(pricingsImagesProvider.notifier).state.clear();
     });
   }
 
@@ -160,6 +187,7 @@ class _AddVirtualServiceWidgetState
         ),
         regularSpacer(),
         InputFormField(
+          initialValue: widget.virtualService?.name,
           label: 'name of product/service',
           validator: (value) {
             if (value == null) {
@@ -189,6 +217,7 @@ class _AddVirtualServiceWidgetState
         ),
         regularSpacer(),
         InputFormField(
+          initialValue: widget.virtualService?.description,
           label: 'e.g this facebook page has.....',
           validator: (value) {
             if (value == null) {
@@ -255,6 +284,7 @@ class _AddVirtualServiceWidgetState
         ),
         regularSpacer(),
         InputFormField(
+          initialValue: widget.virtualService?.price.toString(),
           label: 'NGN',
           inputType: TextInputType.phone,
           validator: (value) {
@@ -362,7 +392,6 @@ class _AddVirtualServiceWidgetState
   }
 
   Widget uploadDocument() {
-    final List<String> productImages = ref.watch(productImagesProvider);
     return Column(
       children: [
         InfoText(
@@ -385,18 +414,18 @@ class _AddVirtualServiceWidgetState
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (productImages.isEmpty)
+              if (ref.watch(pricingsImagesProvider).isEmpty)
                 pickServiceImage()
               else
                 serviceImage(position: 0),
-              if (productImages.isEmpty || productImages.length < 2)
+              if (ref.watch(pricingsImagesProvider).length < 2)
                 pickServiceImage()
               else
                 serviceImage(position: 1),
-              if (productImages.isEmpty || productImages.length < 3)
+              if (ref.watch(pricingsImagesProvider).length < 3)
                 pickServiceImage()
               else
-                serviceImage(position: 2),
+                serviceImage(position: 2)
             ],
           ),
         ),
@@ -405,8 +434,12 @@ class _AddVirtualServiceWidgetState
   }
 
   Widget button() {
+    final isEditing = widget.virtualService?.isEditing() == true;
+
     return CustomButton.medium(
-      label: "Add Virtual Item",
+      label: widget.virtualService != null
+          ? "Edit Virtual Item"
+          : "Add Virtual Item",
       usesProvider: true,
       buttonKey: buttonKey,
       color: ColorManager.themeColor,
@@ -417,20 +450,37 @@ class _AddVirtualServiceWidgetState
         });
         await Future.delayed(const Duration(seconds: 2));
         setState(() {
-          productImageError = ref.read(productImagesProvider).isEmpty;
+          productImageError = ref.read(pricingsImagesProvider).isEmpty;
         });
         if (formKey.currentState!.validate() && !productImageError) {
           formKey.currentState!.save();
-          final serviceImages = List.from(ref.read(productImagesProvider));
+
+          const defaultCharge = EscrowCharge.fromJson(
+              json: {"category": "virtual", "percentage": 10});
+          final virtualServiceCharge = AppStorage.getEscrowCharges().firstWhere(
+            (charge) => charge.category == TransactionCategory.Virtual,
+            orElse: () => defaultCharge,
+          );
+          final escrowCharge =
+              (int.parse(price) * (virtualServiceCharge.percentage));
+
+          final serviceImages =
+              List<String>.from(ref.read(pricingsImagesProvider));
           Map<dynamic, dynamic> serviceJson = {
-            "serviceId": const Uuid().v4(),
+            "serviceId": isEditing
+                ? widget.virtualService!.id
+                : (ref.read(pricingsProvider).length + 1).toString(),
             "virtualName": name,
             "description": description,
-            "virtualPrice": int.parse(price),
+            "virtualPrice": double.parse(price),
             "virtualRequirement": selectedRequirement!.name,
+            "escrowPercentage": (virtualServiceCharge.percentage * 100),
+            "escrowCharges": escrowCharge,
+            "finalPrice": double.parse(price) + escrowCharge,
             "quantity": quantity,
             "pricingImage": serviceImages,
           };
+
           if (mounted) {
             Navigator.pop(context, VirtualService.fromJson(json: serviceJson));
           }
@@ -451,7 +501,10 @@ class _AddVirtualServiceWidgetState
             await FileManager.pickImage(imageSource: ImageSource.gallery);
         if (pickedFile != null) {
           setState(() {
-            ref.read(productImagesProvider.notifier).state.add(pickedFile.path);
+            ref
+                .read(pricingsImagesProvider.notifier)
+                .state
+                .add(pickedFile.path);
           });
         }
       },
@@ -485,21 +538,27 @@ class _AddVirtualServiceWidgetState
             ThemeManager.getTransactionScreenUiOverlayStyle());
       },
       closedBuilder: (context, action) {
-        return Container(
-          width: 70,
-          height: 80,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(SizeManager.regular * 1.3),
-            image: DecorationImage(
-                image:
-                    FileImage(File(ref.watch(productImagesProvider)[position])),
-                fit: BoxFit.cover),
-          ),
-        );
+        final image =
+            ref.watch(pricingsImagesProvider).elementAtOrNull(position);
+        return image == null
+            ? pickServiceImage()
+            : Container(
+                width: 70,
+                height: 80,
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(SizeManager.regular * 1.3),
+                    image: DecorationImage(
+                        image: image.startsWith('http')
+                            ? CachedNetworkImageProvider(image)
+                            : FileImage(File(image)),
+                        fit: BoxFit.cover)),
+              );
       },
       openBuilder: (context, action) {
-        return ViewAddedProductsScreen(
+        return ViewAddedItemsScreen(
           currentPosition: position,
+          itemId: widget.virtualService?.id,
         );
       },
     );

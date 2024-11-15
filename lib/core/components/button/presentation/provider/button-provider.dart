@@ -91,6 +91,9 @@ class ButtonProvider {
 
   static bool loadingValue(
       {required final UniqueKey buttonKey, required WidgetRef ref}) {
+    if (!_buttonKeys.contains(buttonKey)) {
+      return false;
+    }
     StateProvider<Map<String, bool>> buttonProvider =
         _buttonProviders.elementAt(_buttonKeys.indexOf(buttonKey));
     return ref.watch(buttonProvider)["loading"] as bool;

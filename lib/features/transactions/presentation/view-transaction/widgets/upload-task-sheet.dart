@@ -162,16 +162,18 @@ class _UploadTaskSheetState extends ConsumerState<UploadTaskSheet> {
         link: false,
         fileOrLink: file.path);
 
+    debugPrint(response.body);
+
     if (response.error) {
       SnackbarManager.showBasicSnackbar(
           context: context,
           message: "Error Sending Work",
           mode: ContentType.failure);
-      context.pop(result: true);
+      context.pop(result: false);
       return;
     }
 
     SnackbarManager.showBasicSnackbar(context: context, message: "Sent Work!");
-    context.pop();
+    context.pop(result: true);
   }
 }

@@ -22,12 +22,12 @@ List<SettingsModel> presetSettings(
     SettingsModel(
         label: "Change Email",
         icon: AssetManager.svgFile(name: "email"),
-        // onTap: () => Navigator.pushNamed(context, Routes.editProfileRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.changeEmail),
         iconType: IconType.svg),
-    const SettingsModel(
+    SettingsModel(
         label: "Change Phone Number",
         icon: CupertinoIcons.phone_fill,
-        // onTap: () => Navigator.pushNamed(context, Routes.editProfileRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.changePhoneNumber),
         iconType: IconType.icon),
     SettingsModel(
         label: "Two Factor Authentication",
@@ -62,6 +62,12 @@ List<SettingsModel> presetSettings(
     //     iconType: IconType.svg),
 
     //Grave Settings
+    SettingsModel(
+        label: "Blocked Users",
+        icon: CupertinoIcons.minus_circle_fill,
+        settingsType: SettingsType.grave,
+        onTap: () => Navigator.pushNamed(context, Routes.blockedUsersRoute),
+        iconType: IconType.icon),
     SettingsModel(
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),

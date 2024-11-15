@@ -21,9 +21,10 @@ class SnackbarManager {
         title: header,
         message: message,
         contentType: mode ?? ContentType.success,
-        color: (mode ?? ContentType.success) == ContentType.success? ColorManager.accentColor:null,
+        color: (mode ?? ContentType.success) == ContentType.success
+            ? ColorManager.accentColor
+            : null,
       ),
-
 
       // content: Text(
       //   message,
@@ -44,6 +45,31 @@ class SnackbarManager {
       //     horizontal: SizeManager.medium * 1.2, vertical: SizeManager.medium),
       // backgroundColor:
       //     accentMode ? ColorManager.accentColor : ColorManager.background,
+      duration: Duration(seconds: seconds),
+    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackbar);
+  }
+
+  static void showErrorSnackbar({
+    required final BuildContext context,
+    final String header = " Troco",
+    required final String message,
+    int seconds = 2,
+  }) async {
+    final snackbar = SnackBar(
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.transparent,
+      dismissDirection: DismissDirection.startToEnd,
+      content: AwesomeSnackbarContent(
+        inMaterialBanner: true,
+        title: header,
+        message: message,
+        contentType: ContentType.failure,
+        color: null,
+      ),
       duration: Duration(seconds: seconds),
     );
     ScaffoldMessenger.of(context)

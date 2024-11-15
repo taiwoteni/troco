@@ -133,16 +133,16 @@ class _ReferredScreenState extends ConsumerState<ReferredScreen> {
                       color: ColorManager.secondary.withOpacity(0.09),
                     ),
                 itemCount: referrals.length),
-        if (referrals.isNotEmpty)
-          Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: SizeManager.extralarge),
-              alignment: Alignment.center,
-              child: InfoText(
-                  underline: true,
-                  color: ColorManager.accentColor,
-                  alignment: Alignment.center,
-                  text: "How does referral work?"))
+        // if (referrals.isNotEmpty)
+        //   Container(
+        //       padding: const EdgeInsets.symmetric(
+        //           horizontal: SizeManager.extralarge),
+        //       alignment: Alignment.center,
+        //       child: InfoText(
+        //           underline: true,
+        //           color: ColorManager.accentColor,
+        //           alignment: Alignment.center,
+        //           text: "How does referral work?"))
       ],
     );
     return referrals.isEmpty
@@ -161,18 +161,9 @@ class _ReferredScreenState extends ConsumerState<ReferredScreen> {
         onChanged: (text) {
           final value = text.trim().toLowerCase();
           final queriedReferrals = AppStorage.getReferrals().where((element) {
-            bool hasfullName = element.user.lastName
-                    .toLowerCase()
-                    .trim()
-                    .contains(value) ||
-                value.contains(element.user.lastName.trim().toLowerCase()) ||
-                element.user.firstName.toLowerCase().trim().contains(value) ||
-                value.contains(element.user.firstName.trim().toLowerCase());
-            bool byRole = element.user.accountCategory.name
-                    .toLowerCase()
-                    .contains(value) ||
-                value.contains(element.user.accountCategory.name.toLowerCase());
-            return hasfullName || byRole;
+            bool hasfullName =
+                element.fullName.toLowerCase().trim().contains(value);
+            return hasfullName;
           }).toList();
           if (value.trim().isEmpty) {
             setState(() {

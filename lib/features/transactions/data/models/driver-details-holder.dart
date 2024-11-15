@@ -1,10 +1,15 @@
 import 'package:intl/intl.dart';
 
-class DriverDetailsHolder{
+class DriverDetailsHolder {
+  static String? companyName,
+      driverName,
+      plateNumber,
+      backPlateNumber,
+      driverPhoneNumber,
+      destination;
+  static DateTime? estimatedDeliveryTime;
 
-  static String? companyName,driverName,plateNumber,backPlateNumber,driverPhoneNumber,destination,estimatedDeliveryTime;
-
-  static void clear(){
+  static void clear() {
     companyName = null;
     driverName = null;
     plateNumber = null;
@@ -13,16 +18,15 @@ class DriverDetailsHolder{
     estimatedDeliveryTime = null;
   }
 
-  static Map<dynamic,dynamic> toJson(){
+  static Map<dynamic, dynamic> toJson() {
     return {
-      "companyName":companyName,
-      "driverName":driverName,
-      "plateNumber":plateNumber,
-      "backPlateNumber":backPlateNumber,
-      "estimatedDeliveryTime":DateFormat("dd/MM/yyyy").parse(estimatedDeliveryTime?? DateTime.now().toIso8601String()).toIso8601String(),
-      "phoneNumber":driverPhoneNumber,
-      "destination":destination
+      "companyName": companyName,
+      "driverName": driverName,
+      "plateNumber": plateNumber,
+      "backPlateNumber": backPlateNumber,
+      "estimatedDeliveryTime": estimatedDeliveryTime?.toIso8601String(),
+      "phoneNumber": driverPhoneNumber,
+      "destination": destination
     };
   }
-
 }

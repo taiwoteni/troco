@@ -1,20 +1,23 @@
 // ignore_for_file: must_be_immutable
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import '../../../../../core/components/others/spacer.dart';
 
-class SelectReturnProductWidget extends StatefulWidget {
+class SelectReturnItemWidget extends StatefulWidget {
   bool selected;
   final void Function() onChecked;
   final SalesItem item;
   final bool isDisplay;
 
-  SelectReturnProductWidget(
+  SelectReturnItemWidget(
       {super.key,
       required this.selected,
       required this.onChecked,
@@ -22,11 +25,10 @@ class SelectReturnProductWidget extends StatefulWidget {
       required this.item});
 
   @override
-  State<SelectReturnProductWidget> createState() =>
-      _SelectPaymentMethodWidgetState();
+  State<SelectReturnItemWidget> createState() => _SelectReturnItemWidgetState();
 }
 
-class _SelectPaymentMethodWidgetState extends State<SelectReturnProductWidget> {
+class _SelectReturnItemWidgetState extends State<SelectReturnItemWidget> {
   late SalesItem item;
 
   @override
@@ -74,7 +76,7 @@ class _SelectPaymentMethodWidgetState extends State<SelectReturnProductWidget> {
                       fontWeight: FontWeightManager.semibold),
                 ),
                 Text(
-                  "${item.priceString}NGN",
+                  "${item.finalPriceString} NGN",
                   style: TextStyle(
                       fontFamily: "quicksand",
                       color: ColorManager.accentColor,
@@ -106,7 +108,11 @@ class _SelectPaymentMethodWidgetState extends State<SelectReturnProductWidget> {
           borderRadius: BorderRadius.circular(SizeManager.regular),
           image: DecorationImage(
             fit: BoxFit.cover,
-            image: CachedNetworkImageProvider(item.mainImage()),
+            image: widget.item.noImage
+                ? AssetImage(AssetManager.imageFile(name: "task"))
+                : widget.item.mainImage().startsWith('http')
+                    ? NetworkImage(widget.item.mainImage())
+                    : FileImage(File(widget.item.mainImage())),
           )),
     );
   }

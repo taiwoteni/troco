@@ -16,9 +16,12 @@ import '../../../../auth/domain/entities/client.dart';
 
 class FriendWidget extends ConsumerStatefulWidget {
   final Client client;
-  final bool applyHorizontalPadding;
+  final bool applyHorizontalPadding, pushReplace;
   const FriendWidget(
-      {super.key, required this.client, this.applyHorizontalPadding = true});
+      {super.key,
+      required this.client,
+      this.applyHorizontalPadding = true,
+      this.pushReplace = false});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _ClientWidgetState();
@@ -56,6 +59,15 @@ class _ClientWidgetState extends ConsumerState<FriendWidget> {
     return ListTile(
       dense: true,
       tileColor: Colors.transparent,
+      onTap: () {
+        if (widget.pushReplace) {
+          Navigator.pushReplacementNamed(context, Routes.viewProfileRoute,
+              arguments: client);
+          return;
+        }
+        Navigator.pushNamed(context, Routes.viewProfileRoute,
+            arguments: client);
+      },
       contentPadding: EdgeInsets.only(
         left: applyHorizontalPadding ? SizeManager.medium : 0,
         right: applyHorizontalPadding ? SizeManager.medium : 0,
@@ -63,11 +75,7 @@ class _ClientWidgetState extends ConsumerState<FriendWidget> {
         bottom: SizeManager.small,
       ),
       horizontalTitleGap: SizeManager.medium * 0.8,
-      leading: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, Routes.viewProfileRoute,
-            arguments: client),
-        child: profileIcon(),
-      ),
+      leading: profileIcon(),
       title: Row(
         children: [
           Text(

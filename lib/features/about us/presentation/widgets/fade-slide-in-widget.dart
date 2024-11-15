@@ -31,19 +31,6 @@ class _FadeSlideWidgetState extends State<FadeSlideWidget> {
 
   @override
   void initState() {
-    super.initState();
-    if (!widget.mustBeVisible) {
-      animate();
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  void animate() {
     switch (widget.direction) {
       case SlideDirection.up:
         _offset = const Offset(0, 50);
@@ -58,6 +45,19 @@ class _FadeSlideWidgetState extends State<FadeSlideWidget> {
         _offset = const Offset(50, 0);
         break;
     }
+    super.initState();
+    if (!widget.mustBeVisible) {
+      animate();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void animate() {
     _timer =
         Timer(widget.mustBeVisible ? widget.delay * 0.25 : widget.delay, () {
       setState(() {

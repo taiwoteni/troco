@@ -9,7 +9,7 @@ class WalletTransaction {
       : _json = json;
 
   String get transactionName => _json["transactionName"] ?? _json["content"];
-  String get transactionId => _json["transactionId"];
+  String get transactionId => _json["transactionId"] ?? _json["_id"];
 
   double get transactionAmount =>
       double.parse((_json["transactionAmount"] ?? _json["amount"]).toString());
@@ -31,10 +31,16 @@ class WalletTransaction {
 
   TransactionStatus get transactionStatus {
     if ((_json["transactionStatus"] ?? _json["status"])
-            .toString()
+            ?.toString()
             .toLowerCase() ==
         "pending") {
       return TransactionStatus.Pending;
+    }
+    if ((_json["transactionStatus"] ?? _json["status"])
+            ?.toString()
+            .toLowerCase() ==
+        "declined") {
+      return TransactionStatus.Cancelled;
     }
     return TransactionStatus.Completed;
   }

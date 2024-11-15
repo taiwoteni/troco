@@ -18,6 +18,18 @@ class LeaveGroupSheet extends ConsumerStatefulWidget {
 
   @override
   ConsumerState createState() => _LeaveGroupSheetState();
+
+  static Future<bool?> bottomSheet(
+      {required BuildContext context, required Group group}) {
+    return showModalBottomSheet<bool?>(
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: true,
+      backgroundColor: ColorManager.background,
+      context: context,
+      builder: (context) => LeaveGroupSheet(group: group),
+    );
+  }
 }
 
 class _LeaveGroupSheetState extends ConsumerState<LeaveGroupSheet> {

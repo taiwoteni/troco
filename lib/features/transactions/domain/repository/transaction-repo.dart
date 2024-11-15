@@ -5,12 +5,14 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:troco/core/api/utilities/concurrent/concurrent-future.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
 import 'package:troco/features/transactions/utils/service-role.dart';
 
 import '../../../groups/domain/entities/group.dart';
+import '../../data/models/virtual-document.dart';
 import '../entities/driver.dart';
 import '../entities/service.dart';
 import "package:path/path.dart" as Path;
@@ -59,12 +61,187 @@ class TransactionRepo {
           // "role":"Seller",
           "transactionName": transaction.transactionName,
           "aboutService": transaction.transactionDetail,
+          "role": TransactionDataHolder.role?.name.toLowerCase(),
           "location": transaction.location,
           "inspectionPeriod": transaction.inspectionPeriod.name.toLowerCase(),
           "inspectionDays": transaction.inspectionDays,
           "DateOfWork": dateOfWork,
         });
 
+    return result;
+  }
+
+  static Future<HttpResponseModel> editTransaction(
+      {required final String groupId,
+      required final Transaction transaction,
+      required final String dateOfWork}) async {
+    final cat = transaction.transactionCategory;
+    var sellerId = ClientProvider.readOnlyClient!.userId;
+    var buyerId = AppStorage.getGroups()
+        .firstWhere((element) => element.groupId == groupId)
+        .buyerId;
+
+    /// We have to invert the sellers and buyers if the users
+    /// selected that he's the Client;
+    if (cat == TransactionCategory.Service &&
+        (TransactionDataHolder.role ?? ServiceRole.Developer) ==
+            ServiceRole.Client) {
+      final buyerPlaceHolder = buyerId;
+      buyerId = sellerId;
+      sellerId = buyerPlaceHolder;
+    }
+
+    final result = await ApiInterface.patchRequest(
+        url: "edit_transaction/$groupId",
+        data: {
+          "typeOftransaction":
+              transaction.transactionCategory.name.toLowerCase(),
+          "pricingType": cat == TransactionCategory.Product
+              ? "pricings"
+              : "${transaction.transactionCategory.name.toLowerCase()}pricing",
+          // "role":"Seller",
+          "transactionName": transaction.transactionName,
+          "aboutService": transaction.transactionDetail,
+          "location": transaction.location,
+          "inspectionPeriod": transaction.inspectionPeriod.name.toLowerCase(),
+          "inspectionDays": transaction.inspectionDays,
+          "DateOfWork": dateOfWork,
+        });
+
+    return result;
+  }
+
+  static Future<HttpResponseModel> editPricing({
+    required final TransactionCategory type,
+    required final String transactionId,
+    required final Group group,
+    required final SalesItem item,
+  }) async {
+    /// As we all know, there are 3 types of Transactions.
+    /// Virtual, Service and Product
+
+    log(type.name.toString());
+
+    /// We start with the default fields like,
+    /// 'price', 'quantity', 'pricingImage'
+    final multiparts = <MultiPartModel>[];
+
+    if (!item.noImage) {
+      debugPrint(
+          "Added Images in item ${item.name}: ${item.images.toString()}");
+      for (final image in item.images) {
+        var parsedfile = File(image);
+        var stream = ByteStream(parsedfile.openRead());
+        var length = await parsedfile.length();
+        final file = MultipartFile("pricingImage", stream, length,
+            filename: Path.basename(image));
+
+        multiparts.add(MultiPartModel.file(file: file));
+      }
+    }
+
+    final removedImages = ((item.toJson()['removedImages'] ?? []) as List)
+        .map(
+          (e) => e.toString(),
+        )
+        .toList();
+    debugPrint(
+        "Removed Images in item ${item.name}: ${removedImages.toString()}");
+
+    for (final removedImage in removedImages) {
+      multiparts.add(
+          MultiPartModel.field(field: 'removeImages', value: removedImage));
+    }
+
+    multiparts.add(MultiPartModel.field(field: "price", value: item.price));
+    multiparts
+        .add(MultiPartModel.field(field: "quantity", value: item.quantity));
+
+    try {
+      /// For Service Transactions, we have:
+      /// 'serviceName', 'serviceRequirement'
+      if (type == TransactionCategory.Service) {
+        final service = item as Service;
+        log("Is Service");
+
+        final serviceName =
+            MultiPartModel.field(field: "serviceName", value: service.name);
+        final serviceRequirement = MultiPartModel.field(
+            field: "serviceRequirement",
+            value: service.serviceRequirement.name.toLowerCase());
+
+        multiparts.add(MultiPartModel.field(
+            field: "deadlineTime",
+            value: service.deadlineTime.toIso8601String()));
+        multiparts.add(MultiPartModel.field(
+            field: "description", value: service.description));
+
+        multiparts.add(serviceName);
+        multiparts.add(serviceRequirement);
+      }
+
+      ///Now we go the interesting parts;
+      /// For Product Transactions, we have:
+      /// 'productName', 'productCondition', 'category' (Which is now quality. Finbarr's laziness. :|)
+
+      else if (type == TransactionCategory.Product) {
+        final product = item as Product;
+        log("Is Production");
+
+        final productName =
+            MultiPartModel.field(field: "productName", value: product.name);
+        final productQuality = MultiPartModel.field(
+            field: "category",
+            value: ProductQualityConverter.convertToString(
+                quality: product.productQuality));
+        final productCondition = MultiPartModel.field(
+            field: "productCondition",
+            value: ProductConditionConverter.convertToString(
+                condition: product.productCondition));
+
+        multiparts.add(productName);
+        multiparts.add(productQuality);
+        multiparts.add(productCondition);
+      }
+
+      /// For Virtual Service Transactions, we have:
+      /// 'virtualName', 'virtualRequirement'
+
+      else if (type == TransactionCategory.Virtual) {
+        final virtual = item as VirtualService;
+        log("Is Virtual");
+
+        final virtualName =
+            MultiPartModel.field(field: "virtualName", value: virtual.name);
+        final virtualRequirement = MultiPartModel.field(
+            field: "virtualRequirement",
+            value: virtual.serviceRequirement.name.toLowerCase());
+
+        multiparts.add(virtualName);
+        multiparts.add(virtualRequirement);
+        multiparts.add(MultiPartModel.field(
+            field: "description", value: virtual.description));
+      }
+    } on Exception catch (e) {
+      log("Uploading Pricing$e");
+    }
+
+    var sellerId = ClientProvider.readOnlyClient!.userId;
+    var buyerId = group.buyerId;
+
+    /// We have to invert the sellers and buyers if the users
+    /// selected that he's the Client;
+    if (type == TransactionCategory.Service &&
+        (TransactionDataHolder.role ?? ServiceRole.Developer) ==
+            ServiceRole.Client) {
+      final buyerPlaceHolder = buyerId;
+      buyerId = sellerId;
+      sellerId = buyerPlaceHolder;
+    }
+
+    final result = await ApiInterface.multipartPatchRequest(
+        url: "edit_pricing/${group.groupId}/${item.id}",
+        multiparts: multiparts);
     return result;
   }
 
@@ -115,6 +292,8 @@ class TransactionRepo {
         multiparts.add(MultiPartModel.field(
             field: "deadlineTime",
             value: service.deadlineTime.toIso8601String()));
+        multiparts.add(MultiPartModel.field(
+            field: "description", value: service.description));
 
         multiparts.add(serviceName);
         multiparts.add(serviceRequirement);
@@ -192,6 +371,16 @@ class TransactionRepo {
     return result;
   }
 
+  static Future<HttpResponseModel> reportTransaction({
+    required final String transactionId,
+    required final String reason,
+  }) async {
+    return await ApiInterface.postRequest(
+        url:
+            'report_transaction/$transactionId/${ClientProvider.readOnlyClient?.userId}',
+        data: {'reason': reason});
+  }
+
   static Future<HttpResponseModel> getOneTransaction({
     required final String transactionId,
   }) async {
@@ -206,42 +395,8 @@ class TransactionRepo {
   /// User Data must have been saved on Cache first before [getAllTransactions] can be called.
   /// Else: Error will be thrown.
   static Future<HttpResponseModel> getAllTransactions() async {
-    final result = await ApiInterface.findUser(
-        userId: ClientProvider.readOnlyClient!.userId);
-
-    if (result.error) {
-      return HttpResponseModel(
-          returnHeaderType: result.returnHeaderType,
-          error: true,
-          body: result.body,
-          code: result.code);
-    }
-
-    final transactionsJson = result.messageBody!["data"]["transactions"] ?? [];
-    // log(transactionsJson.toString());
-
-    final List<String> transactionsId = ((transactionsJson ?? []) as List)
-        .map((e) => e["_id"].toString())
-        .toList();
-
-    List<Map<dynamic, dynamic>> jsonData = [];
-    for (final String id in transactionsId) {
-      final response = await getOneTransaction(transactionId: id);
-      // log(response.body);
-      if (response.error) {
-        return HttpResponseModel(
-            error: response.error, body: response.body, code: response.code);
-      }
-
-      final data = response.messageBody!["data"];
-      jsonData.add(data);
-    }
-
-    return HttpResponseModel(
-        returnHeaderType: result.returnHeaderType,
-        error: false,
-        body: json.encode(jsonData),
-        code: result.code);
+    return await ApiInterface.getRequest(
+        url: 'get_user_transactions/${ClientProvider.readOnlyClient?.userId}');
   }
 
   /// User Data must have been saved on Cache first before [getTransactions] can be called.
@@ -253,7 +408,7 @@ class TransactionRepo {
       log("error fetching transactions from repo");
       return AppStorage.getAllTransactions();
     } else {
-      final transactionsJson = (json.decode(response.body) as List);
+      final transactionsJson = ((response.messageBody?["data"] ?? []) as List);
 
       final transactions =
           transactionsJson.map((e) => Transaction.fromJson(json: e)).toList();
@@ -356,13 +511,15 @@ class TransactionRepo {
     required final List<String> itemIds,
     required final String comment,
   }) async {
-    final response =
-        await ApiInterface.postRequest(url: "returntransaction", data: {
-      "transactionId": transaction.transactionId,
-      "comments": comment,
-      "productIds": itemIds,
-      "userId": ClientProvider.readOnlyClient!.userId
-    });
+    final response = await ApiInterface.postRequest(
+        url: "returntransaction",
+        okCode: 201,
+        data: {
+          "transactionId": transaction.transactionId,
+          "comments": comment,
+          "productIds": itemIds,
+          "userId": ClientProvider.readOnlyClient!.userId
+        });
 
     return response;
   }
@@ -401,7 +558,41 @@ class TransactionRepo {
     return response;
   }
 
-  /// !!!! Service and Virtual transaction Specific endpoints !!!!
+  static Future<HttpResponseModel> acceptReturnedGoods(
+      {required final Transaction transaction}) async {
+    return await ApiInterface.patchRequest(
+        url:
+            'seller_accept_returned_goods/${transaction.transactionId}/${transaction.creator}/${transaction.buyer}',
+        data: {"confirmedBySeller": true});
+  }
+
+  // !!!! Service and Virtual transaction Specific endpoints !!!!
+
+  static List<Future<HttpResponseModel>> uploadVirtualDocuments(
+      {required final Transaction transaction,
+      required final String taskId,
+      required final List<VirtualDocument> documents}) {
+    final futures = documents.map((document) {
+      final isLink = document.type == VirtualDocumentType.Link;
+      debugPrint("Item ${documents.indexOf(document) + 1} is Link: $isLink");
+      return uploadProofOfWork(
+              transaction: transaction,
+              taskId: taskId,
+              link: isLink,
+              fileOrLink: document.source)
+          .then(
+        (value) {
+          debugPrint(value.body);
+          if (value.error) {
+            throw Exception(value.messageBody?["message"] ?? "Error occurred");
+          }
+          return value;
+        },
+      );
+    }).toList();
+
+    return futures;
+  }
 
   static Future<HttpResponseModel> uploadProofOfWork(
       {required final Transaction transaction,
@@ -414,7 +605,7 @@ class TransactionRepo {
       model = await ApiInterface.postRequest(
           url: "upload_each_task/$taskId",
           data: {
-            "proofLink": fileOrLink,
+            "proofLinks": fileOrLink,
             "transactionType":
                 transaction.transactionCategory.name.toLowerCase()
           });

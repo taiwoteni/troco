@@ -5,7 +5,8 @@ import 'package:troco/features/transactions/domain/entities/service.dart';
 abstract class SalesItem extends Equatable {
   final String id, name;
   final List<String> images;
-  final int price, quantity;
+  final double price;
+  final int quantity;
 
   const SalesItem(
       {required this.id,
@@ -18,6 +19,10 @@ abstract class SalesItem extends Equatable {
       NumberFormat.currency(locale: "en_NG", decimalDigits: 2, symbol: "")
           .format(price);
 
+  String get finalPriceString =>
+      NumberFormat.currency(locale: "en_NG", decimalDigits: 2, symbol: "")
+          .format(finalPrice);
+
   bool get noImage => images.isEmpty;
 
   String mainImage() {
@@ -25,6 +30,14 @@ abstract class SalesItem extends Equatable {
       throw Exception("Sales Item must have at least one image");
     }
     return images[0];
+  }
+
+  /// How we know if a sales item exists already and may be edited is that
+  /// the [id] is not a number but rather a string i.e "66f2d3e0g7tff4"
+  bool isEditing() {
+    final isId = double.tryParse(id);
+
+    return isId == null;
   }
 
   double get finalPrice => double.parse(toJson()["finalPrice"].toString());

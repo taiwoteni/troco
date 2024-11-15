@@ -58,7 +58,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if (AppStorage.getCustomerCareSessionId() == null) {
         AppStorage.saveCustomerCareChats(chats: []);
-        final response = await CustomerCareRepository.createChatSession();
+        final response = await CustomerCareRepository.createChatSession(
+            id: ClientProvider.readOnlyClient!.userId);
         log(response.body);
         if (!response.error) {
           final id = response.messageBody!["chatSession"]["_id"].toString();

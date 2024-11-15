@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
 import 'dart:math' as Math;
@@ -13,6 +14,7 @@ import 'package:gap/gap.dart';
 import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/app/dialog-manager.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/platform.dart';
 import 'package:troco/core/app/routes-manager.dart';
@@ -23,6 +25,7 @@ import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/chat/domain/repositories/chat-repository.dart';
 import 'package:troco/features/chat/presentation/providers/chat-provider.dart';
@@ -78,7 +81,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     ];
     isCreator = group.members.first == ClientProvider.readOnlyClient!.userId;
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+    WidgetsFlutterBinding.ensureInitialized()
+        .addPostFrameCallback((timeStamp) async {
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getChatUiOverlayStyle());
       scrollController.addListener(() {
@@ -570,7 +574,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   Visibility(
                     visible: !group.hasTransaction,
                     child: IconButton(
-                      onPressed: deleteGroup,
+                      onPressed: tryLeaveGroup,
                       highlightColor:
                           ColorManager.accentColor.withOpacity(0.15),
                       style: const ButtonStyle(
@@ -601,116 +605,181 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Future<void> deleteGroup() async {
+  Future<void> tryLeaveGroup() async {
     final hasBuyer = group.members.length >= 3;
     final isSeller = group.creator == ClientProvider.readOnlyClient!.userId;
-    bool deletedGroup = false;
-    late HttpResponseModel response;
+    if (!hasBuyer) {
+      final usersResponse = await askDeleteGroup();
+      if (usersResponse) {
+        /// Would return true if the group deleted without fail
+        final deleteRequestResponse = await deleteGroup(userId: group.creator);
 
-    if (isSeller) {
-      if (hasBuyer) {
-        final deleteBuyer = await showModalBottomSheet<bool?>(
-          isScrollControlled: true,
-          enableDrag: true,
-          useSafeArea: true,
-          backgroundColor: ColorManager.background,
-          context: context,
-          builder: (context) => LeaveGroupSheet(group: group),
-        );
-
-        if (deleteBuyer == null) {
+        if (deleteRequestResponse) {
           SnackbarManager.showBasicSnackbar(
-              context: context,
-              message: "Select who should leave",
-              mode: ContentType.failure);
+              context: context, message: "Group deleted.");
+          context.pop();
           return;
         }
-        if (deleteBuyer) {
-          setState(() => deleting = true);
 
-          response =
-              await GroupRepo.leaveGroup(userId: group.buyerId, group: group);
-        } else {
-          deletedGroup = true;
-          setState(() => deleting = true);
-          final leaveBuyerResponse =
-              await GroupRepo.leaveGroup(userId: group.buyerId, group: group);
-          if (leaveBuyerResponse.error) {
-            setState(() => deleting = false);
-
-            SnackbarManager.showBasicSnackbar(
-                context: context,
-                message: "Error occurred when leaving group",
-                mode: ContentType.failure);
-            return;
-          }
-
-          final leaveResponse =
-              await GroupRepo.leaveGroup(userId: group.creator, group: group);
-          log(leaveResponse.body);
-
-          if (leaveResponse.error) {
-            setState(() => deleting = false);
-
-            SnackbarManager.showBasicSnackbar(
-                context: context,
-                message: "Error occurred when leaving group",
-                mode: ContentType.failure);
-            return;
-          }
-          SnackbarManager.showBasicSnackbar(
-              context: context,
-              mode: ContentType.help,
-              message: "Deleted Group");
-          Navigator.pop(context);
-        }
-      } else {
-        deletedGroup = true;
-        setState(() => deleting = true);
-        response =
-            await GroupRepo.leaveGroup(userId: group.creator, group: group);
-        log(response.code.toString());
-        log(response.body);
-      }
-    } else {
-      deletedGroup = true;
-      setState(() => deleting = true);
-      final leaveResponse =
-          await GroupRepo.leaveGroup(userId: group.buyerId, group: group);
-      log(leaveResponse.body);
-      if (leaveResponse.error) {
-        setState(() => deleting = false);
-        SnackbarManager.showBasicSnackbar(
+        SnackbarManager.showErrorSnackbar(
             context: context,
-            message: "Error occurred when leaving group",
-            mode: ContentType.failure);
+            message: "Couldn't delete group. Try again some other time");
         return;
       }
-      response = await GroupRepo.deleteGroup(
-          userId: group.buyerId, groupId: group.groupId);
+      return;
     }
 
-    // final result = await GroupRepo.deleteGroup(
-    //     userId: ClientProvider.readOnlyClient!.userId, groupId: group.groupId);
-    // log(result.body);
-    setState(() => deleting = false);
+    if (!isSeller) {
+      final askLeave = await askLeaveGroup();
+      if (askLeave) {
+        /// Would return true if the buyer left without fail
+        final deleteRequestResponse = await leaveGroup(userId: group.buyerId);
 
-    if (response.error) {
-      SnackbarManager.showBasicSnackbar(
-          context: context,
-          mode: ContentType.failure,
-          message: deletedGroup
-              ? "Could not delete group"
-              : "Could not remove user");
-    } else {
-      SnackbarManager.showBasicSnackbar(
-          context: context,
-          mode: ContentType.help,
-          message: deletedGroup ? "Deleted Group" : "Removed user");
-      if (deletedGroup) {
-        Navigator.pop(context);
+        if (deleteRequestResponse) {
+          SnackbarManager.showBasicSnackbar(
+              context: context, message: "Left Group.");
+          context.pop();
+          return;
+        }
+
+        SnackbarManager.showErrorSnackbar(
+            context: context,
+            message: "Couldn't leave group. Try again some other time");
+        return;
       }
+      return;
     }
+
+    /// Would return null if nothing was selected but true if to remove buyer;
+    final deleteBuyer =
+        await LeaveGroupSheet.bottomSheet(context: context, group: group);
+
+    if (deleteBuyer == null) {
+      return;
+    }
+
+    if (deleteBuyer) {
+      /// Would return true if the buyer left without fail
+      final deleteRequestResponse = await leaveGroup(userId: group.buyerId);
+
+      if (deleteRequestResponse) {
+        SnackbarManager.showBasicSnackbar(
+            context: context, message: "Buyer removed.");
+        return;
+      }
+
+      SnackbarManager.showErrorSnackbar(
+          context: context,
+          message: "Couldn't remove buyer. Try again some other time");
+      return;
+    }
+
+    final shouldDeleteGroup = await askDeleteGroup();
+    if (!shouldDeleteGroup) {
+      return;
+    }
+
+    // That means we have to delete group since we're removing seller.
+    /// Would return true if the buyer left without fail
+    final deleteRequestResponse = await deleteGroup(userId: group.creator);
+
+    if (deleteRequestResponse) {
+      SnackbarManager.showBasicSnackbar(
+          context: context, message: "Group deleted.");
+      context.pop();
+      return;
+    }
+
+    SnackbarManager.showErrorSnackbar(
+        context: context,
+        message: "Couldn't delete group. Try again some other time");
+    return;
+  }
+
+  Future<bool> leaveGroup({required final String userId}) async {
+    setState(
+      () => deleting = true,
+    );
+    final leaveResponse =
+        await GroupRepo.leaveGroup(userId: userId, group: group);
+    setState(
+      () => deleting = false,
+    );
+    if (leaveResponse.error) {
+      return false;
+    }
+    log(leaveResponse.body);
+    return leaveResponse.error;
+  }
+
+  Future<bool> deleteGroup({required final String userId}) async {
+    setState(
+      () => deleting = true,
+    );
+    final response =
+        await GroupRepo.deleteGroup(userId: userId, groupId: group.groupId);
+    setState(
+      () => deleting = false,
+    );
+    log(response.body);
+    return !response.error;
+  }
+
+  Future<bool> askDeleteGroup() async {
+    final dialogManager = DialogManager(context: context);
+    final response = await dialogManager.showDialogContent<bool?>(
+          title: "Delete Group",
+          icon: Container(
+            decoration: BoxDecoration(
+                color: Colors.red.shade100, shape: BoxShape.circle),
+            width: 60,
+            height: 60,
+            child: const Icon(
+              CupertinoIcons.delete_solid,
+              color: Colors.red,
+              size: IconSizeManager.medium * 0.8,
+            ),
+          ),
+          description:
+              "Are you sure you want to delete this group?\nThis cannot be undone.",
+          cancelLabel: "Delete",
+          onCancel: () {
+            context.pop(result: true);
+          },
+        ) ??
+        false;
+
+    return response;
+  }
+
+  Future<bool> askLeaveGroup() async {
+    final dialogManager = DialogManager(context: context);
+    final response = await dialogManager.showDialogContent<bool?>(
+          title: "Delete Group",
+          icon: Container(
+            decoration: BoxDecoration(
+                color: Colors.red.shade100, shape: BoxShape.circle),
+            width: 60,
+            height: 60,
+            child: Transform.scale(
+              scale: 0.6,
+              child: SvgIcon(
+                  flip: true,
+                  size: const Size.square(IconSizeManager.regular * 0.2),
+                  color: Colors.red,
+                  svgRes: AssetManager.svgFile(name: "remove-user")),
+            ),
+          ),
+          description:
+              "Are you sure you want to leave this group?\nThis cannot be undone.",
+          cancelLabel: "Yes, leave",
+          onCancel: () {
+            context.pop(result: true);
+          },
+        ) ??
+        false;
+
+    return response;
   }
 
   Future<void> openTransactionPage() async {

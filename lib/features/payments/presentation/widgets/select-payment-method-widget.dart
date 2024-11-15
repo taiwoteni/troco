@@ -12,6 +12,7 @@ class SelectPaymentMethodWidget extends StatefulWidget {
   final bool moveLeft;
   final void Function() onChecked;
   final String label, lottie;
+  final Color? color;
 
   SelectPaymentMethodWidget(
       {super.key,
@@ -19,6 +20,7 @@ class SelectPaymentMethodWidget extends StatefulWidget {
       required this.onChecked,
       this.moveLeft = false,
       required this.label,
+      this.color,
       required this.lottie});
 
   @override
@@ -59,6 +61,7 @@ class _SelectPaymentMethodWidgetState extends State<SelectPaymentMethodWidget> {
                   scale: 1.2,
                   child: LottieWidget(
                       lottieRes: widget.lottie,
+                      color: widget.color,
                       size: const Size.square(IconSizeManager.medium)),
                 ),
               ),

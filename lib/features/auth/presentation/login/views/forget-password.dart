@@ -18,6 +18,7 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/data/models/otp-data.dart';
+import 'package:troco/features/auth/presentation/otp/views/otp-screen.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
@@ -148,47 +149,47 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   Future<void> changePassword() async {
     final response = await SettingsRepository.resetPassword(
-      email: LoginData.email!,
-      newPassword: LoginData.password!);
+        emailOrPhone: LoginData.email ?? LoginData.phoneNumber!,
+        newPassword: LoginData.password!);
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    if(!response.error){
+    if (!response.error) {
       SnackbarManager.showBasicSnackbar(
-          context: context,
-          message: "Successfully reset password");
+          context: context, message: "Successfully reset password");
       Navigator.pop(context);
-    }else{
+    } else {
       SnackbarManager.showBasicSnackbar(
           context: context,
           mode: ContentType.failure,
           message: "Couldn't reset password.");
     }
-    log(response.body);  
+    log(response.body);
   }
-  
+
   Future<void> verifyOtp() async {
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    final verified =
-        (await Navigator.pushNamed(context, Routes.otpRoute)) as bool? ?? false;
+    final verified = (await Navigator.pushNamed(context, Routes.otpRoute,
+            arguments: OtpVerificationType.ForgotPassword)) as bool? ??
+        false;
     if (verified) {
-    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
-    await changePassword();
-    }
-    else{
+      ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+      await changePassword();
+    } else {
       SnackbarManager.showBasicSnackbar(
           context: context,
           mode: ContentType.failure,
-          message: "Couldn't verify ${isNumber? "phone number":"email"}");
-      
+          message: "Couldn't verify ${isNumber ? "phone number" : "email"}");
     }
   }
 
   Future<void> requestPasswordReset() async {
-    final response =
-        await SettingsRepository.requestPasswordReset(email: LoginData.email!);
+    final response = await SettingsRepository.requestPasswordReset(
+        emailOrPhone: LoginData.email ?? LoginData.phoneNumber!);
     log(response.body);
+    OtpData.clear();
     OtpData.id = response.messageBody!["data"]["_id"];
-    OtpData.email = response.messageBody!["data"]["email"];
-    LoginData.otp = response.messageBody!["data"]["verificationPin"];
+    OtpData.email = LoginData.email;
+    OtpData.phoneNumber = response.messageBody!["data"]["phoneNumber"];
+    LoginData.otp = response.messageBody?["data"]["verificationPin"];
 
     if (!response.error) {
       await verifyOtp();

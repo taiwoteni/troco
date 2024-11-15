@@ -37,7 +37,7 @@ class _LatestTransactionsListState
   @override
   void initState() {
     transactions.sort(
-      (a, b) => (1.compareTo(0)),
+      (a, b) => (b.creationTime.compareTo(a.creationTime)),
     );
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
@@ -112,10 +112,10 @@ class _LatestTransactionsListState
       next.whenData((value) {
         log("loaded");
         value.sort(
-          (a, b) => (1.compareTo(0)),
+          (a, b) => (b.creationTime.compareTo(a.creationTime)),
         );
         setState(() {
-          transactions = value;
+          transactions = value.toSet().toList();
         });
       });
     });

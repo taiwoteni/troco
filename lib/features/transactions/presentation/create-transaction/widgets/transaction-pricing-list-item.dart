@@ -79,7 +79,9 @@ class _TransactionPricingListWidgetState
             fit: BoxFit.cover,
             image: widget.item.noImage
                 ? AssetImage(AssetManager.imageFile(name: "task"))
-                : FileImage(File(widget.item.mainImage())),
+                : widget.item.mainImage().startsWith('http')
+                    ? NetworkImage(widget.item.mainImage())
+                    : FileImage(File(widget.item.mainImage())),
           )),
     );
   }

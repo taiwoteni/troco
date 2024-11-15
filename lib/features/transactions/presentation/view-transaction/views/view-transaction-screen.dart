@@ -9,22 +9,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
+import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/drag-handle.dart';
 import 'package:troco/core/components/others/onboarding-indicator.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
+import 'package:troco/features/report/presentation/widgets/report-transaction-sheet.dart';
+import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/providers/pricings-notifier.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transaction-tab-index.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-details-page.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-progress-page.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/rounded-tab-indicator.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/tab-item.dart';
+import 'package:troco/features/transactions/utils/service-role.dart';
 import 'package:troco/features/transactions/utils/transaction-status-converter.dart';
 
 import '../../../../../core/components/animations/lottie.dart';
+import '../../../../auth/presentation/providers/client-provider.dart';
+import '../../../utils/enums.dart';
 import '../providers/current-transacton-provider.dart';
 import '../providers/transactions-provider.dart';
 
@@ -48,8 +56,6 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
     controller = PageController();
     salesItems = widget.transaction.salesItem;
     transaction = widget.transaction;
-    debugPrint(
-        "Driver Information : ${transaction.clone().toJson()["driverInformation"]}");
 
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
@@ -66,6 +72,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     listenToTransactionsChanges();
+    transaction = ref.watch(currentTransactionProvider);
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: CustomScrollView(
@@ -285,6 +292,87 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
         ));
   }
 
+  List<PopupMenuItem> popupMenus() {
+    return [
+      /// Only show this menu if i'm not the actual client (That is the real creator) and
+      /// Real Client hasn't accepted terms and conditions (Status is on Pending)
+      if (!transaction.realClient &&
+          transaction.transactionStatus == TransactionStatus.Pending)
+        PopupMenuItem(
+          value: 'edit',
+          labelTextStyle: WidgetStateTextStyle.resolveWith(
+            (states) {
+              return TextStyle(
+                  color: ColorManager.secondary,
+                  fontWeight: FontWeightManager.semibold,
+                  fontFamily: 'quicksand');
+            },
+          ),
+          child: const Text("Edit Transaction"),
+        ),
+      PopupMenuItem(
+        value: 'report',
+        labelTextStyle: WidgetStateTextStyle.resolveWith(
+          (states) {
+            return TextStyle(
+                color: ColorManager.secondary,
+                fontWeight: FontWeightManager.semibold,
+                fontFamily: 'quicksand');
+          },
+        ),
+        child: const Text("Report Transaction"),
+      ),
+      if (transaction.transactionStatus != TransactionStatus.Completed)
+        PopupMenuItem(
+            value: 'group',
+            labelTextStyle: WidgetStateTextStyle.resolveWith(
+              (states) {
+                return TextStyle(
+                    color: ColorManager.secondary,
+                    fontWeight: FontWeightManager.semibold,
+                    fontFamily: 'quicksand');
+              },
+            ),
+            child: const Text("View Group"))
+    ];
+  }
+
+  Widget menuButton() {
+    return PopupMenuButton(
+      itemBuilder: (context) => popupMenus(),
+      iconColor: Colors.white,
+      color: ColorManager.background,
+      onSelected: (value) async {
+        if (value == 'edit') {
+          /// To edit, we just assign the transaction data to the data from the...
+          /// this transaction. The create-transaction-progress-page, knows how to...
+          /// handle the rest.
+          TransactionDataHolder.clear(ref: ref);
+          TransactionDataHolder.assignFrom(transaction: transaction);
+          TransactionDataHolder.isEditing = true;
+          for (final item in transaction.salesItem) {
+            ref.read(pricingsProvider.notifier).addItem(item: item);
+          }
+          Navigator.pushNamed(context, Routes.createTransactionRoute,
+              arguments: transaction.group);
+          return;
+        }
+
+        if (value == 'report') {
+          await ReportTransactionSheet.bottomSheet(
+              context: context, transaction: transaction);
+          return;
+        }
+
+        if (value == 'group') {
+          context.pushNamed(
+              routeName: Routes.chatRoute, arguments: transaction.group);
+          return;
+        }
+      },
+    );
+  }
+
   Widget controls() {
     return Container(
       width: double.maxFinite,
@@ -313,6 +401,8 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
                 color: Colors.white,
                 size: const Size.square(IconSizeManager.medium * 1.1),
               )),
+          const Spacer(),
+          menuButton(),
         ],
       ),
     );
@@ -326,10 +416,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
             .contains(transaction.transactionId)) {
           final t = value.firstWhere(
               (tr) => tr.transactionId == transaction.transactionId);
-          setState(() {
-            transaction = t;
-          });
-          ref.watch(currentTransactionProvider.notifier).state = t;
+          ref.read(currentTransactionProvider.notifier).state = t;
         }
       });
     });

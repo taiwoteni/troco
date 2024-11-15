@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:animations/animations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,24 +21,43 @@ import 'package:uuid/uuid.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../../core/components/button/presentation/provider/button-provider.dart';
 import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
+import '../../../../services/domain/entities/escrow-fee.dart';
 import '../../../data/models/create-transaction-data-holder.dart';
+import '../providers/pricings-notifier.dart';
 import '../views/view-added-products-screen.dart';
 
-class AddProductWidget extends ConsumerStatefulWidget {
-  const AddProductWidget({super.key});
+class AddProductSheet extends ConsumerStatefulWidget {
+  final Product? product;
+  const AddProductSheet({super.key, this.product});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _AddProductWidgetState();
+
+  static Future<Product?> bottomSheet(
+      {required BuildContext context, Product? product}) async {
+    return await showModalBottomSheet(
+        isScrollControlled: true,
+        enableDrag: true,
+        useSafeArea: false,
+        backgroundColor: ColorManager.background,
+        context: context,
+        builder: (context) {
+          return AddProductSheet(
+            product: product,
+          );
+        });
+  }
 }
 
-class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
+class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
   ProductCondition? selectedProductCondition;
   ProductQuality? selectedProductQuality;
 
@@ -59,9 +79,16 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
 
   @override
   void initState() {
+    selectedProductCondition = widget.product?.productCondition;
+    selectedProductQuality = widget.product?.productQuality;
+    quantity = widget.product?.quantity ?? 1;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      ref.watch(productImagesProvider.notifier).state.clear();
+      ref.watch(pricingsImagesProvider.notifier).state.clear();
+      if (widget.product != null) {
+        ref.watch(pricingsImagesProvider.notifier).state =
+            widget.product!.images;
+      }
     });
   }
 
@@ -126,7 +153,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
           padding: const EdgeInsets.symmetric(vertical: SizeManager.small),
           alignment: Alignment.center,
           child: Text(
-            "Add ${category == TransactionCategory.Product ? "Product" : "Service"}",
+            widget.product != null ? "Edit Product" : "Add Product",
             style: TextStyle(
                 color: ColorManager.primary,
                 fontWeight: FontWeightManager.bold,
@@ -139,7 +166,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
           height: SizeManager.extralarge * 1.1,
           right: SizeManager.regular,
           child: IconButton(
-              onPressed: () => loading ? null : Navigator.pop(context),
+              onPressed: () =>
+                  loading ? null : Navigator.pop(context, widget.product),
               style: ButtonStyle(
                   shape: const MaterialStatePropertyAll(CircleBorder()),
                   backgroundColor: MaterialStatePropertyAll(
@@ -161,13 +189,13 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
     return Column(
       children: [
         InfoText(
-          text:
-              " ${category.name}${category == TransactionCategory.Virtual ? "-Service" : ""} Name",
+          text: " Product Name",
           color: ColorManager.primary,
           fontWeight: FontWeightManager.medium,
         ),
         regularSpacer(),
         InputFormField(
+          initialValue: widget.product?.name,
           label: 'e.g "iPhone 13"',
           validator: (value) {
             if (value == null) {
@@ -303,6 +331,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
         ),
         regularSpacer(),
         InputFormField(
+          initialValue: widget.product?.price.toString(),
           label: 'NGN',
           inputType: TextInputType.phone,
           validator: (value) {
@@ -409,7 +438,6 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget uploadPicture() {
-    final List<String> productImages = ref.watch(productImagesProvider);
     return Column(
       children: [
         InfoText(
@@ -432,15 +460,15 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (productImages.isEmpty)
+              if (ref.watch(pricingsImagesProvider).isEmpty)
                 pickProductImage()
               else
                 productImage(position: 0),
-              if (productImages.isEmpty || productImages.length < 2)
+              if (ref.watch(pricingsImagesProvider).length < 2)
                 pickProductImage()
               else
                 productImage(position: 1),
-              if (productImages.isEmpty || productImages.length < 3)
+              if (ref.watch(pricingsImagesProvider).length < 3)
                 pickProductImage()
               else
                 productImage(position: 2),
@@ -452,8 +480,10 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
   }
 
   Widget button() {
+    final isEditing = widget.product?.isEditing() == true;
+
     return CustomButton.medium(
-      label: "Add Product",
+      label: widget.product != null ? "Edit Product" : "Add Product",
       usesProvider: true,
       buttonKey: buttonKey,
       color: ColorManager.themeColor,
@@ -464,22 +494,36 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
         });
         await Future.delayed(const Duration(seconds: 2));
         setState(() {
-          productImageError = ref.read(productImagesProvider).isEmpty;
+          productImageError = ref.read(pricingsImagesProvider).isEmpty;
         });
         if (formKey.currentState!.validate() && !productImageError) {
           formKey.currentState!.save();
-          final productImages = List.from(ref.read(productImagesProvider));
+          const defaultCharge = EscrowCharge.fromJson(
+              json: {"category": "product", "percentage": 10});
+          final productCharge = AppStorage.getEscrowCharges().firstWhere(
+            (charge) => charge.category == TransactionCategory.Product,
+            orElse: () => defaultCharge,
+          );
+          final escrowCharge = (int.parse(price) * (productCharge.percentage));
+
+          final productImages = List.from(ref.read(pricingsImagesProvider));
           Map<dynamic, dynamic> productJson = {
-            "productId": const Uuid().v4(),
+            "productId": isEditing
+                ? widget.product!.id
+                : (ref.read(pricingsProvider).length + 1).toString(),
             "productName": name,
-            "productPrice": int.parse(price),
+            "productPrice": double.parse(price),
             "productCondition": ProductConditionConverter.convertToString(
                 condition: selectedProductCondition!),
             "productQuality": ProductQualityConverter.convertToString(
                 quality: selectedProductQuality!),
+            "escrowPercentage": productCharge.percentage * 100,
+            "escrowCharges": escrowCharge,
+            "finalPrice": double.parse(price) + escrowCharge,
             "quantity": quantity,
             "pricingImage": productImages,
           };
+
           if (mounted) {
             Navigator.pop(context, Product.fromJson(json: productJson));
           }
@@ -500,7 +544,10 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             await FileManager.pickImage(imageSource: ImageSource.gallery);
         if (pickedFile != null) {
           setState(() {
-            ref.read(productImagesProvider.notifier).state.add(pickedFile.path);
+            ref
+                .read(pricingsImagesProvider.notifier)
+                .state
+                .add(pickedFile.path);
           });
         }
       },
@@ -534,20 +581,28 @@ class _AddProductWidgetState extends ConsumerState<AddProductWidget> {
             ThemeManager.getTransactionScreenUiOverlayStyle());
       },
       closedBuilder: (context, action) {
-        return Container(
-          width: 70,
-          height: 80,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(SizeManager.regular * 1.3),
-              image: DecorationImage(
-                  image: FileImage(
-                      File(ref.watch(productImagesProvider)[position])),
-                  fit: BoxFit.cover)),
-        );
+        final image =
+            ref.watch(pricingsImagesProvider).elementAtOrNull(position);
+        return ref.watch(pricingsImagesProvider).elementAtOrNull(position) ==
+                null
+            ? pickProductImage()
+            : Container(
+                width: 70,
+                height: 80,
+                decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(SizeManager.regular * 1.3),
+                    image: DecorationImage(
+                        image: image!.startsWith('http')
+                            ? CachedNetworkImageProvider(image)
+                            : FileImage(File(image)),
+                        fit: BoxFit.cover)),
+              );
       },
       openBuilder: (context, action) {
-        return ViewAddedProductsScreen(
+        return ViewAddedItemsScreen(
           currentPosition: position,
+          itemId: widget.product?.id,
         );
       },
     );

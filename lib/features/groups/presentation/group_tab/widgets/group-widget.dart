@@ -127,6 +127,7 @@ class _CollectionWidgetState extends ConsumerState<CollectionWidget> {
             fontSize: FontSizeManager.medium * 1.1,
             fontWeight: FontWeightManager.semibold),
         subtitle: RichText(
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             text: TextSpan(style: messageStyle, children: [
               TextSpan(
@@ -167,7 +168,7 @@ class _CollectionWidgetState extends ConsumerState<CollectionWidget> {
                           ? lastChat.isImage
                               ? "Photo"
                               : "Video"
-                          : lastChat.message,
+                          : lastChat.message!.replaceAll("\n", ""),
                   style: messageStyle.copyWith(
                     fontWeight:
                         unseenMessages == 0 ? null : FontWeightManager.semibold,

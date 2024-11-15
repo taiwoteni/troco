@@ -11,6 +11,7 @@ import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-profile-widget.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/wallet/domain/repository/wallet-repository.dart';
+import 'package:troco/features/wallet/utils/enums.dart';
 
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/color-manager.dart';
@@ -360,8 +361,12 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
   Future<bool> noPendingWithdrawals() async {
     final withdrawalRequests = await WalletRepository().getWalletHistory();
 
-    return withdrawalRequests.every(
-        (element) => element.transactionStatus == TransactionStatus.Completed);
+    return withdrawalRequests
+        .where(
+          (element) => element.transactionPurpose == WalletPurpose.Withdraw,
+        )
+        .every((element) =>
+            element.transactionStatus != TransactionStatus.Pending);
   }
 
   Widget button() {

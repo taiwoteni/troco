@@ -203,9 +203,10 @@ class _AddProfileScreenState extends ConsumerState<AddProfileScreen> {
       log(LoginData.profile!);
       final response = await EditProfileRepository.uploadProfilePhoto(
           userId: LoginData.id!, profilePath: profilePath!);
+      debugPrint(response.body);
+
       if (response.error) {
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-        log(response.body);
 
         return;
       }

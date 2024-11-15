@@ -41,10 +41,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       TextEditingController(text: ClientProvider.readOnlyClient?.firstName);
   final TextEditingController lastNameController =
       TextEditingController(text: ClientProvider.readOnlyClient?.lastName);
-  final TextEditingController emailController =
-      TextEditingController(text: ClientProvider.readOnlyClient?.email);
-  final TextEditingController phoneNumberController =
-      TextEditingController(text: ClientProvider.readOnlyClient?.phoneNumber);
   final TextEditingController businessNameController =
       TextEditingController(text: ClientProvider.readOnlyClient?.businessName);
   final TextEditingController addressController =
@@ -74,8 +70,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   void dispose() {
     firstNameController.dispose();
     lastNameController.dispose();
-    emailController.dispose();
-    phoneNumberController.dispose();
     businessNameController.dispose();
     addressController.dispose();
     stateController.dispose();
@@ -109,9 +103,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       fullName(),
-                      largeSpacer(),
-                      mediumSpacer(),
-                      authCredentials(),
                       largeSpacer(),
                       mediumSpacer(),
                       businessName(),
@@ -213,87 +204,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           Expanded(child: firstName()),
           mediumSpacer(),
           Expanded(child: lastName())
-        ],
-      ),
-    );
-  }
-
-  Widget email() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-          child: InfoText(
-            text: "Email",
-            color: infoColor,
-            fontSize: FontSizeManager.regular * 0.9,
-            fontWeight: FontWeightManager.semibold,
-          ),
-        ),
-        regularSpacer(),
-        InputFormField(
-          controller: emailController,
-          label: '',
-          validator: (value) {
-            if (value == null) {
-              return "* enter email";
-            }
-            if (value.trim().isEmpty) {
-              return "* enter email";
-            }
-            return null;
-          },
-          onSaved: (value) {
-            clientJson["email"] = value;
-          },
-          prefixIcon: null,
-        ),
-      ],
-    );
-  }
-
-  Widget phoneNumber() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-          child: InfoText(
-            text: "Phone Number",
-            color: infoColor,
-            fontSize: FontSizeManager.regular * 0.9,
-            fontWeight: FontWeightManager.semibold,
-          ),
-        ),
-        regularSpacer(),
-        InputFormField(
-          controller: phoneNumberController,
-          label: '',
-          validator: (value) {
-            if (value == null) {
-              return "* enter number";
-            }
-            if (value.trim().isEmpty) {
-              return "* enter number";
-            }
-            return null;
-          },
-          onSaved: (value) {
-            clientJson["phoneNumber"] = value;
-          },
-          prefixIcon: null,
-        ),
-      ],
-    );
-  }
-
-  Widget authCredentials() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
-      child: Row(
-        children: [
-          Expanded(child: email()),
-          mediumSpacer(),
-          Expanded(child: phoneNumber())
         ],
       ),
     );

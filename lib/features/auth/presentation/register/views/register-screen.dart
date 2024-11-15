@@ -15,6 +15,7 @@ import 'package:troco/core/components/texts/outputs/info-text.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/texts/inputs/text-form-field.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/features/auth/data/models/otp-data.dart';
@@ -437,7 +438,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 style: highlightStyle,
                 recognizer: TapGestureRecognizer()..onTap = () {}),
             const TextSpan(text: " and its "),
-            TextSpan(text: "Privacy Policy", style: highlightStyle),
+            TextSpan(
+                text: "Privacy Policy",
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    context.pushNamed(routeName: Routes.privacyPolicyRoute);
+                  },
+                style: highlightStyle),
             const TextSpan(text: ".")
           ])),
     );

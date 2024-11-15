@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/core/app/dialog-manager.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-item-dialog.dart';
 import 'package:troco/features/notifications/utils/enums.dart';
 
@@ -64,7 +66,7 @@ class _NotificationItemWidgetState
       //     )),
       title: Text(widget.notification.label),
       subtitle: Text(
-        widget.notification.content,
+        widget.notification.content.replaceAll('\n', ""),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
@@ -72,45 +74,25 @@ class _NotificationItemWidgetState
   }
 
   Future<void> onTap() async {
-    var color = widget.notification.type == NotificationType.VerifyTransaction
-        ? Colors.redAccent
-        : ColorManager.accentColor;
-    if (widget.notification.type == NotificationType.VerifyTransaction ||
-        widget.notification.type == NotificationType.CreateTransaction) {
-      log(widget.notification.argument.toString());
-      // Navigator.pushNamed(context, Routes.viewTransactionRoute,
-      //     arguments: Transaction.fromJson(json: widget.notification.argument));
-      return;
-    }
-    return;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return NotificationDialog(
-          icon: Container(
-            width: 70,
-            height: 70,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle, color: color.withOpacity(0.2)),
-            child: SvgIcon(
-              svgRes: AssetManager.svgFile(
-                  name: widget.notification.type ==
-                          NotificationType.VerifyTransaction
-                      ? "buy"
-                      : "delivery"),
-              color: color,
-              size: const Size.square(IconSizeManager.medium),
-            ),
+    final dialog = DialogManager(context: context);
+    dialog.showDialogContent(
+        icon: Container(
+          width: 60,
+          height: 60,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: ColorManager.accentColor.withOpacity(0.2)),
+          child: SvgIcon(
+            svgRes: AssetManager.svgFile(name: "bell"),
+            color: ColorManager.accentColor,
+            size: const Size.square(IconSizeManager.regular),
           ),
-          title: widget.notification.label,
-          description: "Do you wish to approve transaction?",
-          onCancel: decline,
-        );
-      },
-    );
+        ),
+        title: widget.notification.label,
+        description: widget.notification.content,
+        cancelLabel: 'Close',
+        onCancel: () => context.pop());
   }
 
   Future<void> decline() async {

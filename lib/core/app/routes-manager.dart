@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:troco/features/about%20us/presentation/views/about-us-screen.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
+import 'package:troco/features/auth/data/models/otp-data.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/auth/views/auth-screen.dart';
 import 'package:troco/features/auth/presentation/welcome-back/views/welcome-back-screen.dart';
+import 'package:troco/features/block/presentation/screen/blocked-users-screen.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/chat/presentation/views/view-attachment-screen.dart';
 import 'package:troco/features/customer%20care/presentation/views/customer-care-chat-screen.dart';
+import 'package:troco/features/disclaimer/presentation/views/disclaimer.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/chat/presentation/views/chat-screen.dart';
 import 'package:troco/features/auth/presentation/login/views/forget-password.dart';
@@ -21,8 +24,12 @@ import 'package:troco/features/auth/presentation/register/views/add-profile-scre
 import 'package:troco/features/auth/presentation/register/views/setup-account-screen.dart';
 import 'package:troco/features/payments/presentation/views/payment-method-screen.dart';
 import 'package:troco/features/payments/presentation/views/payment-screen.dart';
+import 'package:troco/features/privacy%20policy/presentation/views/privacy-policy.dart';
 import 'package:troco/features/profile/presentation/edit-profile/views/edit-profile-screen.dart';
 import 'package:troco/features/profile/presentation/view-profile/views/view-profile-screen.dart';
+import 'package:troco/features/protection-and-safety/presentation/views/protection-and-safety.dart';
+import 'package:troco/features/settings/presentation/change-email/views/change-email-screen.dart';
+import 'package:troco/features/settings/presentation/change-phoneNumber/views/change-phone-number-screen.dart';
 import 'package:troco/features/settings/presentation/language/views/change-language-screen.dart';
 import 'package:troco/features/settings/presentation/password/views/change-password-screen.dart';
 import 'package:troco/features/settings/presentation/pin/views/change-pin-screen.dart';
@@ -34,8 +41,10 @@ import 'package:troco/features/transactions/presentation/create-transaction/view
 import 'package:troco/features/transactions/presentation/my-transactions/views/my-transaction-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-products-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-transaction-screen.dart';
+import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 import 'package:troco/features/wallet/presentation/views/referrals-screen.dart';
 import 'package:troco/features/wallet/presentation/views/wallet-history-screen.dart';
+import 'package:troco/features/wallet/presentation/views/wallet-transaction-screen.dart';
 import 'package:troco/features/wallet/presentation/views/withdraw-screen.dart';
 
 import '../../features/auth/presentation/login/views/login-screen.dart';
@@ -55,7 +64,6 @@ class Routes {
   static const loginRoute = "/login";
   static const registerRoute = "/register";
   static const otpRoute = "/otp";
-  static const otpPhoneRoute = "/otp";
   static const forgotPasswordRoute = "/forgot-password";
   static const forgotPin = "/forgot-pin";
 
@@ -81,6 +89,8 @@ class Routes {
   static const viewProductsRoute = "/view-product";
 
   static const editProfileRoute = "/edit-profile";
+  static const changeEmail = "/change-email";
+  static const changePhoneNumber = "/change-phoneNumber";
   static const twoFactorAuthenticationRoute = "/two-factor-authentication";
   static const changePasswordRoute = "/change-password";
   static const changePinRoute = "/change-pin";
@@ -108,7 +118,14 @@ class Routes {
   static const blockedScreenRoute = "/blocked-screen";
   static const withdrawRoute = "/withdraw";
   static const referredRoute = "/referred";
+
   static const walletHistoryRoute = "/wallet-history";
+  static const walletTransactionRoute = "/wallet-transaction";
+  static const blockedUsersRoute = "/blocked-users";
+
+  static const privacyPolicyRoute = '/privacy-policy';
+  static const disclaimerRoute = '/disclaimer';
+  static const protectionAndSafetyRoute = '/protection-and-safety';
 }
 
 class RouteGenerator {
@@ -133,16 +150,17 @@ class RouteGenerator {
             settings: routeSettings,
             builder: (context) => const RegisterScreen());
       case Routes.otpRoute:
+        final isEmail = OtpData.email != null;
+        final target = OtpData.email ?? OtpData.phoneNumber!;
+        final verificationType =
+            routeSettings.arguments as OtpVerificationType?;
         return MaterialPageRoute(
             settings: routeSettings,
-            builder: (context) => const OTPScreen(
-                  email: true,
-                ));
-      case Routes.otpPhoneRoute:
-        return MaterialPageRoute(
-            settings: routeSettings,
-            builder: (context) => const OTPScreen(
-                  email: false,
+            builder: (context) => OTPScreen(
+                  target: target,
+                  isEmail: isEmail,
+                  otpVerificationType:
+                      verificationType ?? OtpVerificationType.Authentication,
                 ));
       case Routes.setupAccountRoute:
         return MaterialPageRoute(
@@ -321,6 +339,23 @@ class RouteGenerator {
           settings: routeSettings,
           builder: (context) => const WithdrawScreen(),
         );
+      case Routes.changeEmail:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const ChangeEmailScreen(),
+        );
+      case Routes.changePhoneNumber:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const ChangePhoneNumberScreen(),
+        );
+
+      case Routes.blockedUsersRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const BlockedUsersScreen(),
+        );
+
       case Routes.referredRoute:
         return MaterialPageRoute(
           settings: routeSettings,
@@ -330,6 +365,28 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) => const WalletHistoryScreen(),
+        );
+      case Routes.privacyPolicyRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const PrivacyPolicyScreen(),
+        );
+      case Routes.disclaimerRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const DisclaimerScreen(),
+        );
+      case Routes.protectionAndSafetyRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const ProtectionAndSafety(),
+        );
+      case Routes.walletTransactionRoute:
+        final walletTransaction = routeSettings.arguments as WalletTransaction;
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) =>
+              WalletTransactionScreen(walletTransaction: walletTransaction),
         );
 
       default:

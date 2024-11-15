@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/utils/enums.dart';
 
@@ -38,22 +39,32 @@ class _ReferralWidgetState extends State<ReferralWidget> {
         bottom: SizeManager.small,
       ),
       horizontalTitleGap: SizeManager.medium * 0.8,
-      onTap: () => Navigator.pushNamed(context, Routes.viewProfileRoute,
-          arguments: referral.user),
+      onTap: () {
+        final json = {
+          "firstName": referral.fullName.split(' ')[0],
+          "lastName": referral.fullName.split(' ').last,
+          "userImage": referral.profile,
+          "_id": referral.id,
+          "email": referral.email,
+        };
+
+        Navigator.pushNamed(context, Routes.viewProfileRoute,
+            arguments: Client.fromJson(json: json));
+      },
       leading: profileIcon(),
       title: Row(
         children: [
           Text(
-            referral.user.fullName,
+            referral.fullName,
           ),
-          if (referral.user.verified) ...[
-            smallSpacer(),
-            SvgIcon(
-              svgRes: AssetManager.svgFile(name: "verification"),
-              color: ColorManager.accentColor,
-              size: const Size.square(IconSizeManager.small),
-            )
-          ]
+          // if (referral.user.verified) ...[
+          //   smallSpacer(),
+          //   SvgIcon(
+          //     svgRes: AssetManager.svgFile(name: "verification"),
+          //     color: ColorManager.accentColor,
+          //     size: const Size.square(IconSizeManager.small),
+          //   )
+          // ]
         ],
       ),
       titleTextStyle: TextStyle(
@@ -78,7 +89,7 @@ class _ReferralWidgetState extends State<ReferralWidget> {
       dimension: 53,
       child: ProfileIcon(
         size: 53,
-        url: referral.user.profile,
+        url: referral.profile,
       ),
     );
   }

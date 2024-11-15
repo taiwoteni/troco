@@ -20,6 +20,7 @@ import '../../features/groups/domain/entities/group.dart';
 import '../../features/kyc/utils/enums.dart';
 import '../../features/notifications/domain/entities/notification.dart';
 import '../../features/settings/domain/entity/settings.dart';
+import '../../features/transactions/data/models/draft.dart';
 
 class AppStorage {
   static SharedPreferences? _pref;
@@ -44,6 +45,9 @@ class AppStorage {
   static const String CC_SESSION_KEY = "cc-session";
   static String CC_CHAT_STORAGE_KEY = "cc_chats";
   static String UNSENT_CC_CHAT_STORAGE_KEY = "cc_unsent-chats";
+  static String TRANSACTION_DRAFT_KEY = "transaction-drafts";
+
+  static String BLOCKED_USERS_KEY = "blocked-users";
 
   static String ALL_USERS_PHONE = "all-users-phone";
 
@@ -180,7 +184,7 @@ class AppStorage {
         }
       }
     }
-    return transactions;
+    return transactions.toSet().toList();
   }
 
   static List<Transaction> getAllTransactions() {
@@ -193,6 +197,7 @@ class AppStorage {
     final List<dynamic> transactionsJson = json.decode(jsonString) as List;
     final transactions = transactionsJson
         .map((json) => Transaction.fromJson(json: json))
+        .toSet()
         .toList();
 
     return transactions;
@@ -223,6 +228,20 @@ class AppStorage {
         notifications.map((e) => e.toJson()).toList();
 
     _pref!.setString(NOTIFICATION_STORAGE_KEY, json.encode(notificationsJson));
+  }
+
+  static Future<void> saveBlockedUsers({required List<Client> clients}) async {
+    _pref!.setString(BLOCKED_USERS_KEY,
+        json.encode(clients.map((e) => e.toJson()).toList()));
+  }
+
+  static List<Client> getBlockedUsers() {
+    final jsonString = _pref!.getString(BLOCKED_USERS_KEY);
+    if (jsonString == null) {
+      return [];
+    }
+    final List<dynamic> chatsJson = json.decode(jsonString);
+    return chatsJson.map((e) => Client.fromJson(json: e)).toList();
   }
 
   static List<PaymentMethod> getPaymentMethods() {
@@ -418,5 +437,40 @@ class AppStorage {
         escrowCharges.map((e) => e.toJson()).toList();
 
     _pref!.setString(ESCROW_CHARGES_KEY, json.encode(escrowCharges));
+  }
+
+  static List<Draft> getTransactionDrafts() {
+    final jsonString = _pref!.getString(TRANSACTION_DRAFT_KEY);
+    if (jsonString == null) {
+      return [];
+    }
+
+    final List<dynamic> drafts = json.decode(jsonString);
+    return drafts
+        .map(
+          (e) => Draft.fromJson(json: e),
+        )
+        .toList();
+  }
+
+  /// For drafts when creating transaction
+  static Future<void> addDraft({required final Draft draft}) async {
+    final drafts = getTransactionDrafts();
+    drafts.add(Draft.fromJson(json: draft.toJson()));
+
+    _saveDrafts(drafts: drafts);
+  }
+
+  static Future<void> removeDraft({required final Draft draft}) async {
+    final drafts = getTransactionDrafts();
+    drafts.remove(draft);
+
+    _saveDrafts(drafts: drafts);
+  }
+
+  static Future<void> _saveDrafts({required final List<Draft> drafts}) async {
+    final jsonList = drafts.map((e) => e.toJson());
+
+    _pref!.setString(TRANSACTION_DRAFT_KEY, json.encode(jsonList));
   }
 }

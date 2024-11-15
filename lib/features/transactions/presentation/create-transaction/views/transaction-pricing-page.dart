@@ -9,6 +9,8 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
+import 'package:troco/features/transactions/domain/entities/service.dart';
+import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/pricings-notifier.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
@@ -21,6 +23,7 @@ import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/button/presentation/provider/button-provider.dart';
 import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../groups/presentation/collections_page/widgets/empty-screen.dart';
+import '../../../domain/entities/product.dart';
 import '../../../utils/enums.dart';
 import '../../create-transaction/providers/create-transaction-provider.dart';
 import '../widgets/add-product-widget.dart';
@@ -145,11 +148,16 @@ class _TransactionPricingPageState
             const Gap(SizeManager.medium * 1.35),
         itemCount: items.length,
         itemBuilder: (context, index) {
-          return TransactionPricingListWidget(
-              editable: TransactionDataHolder.transactionCategory !=
-                  TransactionCategory.Service,
-              key: ObjectKey(items[index]),
-              item: items[index]);
+          return GestureDetector(
+            onTap: () {
+              addItems(editItem: items[index]);
+            },
+            child: TransactionPricingListWidget(
+                editable: TransactionDataHolder.transactionCategory !=
+                    TransactionCategory.Service,
+                key: ObjectKey(items[index]),
+                item: items[index]),
+          );
         },
       );
     }
@@ -160,13 +168,18 @@ class _TransactionPricingPageState
       gridDelegate: gridDelegate(),
       itemCount: items.length,
       itemBuilder: (context, index) {
-        return TransactionPricingGridWidget(
-          item: items[index],
-          onDelete: () {
-            setState(() {
-              items.removeAt(index);
-            });
+        return GestureDetector(
+          onTap: () {
+            addItems(editItem: items[index]);
           },
+          child: TransactionPricingGridWidget(
+            item: items[index],
+            onDelete: () {
+              setState(() {
+                items.removeAt(index);
+              });
+            },
+          ),
         );
       },
     );
@@ -179,9 +192,11 @@ class _TransactionPricingPageState
       buttonKey: buttonKey,
       color: ColorManager.themeColor,
       onPressed: () async {
+        TransactionDataHolder.items = ref.read(pricingsProvider);
         ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
         await Future.delayed(const Duration(seconds: 3));
-        if (TransactionDataHolder.items?.isEmpty ?? true) {
+
+        if ((TransactionDataHolder.items ?? []).isEmpty) {
           setState(() => error = true);
           SnackbarManager.showBasicSnackbar(
               context: context,
@@ -194,10 +209,24 @@ class _TransactionPricingPageState
         if (TransactionDataHolder.transactionCategory ==
             TransactionCategory.Service) {
           final totalCost = TransactionDataHolder.items!.fold(
-            0,
-            (previousValue, element) => previousValue + element.price,
+            0.0,
+            (previousValue, element) =>
+                previousValue +
+                (element.isEditing() == true
+                    ? element.finalPrice
+                    : element.price.toDouble()),
           );
-          if (totalCost != TransactionDataHolder.totalCost) {
+          debugPrint(
+              "Data holder total cost: ${TransactionDataHolder.totalCost}");
+          debugPrint("Total cost: $totalCost");
+          debugPrint("Is Editing: ${TransactionDataHolder.isEditing}");
+          debugPrint(
+              "Difference: ${totalCost - TransactionDataHolder.totalCost!}");
+          debugPrint("Is Ok: ${totalCost >= TransactionDataHolder.totalCost!}");
+
+          if (TransactionDataHolder.isEditing == true
+              ? false
+              : totalCost != TransactionDataHolder.totalCost) {
             setState(() => error = true);
             SnackbarManager.showBasicSnackbar(
                 context: context,
@@ -207,23 +236,27 @@ class _TransactionPricingPageState
             ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
             return;
           }
-          final role = await showModalBottomSheet<ServiceRole?>(
-            isScrollControlled: true,
-            enableDrag: true,
-            useSafeArea: true,
-            backgroundColor: ColorManager.background,
-            context: context,
-            builder: (context) => const SelectRolesSheet(),
-          );
+          if (TransactionDataHolder.isEditing == true) {
+            TransactionDataHolder.role = ServiceRole.Developer;
+          } else {
+            final role = await showModalBottomSheet<ServiceRole?>(
+              isScrollControlled: true,
+              enableDrag: true,
+              useSafeArea: true,
+              backgroundColor: ColorManager.background,
+              context: context,
+              builder: (context) => const SelectRolesSheet(),
+            );
 
-          if (role == null) {
-            SnackbarManager.showBasicSnackbar(
-                context: context,
-                mode: ContentType.failure,
-                message: "Select your role in this transaction.");
-            return;
+            if (role == null) {
+              SnackbarManager.showBasicSnackbar(
+                  context: context,
+                  mode: ContentType.failure,
+                  message: "Select your role in this transaction.");
+              return;
+            }
+            TransactionDataHolder.role = role;
           }
-          TransactionDataHolder.role = role;
         }
         ref.read(transactionPageController.notifier).moveNext(nextPageIndex: 3);
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
@@ -249,7 +282,7 @@ class _TransactionPricingPageState
         mediumSpacer(),
         regularSpacer(),
         pricingGrid(),
-        if (items.isNotEmpty) ...[mediumSpacer(), smallSpacer()]
+        if (items.isNotEmpty) ...[mediumSpacer(), smallSpacer()],
       ],
     );
   }
@@ -280,31 +313,35 @@ class _TransactionPricingPageState
     );
   }
 
-  Future<void> addItems() async {
-    final item = await showModalBottomSheet<SalesItem>(
-      isScrollControlled: true,
-      enableDrag: true,
-      useSafeArea: false,
-      backgroundColor: ColorManager.background,
-      context: context,
-      builder: (context) {
-        if (TransactionDataHolder.transactionCategory ==
-            TransactionCategory.Product) {
-          return const AddProductWidget();
-        } else if (TransactionDataHolder.transactionCategory ==
-            TransactionCategory.Virtual) {
-          return const AddVirtualServiceWidget();
-        } else {
-          return const AddServiceWidget();
-        }
-      },
-    );
+  Future<SalesItem?> getItem({final SalesItem? item}) {
+    switch (TransactionDataHolder.transactionCategory) {
+      case TransactionCategory.Service:
+        return Future.value(AddServiceSheet.bottomSheet(
+            context: context, service: item as Service?));
+      case TransactionCategory.Product:
+        return Future.value(AddProductSheet.bottomSheet(
+            context: context, product: item as Product?));
+      default:
+        return Future.value(AddVirtualServiceSheet.bottomSheet(
+            context: context, service: item as VirtualService?));
+    }
+  }
+
+  Future<void> addItems({SalesItem? editItem}) async {
+    final item = await getItem(item: editItem);
 
     if (item != null) {
-      ref.watch(pricingsProvider.notifier).addItem(item: item);
+      // If I'm to edit
+      if (editItem != null) {
+        ref
+            .watch(pricingsProvider.notifier)
+            .editItem(oldItem: editItem, newItem: item);
+      } else {
+        ref.watch(pricingsProvider.notifier).addItem(item: item);
+      }
       setState(() {});
       TransactionDataHolder.items = ref.read(pricingsProvider);
     }
-    ref.read(productImagesProvider.notifier).state.clear();
+    ref.read(pricingsImagesProvider.notifier).state.clear();
   }
 }

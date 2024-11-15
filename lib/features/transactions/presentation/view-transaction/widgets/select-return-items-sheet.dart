@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
+import 'package:troco/core/components/texts/outputs/info-text.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/select-return-product-widget.dart';
@@ -137,7 +138,7 @@ class _SelectPaymentMethodSheetState
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
-          child: SelectReturnProductWidget(
+          child: SelectReturnItemWidget(
             selected: selectedIds.contains(items[index].id),
             onChecked: () => setState(() {
               if (selectedIds.contains(items[index].id)) {
@@ -158,50 +159,74 @@ class _SelectPaymentMethodSheetState
     return CustomButton(
         buttonKey: buttonKey,
         usesProvider: true,
-        onPressed: selectProfile,
+        onPressed: returnProducts,
         label: "Return");
   }
 
   Widget price() {
-    final totalPrice = items.fold(
-      0.0,
-      (previousValue, element) => previousValue + element.finalPrice,
-    );
+    final totalPrice = selectedIds
+        .map(
+          (e) => items[items.indexWhere(
+            (element) => element.id == e,
+          )],
+        )
+        .fold(
+          0.0,
+          (previousValue, element) => previousValue + element.finalPrice,
+        );
     final totalPriceString =
         NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
             .format(totalPrice);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Total Amount Returned: ",
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              color: ColorManager.secondary,
-              fontFamily: 'quicksand',
-              height: 1.4,
-              fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.8),
+        const InfoText(
+          fontSize: FontSizeManager.regular * 0.8,
+          text:
+              '* You are to return all the quantity of the selected products given',
+          color: Colors.red,
         ),
-        Text(
-          "$totalPriceString NGN",
-          textAlign: TextAlign.left,
-          style: TextStyle(
-              color: ColorManager.accentColor,
-              fontFamily: 'lato',
-              height: 1.4,
-              fontWeight: FontWeightManager.extrabold,
-              fontSize: FontSizeManager.medium * 0.8),
+        smallSpacer(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Total Amount Returned: ",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                  color: ColorManager.secondary,
+                  fontFamily: 'quicksand',
+                  height: 1.4,
+                  fontWeight: FontWeightManager.extrabold,
+                  fontSize: FontSizeManager.medium * 0.8),
+            ),
+            Text(
+              "$totalPriceString NGN",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                  color: ColorManager.accentColor,
+                  fontFamily: 'lato',
+                  height: 1.4,
+                  fontWeight: FontWeightManager.extrabold,
+                  fontSize: FontSizeManager.medium * 0.8),
+            ),
+          ],
         ),
       ],
     );
   }
 
   Widget escrowCharge() {
-    final totalPrice = items.fold(
-      0.0,
-      (previousValue, element) => previousValue + element.escrowCharge,
-    );
+    final totalPrice = selectedIds
+        .map(
+          (e) => items[items.indexWhere(
+            (element) => element.id == e,
+          )],
+        )
+        .fold(
+          0.0,
+          (previousValue, element) => previousValue + element.escrowCharge,
+        );
     final totalPriceString =
         NumberFormat.currency(locale: 'en_NG', decimalDigits: 2, symbol: "")
             .format(totalPrice);
@@ -232,7 +257,7 @@ class _SelectPaymentMethodSheetState
     );
   }
 
-  Future<void> selectProfile() async {
+  Future<void> returnProducts() async {
     setState(() => loading = true);
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));

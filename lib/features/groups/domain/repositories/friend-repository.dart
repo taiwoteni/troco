@@ -41,6 +41,7 @@ class FriendRepository {
         // To remove bulky data
         userJson.remove("transactions");
         userJson.remove("groups");
+        userJson.remove("notifications");
 
         final friendClient = Client.fromJson(json: userJson);
         friends.add(friendClient);
@@ -73,6 +74,7 @@ class FriendRepository {
         // To remove bulky data
         userJson.remove("transactions");
         userJson.remove("groups");
+        userJson.remove("notifications");
 
         friends.add(userJson);
       }

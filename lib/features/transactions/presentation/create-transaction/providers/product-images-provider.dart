@@ -1,5 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final productImagesProvider = StateProvider<List<String>>((ref) {
+final pricingsImagesProvider = StateProvider<List<String>>((ref) {
   return [];
 });
+
+final removedImagesItemsProvider = StateProvider<List<Map>>(
+  (ref) => [],
+);

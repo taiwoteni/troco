@@ -12,9 +12,8 @@ class Service extends SalesItem {
         super(
             id: json["serviceId"] ?? json["_id"],
             name: json["serviceName"] ?? json["name"],
-            price:
-                double.parse((json["servicePrice"] ?? json["price"]).toString())
-                    .toInt(),
+            price: double.parse(
+                (json["servicePrice"] ?? json["price"]).toString()),
             images: ((json["pricingImage"] ?? []) as List).toListString(),
             quantity: int.parse((json["quantity"] ?? 1).toString()));
 
@@ -26,13 +25,34 @@ class Service extends SalesItem {
           requirement:
               _json["serviceRequirement"] ?? _json["requirement"] ?? "design");
 
-  String get proofOfTask => _json["proofOfWork"] ?? "";
+  List<String> get _proofOfWorkList {
+    try {
+      return ((_json["proofOfWork"] ?? []) as List)
+          .map(
+            (e) => e.toString(),
+          )
+          .toList();
+    } on TypeError catch (e) {
+      final list = <String>[];
+      list.add(_json["proofOfWork"] ?? "");
+      return list;
+    }
+  }
+
+  String get proofOfTask =>
+      _json["proofOfWork"] != null ? _proofOfWorkList.first : "";
+
+  String get description =>
+      _json["description"] ?? "No description of this task";
 
   TaskStatus get status => TaskStatusConverter.toTaskStatus(
       status: _json["taskStatus"] ?? "Pending");
 
+  TaskStatus get paymentStatus =>
+      TaskStatusConverter.toTaskStatus(status: _json["payStatus"] ?? "Pending");
+
   /// [taskUploaded] tells us if this task has it's work uploaded by the developer
-  bool get taskUploaded => _json["proofOfWork"] != null;
+  bool get taskUploaded => _proofOfWorkList.isNotEmpty;
 
   /// [clientSatisfied] tells us if the client has been satisfied with this task
   bool get clientSatisfied => _json["clientSatisfied"] ?? false;
@@ -46,7 +66,7 @@ class Service extends SalesItem {
 
   bool get workRejected => status == TaskStatus.Rejected;
 
-  bool get approvePayment => status == TaskStatus.Accepted;
+  bool get approvePayment => paymentStatus == TaskStatus.Accepted;
 
   List<String> get serviceImages =>
       ((_json["pricingImage"] ?? []) as List).toListString();

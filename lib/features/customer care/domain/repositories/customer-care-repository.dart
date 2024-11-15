@@ -6,11 +6,10 @@ import 'package:troco/features/chat/domain/entities/chat.dart';
 import '../../../../core/api/data/model/response-model.dart';
 
 class CustomerCareRepository {
-  static Future<HttpResponseModel> createChatSession() async {
+  static Future<HttpResponseModel> createChatSession(
+      {required final String id}) async {
     final result = await ApiInterface.postRequest(
-        url: "startChat",
-        okCode: 201,
-        data: {"userId": ClientProvider.readOnlyClient!.userId});
+        url: "startChat", okCode: 201, data: {"userId": id});
 
     return result;
   }
@@ -22,7 +21,7 @@ class CustomerCareRepository {
     final result = await ApiInterface.postRequest(url: "sendMessage", data: {
       "senderId": customerCareId,
       "content":
-          "Welcome to Troco Customer Service, ${ClientProvider.readOnlyClient!.fullName}. If you have any complaints, issues or uncertainties, feel free to ask. We're here.",
+          "Welcome to Troco Customer Service. If you have any complaints, issues or uncertainties, feel free to ask. We're here.",
       "sessionId": sessionId
     });
 

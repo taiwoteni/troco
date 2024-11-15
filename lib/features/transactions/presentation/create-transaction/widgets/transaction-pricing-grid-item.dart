@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
@@ -51,7 +52,9 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                   image: DecorationImage(
                       image: item.noImage
                           ? AssetImage(AssetManager.imageFile(name: "task"))
-                          : FileImage(File(item.mainImage())),
+                          : item.mainImage().startsWith('http')
+                              ? NetworkImage(item.mainImage())
+                              : FileImage(File(item.mainImage())),
                       fit: BoxFit.cover)),
               child: Container(
                 padding:
@@ -75,6 +78,13 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                         padding: EdgeInsets.zero,
                         iconSize: 0,
                         onPressed: () {
+                          if (TransactionDataHolder.isEditing == true) {
+                            SnackbarManager.showErrorSnackbar(
+                                context: context,
+                                message:
+                                    "You can't delete pricing once created");
+                            return;
+                          }
                           onDelete?.call();
                           ref
                               .read(pricingsProvider.notifier)
