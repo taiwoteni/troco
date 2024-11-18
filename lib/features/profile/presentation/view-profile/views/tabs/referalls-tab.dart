@@ -7,6 +7,7 @@ import '../../../../../../core/app/color-manager.dart';
 import '../../../../../../core/app/font-manager.dart';
 import '../../../../../../core/app/size-manager.dart';
 import '../../../../../../core/components/others/spacer.dart';
+import '../../../../../auth/presentation/providers/client-provider.dart';
 import '../../../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 import '../../../../../notifications/presentation/widgets/notification-menu-button.dart';
 import '../../providers/client-provider.dart';
@@ -78,6 +79,9 @@ class _UserDetailsTabState extends ConsumerState<ReferralsTab> {
         (index) {
           return ReferralWidget(
               key: ObjectKey(ref.read(referralsProfileProvider)[index]),
+              pushReplace: true,
+              enabled: ref.read(userProfileProvider)?.userId ==
+                  ClientProvider.readOnlyClient?.userId,
               referral: ref.read(referralsProfileProvider)[index]);
         },
       ),

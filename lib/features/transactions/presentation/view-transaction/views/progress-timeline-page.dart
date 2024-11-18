@@ -7,6 +7,7 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/features/transactions/domain/entities/service.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
+import 'package:troco/features/transactions/utils/service-role.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../data/models/process-model.dart';
 import '../../../domain/entities/transaction.dart';
@@ -235,14 +236,20 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
 
     final processes = <Process>[];
 
+    final realCreatorIsClient = transaction.role == ServiceRole.Client;
+    final name = realCreatorIsClient ? "Client" : "Developer";
+
+    final oppName = name == "Client" ? "Developer" : "Client";
+
     // Acceptance of Terms
     Process acceptanceOfTerms =
         Process(message: "Acceptance Of Terms", subProcesses: [
       SubProcess(
-          message: "Seller created transaction",
+          message: "${isService ? name : "Seller"} created transaction",
           done: transaction.transactionStatus != TransactionStatus.Cancelled),
       SubProcess(
-          message: "Buyer approved transaction",
+          message:
+              "${isService ? oppName : "Buyer"} ${isService ? "accepted terms and conditions" : "approved transaction"}",
           done: completedAcceptanceOfTerms()),
     ]);
     processes.add(acceptanceOfTerms);

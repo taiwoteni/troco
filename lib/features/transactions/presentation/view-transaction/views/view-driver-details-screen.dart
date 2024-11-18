@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_media_downloader/flutter_media_downloader.dart';
@@ -5,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:intl/intl.dart';
 // import 'package:path_provider/path_provider.dart';
 import 'package:troco/core/app/color-manager.dart';
+import 'package:troco/core/components/animations/lottie.dart';
+import 'package:troco/core/components/others/spacer.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -44,18 +47,100 @@ class _ViewAttachmentScreenState
       backgroundColor: ColorManager.tertiary,
       appBar: appBar(),
       body: Center(
-        child: Hero(
-          tag: ref.read(currentTransactionProvider).transactionId,
-          transitionOnUserGestures: true,
-          child: Container(
-              width: double.maxFinite,
-              constraints: const BoxConstraints(maxHeight: 400),
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.fitWidth,
-                      image: CachedNetworkImageProvider(driver.plateNumber)))),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              extraLargeSpacer(),
+              Text(
+                "Front Plate Number",
+                style: TextStyle(
+                    color: ColorManager.accentColor,
+                    fontFamily: 'lato',
+                    fontSize: FontSizeManager.medium,
+                    fontWeight: FontWeightManager.semibold),
+              ),
+              mediumSpacer(),
+              image(driver.plateNumber),
+              extraLargeSpacer(),
+              Text(
+                "Back Plate Number",
+                style: TextStyle(
+                    color: ColorManager.accentColor,
+                    fontFamily: 'lato',
+                    fontSize: FontSizeManager.medium,
+                    fontWeight: FontWeightManager.semibold),
+              ),
+              mediumSpacer(),
+              image(driver.backPlateNumber),
+              extraLargeSpacer(),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget image(String url) {
+    return OpenContainer(
+      middleColor: Colors.black,
+      openColor: Colors.black,
+      closedElevation: 0,
+      closedColor: Colors.transparent,
+      transitionDuration: const Duration(milliseconds: 600),
+      openElevation: 0,
+      closedBuilder: (context, action) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(SizeManager.medium),
+            child: Container(
+              width: double.maxFinite,
+              constraints: const BoxConstraints(maxHeight: 250),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(SizeManager.medium),
+              ),
+              child: CachedNetworkImage(
+                imageUrl: url,
+                width: double.maxFinite,
+                height: double.maxFinite,
+                fadeInCurve: Curves.ease,
+                fit: BoxFit.fitWidth,
+                placeholder: (context, url) {
+                  return LottieWidget(
+                      lottieRes: AssetManager.lottieFile(name: "loading-image"),
+                      size: Size.infinite);
+                },
+              ),
+            ),
+          ),
+        );
+      },
+      openBuilder: (context, action) {
+        return Container(
+          width: double.maxFinite,
+          height: double.maxFinite,
+          alignment: Alignment.center,
+          color: Colors.black,
+          child: Container(
+            width: double.maxFinite,
+            constraints: const BoxConstraints(maxHeight: 500),
+            child: CachedNetworkImage(
+              imageUrl: url,
+              width: double.maxFinite,
+              height: double.maxFinite,
+              fadeInCurve: Curves.ease,
+              fit: BoxFit.fitWidth,
+              placeholder: (context, url) {
+                return LottieWidget(
+                    lottieRes: AssetManager.lottieFile(name: "loading-image"),
+                    size: Size.infinite);
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 

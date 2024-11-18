@@ -8,10 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
+import 'package:troco/core/extensions/list-extension.dart';
+import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
@@ -25,6 +28,7 @@ import '../../../../../core/components/button/presentation/provider/button-provi
 import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
+import '../../../../../core/components/texts/inputs/currency_input_formatter.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../services/domain/entities/escrow-fee.dart';
@@ -58,6 +62,7 @@ class AddVirtualServiceSheet extends ConsumerStatefulWidget {
 class _AddVirtualServiceWidgetState
     extends ConsumerState<AddVirtualServiceSheet> {
   VirtualServiceRequirement? selectedRequirement;
+  late NumberFormat currencyFormatter;
   int quantity = 1;
   bool productImageError = false;
   final buttonKey = UniqueKey();
@@ -77,6 +82,11 @@ class _AddVirtualServiceWidgetState
 
   @override
   void initState() {
+    currencyFormatter = NumberFormat.currency(
+      locale: 'en_NG',
+      decimalDigits: 0,
+      symbol: "",
+    );
     selectedRequirement = widget.virtualService?.serviceRequirement;
     quantity = widget.virtualService?.quantity ?? 1;
     super.initState();
@@ -162,7 +172,9 @@ class _AddVirtualServiceWidgetState
           height: SizeManager.extralarge * 1.1,
           right: SizeManager.regular,
           child: IconButton(
-              onPressed: () => loading ? null : Navigator.pop(context),
+              onPressed: () => loading
+                  ? null
+                  : Navigator.pop(context, widget.virtualService),
               style: ButtonStyle(
                   shape: const MaterialStatePropertyAll(CircleBorder()),
                   backgroundColor: MaterialStatePropertyAll(
@@ -284,9 +296,11 @@ class _AddVirtualServiceWidgetState
         ),
         regularSpacer(),
         InputFormField(
-          initialValue: widget.virtualService?.price.toString(),
+          initialValue:
+              widget.virtualService?.price.toInt().format(currencyFormatter),
           label: 'NGN',
           inputType: TextInputType.phone,
+          inputFormatters: [CurrencyInputFormatter()],
           validator: (value) {
             if (value == null) {
               return "* enter price";
@@ -294,8 +308,8 @@ class _AddVirtualServiceWidgetState
             if (value.trim().isEmpty) {
               return "* enter price";
             }
-            if (!RegExp(r'^[0-9]+$')
-                .hasMatch(value.trim().replaceAll(",", ""))) {
+            if (!RegExp(r'^\d+(\.\d+)?$')
+                .hasMatch(value.replaceAll(RegExp(r','), "").trim())) {
               return "* enter valid price";
             }
             return null;
@@ -465,7 +479,9 @@ class _AddVirtualServiceWidgetState
               (int.parse(price) * (virtualServiceCharge.percentage));
 
           final serviceImages =
-              List<String>.from(ref.read(pricingsImagesProvider));
+              List<String>.from(ref.read(pricingsImagesProvider))
+                  .copy()
+                  .toListString();
           Map<dynamic, dynamic> serviceJson = {
             "serviceId": isEditing
                 ? widget.virtualService!.id
@@ -536,6 +552,9 @@ class _AddVirtualServiceWidgetState
       onClosed: (data) {
         SystemChrome.setSystemUIOverlayStyle(
             ThemeManager.getTransactionScreenUiOverlayStyle());
+        setState(
+          () {},
+        );
       },
       closedBuilder: (context, action) {
         final image =

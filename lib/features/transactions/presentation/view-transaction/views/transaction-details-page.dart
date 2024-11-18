@@ -240,7 +240,7 @@ class _TransactionsDetailPageState
         divider(),
         regularSpacer(),
         // Delivery Fee
-        deliveryFee(),
+        driverPlateNumber(),
         regularSpacer(),
       ],
     );
@@ -696,7 +696,7 @@ class _TransactionsDetailPageState
     );
   }
 
-  Widget deliveryFee() {
+  Widget driverPlateNumber() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -710,28 +710,25 @@ class _TransactionsDetailPageState
               fontWeight: FontWeightManager.extrabold,
               fontSize: FontSizeManager.medium * 0.8),
         ),
-        Hero(
-          tag: transaction.transactionId,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(
-                builder: (context) {
-                  return const ViewDriverDetailsScreen();
-                },
-              ));
-            },
-            child: Text(
-              !transaction.hasDriver ? '---' : "View Plate Number >",
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                  color: !transaction.hasDriver
-                      ? ColorManager.primary
-                      : ColorManager.accentColor,
-                  fontFamily: 'quicksand',
-                  height: 1.4,
-                  fontWeight: FontWeightManager.extrabold,
-                  fontSize: FontSizeManager.medium * 0.8),
-            ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(
+              builder: (context) {
+                return const ViewDriverDetailsScreen();
+              },
+            ));
+          },
+          child: Text(
+            !transaction.hasDriver ? '---' : "View Plate Number >",
+            textAlign: TextAlign.left,
+            style: TextStyle(
+                color: !transaction.hasDriver
+                    ? ColorManager.primary
+                    : ColorManager.accentColor,
+                fontFamily: 'quicksand',
+                height: 1.4,
+                fontWeight: FontWeightManager.extrabold,
+                fontSize: FontSizeManager.medium * 0.8),
           ),
         ),
       ],
@@ -1544,8 +1541,6 @@ class _TransactionsDetailPageState
     ];
   }
 
-  // Methods
-
   Future<void> openTermsAndConditions() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
@@ -1750,16 +1745,6 @@ class _TransactionsDetailPageState
     await Future.delayed(const Duration(seconds: 2));
 
     if (!isReturnTransaction || satisfied) {
-      if (satisfied) {
-        final received = await AcceptItemsSheet.bottomSheet(
-                transaction: transaction, context: context) ??
-            false;
-
-        if (!received) {
-          ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
-          return;
-        }
-      }
       final response = await TransactionRepo.satisfiedWithProduct(
           transaction: transaction, yes: satisfied);
       if (response.error) {
@@ -1902,8 +1887,19 @@ class _TransactionsDetailPageState
 
   Future<void> markReceivedProduct() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
+    await Future.delayed(const Duration(seconds: 3));
+
+    /// A bottom sheet that confirms that they've received
+    /// the items. This must occur for all items - product,service and virtual
+    final received = await AcceptItemsSheet.bottomSheet(
+            transaction: transaction, context: context) ??
+        false;
+    if (!received) {
+      ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+      return;
+    }
+
     if (transaction.transactionCategory != TransactionCategory.Product) {
-      await Future.delayed(const Duration(seconds: 3));
       setState(() => serviceReceivedTasks = true);
       ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
       return;
@@ -2065,7 +2061,15 @@ class _TransactionsDetailPageState
     ButtonProvider.startLoading(buttonKey: cancelKey, ref: ref);
     final result = await TransactionRepo.respondToTransaction(
         approve: false, transaction: transaction);
-    log(result.body);
+
+    debugPrint(result.body);
+
+    SnackbarManager.showBasicSnackbar(
+        context: context,
+        mode: result.error ? ContentType.failure : ContentType.success,
+        message: result.error
+            ? "Error rejecting terms"
+            : "Rejected Terms Successfully");
     ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
   }
 

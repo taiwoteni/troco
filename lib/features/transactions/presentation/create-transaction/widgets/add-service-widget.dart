@@ -9,9 +9,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
+import 'package:troco/core/components/texts/inputs/currency_input_formatter.dart';
 import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
+import 'package:troco/core/extensions/list-extension.dart';
+import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/service.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
@@ -60,6 +64,7 @@ class AddServiceSheet extends ConsumerStatefulWidget {
 }
 
 class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
+  late NumberFormat currencyFormatter;
   ServiceRequirement? selectedRequirement;
   Month? selectedMonth;
   int? selectedYear;
@@ -85,6 +90,11 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
 
   @override
   void initState() {
+    currencyFormatter = NumberFormat.currency(
+      locale: 'en_NG',
+      decimalDigits: 0,
+      symbol: "",
+    );
     selectedDay = widget.service?.deadlineTime.day;
     selectedYear = widget.service?.deadlineTime.year;
     if (widget.service != null) {
@@ -95,11 +105,14 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       if (widget.service != null) {
-        ref.watch(pricingsImagesProvider.notifier).state =
+        ref.read(pricingsImagesProvider.notifier).state =
             widget.service!.images;
         return;
       }
-      ref.watch(pricingsImagesProvider.notifier).state.clear();
+      ref.read(pricingsImagesProvider.notifier).state.clear();
+      setState(
+        () {},
+      );
     });
   }
 
@@ -526,9 +539,10 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
         ),
         regularSpacer(),
         InputFormField(
-          initialValue: widget.service?.price.toString(),
+          initialValue: widget.service?.price.toInt().format(currencyFormatter),
           label: 'NGN',
           inputType: TextInputType.phone,
+          inputFormatters: [CurrencyInputFormatter()],
           validator: (value) {
             if (value == null) {
               return "* enter price";
@@ -536,8 +550,8 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
             if (value.trim().isEmpty) {
               return "* enter price";
             }
-            if (!RegExp(r'^[0-9]+$')
-                .hasMatch(value.trim().replaceAll(",", ""))) {
+            if (!RegExp(r'^\d+(\.\d+)?$')
+                .hasMatch(value.replaceAll(RegExp(r','), "").trim())) {
               return "* enter valid price";
             }
             return null;
@@ -711,7 +725,9 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
               (double.parse(price) * (serviceCharge.percentage));
 
           final productImages =
-              List<String>.from(ref.read(pricingsImagesProvider));
+              List<String>.from(ref.read(pricingsImagesProvider))
+                  .copy()
+                  .toListString();
           final DateTime dateTime = DateTime(
               selectedYear!, selectedMonth!.toMonthOfYear(), selectedDay!);
           Map<dynamic, dynamic> serviceJson = {
@@ -730,7 +746,7 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
           };
 
           if (productImages.isNotEmpty) {
-            serviceJson["pricingImage"] = productImages;
+            serviceJson["pricingImage"] = productImages.copy().toListString();
           }
           if (mounted) {
             Navigator.pop(context, Service.fromJson(json: serviceJson));
@@ -787,6 +803,9 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
       onClosed: (data) {
         SystemChrome.setSystemUIOverlayStyle(
             ThemeManager.getTransactionScreenUiOverlayStyle());
+        setState(
+          () {},
+        );
       },
       closedBuilder: (context, action) {
         final image =

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
@@ -54,6 +55,8 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
   Widget build(BuildContext context) {
     return ListTile(
       dense: true,
+      onTap: () => Navigator.pushNamed(context, Routes.viewProfileRoute,
+          arguments: client),
       tileColor: Colors.transparent,
       contentPadding: const EdgeInsets.only(
         left: SizeManager.medium,
@@ -62,11 +65,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
         bottom: SizeManager.small,
       ),
       horizontalTitleGap: SizeManager.medium * 0.8,
-      leading: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, Routes.viewProfileRoute,
-            arguments: client),
-        child: profileIcon(),
-      ),
+      leading: profileIcon(),
       title: Text(
         client.fullName,
         style: TextStyle(
@@ -134,7 +133,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
     log(response.body);
     if (response.error) {
       log(response.body);
-      SnackbarManager.showBasicSnackbar(
+      SnackbarManager.showErrorSnackbar(
           context: context, message: response.messageBody!["message"]);
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     } else {
@@ -144,6 +143,10 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
       });
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
+
+      SnackbarManager.showBasicSnackbar(
+          context: context, message: "Added ${client.firstName} to group");
+      context.pop();
     }
   }
 }

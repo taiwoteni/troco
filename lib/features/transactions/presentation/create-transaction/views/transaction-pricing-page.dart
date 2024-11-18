@@ -334,14 +334,14 @@ class _TransactionPricingPageState
       // If I'm to edit
       if (editItem != null) {
         ref
-            .watch(pricingsProvider.notifier)
+            .read(pricingsProvider.notifier)
             .editItem(oldItem: editItem, newItem: item);
       } else {
-        ref.watch(pricingsProvider.notifier).addItem(item: item);
+        ref.read(pricingsProvider.notifier).addItem(item: item);
       }
       setState(() {});
       TransactionDataHolder.items = ref.read(pricingsProvider);
     }
-    ref.read(pricingsImagesProvider.notifier).state.clear();
+    // ref.read(pricingsImagesProvider.notifier).state.clear();
   }
 }

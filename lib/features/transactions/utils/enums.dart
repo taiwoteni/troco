@@ -16,21 +16,22 @@ enum ProductCondition { New, ForeignUsed, NigerianUsed }
 enum ProductQuality { Good, Faulty, High, Low }
 
 enum ServiceRequirement {
-  Produce,
-  Repair,
-  Replacement,
+  // Produce,
+  // Repair,
+  // Replacement,
+  Develop,
   Design,
-  Create,
-  Manufacture
+  Create
+  // Manufacture
 }
 
 enum VirtualServiceRequirement {
-  Create,
-  Exchange,
-  Develop,
+  // Create,
+  // Exchange,
+  // Develop,
   Buying,
   Selling,
-  Design
+  // Design
 }
 
 enum InspectionPeriod { Hour, Day, Month }

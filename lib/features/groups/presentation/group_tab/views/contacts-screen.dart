@@ -204,7 +204,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           (await ContactsService.getContacts()).where((element) =>
               element.phones != null &&
               element.phones != [] &&
-              element.phones!.every(
+              element.phones!.any(
                 (element) => element.value != null,
               ));
 
@@ -233,9 +233,10 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
       final notUserContacts = contacts
           .toSet()
           .where(
-            (element) => element.phones!.any(
+            (element) => element.phones!.every(
               (element) =>
-                  element.value! != ClientProvider.readOnlyClient!.phoneNumber,
+                  PhoneNumberConverter.convertToFull(element.value!) !=
+                  ClientProvider.readOnlyClient!.phoneNumber,
             ),
           )
           .toSet();

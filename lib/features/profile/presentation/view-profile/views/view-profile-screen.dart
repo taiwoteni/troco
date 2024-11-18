@@ -60,7 +60,7 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
             [loadUser(), loadGroups(), loadFriends(), loadReferrals()],
             eagerError: true)
         .timeout(
-      const Duration(seconds: 25),
+      const Duration(seconds: 35),
       onTimeout: () {
         setState(() => error = true);
         throw Exception("Error Occurred");

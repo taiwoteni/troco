@@ -111,7 +111,7 @@ class _SelectReturnItemWidgetState extends State<SelectReturnItemWidget> {
             image: widget.item.noImage
                 ? AssetImage(AssetManager.imageFile(name: "task"))
                 : widget.item.mainImage().startsWith('http')
-                    ? NetworkImage(widget.item.mainImage())
+                    ? CachedNetworkImageProvider(widget.item.mainImage())
                     : FileImage(File(widget.item.mainImage())),
           )),
     );

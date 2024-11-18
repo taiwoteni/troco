@@ -8,9 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
+import 'package:troco/core/extensions/list-extension.dart';
+import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
@@ -26,6 +29,7 @@ import '../../../../../core/components/button/presentation/provider/button-provi
 import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
+import '../../../../../core/components/texts/inputs/currency_input_formatter.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../services/domain/entities/escrow-fee.dart';
@@ -60,6 +64,7 @@ class AddProductSheet extends ConsumerStatefulWidget {
 class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
   ProductCondition? selectedProductCondition;
   ProductQuality? selectedProductQuality;
+  late NumberFormat currencyFormatter;
 
   int quantity = 1;
   bool productImageError = false;
@@ -79,6 +84,11 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
 
   @override
   void initState() {
+    currencyFormatter = NumberFormat.currency(
+      locale: 'en_NG',
+      decimalDigits: 0,
+      symbol: "",
+    );
     selectedProductCondition = widget.product?.productCondition;
     selectedProductQuality = widget.product?.productQuality;
     quantity = widget.product?.quantity ?? 1;
@@ -331,9 +341,10 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
         ),
         regularSpacer(),
         InputFormField(
-          initialValue: widget.product?.price.toString(),
+          initialValue: widget.product?.price.toInt().format(currencyFormatter),
           label: 'NGN',
           inputType: TextInputType.phone,
+          inputFormatters: [CurrencyInputFormatter()],
           validator: (value) {
             if (value == null) {
               return "* enter price";
@@ -341,7 +352,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
             if (value.trim().isEmpty) {
               return "* enter price";
             }
-            if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
+            if (!RegExp(r'^\d+(\.\d+)?$')
+                .hasMatch(value.replaceAll(RegExp(r','), "").trim())) {
               return "* enter valid price";
             }
             return null;
@@ -506,7 +518,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
           );
           final escrowCharge = (int.parse(price) * (productCharge.percentage));
 
-          final productImages = List.from(ref.read(pricingsImagesProvider));
+          final productImages =
+              List.from(ref.read(pricingsImagesProvider)).copy().toListString();
           Map<dynamic, dynamic> productJson = {
             "productId": isEditing
                 ? widget.product!.id
@@ -579,6 +592,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
       onClosed: (data) {
         SystemChrome.setSystemUIOverlayStyle(
             ThemeManager.getTransactionScreenUiOverlayStyle());
+        setState(
+          () {},
+        );
       },
       closedBuilder: (context, action) {
         final image =

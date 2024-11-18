@@ -28,6 +28,8 @@ class _TransactionTermsPageState extends ConsumerState<TransactionTermsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final disabled = TransactionDataHolder.isEditing == true ||
+        TransactionDataHolder.transactionCategory != null;
     return Scaffold(
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
@@ -40,13 +42,13 @@ class _TransactionTermsPageState extends ConsumerState<TransactionTermsPage> {
               title(),
               largeSpacer(),
               Opacity(
-                opacity: TransactionDataHolder.isEditing == true ? 0.4 : 1,
+                opacity: disabled ? 0.4 : 1,
                 child: SelectTransactionTypeWidget(
                   label: 'Product',
                   description: "Select if a product-based transaction.",
                   selected: category == TransactionCategory.Product,
                   onChecked: () {
-                    if (TransactionDataHolder.isEditing ?? false) {
+                    if (disabled) {
                       return;
                     }
                     setState(() {
@@ -57,13 +59,13 @@ class _TransactionTermsPageState extends ConsumerState<TransactionTermsPage> {
               ),
               mediumSpacer(),
               Opacity(
-                opacity: TransactionDataHolder.isEditing == true ? 0.4 : 1,
+                opacity: disabled ? 0.4 : 1,
                 child: SelectTransactionTypeWidget(
                   label: 'Service',
                   description: "Select if a service-based transaction.",
                   selected: category == TransactionCategory.Service,
                   onChecked: () {
-                    if (TransactionDataHolder.isEditing ?? false) {
+                    if (disabled) {
                       return;
                     }
                     setState(() {
@@ -74,13 +76,13 @@ class _TransactionTermsPageState extends ConsumerState<TransactionTermsPage> {
               ),
               mediumSpacer(),
               Opacity(
-                opacity: TransactionDataHolder.isEditing == true ? 0.4 : 1,
+                opacity: disabled ? 0.4 : 1,
                 child: SelectTransactionTypeWidget(
                   label: 'Virtual',
                   description: "Select if a virtual-product based transaction.",
                   selected: category == TransactionCategory.Virtual,
                   onChecked: () {
-                    if (TransactionDataHolder.isEditing ?? false) {
+                    if (disabled) {
                       return;
                     }
                     setState(() {

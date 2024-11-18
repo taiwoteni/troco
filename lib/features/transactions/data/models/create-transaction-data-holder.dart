@@ -53,6 +53,7 @@ class TransactionDataHolder {
     inspectionDays = null;
     inspectionPeriod = null;
     location = null;
+    totalCost = null;
     items = null;
     date = null;
     isEditing = null;

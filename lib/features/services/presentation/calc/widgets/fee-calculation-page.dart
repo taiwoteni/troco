@@ -141,10 +141,17 @@ class _SelectCategoryPageState extends ConsumerState<FeeCalculationPage> {
                         backgroundColor:
                             WidgetStatePropertyAll(Colors.transparent),
                         shape: WidgetStatePropertyAll(CircleBorder())),
-                    onPressed: () => setState(() => price =
-                        price.trim().isEmpty || price == "0"
-                            ? "0"
-                            : price.substring(0, price.length - 1)),
+                    onPressed: () {
+                      setState(
+                        () {
+                          if (price.trim().isEmpty || price.length <= 1) {
+                            price = "0";
+                            return;
+                          }
+                          price = price.substring(0, price.length - 1);
+                        },
+                      );
+                    },
                     icon: Icon(
                       Icons.backspace_rounded,
                       color: ColorManager.accentColor,

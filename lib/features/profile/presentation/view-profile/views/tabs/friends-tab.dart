@@ -6,6 +6,7 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/groups/presentation/collections_page/widgets/empty-screen.dart';
 import 'package:troco/features/groups/presentation/friends_tab/widgets/friend-widget.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-menu-button.dart';
@@ -82,6 +83,8 @@ class _UserDetailsTabState extends ConsumerState<FriendsTab> {
           return FriendWidget(
             key: ObjectKey(
                 ref.read(friendsProfileProvider).toSet().toList()[index]),
+            enabled: ref.read(userProfileProvider)?.userId ==
+                ClientProvider.readOnlyClient?.userId,
             client: ref.read(friendsProfileProvider).toSet().toList()[index],
             pushReplace: true,
             applyHorizontalPadding: false,

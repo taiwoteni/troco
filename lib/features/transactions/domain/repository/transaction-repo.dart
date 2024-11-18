@@ -148,10 +148,8 @@ class TransactionRepo {
     debugPrint(
         "Removed Images in item ${item.name}: ${removedImages.toString()}");
 
-    for (final removedImage in removedImages) {
-      multiparts.add(
-          MultiPartModel.field(field: 'removeImages', value: removedImage));
-    }
+    multiparts
+        .add(MultiPartModel.field(field: 'removeImages', value: removedImages));
 
     multiparts.add(MultiPartModel.field(field: "price", value: item.price));
     multiparts

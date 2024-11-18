@@ -9,6 +9,7 @@ import '../../../domain/entities/service.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../domain/entities/virtual-service.dart';
 import '../../../utils/enums.dart';
+import '../../../utils/service-role.dart';
 import '../providers/transactions-provider.dart';
 
 class ProgressDetailsPage extends ConsumerStatefulWidget {
@@ -141,6 +142,12 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
     final bool isService =
         transaction.transactionCategory == TransactionCategory.Service;
 
+    final realCreatorIsClient = transaction.role == ServiceRole.Client;
+    final realClient = transaction.realClient;
+    final name = realCreatorIsClient ? "client" : "developer";
+
+    final oppName = name == "client" ? "developer" : "client";
+
     switch (transaction.transactionStatus) {
       case TransactionStatus.Cancelled:
         return "Cancelled Transaction";
@@ -200,7 +207,7 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
         return "Completed Transaction!";
 
       default:
-        return "Waiting for ${isSeller ? "buyer" : "you"} to approve..";
+        return "Waiting for ${isService ? (realClient ? "you" : oppName) : "buyer"} to approve..";
     }
   }
 

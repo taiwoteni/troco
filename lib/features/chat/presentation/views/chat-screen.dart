@@ -609,23 +609,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final hasBuyer = group.members.length >= 3;
     final isSeller = group.creator == ClientProvider.readOnlyClient!.userId;
     if (!hasBuyer) {
-      final usersResponse = await askDeleteGroup();
-      if (usersResponse) {
-        /// Would return true if the group deleted without fail
-        final deleteRequestResponse = await deleteGroup(userId: group.creator);
+      final removeSelf =
+          await leaveGroup(userId: ClientProvider.readOnlyClient!.userId);
 
-        if (deleteRequestResponse) {
-          SnackbarManager.showBasicSnackbar(
-              context: context, message: "Group deleted.");
-          context.pop();
-          return;
-        }
-
-        SnackbarManager.showErrorSnackbar(
-            context: context,
-            message: "Couldn't delete group. Try again some other time");
+      if (removeSelf) {
+        SnackbarManager.showBasicSnackbar(
+            context: context, message: "Group deleted.");
+        context.pop();
         return;
       }
+
+      SnackbarManager.showErrorSnackbar(
+          context: context,
+          message: "Couldn't delete group. Try again some other time");
       return;
     }
 
@@ -653,46 +649,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// Would return null if nothing was selected but true if to remove buyer;
     final deleteBuyer =
         await LeaveGroupSheet.bottomSheet(context: context, group: group);
-
     if (deleteBuyer == null) {
       return;
     }
 
-    if (deleteBuyer) {
-      /// Would return true if the buyer left without fail
-      final deleteRequestResponse = await leaveGroup(userId: group.buyerId);
+    final yes = await (deleteBuyer ? askRemoveBuyer() : askLeaveGroup());
 
-      if (deleteRequestResponse) {
-        SnackbarManager.showBasicSnackbar(
-            context: context, message: "Buyer removed.");
-        return;
-      }
-
-      SnackbarManager.showErrorSnackbar(
-          context: context,
-          message: "Couldn't remove buyer. Try again some other time");
+    if (!yes) {
       return;
     }
 
-    final shouldDeleteGroup = await askDeleteGroup();
-    if (!shouldDeleteGroup) {
-      return;
-    }
-
-    // That means we have to delete group since we're removing seller.
-    /// Would return true if the buyer left without fail
-    final deleteRequestResponse = await deleteGroup(userId: group.creator);
-
-    if (deleteRequestResponse) {
+    final response =
+        await leaveGroup(userId: deleteBuyer ? group.buyerId : group.creator);
+    if (response) {
       SnackbarManager.showBasicSnackbar(
-          context: context, message: "Group deleted.");
-      context.pop();
+          context: context,
+          message: deleteBuyer ? "Removed Buyer from Group" : "Deleted Group");
+      if (!deleteBuyer) {
+        context.pop();
+      }
       return;
     }
 
     SnackbarManager.showErrorSnackbar(
         context: context,
-        message: "Couldn't delete group. Try again some other time");
+        message: "Error ${deleteBuyer ? "removing buyer" : "deleting group"}");
     return;
   }
 
@@ -702,47 +683,45 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
     final leaveResponse =
         await GroupRepo.leaveGroup(userId: userId, group: group);
-    setState(
-      () => deleting = false,
-    );
-    if (leaveResponse.error) {
-      return false;
+
+    // Manually delete a group if the person being removed is you
+    if (userId == ClientProvider.readOnlyClient?.userId) {
+      if (!leaveResponse.error) {
+        final groups = AppStorage.getGroups();
+        if (groups.any(
+          (element) => element.groupId == group.groupId,
+        )) {
+          groups.removeWhere(
+            (element) => element.groupId == group.groupId,
+          );
+          AppStorage.saveGroups(groups: groups);
+        }
+      }
     }
-    log(leaveResponse.body);
-    return leaveResponse.error;
-  }
 
-  Future<bool> deleteGroup({required final String userId}) async {
-    setState(
-      () => deleting = true,
-    );
-    final response =
-        await GroupRepo.deleteGroup(userId: userId, groupId: group.groupId);
     setState(
       () => deleting = false,
     );
-    log(response.body);
-    return !response.error;
+    return !leaveResponse.error;
   }
 
-  Future<bool> askDeleteGroup() async {
+  Future<bool> askRemoveBuyer() async {
     final dialogManager = DialogManager(context: context);
     final response = await dialogManager.showDialogContent<bool?>(
-          title: "Delete Group",
+          title: "Remove Member?",
           icon: Container(
             decoration: BoxDecoration(
                 color: Colors.red.shade100, shape: BoxShape.circle),
             width: 60,
             height: 60,
-            child: const Icon(
-              CupertinoIcons.delete_solid,
-              color: Colors.red,
-              size: IconSizeManager.medium * 0.8,
+            child: ProfileIcon(
+              url: group.buyer?.profile,
+              size: double.maxFinite,
             ),
           ),
           description:
-              "Are you sure you want to delete this group?\nThis cannot be undone.",
-          cancelLabel: "Delete",
+              "Are you sure you want to remove ${group.buyer?.firstName ?? "the buyer"}?\nThis cannot be undone.",
+          cancelLabel: "Remove",
           onCancel: () {
             context.pop(result: true);
           },
@@ -755,7 +734,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<bool> askLeaveGroup() async {
     final dialogManager = DialogManager(context: context);
     final response = await dialogManager.showDialogContent<bool?>(
-          title: "Delete Group",
+          title: "Leave Group",
           icon: Container(
             decoration: BoxDecoration(
                 color: Colors.red.shade100, shape: BoxShape.circle),

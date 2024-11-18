@@ -16,10 +16,12 @@ import '../../../../auth/domain/entities/client.dart';
 
 class FriendWidget extends ConsumerStatefulWidget {
   final Client client;
+  final bool enabled;
   final bool applyHorizontalPadding, pushReplace;
   const FriendWidget(
       {super.key,
       required this.client,
+      this.enabled = true,
       this.applyHorizontalPadding = true,
       this.pushReplace = false});
 
@@ -60,6 +62,9 @@ class _ClientWidgetState extends ConsumerState<FriendWidget> {
       dense: true,
       tileColor: Colors.transparent,
       onTap: () {
+        if (!widget.enabled) {
+          return;
+        }
         if (widget.pushReplace) {
           Navigator.pushReplacementNamed(context, Routes.viewProfileRoute,
               arguments: client);

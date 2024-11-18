@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/utils/enums.dart';
@@ -14,7 +15,12 @@ import '../../../../core/components/others/spacer.dart';
 
 class ReferralWidget extends StatefulWidget {
   final Referral referral;
-  const ReferralWidget({super.key, required this.referral});
+  final bool enabled, pushReplace;
+  const ReferralWidget(
+      {super.key,
+      required this.referral,
+      this.enabled = true,
+      this.pushReplace = false});
 
   @override
   State<ReferralWidget> createState() => _ReferralWidgetState();
@@ -40,6 +46,10 @@ class _ReferralWidgetState extends State<ReferralWidget> {
       ),
       horizontalTitleGap: SizeManager.medium * 0.8,
       onTap: () {
+        if (!widget.enabled) {
+          return;
+        }
+
         final json = {
           "firstName": referral.fullName.split(' ')[0],
           "lastName": referral.fullName.split(' ').last,
@@ -47,9 +57,15 @@ class _ReferralWidgetState extends State<ReferralWidget> {
           "_id": referral.id,
           "email": referral.email,
         };
+        final client = Client.fromJson(json: json);
 
-        Navigator.pushNamed(context, Routes.viewProfileRoute,
-            arguments: Client.fromJson(json: json));
+        if (widget.pushReplace) {
+          context.pushReplacementNamed(
+              routeName: Routes.viewProfileRoute, arguments: client);
+          return;
+        }
+        context.pushNamed(
+            routeName: Routes.viewProfileRoute, arguments: client);
       },
       leading: profileIcon(),
       title: Row(

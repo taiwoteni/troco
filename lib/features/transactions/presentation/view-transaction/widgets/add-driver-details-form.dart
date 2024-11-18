@@ -353,7 +353,7 @@ class _AddDriverDetailsFormState extends ConsumerState<AddDriverDetailsForm> {
         ),
         regularSpacer(),
         Row(
-          children: [noOfDeliveryPeriod(), deliveryPeriodType()],
+          children: [noOfDeliveryPeriod(), smallSpacer(), deliveryPeriodType()],
         )
       ],
     );

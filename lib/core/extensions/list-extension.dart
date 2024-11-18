@@ -4,4 +4,16 @@ extension ListExtension on List<dynamic> {
       (e) => e.toString(),
     ).toList();
   }
+
+  List<dynamic> copy() {
+    final l = [];
+
+    forEach(
+      (element) {
+        l.add(element);
+      },
+    );
+
+    return l;
+  }
 }

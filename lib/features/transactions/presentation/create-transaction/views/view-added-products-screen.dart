@@ -58,7 +58,7 @@ class _ViewAddedProductsScreenState
         alignment: Alignment.center,
         child: images.isEmpty
             ? LottieWidget(
-                lottieRes: AssetManager.lottieFile(name: 'loading_image'),
+                lottieRes: AssetManager.lottieFile(name: 'loading-image'),
                 size: const Size.fromHeight(400))
             : PageView(
                 controller: controller,

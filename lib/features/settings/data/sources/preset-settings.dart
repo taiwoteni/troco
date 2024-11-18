@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
+import 'package:troco/core/app/dialog-manager.dart';
+import 'package:troco/core/components/images/profile-icon.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
+import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
 import '../../utils/enums.dart';
 
@@ -20,6 +24,12 @@ List<SettingsModel> presetSettings(
         onTap: () => Navigator.pushNamed(context, Routes.editProfileRoute),
         iconType: IconType.svg),
     SettingsModel(
+        label: "Two Factor Authentication",
+        icon: AssetManager.svgFile(name: "two-factor-authentication"),
+        onTap: () =>
+            Navigator.pushNamed(context, Routes.twoFactorAuthenticationRoute),
+        iconType: IconType.svg),
+    SettingsModel(
         label: "Change Email",
         icon: AssetManager.svgFile(name: "email"),
         onTap: () => Navigator.pushNamed(context, Routes.changeEmail),
@@ -29,12 +39,6 @@ List<SettingsModel> presetSettings(
         icon: CupertinoIcons.phone_fill,
         onTap: () => Navigator.pushNamed(context, Routes.changePhoneNumber),
         iconType: IconType.icon),
-    SettingsModel(
-        label: "Two Factor Authentication",
-        icon: AssetManager.svgFile(name: "two-factor-authentication"),
-        onTap: () =>
-            Navigator.pushNamed(context, Routes.twoFactorAuthenticationRoute),
-        iconType: IconType.svg),
     SettingsModel(
         label: "Change Pin",
         icon: AssetManager.svgFile(name: "change-pin"),
@@ -72,6 +76,25 @@ List<SettingsModel> presetSettings(
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
         onTap: () async {
+          final dialogService = DialogManager(context: context);
+          final logout = (await dialogService.showDialogContent<bool>(
+                  title: "Logout",
+                  description:
+                      "Are you sure you want to logout of your account?",
+                  icon: ProfileIcon(
+                    url: ClientProvider.readOnlyClient?.profile,
+                    size: 60,
+                  ),
+                  cancelLabel: "Yes, Log me out",
+                  onCancel: () {
+                    context.pop(result: true);
+                  }) ??
+              false);
+
+          if (!logout) {
+            return;
+          }
+
           ref.watch(paymentMethodProvider.notifier).state = [];
           await Navigator.pushNamedAndRemoveUntil(
               context, Routes.authRoute, (route) => false);

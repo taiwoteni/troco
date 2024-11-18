@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/core/components/texts/inputs/currency_input_formatter.dart';
 import 'package:troco/core/components/texts/inputs/text-form-field.dart';
 import 'package:troco/core/components/texts/outputs/info-text.dart';
+import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
 import 'package:troco/features/transactions/utils/date-input-formatter.dart';
@@ -32,13 +34,7 @@ class TransactionDescriptionPage extends ConsumerStatefulWidget {
 
 class _TransactionDescriptionPageState
     extends ConsumerState<TransactionDescriptionPage> {
-  final TextEditingController transactionNameController =
-      TextEditingController(text: TransactionDataHolder.transactionName ?? "");
-  final TextEditingController aboutProductController =
-      TextEditingController(text: TransactionDataHolder.aboutProduct ?? "");
-  final TextEditingController locationController =
-      TextEditingController(text: TransactionDataHolder.location ?? "");
-  late TextEditingController totalCostController;
+  late NumberFormat currencyFormatter;
   Month? selectedMonth;
   int? selectedYear;
   int? selectedDay;
@@ -50,11 +46,11 @@ class _TransactionDescriptionPageState
 
   @override
   void initState() {
-    final formatter =
-        NumberFormat.currency(locale: 'en_NG', symbol: '', decimalDigits: 0);
-    final totalCost = TransactionDataHolder.totalCost;
-    totalCostController = TextEditingController(
-        text: totalCost == null ? "" : formatter.format(totalCost));
+    currencyFormatter = NumberFormat.currency(
+      locale: 'en_NG',
+      decimalDigits: 0,
+      symbol: "",
+    );
     inspectionDay = TransactionDataHolder.inspectionDays ?? 0;
     selectedInspectionPeriod = TransactionDataHolder.inspectionPeriod;
 
@@ -144,7 +140,7 @@ class _TransactionDescriptionPageState
         ),
         regularSpacer(),
         InputFormField(
-          controller: transactionNameController,
+          initialValue: TransactionDataHolder.transactionName,
           label: isService
               ? "The name of the project/service"
               : isVirtual
@@ -191,7 +187,7 @@ class _TransactionDescriptionPageState
         ),
         regularSpacer(),
         InputFormField(
-          controller: aboutProductController,
+          initialValue: TransactionDataHolder.aboutProduct,
           label: isService
               ? "Enter terms of Service (e.g We agreed that I will receive service completed on the 5th day.....)"
               : 'Write about your ${category.name.toLowerCase()}${category == TransactionCategory.Virtual ? "-product" : ""}(s). Try to keep it brief and informative as much as possible.',
@@ -312,7 +308,7 @@ class _TransactionDescriptionPageState
         ),
         regularSpacer(),
         InputFormField(
-          controller: locationController,
+          initialValue: TransactionDataHolder.location,
           label: 'Location',
           validator: (value) {
             if (value == null) {
@@ -477,7 +473,7 @@ class _TransactionDescriptionPageState
 
     final difference = parsedTime.difference(DateTime.now());
 
-    final isValidDate = !difference.isNegative || difference.inDays > 0;
+    final isValidDate = !difference.isNegative || difference.inDays > -1;
 
     setState(() => timeError = !isValidDate);
     return isValidDate;
@@ -512,10 +508,12 @@ class _TransactionDescriptionPageState
         ),
         regularSpacer(),
         InputFormField(
-          initialValue: TransactionDataHolder.totalCost.toString(),
-          controller: totalCostController,
+          initialValue: TransactionDataHolder.totalCost
+              ?.toInt()
+              .format(currencyFormatter),
           label: 'The Total Cost of the Project',
           inputType: TextInputType.phone,
+          inputFormatters: [CurrencyInputFormatter()],
           validator: (value) {
             if (value == null) {
               return "* enter cost";
