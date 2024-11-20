@@ -44,7 +44,7 @@ class _UserDetailsTabState extends ConsumerState<GroupsTab> {
 
   Widget title() {
     return Text(
-      "Groups",
+      "Orders",
       style: TextStyle(
           fontSize: FontSizeManager.large * 1.05,
           fontWeight: FontWeightManager.extrabold,

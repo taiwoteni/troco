@@ -40,6 +40,10 @@ abstract class SalesItem extends Equatable {
     return isId == null;
   }
 
+  List<String> get removedImages => ((toJson()['removedImages'] ?? []) as List)
+      .map((e) => e.toString())
+      .toList();
+
   double get finalPrice => double.parse(toJson()["finalPrice"].toString());
 
   double get escrowCharge => double.parse(toJson()["escrowCharges"].toString());

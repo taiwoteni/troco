@@ -126,7 +126,7 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget> {
                   color: ColorManager.secondary,
                   alignment: Alignment.center,
                   text:
-                      "You can only add members from your friend list to a group."))
+                      "You can only add members from your friend list to an order."))
       ],
     );
     return queriedClients.isEmpty

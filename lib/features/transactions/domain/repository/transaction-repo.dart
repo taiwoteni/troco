@@ -111,45 +111,14 @@ class TransactionRepo {
     return result;
   }
 
-  static Future<HttpResponseModel> editPricing({
+  static List<MultiPartModel> editPricingMultipart({
     required final TransactionCategory type,
     required final String transactionId,
-    required final Group group,
     required final SalesItem item,
-  }) async {
-    /// As we all know, there are 3 types of Transactions.
-    /// Virtual, Service and Product
-
-    log(type.name.toString());
-
+  }) {
     /// We start with the default fields like,
     /// 'price', 'quantity', 'pricingImage'
     final multiparts = <MultiPartModel>[];
-
-    if (!item.noImage) {
-      debugPrint(
-          "Added Images in item ${item.name}: ${item.images.toString()}");
-      for (final image in item.images) {
-        var parsedfile = File(image);
-        var stream = ByteStream(parsedfile.openRead());
-        var length = await parsedfile.length();
-        final file = MultipartFile("pricingImage", stream, length,
-            filename: Path.basename(image));
-
-        multiparts.add(MultiPartModel.file(file: file));
-      }
-    }
-
-    final removedImages = ((item.toJson()['removedImages'] ?? []) as List)
-        .map(
-          (e) => e.toString(),
-        )
-        .toList();
-    debugPrint(
-        "Removed Images in item ${item.name}: ${removedImages.toString()}");
-
-    multiparts
-        .add(MultiPartModel.field(field: 'removeImages', value: removedImages));
 
     multiparts.add(MultiPartModel.field(field: "price", value: item.price));
     multiparts
@@ -224,17 +193,48 @@ class TransactionRepo {
       log("Uploading Pricing$e");
     }
 
-    var sellerId = ClientProvider.readOnlyClient!.userId;
-    var buyerId = group.buyerId;
+    return multiparts;
+  }
 
-    /// We have to invert the sellers and buyers if the users
-    /// selected that he's the Client;
-    if (type == TransactionCategory.Service &&
-        (TransactionDataHolder.role ?? ServiceRole.Developer) ==
-            ServiceRole.Client) {
-      final buyerPlaceHolder = buyerId;
-      buyerId = sellerId;
-      sellerId = buyerPlaceHolder;
+  static Future<HttpResponseModel> editPricing({
+    required final TransactionCategory type,
+    required final String transactionId,
+    required final Group group,
+    required final SalesItem item,
+  }) async {
+    /// We have to loop the endpoint and the removeImages one-by-one
+    /// Then after we've looped the last removeImages, we add the pricingImage
+
+    final removedImages = item.removedImages;
+    debugPrint(
+        "Removed Images in item ${item.name}: ${removedImages.toString()}");
+
+    for (final image in removedImages) {
+      final multiparts = editPricingMultipart(
+          type: type, transactionId: transactionId, item: item);
+      multiparts.add(MultiPartModel.field(field: 'removeImages', value: image));
+      final result = await ApiInterface.multipartPatchRequest(
+          url: "edit_pricing/${group.groupId}/${item.id}",
+          multiparts: multiparts);
+      if (result.error) {
+        return result;
+      }
+    }
+
+    final multiparts = editPricingMultipart(
+        type: type, transactionId: transactionId, item: item);
+    if (!item.noImage) {
+      debugPrint(
+          "Added Images in item ${item.name}: ${item.images.toString()}");
+      for (final image in item.images) {
+        var parsedfile = File(image);
+        var stream = ByteStream(parsedfile.openRead());
+        var length = await parsedfile.length();
+        final file = MultipartFile("pricingImage", stream, length,
+            filename: Path.basename(image));
+
+        multiparts.add(MultiPartModel.file(file: file));
+      }
     }
 
     final result = await ApiInterface.multipartPatchRequest(

@@ -193,6 +193,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
 
     if (!response.error) {
       Navigator.pop(context, true);
+      return;
     } else {
       SnackbarManager.showErrorSnackbar(
           context: context, message: "Incorrect otp");

@@ -57,6 +57,7 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
   late Group group;
   late bool showViews;
   late FocusNode focusNode;
+  bool deleting = false;
 
   @override
   void initState() {
@@ -454,8 +455,10 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
   Future<void> deleteMessage() async {
     FocusScope.of(context).requestFocus(focusNode);
 
+    setState(() => deleting = true);
     final result =
         await ChatRepo.deleteChat(chat: chat, groupId: group.groupId);
+    setState(() => deleting = false);
 
     debugPrint(result.body);
 
@@ -507,13 +510,19 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
           ),
           mediumSpacer()
         ],
-        GestureDetector(
-          onTap: deleteMessage,
-          child: Text(
-            "Delete",
-            style: textStyle.copyWith(color: Colors.red),
-          ),
-        )
+        if (DateTime.now().difference(chat.time).inMinutes <= 20)
+          GestureDetector(
+            onTap: deleteMessage,
+            child: deleting
+                ? LottieWidget(
+                    lottieRes: AssetManager.lottieFile(name: "loading"),
+                    color: Colors.red,
+                    size: Size.square(IconSizeManager.regular))
+                : Text(
+                    "Delete",
+                    style: textStyle.copyWith(color: Colors.red),
+                  ),
+          )
       ],
     );
   }

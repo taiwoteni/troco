@@ -73,6 +73,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
   Widget build(BuildContext context) {
     listenToTransactionsChanges();
     transaction = ref.watch(currentTransactionProvider);
+    salesItems = transaction.salesItem;
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: CustomScrollView(
@@ -333,7 +334,7 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
                     fontFamily: 'quicksand');
               },
             ),
-            child: const Text("View Group"))
+            child: const Text("View Order"))
     ];
   }
 

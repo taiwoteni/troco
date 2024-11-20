@@ -609,19 +609,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final hasBuyer = group.members.length >= 3;
     final isSeller = group.creator == ClientProvider.readOnlyClient!.userId;
     if (!hasBuyer) {
+      final go = await askLeaveGroup();
+      if (!go) {
+        return;
+      }
+
       final removeSelf =
           await leaveGroup(userId: ClientProvider.readOnlyClient!.userId);
 
       if (removeSelf) {
         SnackbarManager.showBasicSnackbar(
-            context: context, message: "Group deleted.");
+            context: context, message: "Order deleted.");
         context.pop();
         return;
       }
 
       SnackbarManager.showErrorSnackbar(
           context: context,
-          message: "Couldn't delete group. Try again some other time");
+          message: "Couldn't delete order. Try again some other time");
       return;
     }
 
@@ -664,7 +669,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (response) {
       SnackbarManager.showBasicSnackbar(
           context: context,
-          message: deleteBuyer ? "Removed Buyer from Group" : "Deleted Group");
+          message: deleteBuyer ? "Removed Member from Order" : "Deleted Order");
       if (!deleteBuyer) {
         context.pop();
       }
@@ -673,7 +678,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     SnackbarManager.showErrorSnackbar(
         context: context,
-        message: "Error ${deleteBuyer ? "removing buyer" : "deleting group"}");
+        message: "Error ${deleteBuyer ? "removing buyer" : "deleting order"}");
     return;
   }
 
@@ -734,7 +739,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<bool> askLeaveGroup() async {
     final dialogManager = DialogManager(context: context);
     final response = await dialogManager.showDialogContent<bool?>(
-          title: "Leave Group",
+          title: "Leave Order",
           icon: Container(
             decoration: BoxDecoration(
                 color: Colors.red.shade100, shape: BoxShape.circle),
@@ -750,7 +755,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ),
           description:
-              "Are you sure you want to leave this group?\nThis cannot be undone.",
+              "Are you sure you want to leave this order?\nThis cannot be undone.",
           cancelLabel: "Yes, leave",
           onCancel: () {
             context.pop(result: true);
@@ -763,6 +768,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Future<void> openTransactionPage() async {
     if (group.transactionIsHampered) {
+      if (!isCreator) {
+        SnackbarManager.showBasicSnackbar(
+            context: context,
+            message: "Waiting for creator to add items",
+            mode: ContentType.help);
+      }
       SnackbarManager.showBasicSnackbar(
           context: context,
           mode: ContentType.failure,
@@ -793,8 +804,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       } else {
         SnackbarManager.showBasicSnackbar(
             context: context,
-            message: "Under maintenance for buyers",
-            mode: ContentType.warning);
+            message: "Creator hasn't made a transaction yet",
+            mode: ContentType.help);
       }
     }
   }

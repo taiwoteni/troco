@@ -223,7 +223,7 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
 
         SnackbarManager.showBasicSnackbar(
             context: context,
-            message: "Created group successfully",
+            message: "Created order successfully",
             mode: ContentType.success);
         if (mounted) {
           Navigator.pop(context);
@@ -235,8 +235,8 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
                         result.messageBody?['error'].toString() ??
                         " ")
                     .contains("admin")
-                ? "Unable to find admin for group"
-                : "Unable to create group");
+                ? "Unable to find admin for this order"
+                : "Unable to create order");
         log(result.body);
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       }

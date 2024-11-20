@@ -11,6 +11,8 @@ class WalletTransaction {
   String get transactionName => _json["transactionName"] ?? _json["content"];
   String get transactionId => _json["transactionId"] ?? _json["_id"];
 
+  String get walletId => _json["_id"];
+
   double get transactionAmount =>
       double.parse((_json["transactionAmount"] ?? _json["amount"]).toString());
 
@@ -47,6 +49,13 @@ class WalletTransaction {
 
   DateTime get time {
     return DateTime.parse(_json["date"] ?? DateTime.now().toIso8601String())
+        .toLocal();
+  }
+
+  DateTime get createdTime {
+    return DateTime.parse(_json["createdTime"] ??
+            _json["data"] ??
+            DateTime.now().toIso8601String())
         .toLocal();
   }
 

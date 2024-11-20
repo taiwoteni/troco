@@ -89,7 +89,7 @@ class _WalletTransactionScreenState extends State<WalletTransactionScreen> {
             detail(
                 title: "Transaction Date",
                 value: DateFormat("MMM d, yyyy 'at' hh:mm a")
-                    .format(walletTransaction.time)),
+                    .format(walletTransaction.createdTime)),
             mediumSpacer(),
             divider(),
             largeSpacer(),

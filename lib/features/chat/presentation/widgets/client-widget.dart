@@ -145,7 +145,7 @@ class _ClientWidgetState extends ConsumerState<ClientWidget> {
       ButtonProvider.disable(buttonKey: buttonKey, ref: ref);
 
       SnackbarManager.showBasicSnackbar(
-          context: context, message: "Added ${client.firstName} to group");
+          context: context, message: "Added ${client.firstName} to order");
       context.pop();
     }
   }

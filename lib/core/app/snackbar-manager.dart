@@ -47,9 +47,10 @@ class SnackbarManager {
       //     accentMode ? ColorManager.accentColor : ColorManager.background,
       duration: Duration(seconds: seconds),
     );
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(snackbar);
+    final s = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
+    if (context.mounted) {
+      s.showSnackBar(snackbar);
+    }
   }
 
   static void showErrorSnackbar({
@@ -72,8 +73,9 @@ class SnackbarManager {
       ),
       duration: Duration(seconds: seconds),
     );
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(snackbar);
+    final s = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
+    if (context.mounted) {
+      s.showSnackBar(snackbar);
+    }
   }
 }

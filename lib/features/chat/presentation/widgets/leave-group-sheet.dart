@@ -64,14 +64,14 @@ class _LeaveGroupSheetState extends ConsumerState<LeaveGroupSheet> {
                 onChecked: () => setState(() => removeBuyer = true),
                 label: "Buyer",
                 profile: widget.group.buyer!.profile,
-                description: "Remove Buyer from this Group"),
+                description: "Remove Buyer from this order"),
             mediumSpacer(),
             LeaveGroupItem(
                 selected: !removeBuyer,
                 onChecked: () => setState(() => removeBuyer = false),
                 label: "Yourself",
                 profile: widget.group.seller.profile,
-                description: "Remove yourself while deleting the group."),
+                description: "Remove yourself while deleting the order."),
             extraLargeSpacer(),
             button(),
             extraLargeSpacer()

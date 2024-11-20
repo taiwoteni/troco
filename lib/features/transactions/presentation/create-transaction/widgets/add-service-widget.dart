@@ -48,8 +48,8 @@ class AddServiceSheet extends ConsumerStatefulWidget {
       _AddServiceWidgetState();
 
   static Future<Service?> bottomSheet(
-      {required BuildContext context, Service? service}) async {
-    return await showModalBottomSheet(
+      {required BuildContext context, Service? service}) {
+    return showModalBottomSheet<Service?>(
         isScrollControlled: true,
         enableDrag: true,
         useSafeArea: false,
@@ -190,7 +190,11 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
           height: SizeManager.extralarge * 1.1,
           right: SizeManager.regular,
           child: IconButton(
-              onPressed: () => loading ? null : Navigator.pop(context),
+              onPressed: () {
+                if (loading) {
+                  return;
+                }
+              },
               style: ButtonStyle(
                   shape: const MaterialStatePropertyAll(CircleBorder()),
                   backgroundColor: MaterialStatePropertyAll(

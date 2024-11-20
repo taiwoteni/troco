@@ -69,6 +69,9 @@ class ButtonProvider {
 
   static void startLoading(
       {required final UniqueKey buttonKey, required WidgetRef ref}) {
+    if (!_buttonKeys.contains(buttonKey)) {
+      return;
+    }
     StateProvider<Map<String, bool>> buttonProvider =
         _buttonProviders[_buttonKeys.indexOf(buttonKey)];
     final bool enabled = ref.watch(buttonProvider)["enabled"] as bool;
@@ -80,6 +83,9 @@ class ButtonProvider {
 
   static void stopLoading(
       {required final UniqueKey buttonKey, required WidgetRef ref}) {
+    if (!_buttonKeys.contains(buttonKey)) {
+      return;
+    }
     StateProvider<Map<String, bool>> buttonProvider =
         _buttonProviders[_buttonKeys.indexOf(buttonKey)];
     final bool enabled = ref.watch(buttonProvider)["enabled"] as bool;
