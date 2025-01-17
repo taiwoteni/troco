@@ -1,23 +1,25 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../core/api/data/model/response-model.dart';
 import '../entity/bank.dart';
 
-const bearerToken =
-    "Bearer FLWSECK-89b17dd7e4587c4b72e05c9e69fbcfa1-19035d07801vt-X";
-
 class BankRepository {
+  static final bearerToken = dotenv.env["FLUTTERWAVE_TOKEN"] ?? '';
+  static final flutterWaveApi = dotenv.env["FLUTTERWAVE_API_URL"] ?? '';
+  static final nigerianBanksUrl = dotenv.env['NIGERIAN_BANKS_URL'] ?? '';
+
   static Future<HttpResponseModel> getAllBanks() async {
-    final Uri uri = Uri.parse("https://api.flutterwave.com/v3/banks/NG");
+    final Uri uri = Uri.parse("${flutterWaveApi}/banks/NG");
     try {
       final request = http.Request('GET', uri);
       request.headers['Content-Type'] = 'application/json';
 
       /// Authorization Token needs to be gotten and placed here.
-      request.headers["Authorization"] = bearerToken;
+      request.headers["Authorization"] = "Bearer ${bearerToken}";
       final response = await http.Client().send(request);
 
       final String body = await response.stream.bytesToString();
@@ -37,7 +39,7 @@ class BankRepository {
   }
 
   static Future<HttpResponseModel> getAllBanksWithLogo() async {
-    final Uri uri = Uri.parse("https://nigerianbanks.xyz/");
+    final Uri uri = Uri.parse(nigerianBanksUrl + "/");
     try {
       final request = http.Request('GET', uri);
       request.headers['Content-Type'] = 'application/json';
@@ -63,14 +65,13 @@ class BankRepository {
     required final String accountNo,
     required final Bank bank,
   }) async {
-    final Uri uri =
-        Uri.parse("https://api.flutterwave.com/v3/accounts/resolve");
+    final Uri uri = Uri.parse("${flutterWaveApi}/accounts/resolve");
     try {
       final request = http.Request('POST', uri);
       request.headers['Content-Type'] = 'application/json';
 
       /// Authorization Token needs to be gotten and placed here.
-      request.headers["Authorization"] = bearerToken;
+      request.headers["Authorization"] = "Bearer ${bearerToken}";
       request.body =
           json.encode({"account_number": accountNo, "account_bank": bank.code});
       log(request.body);

@@ -28,7 +28,7 @@ class _UserDetailsTabState extends ConsumerState<FriendsTab> {
       return SliverFillRemaining(
         child: EmptyScreen(
           label:
-              "${ref.watch(userProfileProvider)!.firstName} doesn't have any friends.",
+              "${ref.watch(userProfileProvider)!.firstName} doesn't have any clients.",
         ),
       );
     }
@@ -49,7 +49,7 @@ class _UserDetailsTabState extends ConsumerState<FriendsTab> {
 
   Widget title() {
     return Text(
-      "Friends",
+      "Clients",
       style: TextStyle(
           fontSize: FontSizeManager.large * 1.05,
           fontWeight: FontWeightManager.extrabold,

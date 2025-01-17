@@ -141,7 +141,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentMethod> {
       ref.watch(paymentMethodProvider.notifier).state = paymentMethods;
       // setState(() {});
     }
-
+    debugPrint(paymentMethod!.toJson().toString());
     Navigator.pop(context, paymentMethod);
   }
 

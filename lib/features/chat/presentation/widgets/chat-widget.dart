@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -121,8 +122,20 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
                                 horizontal: SizeManager.large * 1.2),
                             child: bubbleWidget(),
                           )
-                        : bubbleWidget())
-                    : bubbleWidget(),
+                        : GestureDetector(
+                            onLongPress: () {
+                              if (chat.hasMessage) {
+                                FlutterClipboard.copy(chat.message!);
+                              }
+                            },
+                            child: bubbleWidget()))
+                    : GestureDetector(
+                        onLongPress: () {
+                          if (chat.hasMessage) {
+                            FlutterClipboard.copy(chat.message!);
+                          }
+                        },
+                        child: bubbleWidget()),
               ),
               profileIcon(isSender: isSender),
               loadingWidget(),
@@ -453,12 +466,18 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
   }
 
   Future<void> deleteMessage() async {
+    setState(() {
+      deleting = true;
+      chat.setLoading(true);
+    });
     FocusScope.of(context).requestFocus(focusNode);
 
-    setState(() => deleting = true);
     final result =
         await ChatRepo.deleteChat(chat: chat, groupId: group.groupId);
-    setState(() => deleting = false);
+    setState(() {
+      deleting = false;
+      chat.setLoading(false);
+    });
 
     debugPrint(result.body);
 
@@ -500,7 +519,8 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (chat.hasMessage) ...[
+        if (chat.hasMessage &&
+            DateTime.now().difference(chat.time).inMinutes <= 20) ...[
           GestureDetector(
             onTap: editMessage,
             child: Text(
@@ -510,9 +530,19 @@ class _ChatWidgetState extends ConsumerState<ChatWidget> {
           ),
           mediumSpacer()
         ],
+        if (chat.hasMessage) ...[
+          GestureDetector(
+            onTap: () => FlutterClipboard.copy(chat.message!),
+            child: Text(
+              "Copy",
+              style: textStyle.copyWith(color: ColorManager.accentColor),
+            ),
+          ),
+          mediumSpacer(),
+        ],
         if (DateTime.now().difference(chat.time).inMinutes <= 20)
           GestureDetector(
-            onTap: deleteMessage,
+            onTap: deleting ? null : deleteMessage,
             child: deleting
                 ? LottieWidget(
                     lottieRes: AssetManager.lottieFile(name: "loading"),

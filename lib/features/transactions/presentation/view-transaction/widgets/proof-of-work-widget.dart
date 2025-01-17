@@ -2,6 +2,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/core/extensions/string-extension.dart';
@@ -9,6 +10,7 @@ import 'package:troco/features/transactions/domain/entities/service.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 
 import '../../../../../core/app/color-manager.dart';
+import '../../../../../core/app/download-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/others/spacer.dart';
@@ -37,11 +39,11 @@ class _ProofOfWorkWidgetState extends State<ProofOfWorkWidget> {
     return InkWell(
       borderRadius: BorderRadius.circular(SizeManager.regular),
       splashColor: ColorManager.accentColor.withOpacity(0.1),
-      onTap: () {
+      onTap: () async {
         final link = isVirtual
             ? (item as VirtualService).proofOfTask
             : (item as Service).proofOfTask;
-        FlutterClipboard.copy(link);
+
         context.pushNamed(routeName: Routes.cardPaymentScreen, arguments: link);
       },
       child: Container(

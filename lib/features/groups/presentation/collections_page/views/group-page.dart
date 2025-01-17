@@ -151,7 +151,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
                   text: "Orders",
                 ),
                 Tab(
-                  text: "Friends",
+                  text: "Clients",
                 )
               ],
               onTap: (value) {
@@ -206,7 +206,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
         SnackbarManager.showBasicSnackbar(
             context: context,
             mode: ContentType.failure,
-            message: "Max groups for Personal Account is 20.");
+            message: "Max orders for Personal Account is 20.");
       }
       return;
     }

@@ -80,7 +80,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               text: "Details",
             ),
             Tab(
-              text: "Friends",
+              text: "Clients",
             ),
             Tab(
               text: "Orders",

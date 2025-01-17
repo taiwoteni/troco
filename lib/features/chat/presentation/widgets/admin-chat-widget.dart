@@ -107,7 +107,7 @@ class _ChatWidgetState extends ConsumerState<AdminChatWidget> {
                     fontWeight: FontWeightManager.semibold),
               ),
               Text(
-                "Group Admin",
+                "Order Admin",
                 style: TextStyle(
                     color: ColorManager.secondary,
                     fontFamily: 'lato',

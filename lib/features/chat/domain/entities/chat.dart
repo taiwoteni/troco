@@ -27,6 +27,7 @@ class Chat extends Equatable {
 
   String get senderId => _json["sender id"] ?? _json["sender"];
   String get chatId => _json["id"] ?? _json["chatId"] ?? _json["_id"];
+
   String get profile => _json["profile"] ?? "null";
   bool get read =>
       readReceipts.contains(ClientProvider.readOnlyClient!.userId) ||
@@ -43,6 +44,10 @@ class Chat extends Equatable {
       .toList();
   bool get loading => _json["loading"] ?? false;
   Map<dynamic, dynamic> toJson() => _json;
+
+  void setLoading(bool value) {
+    _json["loading"] = value;
+  }
 
   @override
   List<Object?> get props => [chatId];

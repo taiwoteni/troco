@@ -70,7 +70,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     // This way, wether a user has internet connection or not, we would be able to tell wether
     // ...he is online or not.
     userRefreshTimer = Timer.periodic(
-      const Duration(seconds: 30),
+      const Duration(seconds: 10),
       (timer) async {
         // We get the user to try to  know if the user is logged in
         // or not.
@@ -93,7 +93,7 @@ class _MyAppState extends ConsumerState<MyApp> {
           }
           AppStorage.saveClient(client: updatedClient);
 
-          if (userJson["kycTier"] < userJson["kyccurrentTier"]) {
+          if (userJson["kycTier"] != userJson["kyccurrentTier"]) {
             //To save kyc status, if currently verifying or not.
             AppStorage.savekycVerificationStatus(
                 tier: KycConverter.convertToEnum(

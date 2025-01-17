@@ -197,22 +197,37 @@ class _CustomerCareProfileIconState
     return SizedBox(
         width: widget.size ?? IconSizeManager.medium,
         height: widget.size ?? IconSizeManager.medium,
-        child: Container(
-          width: double.maxFinite,
-          height: double.maxFinite,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color.fromARGB(255, 223, 218, 218)),
-          child: SvgIcon(
-            svgRes: AssetManager.svgFile(name: 'customer-service'),
-            color: Colors.white,
-            size: Size.square(widget.size != null
-                ? widget.size! >= 50
-                    ? widget.size! * 0.42
-                    : widget.size! * 0.5
-                : (IconSizeManager.medium) * 0.65),
-          ),
+        child: Stack(
+          children: [
+            Container(
+              width: double.maxFinite,
+              height: double.maxFinite,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color.fromARGB(255, 223, 218, 218)),
+              child: SvgIcon(
+                svgRes: AssetManager.svgFile(name: 'customer-service'),
+                color: Colors.white,
+                size: Size.square(widget.size != null
+                    ? widget.size! >= 50
+                        ? widget.size! * 0.42
+                        : widget.size! * 0.5
+                    : (IconSizeManager.medium) * 0.65),
+              ),
+            ),
+            Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: ColorManager.accentColor,
+                      border: Border.all(color: Colors.white, width: 2)),
+                ))
+          ],
         ));
   }
 }

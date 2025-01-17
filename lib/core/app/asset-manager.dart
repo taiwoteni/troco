@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:troco/core/app/legal-file-extractor.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/about%20us/presentation/widgets/fade-slide-in-widget.dart';
@@ -40,7 +41,7 @@ class AssetManager {
 
   static Future<List<Widget>> getLegalDisplay(
       {required String type, required final BuildContext context}) async {
-    final path = 'assets/legal/$type.txt';
+    final path = 'assets/legal/$type.troco-legal';
 
     final readFile = await rootBundle.loadString(path);
 
@@ -152,11 +153,13 @@ class AssetManager {
   }
 
   static Widget _content({required final String text}) {
-    return Text(text,
-        style: TextStyle(
-            color: ColorManager.primary,
-            fontFamily: 'lato',
-            fontSize: FontSizeManager.regular,
-            fontWeight: FontWeightManager.regular));
+    final style = TextStyle(
+        color: ColorManager.primary,
+        fontFamily: 'lato',
+        fontSize: FontSizeManager.regular,
+        fontWeight: FontWeightManager.regular);
+    final decodedWidget =
+        LegalFileExtractor.decodeString(source: text, style: style);
+    return RichText(text: decodedWidget);
   }
 }

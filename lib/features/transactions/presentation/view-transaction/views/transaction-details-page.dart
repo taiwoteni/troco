@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:troco/core/app/download-manager.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
@@ -68,6 +69,8 @@ class _TransactionsDetailPageState
     extends ConsumerState<TransactionsDetailPage> {
   late Transaction transaction;
   late Group group;
+  late DownloadManager downloadManager;
+
   String text = "Approve Transaction";
   final screenshot = ScreenshotController();
 
@@ -96,6 +99,12 @@ class _TransactionsDetailPageState
     }
 
     super.initState();
+    // Initialize the download manager once the page's context is fully initialized.
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        downloadManager = DownloadManager(context: context);
+      },
+    );
   }
 
   @override
@@ -995,10 +1004,16 @@ class _TransactionsDetailPageState
         )
             .map(
           (task) {
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: SizeManager.regular),
-              child: ProofOfWorkWidget(salesItem: task),
+            return GestureDetector(
+              onTap: () {
+                DownloadManager(context: context)
+                    .downloadFile(task.proofOfTask, task.name);
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: SizeManager.regular),
+                child: ProofOfWorkWidget(salesItem: task),
+              ),
             );
           },
         ).toList(),
@@ -1026,10 +1041,19 @@ class _TransactionsDetailPageState
             .expand((documents) => documents)
             .map(
           (document) {
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: SizeManager.regular),
-              child: ProofOfWorkVirtualWidget(document: document),
+            return GestureDetector(
+              onTap: () {
+                SnackbarManager.showBasicSnackbar(
+                    context: context, message: "Downloading document");
+
+                downloadManager.downloadFile(
+                    document.source, document.taskName);
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: SizeManager.regular),
+                child: ProofOfWorkVirtualWidget(document: document),
+              ),
             );
           },
         ).toList(),

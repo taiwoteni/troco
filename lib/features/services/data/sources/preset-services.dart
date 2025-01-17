@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
@@ -41,19 +42,24 @@ List<SettingsModel> presetServices({required BuildContext context}) {
                 ? Routes.kycVerificationRoute
                 : Routes.kycVerificationIntroRoute),
         iconType: IconType.svg),
-
     SettingsModel(
-        label: "Terms and Conditions",
-        icon: AssetManager.svgFile(name: "policy"),
+        label: "Customer Care",
+        icon: AssetManager.svgFile(name: "customer-service"),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        onTap: () => Navigator.pushNamed(context, Routes.customerCareRoute),
         iconType: IconType.svg),
     SettingsModel(
-        label: "Privacy Policy",
-        icon: AssetManager.svgFile(name: "policy"),
-        onTap: () => Navigator.pushNamed(context, Routes.privacyPolicyRoute),
+        label: "Contact Us",
+        icon: AssetManager.svgFile(name: "audio-call"),
         settingsType: SettingsType.financial,
+        onTap: () => Navigator.pushNamed(context, Routes.contactUsRoute),
         iconType: IconType.svg),
+    SettingsModel(
+        label: "How To Use Troco",
+        icon: Icons.help,
+        settingsType: SettingsType.financial,
+        onTap: () => Navigator.pushNamed(context, Routes.howToUseTrocoRoute),
+        iconType: IconType.icon),
     SettingsModel(
         label: "Disclaimer",
         icon: AssetManager.svgFile(name: "disclaimer"),
@@ -68,19 +74,20 @@ List<SettingsModel> presetServices({required BuildContext context}) {
         settingsType: SettingsType.financial,
         iconType: IconType.svg),
     SettingsModel(
-        label: "Customer Care",
-        icon: AssetManager.svgFile(name: "customer-service"),
+        label: "Terms and Conditions",
+        icon: AssetManager.svgFile(name: "policy"),
         settingsType: SettingsType.financial,
-        onTap: () => Navigator.pushNamed(context, Routes.customerCareRoute),
+        onTap: () =>
+            Navigator.pushNamed(context, Routes.termsAndConditionsRoute),
         iconType: IconType.svg),
     SettingsModel(
-        label: "Contact Us",
-        icon: AssetManager.svgFile(name: "audio-call"),
+        label: "Privacy Policy",
+        icon: AssetManager.svgFile(name: "policy"),
+        onTap: () => Navigator.pushNamed(context, Routes.privacyPolicyRoute),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.customerCareRoute),
         iconType: IconType.svg),
     SettingsModel(
-        label: "About  Us",
+        label: "About Us",
         icon: AssetManager.svgFile(name: "about"),
         settingsType: SettingsType.financial,
         onTap: () => Navigator.pushNamed(context, Routes.aboutUsRoute),

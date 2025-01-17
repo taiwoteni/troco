@@ -255,7 +255,7 @@ class _PrivacyPolicyScreenState extends ConsumerState<PrivacyPolicyScreen> {
                   mustBeVisible: true,
                   child: content(
                       text:
-                          "To exercise your right to privacy regarding the personal information we have on file about you, or to inquire or complain about how we handle it, please get in touch with our Privacy customer care  using the details below:\n\nemail. privacycustomercare@troco.ng\nOffice : 33 Gra, College Road C\nLagos\nNigeria.\nWhile we make every effort to address complaints promptly and amicably, if you would want to move further with a formal privacy complaint, please submit your grievance in writing to our Privacy Officer using the above postal or email address. Your formal complaint will be acknowledged within a day.")),
+                          "To exercise your right to privacy regarding the personal information we have on file about you, or to inquire or complain about how we handle it, please get in touch with our Privacy customer care  using the details below:\n\nemail. privacycustomercare@troco.ng\nOffice : Ibusa junction by Nebisi road, asaba, Delta.\n\nWhile we make every effort to address complaints promptly and amicably, if you would want to move further with a formal privacy complaint, please submit your grievance in writing to our Privacy Officer using the above postal or email address. Your formal complaint will be acknowledged within a day.")),
             ],
           ),
         ),

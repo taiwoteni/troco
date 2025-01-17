@@ -194,10 +194,32 @@ class _TrocoDetailsSheetState extends ConsumerState<TrocoDetailsSheet> {
 
   Widget methodsList() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
-      child: SelectPaymentProfileWidget(
-          selected: false, onChecked: () => null, method: trocoAccountDetails),
-    );
+        padding: const EdgeInsets.symmetric(vertical: SizeManager.regular),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SelectPaymentProfileWidget(
+                selected: false,
+                onChecked: () => null,
+                method: trocoAccountDetails.first),
+            regularSpacer(),
+            regularSpacer(),
+            Text(
+              "OR",
+              style: TextStyle(
+                  color: ColorManager.secondary,
+                  fontSize: FontSizeManager.regular * .9,
+                  fontWeight: FontWeightManager.regular,
+                  fontFamily: 'lato'),
+            ),
+            regularSpacer(),
+            regularSpacer(),
+            SelectPaymentProfileWidget(
+                selected: false,
+                onChecked: () => null,
+                method: trocoAccountDetails.last),
+          ],
+        ));
   }
 
   Widget button() {

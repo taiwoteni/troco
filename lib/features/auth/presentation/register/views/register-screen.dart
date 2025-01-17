@@ -436,14 +436,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             TextSpan(
                 text: "Terms of using the Troco Platform",
                 style: highlightStyle,
-                recognizer: TapGestureRecognizer()..onTap = () {}),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () => context.pushNamed(
+                      routeName: Routes.termsAndConditionsRoute)),
             const TextSpan(text: " and its "),
             TextSpan(
                 text: "Privacy Policy",
                 recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    context.pushNamed(routeName: Routes.privacyPolicyRoute);
-                  },
+                  ..onTap = () =>
+                      context.pushNamed(routeName: Routes.privacyPolicyRoute),
                 style: highlightStyle),
             const TextSpan(text: ".")
           ])),

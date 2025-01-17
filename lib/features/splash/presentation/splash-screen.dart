@@ -48,7 +48,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         showLoading = true;
       });
 
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 1));
       final isLoggedIn = ClientProvider.readOnlyClient != null;
       Navigator.pushReplacementNamed(
           context,

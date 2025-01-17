@@ -8,6 +8,7 @@ import 'package:troco/features/auth/presentation/welcome-back/views/welcome-back
 import 'package:troco/features/block/presentation/screen/blocked-users-screen.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/chat/presentation/views/view-attachment-screen.dart';
+import 'package:troco/features/contact-us/presentation/views/contact-us.dart';
 import 'package:troco/features/customer%20care/presentation/views/customer-care-chat-screen.dart';
 import 'package:troco/features/disclaimer/presentation/views/disclaimer.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
@@ -16,6 +17,7 @@ import 'package:troco/features/auth/presentation/login/views/forget-password.dar
 import 'package:troco/features/groups/presentation/group_tab/views/contacts-screen.dart';
 import 'package:troco/features/home/presentation/views/home-screen.dart';
 import 'package:troco/features/home/presentation/widgets/blocked-screen.dart';
+import 'package:troco/features/how-to-use-troco/presentation/views/how-to-use-troco.dart';
 import 'package:troco/features/notifications/presentation/views/notification-screen.dart';
 import 'package:troco/features/onboarding/presentation/views/onboarding-sceen.dart';
 import 'package:troco/features/auth/presentation/otp/views/otp-screen.dart';
@@ -36,6 +38,7 @@ import 'package:troco/features/settings/presentation/pin/views/change-pin-screen
 import 'package:troco/features/settings/presentation/pin/views/forget-pin.dart';
 import 'package:troco/features/settings/presentation/two-factor-authentication/views/two-factor-authentication-screen.dart';
 import 'package:troco/features/splash/presentation/splash-screen.dart';
+import 'package:troco/features/terms-and-conditions/presentation/views/terms-and-conditions.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/views/transaction-success-screen.dart';
 import 'package:troco/features/transactions/presentation/my-transactions/views/my-transaction-screen.dart';
@@ -124,6 +127,10 @@ class Routes {
   static const blockedUsersRoute = "/blocked-users";
 
   static const privacyPolicyRoute = '/privacy-policy';
+  static const termsAndConditionsRoute = '/terms-and-conditions';
+  static const howToUseTrocoRoute = '/how-to-use-troco';
+  static const contactUsRoute = '/contact-us';
+
   static const disclaimerRoute = '/disclaimer';
   static const protectionAndSafetyRoute = '/protection-and-safety';
 }
@@ -380,6 +387,21 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) => const ProtectionAndSafety(),
+        );
+      case Routes.termsAndConditionsRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const TermsAndConditions(),
+        );
+      case Routes.contactUsRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const ContactUsScreen(),
+        );
+      case Routes.howToUseTrocoRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) => const HowToUseTroco(),
         );
       case Routes.walletTransactionRoute:
         final walletTransaction = routeSettings.arguments as WalletTransaction;

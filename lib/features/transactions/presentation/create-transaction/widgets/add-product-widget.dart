@@ -359,7 +359,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
             return null;
           },
           onSaved: (value) {
-            setState(() => price = value?.toString() ?? "");
+            setState(() => price = value?.toString().replaceAll(",", "") ?? "");
           },
           prefixIcon: null,
         ),
@@ -516,13 +516,14 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
             (charge) => charge.category == TransactionCategory.Product,
             orElse: () => defaultCharge,
           );
+
           final escrowCharge = (int.parse(price) * (productCharge.percentage));
 
           final productImages =
               List.from(ref.read(pricingsImagesProvider)).copy().toListString();
           Map<dynamic, dynamic> productJson = {
             "productId": isEditing
-                ? widget.product!.id
+                ? widget.product?.id
                 : (ref.read(pricingsProvider).length + 1).toString(),
             "productName": name,
             "productPrice": double.parse(price),

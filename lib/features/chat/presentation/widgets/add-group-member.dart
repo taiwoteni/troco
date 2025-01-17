@@ -93,7 +93,7 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget> {
                 expanded: true,
                 lottie: AssetManager.lottieFile(name: "plane-cloud"),
                 label: allClients.isEmpty
-                    ? "You don't have any friends"
+                    ? "You don't have any clients"
                     : "No search results for '${textController.text.toString().trim()}'",
               )
             : ListView.separated(
@@ -126,7 +126,7 @@ class _AddGroupMemberWidgetState extends ConsumerState<AddGroupMemberWidget> {
                   color: ColorManager.secondary,
                   alignment: Alignment.center,
                   text:
-                      "You can only add members from your friend list to an order."))
+                      "You can only add members from your client list to an order."))
       ],
     );
     return queriedClients.isEmpty

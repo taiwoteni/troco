@@ -169,6 +169,7 @@ class _UploadTaskSheetState extends ConsumerState<UploadTaskSheet> {
           context: context,
           message: "Error Sending Work",
           mode: ContentType.failure);
+      await Future.delayed(Duration(seconds: 1));
       context.pop(result: false);
       return;
     }

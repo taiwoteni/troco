@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
@@ -62,22 +63,34 @@ class CustomerCareRepository {
     final result = await ApiInterface.getRequest(
         url: "getcustomercaremessages/$sessionId");
 
+    debugPrint(result.body);
+
     if (result.error) {
+      if ((result.messageBody?["message"].toString() ?? "")
+          .toLowerCase()
+          .contains("found")) {
+        return [];
+      }
+
+      if (!(result.messageBody?["chatSession"]["active"] ?? false)) {
+        return [];
+      }
       return AppStorage.getCustomerCareChats().map((e) => e.toJson()).toList();
     }
 
-    final sortedList = (result.messageBody!["chatSession"]["messages"] as List)
-        .map(
-          (e) => {
-            "_id": e["_id"],
-            "content": e["content"],
-            "sender": e["sender"] == null
-                ? result.messageBody!["chatSession"]["customerCare"]
-                : e["sender"]["_id"],
-            "timestamp": e["timestamp"]
-          },
-        )
-        .toList();
+    final sortedList =
+        ((result.messageBody?["chatSession"]["messages"] ?? []) as List)
+            .map(
+              (e) => {
+                "_id": e["_id"],
+                "content": e["content"],
+                "sender": e["sender"] == null
+                    ? result.messageBody!["chatSession"]["customerCare"]
+                    : e["sender"]["_id"],
+                "timestamp": e["timestamp"]
+              },
+            )
+            .toList();
 
     return sortedList;
   }

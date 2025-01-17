@@ -589,7 +589,7 @@ class _CustomerCareChatScreenState
     /// We send the Chat through the API.
     final response = await CustomerCareRepository.sendChat(
         content: chatMessage, sessionId: sessionId);
-    log(response.body);
+    debugPrint("Error Sending Chat: " + response.body);
 
     // if (!response.error) {
     //   // To show stopped-loading animation if sent

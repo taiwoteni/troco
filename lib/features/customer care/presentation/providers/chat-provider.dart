@@ -16,15 +16,13 @@ final customerCareRepoProvider = StateProvider<CustomerCareRepository>(
 
 /// The Future provider that helps us to perform
 /// The Future task of getting Chats.
-final chatsListProvider =
-    FutureProvider<List<dynamic>>((ref) async {
+final chatsListProvider = FutureProvider<List<dynamic>>((ref) async {
   final chatsRepo = ref.watch(customerCareRepoProvider);
-  final chats = await chatsRepo.getCustomerCareMessages(sessionId: AppStorage.getCustomerCareSessionId() ?? "??????");
+  final chats = await chatsRepo.getCustomerCareMessages(
+      sessionId: AppStorage.getCustomerCareSessionId() ?? "??????");
   // log("Loaded data from Chats Repo");
   return chats;
 });
-
-
 
 /// The StreamProvider that constantly sends updates
 /// Of the Chats States only when there is a change
@@ -35,14 +33,14 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>(
         StreamController<List<Chat>>();
 
     final periodic =
-        Timer.periodic(const Duration(milliseconds: 2025), (timer) {
+        Timer.periodic(const Duration(milliseconds: 2000), (timer) {
       ref.watch(chatsListProvider).whenData((chatsJson) {
-        final _chatsList = AppStorage.getCustomerCareChats()
-            .map((e) => e.toJson())
-            .toList();
+        final _chatsList =
+            AppStorage.getCustomerCareChats().map((e) => e.toJson()).toList();
 
         final bool chatsAreDifferent =
-            json.encode(_chatsList) != json.encode(chatsJson)  || _chatsList.length != chatsJson.length;
+            json.encode(_chatsList) != json.encode(chatsJson) ||
+                _chatsList.length != chatsJson.length;
         List chatsListJson = chatsJson;
         List<Chat> chatsList =
             chatsListJson.map((e) => Chat.fromJson(json: e)).toList();
@@ -63,7 +61,8 @@ final chatsStreamProvider = StreamProvider.autoDispose<List<Chat>>(
 
           streamController.sink.add(chatsList);
         }
-        ref.read(customerCareRepoProvider.notifier).state = CustomerCareRepository();
+        ref.read(customerCareRepoProvider.notifier).state =
+            CustomerCareRepository();
         // log("==================");
       });
     });

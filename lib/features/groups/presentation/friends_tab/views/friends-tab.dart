@@ -59,7 +59,7 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
                       ? "add-friends"
                       : "no-search-results"),
               label: ref.watch(collectionsSearchProvider).isEmpty
-                  ? "Invite a friend to Troco"
+                  ? "Invite a client to Troco"
                   : "No Search result for '${ref.watch(collectionsSearchProvider)}'",
             ),
           )
@@ -81,7 +81,7 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
                             alignment: Alignment.center,
                             fontSize: FontSizeManager.regular * 0.85,
                             text:
-                                "Your Friends are your contacts who are Troco users.")),
+                                "Your Clients are your added contacts who are Troco users.")),
                     const Gap(SizeManager.bottomBarHeight)
                   ],
                 ],

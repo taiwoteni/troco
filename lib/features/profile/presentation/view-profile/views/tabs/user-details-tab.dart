@@ -49,7 +49,8 @@ class _UserDetailsTabState extends ConsumerState<UserDetailsTab> {
     final client = ref.watch(userProfileProvider)!;
     final isSelf = client == ClientProvider.readOnlyClient!;
 
-    blocked = ref.watch(userProfileProvider)!.blockedByUser;
+    blocked = ref.watch(clientProvider)?.blockedUsers.contains(client.userId) ??
+        false;
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.large),
       sliver: SliverList.list(
@@ -139,7 +140,9 @@ class _UserDetailsTabState extends ConsumerState<UserDetailsTab> {
                 ),
                 label: loading
                     ? (blocked ? 'Unblocking...' : 'Blocking...')
-                    : "Block ${client.firstName}"),
+                    : blocked
+                        ? "Unblock ${client.firstName}"
+                        : "Block ${client.firstName}"),
           ],
 
           extraLargeSpacer(),
@@ -263,9 +266,9 @@ class _UserDetailsTabState extends ConsumerState<UserDetailsTab> {
     clientJson["blockedUsers"] = blockedIds;
     await AppStorage.saveClient(client: Client.fromJson(json: clientJson));
 
-    if (!block) {
-      context.pop();
-    }
+    // if (!block) {
+    //   context.pop();
+    // }
 
     setState(() {
       loading = false;

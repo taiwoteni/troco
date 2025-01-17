@@ -1,12 +1,13 @@
 // ignore_for_file: unnecessary_string_interpolations
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:troco/core/api/data/model/multi-part-model.dart';
 import 'package:troco/core/api/data/model/response-model.dart';
 
 class ApiInterface {
-  static const _serverUrl = "https://trocco-app-be-mpac.onrender.com/api/v1";
+  static final _serverUrl = dotenv.env['TROCO_API_URL'] ?? '';
 
   static Future<HttpResponseModel> getRequest(
       {required final String url,

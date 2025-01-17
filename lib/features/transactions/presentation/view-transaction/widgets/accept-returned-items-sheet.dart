@@ -42,11 +42,18 @@ class _SelectPaymentMethodSheetState extends ConsumerState<AcceptItemsSheet> {
   List<SalesItem> items = [];
   final buttonKey = UniqueKey();
 
+  late bool isService;
+  late bool isProduct;
+
   @override
   void initState() {
     items = widget.transaction.hasReturnTransaction
         ? widget.transaction.returnItems
         : widget.transaction.salesItem;
+    isProduct =
+        widget.transaction.transactionCategory == TransactionCategory.Product;
+    isService =
+        widget.transaction.trocoPaysSeller == TransactionCategory.Service;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
       (timeStamp) {
@@ -116,7 +123,11 @@ class _SelectPaymentMethodSheetState extends ConsumerState<AcceptItemsSheet> {
           child: Text(
             widget.transaction.hasReturnTransaction
                 ? "Accept Returned Items"
-                : "Satisfied With Products",
+                : isProduct
+                    ? "Accept The Products"
+                    : (isService
+                        ? "Accept The Software"
+                        : "Accept The Document"),
             style: TextStyle(
                 color: ColorManager.primary,
                 fontWeight: FontWeightManager.bold,
@@ -195,7 +206,7 @@ class _SelectPaymentMethodSheetState extends ConsumerState<AcceptItemsSheet> {
           ),
         ),
         Text(
-          "I ${isReturn ? "accept" : "am satisfied with"} the ${isReturn ? "returned items" : "products"} above.",
+          "I ${isReturn ? "accept" : "have received"} the ${isReturn ? "returned items" : isProduct ? "merchandise" : isService ? "software" : "document"} above.",
           style: TextStyle(
               fontFamily: 'lato',
               wordSpacing: 2.5,
