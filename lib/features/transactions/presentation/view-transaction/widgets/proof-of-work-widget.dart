@@ -39,13 +39,6 @@ class _ProofOfWorkWidgetState extends State<ProofOfWorkWidget> {
     return InkWell(
       borderRadius: BorderRadius.circular(SizeManager.regular),
       splashColor: ColorManager.accentColor.withOpacity(0.1),
-      onTap: () async {
-        final link = isVirtual
-            ? (item as VirtualService).proofOfTask
-            : (item as Service).proofOfTask;
-
-        context.pushNamed(routeName: Routes.cardPaymentScreen, arguments: link);
-      },
       child: Container(
         width: double.maxFinite,
         height: 80,

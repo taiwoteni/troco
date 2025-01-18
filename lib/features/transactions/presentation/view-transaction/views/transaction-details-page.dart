@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:path_provider/path_provider.dart';
@@ -1006,8 +1007,21 @@ class _TransactionsDetailPageState
           (task) {
             return GestureDetector(
               onTap: () {
-                DownloadManager(context: context)
-                    .downloadFile(task.proofOfTask, task.name);
+                // debugPrint(task.proofOfTask);
+                // FlutterClipboard.copy(task.proofOfTask);
+                // return;
+                final extension = task.proofOfTask
+                    .substring(task.proofOfTask.lastIndexOf("."));
+                final fileName =
+                    "${task.name.replaceAll(" ", "_")}${extension}";
+                debugPrint(fileName);
+                SnackbarManager.showBasicSnackbar(
+                    context: context,
+                    mode: ContentType.help,
+                    message: "Downloading document....");
+
+                downloadManager.downloadFile(task.proofOfTask, fileName,
+                    "${transaction.transactionName.toLowerCase().replaceAll(" ", "_")}");
               },
               child: Padding(
                 padding:
@@ -1043,11 +1057,15 @@ class _TransactionsDetailPageState
           (document) {
             return GestureDetector(
               onTap: () {
+                final extension =
+                    document.source.substring(document.source.lastIndexOf("."));
                 SnackbarManager.showBasicSnackbar(
                     context: context, message: "Downloading document");
 
                 downloadManager.downloadFile(
-                    document.source, document.taskName);
+                    document.source.replaceAll(" ", "_"),
+                    "${document.taskName}${extension}",
+                    "${transaction.transactionName.toLowerCase().replaceAll(" ", "_")}");
               },
               child: Padding(
                 padding:

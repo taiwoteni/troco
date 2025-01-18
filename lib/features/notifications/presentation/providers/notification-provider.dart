@@ -10,7 +10,6 @@ import 'package:troco/features/notifications/domain/repository/notification-repo
 
 import '../../domain/entities/notification.dart';
 
-
 /// This is a state Provider, responsible for returning and refreshing
 /// the Notification Repo class. Inorder reload to be on the safer side when looking for changes.
 final notificationRepoProvider =
@@ -34,10 +33,9 @@ final notificationsStreamProvider = StreamProvider<List<Notification>>(
   (ref) {
     final streamController = StreamController<List<Notification>>();
 
-    final periodic = Timer.periodic(const Duration(seconds: 3), (_) {
+    final periodic = Timer.periodic(const Duration(seconds: 2), (_) {
       ref.watch(notificationFutureProvider).when(
           data: (notificationsJson) {
-
             /// First of all we have to compare and contrast between the
             /// values gotten from the APIs and saved on the Device Cache.
             ///
@@ -52,16 +50,15 @@ final notificationsStreamProvider = StreamProvider<List<Notification>>(
 
             /// Then We contrast.
             final bool notificationsDifferent =
-                json.encode(_notificationsList) != json.encode(notificationsJson);
+                json.encode(_notificationsList) !=
+                    json.encode(notificationsJson);
 
             final valuesAreDifferent = notificationsDifferent;
 
-            
             if (valuesAreDifferent) {
               List<Notification> notificationsList = notificationsJson
-                .map((e) => Notification.fromJson(json: e))
-                .toList();
-
+                  .map((e) => Notification.fromJson(json: e))
+                  .toList();
 
               AppStorage.saveNotifications(notifications: notificationsList);
               streamController.sink.add(notificationsList);

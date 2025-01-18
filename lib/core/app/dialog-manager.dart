@@ -18,31 +18,49 @@ class DialogManager {
       required final String description,
       String? okLabel,
       String? cancelLabel,
+      bool? okLoading,
+      bool? cancelLoading,
       void Function()? onOk,
       void Function()? onCancel}) async {
     return showDialog<T>(
       context: context,
       builder: (context) {
-        return _dialogView(
+        return DialogView(
             title: title,
             description: description,
             icon: icon,
             onOk: onOk,
+            okLoading: okLoading,
+            cancelLoading: cancelLoading,
             onCancel: onCancel,
             okLabel: okLabel,
             cancelLabel: cancelLabel);
       },
     );
   }
+}
 
-  Dialog _dialogView(
-      {Widget? icon,
-      required final String title,
-      required final String description,
-      String? okLabel,
-      String? cancelLabel,
-      void Function()? onOk,
-      onCancel}) {
+class DialogView extends StatelessWidget {
+  final Widget? icon;
+  final String title, description;
+  final String? okLabel, cancelLabel;
+  final bool? okLoading, cancelLoading;
+  final void Function()? onOk, onCancel;
+
+  const DialogView(
+      {super.key,
+      this.icon,
+      required this.title,
+      required this.description,
+      this.okLabel,
+      this.cancelLabel,
+      this.onOk,
+      this.okLoading,
+      this.cancelLoading,
+      this.onCancel});
+
+  @override
+  Widget build(BuildContext context) {
     return Dialog(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -102,14 +120,16 @@ class DialogManager {
                                 ? const EdgeInsets.only(
                                     right: SizeManager.regular)
                                 : null,
-                            label: cancelLabel,
+                            loading: cancelLoading,
+                            label: cancelLabel!,
                             color: Colors.red.shade600,
                             onPressed: onCancel,
                           )),
                         if (okLabel != null)
                           Expanded(
                               child: CustomButton.small(
-                            label: okLabel,
+                            label: okLabel!,
+                            loading: okLoading,
                             color: ColorManager.accentColor,
                             onPressed: onOk,
                           )),

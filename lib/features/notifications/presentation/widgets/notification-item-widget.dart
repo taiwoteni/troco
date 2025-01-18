@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/dialog-manager.dart';
+import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
+import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-item-dialog.dart';
 import 'package:troco/features/notifications/utils/enums.dart';
 
@@ -24,6 +26,7 @@ class NotificationItemWidget extends ConsumerStatefulWidget {
 
 class _NotificationItemWidgetState
     extends ConsumerState<NotificationItemWidget> {
+  bool loading = false;
   @override
   Widget build(BuildContext context) {
     var color = ColorManager.accentColor;
@@ -45,6 +48,15 @@ class _NotificationItemWidgetState
           fontFamily: 'Quicksand',
           fontSize: FontSizeManager.regular,
           fontWeight: FontWeightManager.regular),
+      trailing: widget.notification.read
+          ? null
+          : Container(
+              width: 7,
+              margin: EdgeInsets.only(right: SizeManager.regular),
+              height: 7,
+              decoration: BoxDecoration(
+                  color: ColorManager.accentColor, shape: BoxShape.circle),
+            ),
       leading: Container(
         width: 70,
         height: 70,
@@ -91,7 +103,32 @@ class _NotificationItemWidgetState
         ),
         title: widget.notification.label,
         description: widget.notification.content,
-        cancelLabel: 'Close',
+        okLabel: !widget.notification.read ? 'Mark as read' : null,
+        cancelLoading: loading,
+        okLoading: loading,
+        onOk: () async {
+          setState(() {
+            loading = true;
+          });
+          await Future.delayed(const Duration(seconds: 5));
+          final result = await NotificationRepo.markNotificationAsRead(
+              notification: widget.notification);
+          setState(() {
+            loading = false;
+          });
+
+          if (result.error) {
+            SnackbarManager.showErrorSnackbar(
+                context: context,
+                message: "Unable to mark notification as read");
+            return;
+          }
+
+          SnackbarManager.showBasicSnackbar(
+              context: context, message: "Marked as read");
+          context.pop();
+        },
+        cancelLabel: !widget.notification.read ? null : 'Close',
         onCancel: () => context.pop());
   }
 

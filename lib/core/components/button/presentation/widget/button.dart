@@ -18,6 +18,7 @@ class CustomButton extends ConsumerStatefulWidget {
   final Color? color, textColor;
   final bool usesProvider, disabled;
   final EdgeInsets? margin;
+  final bool? loading;
 
   CustomButton({
     super.key,
@@ -26,6 +27,7 @@ class CustomButton extends ConsumerStatefulWidget {
     this.size = "large",
     this.usesProvider = false,
     this.onPressed,
+    this.loading,
     this.disabled = false,
     this.color,
     this.textColor,
@@ -45,6 +47,7 @@ class CustomButton extends ConsumerStatefulWidget {
     this.size = "medium",
     this.usesProvider = false,
     this.onPressed,
+    this.loading,
     this.disabled = false,
     this.margin,
     this.textColor,
@@ -65,6 +68,7 @@ class CustomButton extends ConsumerStatefulWidget {
     this.disabled = false,
     this.usesProvider = false,
     this.onPressed,
+    this.loading,
     this.color,
     this.margin,
     this.textColor,
@@ -104,7 +108,7 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
   @override
   Widget build(BuildContext context) {
     bool usesProvider = widget.usesProvider;
-    bool loading = false;
+    bool loading = widget.loading ?? false;
     bool enabled = !widget.disabled;
     if (usesProvider) {
       ButtonProvider(key: widget.buttonKey!);

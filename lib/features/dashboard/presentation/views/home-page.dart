@@ -24,6 +24,7 @@ import 'package:troco/features/transactions/presentation/view-transaction/provid
 import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
+import '../../../notifications/presentation/providers/notification-provider.dart';
 import '../../../transactions/domain/entities/transaction.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -35,6 +36,7 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   List<Transaction> transactions = [];
+  late int notificationCount;
   final defaultStyle = TextStyle(
       fontFamily: 'quicksand',
       color: ColorManager.primary,
@@ -70,6 +72,11 @@ class _HomePageState extends ConsumerState<HomePage> {
       0,
       (previousValue, element) => previousValue + element.transactionAmount,
     );
+    notificationCount = AppStorage.getNotifications()
+        .where(
+          (element) => !element.read,
+        )
+        .length;
 
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
@@ -80,6 +87,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    listenToNotificationChanges();
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SizedBox(
@@ -188,10 +196,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 SystemChrome.setSystemUIOverlayStyle(
                                     ThemeManager.getHomeUiOverlayStyle());
                               },
-                              child: Icon(
-                                Icons.notifications_rounded,
-                                color: ColorManager.primaryDark,
-                                size: IconSizeManager.medium * 0.9,
+                              child: Badge.count(
+                                count: notificationCount,
+                                backgroundColor: Colors.red,
+                                child: Icon(
+                                  Icons.notifications_rounded,
+                                  color: ColorManager.primaryDark,
+                                  size: IconSizeManager.medium * 0.9,
+                                ),
+                                textColor: Colors.white,
+                                isLabelVisible: notificationCount > 0,
                               ),
                             ),
                             mediumSpacer(),
@@ -367,6 +381,27 @@ class _HomePageState extends ConsumerState<HomePage> {
       svgRes: AssetManager.svgFile(name: 'transaction'),
       size: const Size.square(IconSizeManager.extralarge),
       color: Colors.white.withOpacity(0.4),
+    );
+  }
+
+  void listenToNotificationChanges() {
+    ref.listen(
+      notificationsStreamProvider,
+      (previous, next) {
+        next.when(
+          data: (data) {
+            setState(() {
+              notificationCount = data
+                  .where(
+                    (element) => !element.read,
+                  )
+                  .length;
+            });
+          },
+          error: (error, stackTrace) => null,
+          loading: () => null,
+        );
+      },
     );
   }
 }

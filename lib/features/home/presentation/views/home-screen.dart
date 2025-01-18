@@ -13,14 +13,11 @@ import 'package:troco/features/home/presentation/widgets/blocked-screen.dart';
 import 'package:troco/features/notifications/domain/entities/notification.dart'
     as n;
 import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
+import 'package:troco/features/notifications/presentation/providers/notification-provider.dart';
 import 'package:troco/features/services/domain/entities/escrow-fee.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
 import '../../../../core/api/data/repositories/api-interface.dart';
-import '../../../../core/app/asset-manager.dart';
 import '../../../auth/domain/entities/client.dart';
-import '../../../transactions/utils/enums.dart';
-import '../../../wallet/presentation/views/wallet-page.dart';
-import '../../data/models/home-item-model.dart';
 import '../widgets/bottom-bar.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -84,6 +81,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     listenToBlockedChanges();
+    listenToNotificationChanges();
     return PopScope(
       canPop: ref.watch(homeProvider) == 0,
       onPopInvoked: (didPop) {
@@ -139,6 +137,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           data: (data) => setState(() {
             showBlockedScreen = data;
           }),
+          error: (error, stackTrace) => null,
+          loading: () => null,
+        );
+      },
+    );
+  }
+
+  void listenToNotificationChanges() {
+    ref.listen(
+      notificationsStreamProvider,
+      (previous, next) {
+        next.when(
+          data: (data) {},
           error: (error, stackTrace) => null,
           loading: () => null,
         );
