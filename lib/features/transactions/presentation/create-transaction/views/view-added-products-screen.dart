@@ -9,19 +9,27 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/core/components/others/spacer.dart';
+import 'package:troco/core/extensions/list-extension.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
-import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/components/images/svg.dart';
+import '../providers/product-images-provider.dart';
 
 class ViewAddedItemsScreen extends ConsumerStatefulWidget {
   final int? currentPosition;
   final String? itemId;
-  const ViewAddedItemsScreen({super.key, this.currentPosition, this.itemId});
+  final void Function({required String image}) onRemove;
+  final List<String> images;
+  const ViewAddedItemsScreen(
+      {super.key,
+      required this.onRemove,
+      required this.images,
+      this.currentPosition,
+      this.itemId});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -37,10 +45,9 @@ class _ViewAddedProductsScreenState
   void initState() {
     controller = PageController(initialPage: widget.currentPosition ?? 0);
     itemId = widget.itemId;
+    images = widget.images.copy().toListString();
     super.initState();
-    setState(() {
-      images = List.from(ref.read(pricingsImagesProvider));
-    });
+
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getTransactionScreenUiOverlayStyle());
@@ -177,10 +184,10 @@ class _ViewAddedProductsScreenState
           }
         }
 
+        widget.onRemove(image: images[position]);
         setState(() {
           images.removeAt(position);
         });
-        ref.read(pricingsImagesProvider).removeAt(position);
 
         if (images.isEmpty) {
           context.pop();

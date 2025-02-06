@@ -284,6 +284,7 @@ class _KycVerificationScreenState extends ConsumerState<KycVerificationScreen>
     }
     // If the user is trying to select a tier when a tier is still being
     // verified by admin or select a tier when uploading a tier
+
     if (verifyingTier != null || uploadingTier != null) {
       SnackbarManager.showBasicSnackbar(
           context: context,

@@ -37,7 +37,7 @@ class _LatestTransactionsListState
   @override
   void initState() {
     transactions.sort(
-      (a, b) => (b.creationTime.compareTo(a.creationTime)),
+      (a, b) => (b.timeToSort.compareTo(a.timeToSort)),
     );
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
@@ -110,9 +110,9 @@ class _LatestTransactionsListState
   Future<void> listenToTransactionsChanges() async {
     ref.listen(transactionsStreamProvider, (previous, next) {
       next.whenData((value) {
-        log("loaded");
+        // log("loaded");
         value.sort(
-          (a, b) => (b.creationTime.compareTo(a.creationTime)),
+          (a, b) => (b.timeToSort.compareTo(a.timeToSort)),
         );
         setState(() {
           transactions = value.toSet().toList();

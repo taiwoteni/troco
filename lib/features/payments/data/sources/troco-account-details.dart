@@ -8,7 +8,7 @@ final trocoAccountDetails = [
       "id": 1,
       "logo": "https://nigerianbanks.xyz/logo/access-bank.png"
     },
-    "accountName": "Troco technology Ltd",
+    "accountName": "Troco technology Limited",
     "accountNumber": "1872810737"
   }),
   AccountMethod.fromJson(json: const {

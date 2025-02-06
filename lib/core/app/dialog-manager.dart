@@ -18,8 +18,8 @@ class DialogManager {
       required final String description,
       String? okLabel,
       String? cancelLabel,
-      bool? okLoading,
-      bool? cancelLoading,
+      UniqueKey? okKey,
+      cancelKey,
       void Function()? onOk,
       void Function()? onCancel}) async {
     return showDialog<T>(
@@ -30,8 +30,8 @@ class DialogManager {
             description: description,
             icon: icon,
             onOk: onOk,
-            okLoading: okLoading,
-            cancelLoading: cancelLoading,
+            okKey: okKey,
+            cancelKey: cancelKey,
             onCancel: onCancel,
             okLabel: okLabel,
             cancelLabel: cancelLabel);
@@ -40,11 +40,11 @@ class DialogManager {
   }
 }
 
-class DialogView extends StatelessWidget {
+class DialogView extends StatefulWidget {
   final Widget? icon;
   final String title, description;
   final String? okLabel, cancelLabel;
-  final bool? okLoading, cancelLoading;
+  final UniqueKey? okKey, cancelKey;
   final void Function()? onOk, onCancel;
 
   const DialogView(
@@ -55,9 +55,23 @@ class DialogView extends StatelessWidget {
       this.okLabel,
       this.cancelLabel,
       this.onOk,
-      this.okLoading,
-      this.cancelLoading,
+      this.okKey,
+      this.cancelKey,
       this.onCancel});
+
+  @override
+  State<DialogView> createState() => _DialogViewState();
+}
+
+class _DialogViewState extends State<DialogView> {
+  late UniqueKey okKey, cancelKey;
+
+  @override
+  void initState() {
+    okKey = widget.okKey ?? UniqueKey();
+    cancelKey = widget.cancelKey ?? UniqueKey();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,12 +100,12 @@ class DialogView extends StatelessWidget {
                       height: 60,
                       child: FittedBox(
                         fit: BoxFit.cover,
-                        child: icon,
+                        child: widget.icon,
                       ),
                     ),
                     largeSpacer(),
                     Text(
-                      title,
+                      widget.title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontFamily: 'lato',
@@ -101,7 +115,7 @@ class DialogView extends StatelessWidget {
                     ),
                     mediumSpacer(),
                     Text(
-                      description,
+                      widget.description,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontFamily: 'quicksand',
@@ -113,25 +127,27 @@ class DialogView extends StatelessWidget {
                     regularSpacer(),
                     Row(
                       children: [
-                        if (cancelLabel != null)
+                        if (widget.cancelLabel != null)
                           Expanded(
                               child: CustomButton.small(
-                            margin: okLabel != null
+                            margin: widget.okLabel != null
                                 ? const EdgeInsets.only(
                                     right: SizeManager.regular)
                                 : null,
-                            loading: cancelLoading,
-                            label: cancelLabel!,
+                            buttonKey: cancelKey,
+                            usesProvider: true,
+                            label: widget.cancelLabel!,
                             color: Colors.red.shade600,
-                            onPressed: onCancel,
+                            onPressed: widget.onCancel,
                           )),
-                        if (okLabel != null)
+                        if (widget.okLabel != null)
                           Expanded(
                               child: CustomButton.small(
-                            label: okLabel!,
-                            loading: okLoading,
+                            label: widget.okLabel!,
+                            buttonKey: okKey,
+                            usesProvider: true,
                             color: ColorManager.accentColor,
-                            onPressed: onOk,
+                            onPressed: widget.onOk,
                           )),
                       ],
                     ),

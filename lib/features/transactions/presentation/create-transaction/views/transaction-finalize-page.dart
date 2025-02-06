@@ -381,29 +381,45 @@ class _TransactionPreviewPageState
               (previousValue, element) => previousValue + element,
             );
 
+        if (client.kycTier == VerificationTier.None) {
+          if (totalPrice > 100000) {
+            SnackbarManager.showBasicSnackbar(
+                context: context,
+                mode: ContentType.failure,
+                message:
+                    "Max price for an unverified account is 100,000 NGN.\nVerify your KYC");
+            ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+            return;
+          }
+        }
+
         if (client.kycTier == VerificationTier.Tier1) {
           if (totalPrice > 200000) {
             SnackbarManager.showBasicSnackbar(
                 context: context,
                 mode: ContentType.failure,
                 message:
-                    "Max price for Tier 1 is 200,000 NGN\nUpgrade your KYC Tier");
-            ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-
-            return;
-          }
-        } else if (client.kycTier == VerificationTier.Tier2) {
-          if (totalPrice > 500000) {
-            SnackbarManager.showBasicSnackbar(
-                context: context,
-                mode: ContentType.failure,
-                message:
-                    "Max price for Tier 1 is 500,000 NGN\nUpgrade your KYC Tier");
+                    "Max price for Tier 1 is 200,000 NGN.\nUpgrade your KYC Tier");
             ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
 
             return;
           }
         }
+
+        if (client.kycTier == VerificationTier.Tier2) {
+          if (totalPrice > 500000) {
+            SnackbarManager.showBasicSnackbar(
+                context: context,
+                mode: ContentType.failure,
+                message:
+                    "Max price for Tier 1 is 500,000 NGN.\nUpgrade your KYC Tier");
+            ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+
+            return;
+          }
+        }
+
         await verifyPin();
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
       },

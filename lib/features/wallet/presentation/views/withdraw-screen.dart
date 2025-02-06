@@ -20,6 +20,7 @@ import '../../../../core/app/size-manager.dart';
 import '../../../../core/cache/shared-preferences.dart';
 import '../../../../core/components/images/svg.dart';
 import '../../../../core/components/others/spacer.dart';
+import '../../../../core/components/texts/inputs/currency_input_formatter.dart';
 import '../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../auth/presentation/providers/client-provider.dart';
 import '../../../payments/domain/entity/account-method.dart';
@@ -307,7 +308,8 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
       inputType: TextInputType.number,
       isPassword: false,
       label: "amount",
-      validator: (value) {
+      validator: (text) {
+        final value = text?.replaceAll(",", "");
         if (value == null) {
           return "* enter an amount.";
         }
@@ -322,6 +324,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
                 : null
             : "* enter an amount.";
       },
+      inputFormatters: [CurrencyInputFormatter()],
       onSaved: (value) {},
       prefixIcon: IconButton(
         onPressed: null,
@@ -359,13 +362,13 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
   }
 
   Future<bool> noPendingWithdrawals() async {
-    final withdrawalRequests = await WalletRepository().getWalletHistory();
+    final withdrawalRequests =
+        (await WalletRepository().getWalletHistory()).where(
+      (element) => element.transactionPurpose == WalletPurpose.Withdraw,
+    );
 
-    return withdrawalRequests
-        .where(
-          (element) => element.transactionPurpose == WalletPurpose.Withdraw,
-        )
-        .every((element) =>
+    return withdrawalRequests.isEmpty ||
+        withdrawalRequests.every((element) =>
             element.transactionStatus != TransactionStatus.Pending);
   }
 
@@ -398,7 +401,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen>
           return;
         }
         final response = await WalletRepository.requestWithdrawal(
-            amount: double.parse(amountController.text),
+            amount: double.parse(amountController.text.replaceAll(",", "")),
             account: selectedAccount!);
         debugPrint(response.code.toString());
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

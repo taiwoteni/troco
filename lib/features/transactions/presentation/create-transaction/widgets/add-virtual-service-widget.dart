@@ -16,7 +16,6 @@ import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
 import 'package:troco/core/extensions/list-extension.dart';
 import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
-import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/virtual-service-requirement-converter.dart';
 import 'package:uuid/uuid.dart';
@@ -72,6 +71,8 @@ class _AddVirtualServiceWidgetState
   String name = "";
   String description = "";
 
+  var images = <String>[];
+
   @override
   void setState(VoidCallback fn) {
     if (!mounted) {
@@ -89,15 +90,8 @@ class _AddVirtualServiceWidgetState
     );
     selectedRequirement = widget.virtualService?.serviceRequirement;
     quantity = widget.virtualService?.quantity ?? 1;
+    images = widget.virtualService?.images ?? [];
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      if (widget.virtualService != null) {
-        ref.read(pricingsImagesProvider.notifier).state =
-            widget.virtualService!.images;
-        return;
-      }
-      ref.read(pricingsImagesProvider.notifier).state.clear();
-    });
   }
 
   @override
@@ -428,15 +422,15 @@ class _AddVirtualServiceWidgetState
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (ref.watch(pricingsImagesProvider).isEmpty)
+              if (images.isEmpty)
                 pickServiceImage()
               else
                 serviceImage(position: 0),
-              if (ref.watch(pricingsImagesProvider).length < 2)
+              if (images.length < 2)
                 pickServiceImage()
               else
                 serviceImage(position: 1),
-              if (ref.watch(pricingsImagesProvider).length < 3)
+              if (images.length < 3)
                 pickServiceImage()
               else
                 serviceImage(position: 2)
@@ -464,7 +458,7 @@ class _AddVirtualServiceWidgetState
         });
         await Future.delayed(const Duration(seconds: 2));
         setState(() {
-          productImageError = ref.read(pricingsImagesProvider).isEmpty;
+          productImageError = images.isEmpty;
         });
         if (formKey.currentState!.validate() && !productImageError) {
           formKey.currentState!.save();
@@ -478,10 +472,7 @@ class _AddVirtualServiceWidgetState
           final escrowCharge =
               (int.parse(price) * (virtualServiceCharge.percentage));
 
-          final serviceImages =
-              List<String>.from(ref.read(pricingsImagesProvider))
-                  .copy()
-                  .toListString();
+          final serviceImages = images.copy().toListString();
           Map<dynamic, dynamic> serviceJson = {
             "serviceId": isEditing
                 ? widget.virtualService!.id
@@ -517,10 +508,7 @@ class _AddVirtualServiceWidgetState
             await FileManager.pickImage(imageSource: ImageSource.gallery);
         if (pickedFile != null) {
           setState(() {
-            ref
-                .read(pricingsImagesProvider.notifier)
-                .state
-                .add(pickedFile.path);
+            images.add(pickedFile.path);
           });
         }
       },
@@ -557,8 +545,7 @@ class _AddVirtualServiceWidgetState
         );
       },
       closedBuilder: (context, action) {
-        final image =
-            ref.watch(pricingsImagesProvider).elementAtOrNull(position);
+        final image = images.elementAtOrNull(position);
         return image == null
             ? pickServiceImage()
             : Container(
@@ -577,6 +564,8 @@ class _AddVirtualServiceWidgetState
       openBuilder: (context, action) {
         return ViewAddedItemsScreen(
           currentPosition: position,
+          images: images,
+          onRemove: ({required image}) => setState(() => images.remove(image)),
           itemId: widget.virtualService?.id,
         );
       },

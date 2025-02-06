@@ -146,7 +146,7 @@ class TransactionPricingGridWidget extends ConsumerWidget {
                     ),
                     smallSpacer(),
                     Text(
-                      item.priceString,
+                      "${item.priceString} NGN",
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           fontFamily: 'quicksand',

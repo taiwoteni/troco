@@ -163,22 +163,17 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
                         : "Waiting for your payment";
       case TransactionStatus.Processing:
         return (isVirtual || isService)
-            ? isService
+            ? (isService
                 ? getServiceAnimationLabel()
-                : isVirtual
-                    ? getVirtualAnimationLabel()
-                    : isSeller
-                        ? "Awaiting buyer's payemnt"
-                        : transaction.paymentDone
-                            ? "Awaiting admin's approval"
-                            : "Waiting for your payment"
-            : isSeller
-                ? (transaction.hasDriver
+                : getVirtualAnimationLabel())
+            : transaction.hasReturnTransaction
+                ? getReturnTransactionAnimationLabel()
+                : (transaction.hasDriver
                     ? "Awaiting admin's approval"
-                    : "Upload driver details")
-                : transaction.hasReturnTransaction
-                    ? "Returning items"
-                    : "Seller is uploading driver details";
+                    : (isSeller
+                        ? "Upload driver details"
+                        : "waiting for driver details"));
+
       case TransactionStatus.Ongoing:
         return (isVirtual || isService)
             ? isService
@@ -190,9 +185,9 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
                         : transaction.paymentDone
                             ? "Awaiting admin's approval"
                             : "Waiting for your payment"
-            : (isSeller
-                ? "Delivering ${transaction.transactionCategory.name}(s)"
-                : "${transaction.transactionCategory.name}(s) are on their way");
+            : ((transaction.hasReturnTransaction ? !isSeller : isSeller)
+                ? "Delivering ${transaction.hasReturnTransaction ? "returned" : ""} product(s)"
+                : "${transaction.hasReturnTransaction ? "Returned product(s)" : "Product(s)"} are on their way");
       case TransactionStatus.Finalizing:
         return (isService || isVirtual)
             ? "Admin finalizing transaction..."
@@ -250,7 +245,7 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
     if (!pendingTask.paymentMade) {
       description = isBuyer
           ? "Make payment for Task ${index + 1}"
-          : "Waiting for buyer's payment";
+          : "Waiting for client's payment";
       return description;
     }
 
@@ -412,6 +407,27 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
     }
 
     return description;
+  }
+
+  String getReturnTransactionAnimationLabel() {
+    final bool isSeller =
+        transaction.creator == ClientProvider.readOnlyClient!.userId;
+
+    if (transaction.hasReturnDriver) {
+      if (transaction.adminApprovesDriver) {
+        return isSeller
+            ? "Return products underway"
+            : "Your items are being returned";
+      }
+
+      return "Admin approving return buyer";
+    }
+
+    if (isSeller) {
+      return "Waiting for buyer to return product";
+    }
+
+    return "Upload return driver's info";
   }
 }
 

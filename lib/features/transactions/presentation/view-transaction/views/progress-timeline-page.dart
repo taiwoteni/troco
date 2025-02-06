@@ -191,11 +191,11 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
                 ? 50
                 : index == 0 || index == subProcesses.length - 1
                     ? overflowing
-                        ? 40
-                        : 30
-                    : overflowing
                         ? 50
-                        : 40,
+                        : 40
+                    : overflowing
+                        ? 55
+                        : 50,
             nodeItemOverlapBuilder: (context, index) => false,
             indicatorBuilder: (context, index) {
               final subProcess = subProcesses[index];
@@ -268,39 +268,31 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
             SubProcess(
                 message: "Admin approves payment",
                 done: transaction.adminApprovesPayment),
-            if (transaction.hasReturnTransaction &&
-                transaction.transactionCategory !=
-                    TransactionCategory.Virtual) ...[
+            SubProcess(
+                message: "Seller uploads driver details",
+                done: transaction.hasDriver),
+            SubProcess(
+                message: "Admin approved seller's driver details",
+                done: transaction.hasDriver &&
+                        (paymentStatus
+                                .contains(transaction.transactionStatus) ||
+                            transaction.transactionStatus ==
+                                TransactionStatus.Ongoing) ||
+                    transaction.hasReturnTransaction),
+            if (transaction.hasReturnTransaction) ...[
               SubProcess(
                   message:
                       "${isBuyer ? "Returning " : "Buyer returned"} ${transaction.returnItems.length} ${transaction.pricingName}${transaction.returnItems.length == 1 ? "" : "s"}",
                   done: transaction.hasReturnTransaction),
               SubProcess(
                   message: "Buyer uploaded returning driver details",
-                  done: transaction.hasReturnTransaction)
-            ],
-            SubProcess(
-                message: isVirtual
-                    ? "Seller starts leading"
-                    : "Seller uploads driver details",
-                done: isVirtual
-                    ? transaction.sellerStarteedLeading
-                    : transaction.hasDriver),
-            SubProcess(
-                message: isVirtual
-                    ? "Buyer accepts lead"
-                    : "Admin approves driver details",
-                done: isVirtual
-                    ? transaction.leadStarted
-                    : transaction.hasDriver &&
-                        (paymentStatus
-                                .contains(transaction.transactionStatus) ||
-                            transaction.transactionStatus ==
-                                TransactionStatus.Ongoing)),
-            if (isVirtual)
+                  done: transaction.hasReturnTransaction &&
+                      transaction.hasReturnDriver),
               SubProcess(
-                  message: "Inspection Started",
-                  done: paymentStatus.contains(transaction.transactionStatus))
+                  message: "Admin approved return driver",
+                  done: transaction.adminApprovesDriver &&
+                      transaction.hasReturnDriver)
+            ],
           ]);
       processes.add(paymentOfTransaction);
 
@@ -309,10 +301,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
         TransactionStatus.Finalizing,
         TransactionStatus.Completed,
       ];
-      final category =
-          transaction.transactionCategory == TransactionCategory.Product
-              ? "Product"
-              : "Service";
+      final category = "Product";
       Process deliveryOfTransaction =
           Process(message: "Delivery of ${category.titleCase}", subProcesses: [
         SubProcess(
@@ -320,7 +309,9 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
                 "Driver delivers ${transaction.hasReturnTransaction ? "returned" : ""} $category",
             done: deliveryStatus.contains(transaction.transactionStatus)),
         SubProcess(
-            message: "Buyer receives $category",
+            message: transaction.hasReturnTransaction
+                ? "Seller receives returned products"
+                : "Buyer receives products",
             done: deliveryStatus.contains(transaction.transactionStatus)),
       ]);
       processes.add(deliveryOfTransaction);
@@ -330,10 +321,19 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
           message: "Acceptance of ${transaction.transactionCategory.name}",
           subProcesses: [
             SubProcess(
-                message: "Buyer is satisfied with $category",
-                done: transaction.buyerSatisfied),
+                message: transaction.hasReturnTransaction
+                    ? "Seller has accepted returned product(s)"
+                    : "Buyer is satisfied with product(s)",
+                done: transaction.hasReturnTransaction
+                    ? transaction.transactionStatus ==
+                        TransactionStatus.Completed
+                    : transaction.buyerSatisfied),
             SubProcess(
-                message: "Troco pays seller",
+                message: transaction.hasReturnTransaction
+                    ? transaction.allProductsReturned
+                        ? "Troco funds buyer"
+                        : "Troco funds both buyer and seller"
+                    : "Troco pays seller",
                 done: transaction.transactionStatus ==
                     TransactionStatus.Completed),
           ]);
@@ -352,7 +352,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
 
         final process = Process(message: "Task $index", subProcesses: [
           SubProcess(
-              message: "Buyer made payment for task $index",
+              message: "Client made payment for task $index",
               done: task.paymentMade),
           SubProcess(
               message: "Admin approved payment for task $index",
@@ -386,7 +386,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
         final process =
             Process(message: "Virtual-Product $index", subProcesses: [
           SubProcess(
-              message: "Buyer made payment for product $index",
+              message: "Client made payment for product $index",
               done: task.paymentMade),
           SubProcess(
               message: "Admin approved payment for product $index",
@@ -396,7 +396,7 @@ class _ProgressTimelinePageState extends ConsumerState<ProgressTimelinePage> {
                   "Seller uploaded required/specified document for product $index",
               done: task.documentsUploaded),
           SubProcess(
-              message: "Buyer satisfied with seller's material",
+              message: "Client satisfied with seller's material",
               done: task.clientSatisfied),
           SubProcess(
               message: "Payment released to the seller's wallet",

@@ -32,7 +32,7 @@ class Transaction extends Equatable {
   Group get group {
     return AppStorage.getGroups().firstWhere(
       (element) {
-        debugPrint("group id for ${element.groupName} is ${element.groupId}");
+        // debugPrint("group id for ${element.groupName} is ${element.groupId}");
         return element.groupId == transactionId;
       },
     );
@@ -62,9 +62,28 @@ class Transaction extends Equatable {
     return client.fullName;
   }
 
-  DateTime get transactionTime => DateTime.parse(_json["transaction time"] ??
-      _json["DateOfWork"] ??
-      group.transactionTime.toIso8601String());
+  DateTime get transactionTime {
+    try {
+      return DateTime.parse(_json["transaction time"] ??
+          _json["DateOfWork"] ??
+          group.transactionTime.toIso8601String());
+    } catch (e) {
+      return DateTime.now();
+    }
+  }
+
+  DateTime get lastUpdatedTime {
+    try {
+      return DateTime.parse(_json["updatedAt"] ??
+          _json["createdAt"] ??
+          group.transactionTime.toIso8601String());
+    } catch (e) {
+      return DateTime.now();
+    }
+  }
+
+  DateTime get timeToSort =>
+      lastUpdatedTime.isAfter(creationTime) ? lastUpdatedTime : creationTime;
 
   DateTime get creationTime => DateTime.parse(_json["creation time"] ??
       _json["createdAt"] ??
@@ -176,7 +195,7 @@ class Transaction extends Equatable {
   bool get hasDriver => ((_json["driverInformation"] ?? []) as List).isNotEmpty;
 
   bool get hasReturnDriver =>
-      ((_json["driverInformation"] ?? []) as List).length > 1;
+      ((_json["driverInformation"] ?? []) as List).length >= 2;
 
   bool get hasAccountDetails =>
       ((_json["accountDetailes"] ?? []) as List).isNotEmpty;
@@ -193,6 +212,14 @@ class Transaction extends Equatable {
   /// [trocoPaysSeller] is always true now...
   /// simply because money is always sent to seller's wallet after transaction.
   bool get trocoPaysSeller => true;
+
+  bool get allProductsReturned {
+    if (!hasReturnTransaction) {
+      return false;
+    }
+
+    return returnItems.length == salesItem.length;
+  }
 
   bool get realClient {
     final isApparentCreator = creator == ClientProvider.readOnlyClient?.userId;

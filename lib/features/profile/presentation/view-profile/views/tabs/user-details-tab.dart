@@ -56,7 +56,10 @@ class _UserDetailsTabState extends ConsumerState<UserDetailsTab> {
       sliver: SliverList.list(
         children: [
           largeSpacer(),
-          detail(title: "full name", value: client.fullName),
+          detail(
+              title: "full name",
+              value:
+                  client.fullName.trim().isEmpty ? "No Name" : client.fullName),
           divider(),
           detail(title: "email", value: client.email),
           divider(),
@@ -95,7 +98,11 @@ class _UserDetailsTabState extends ConsumerState<UserDetailsTab> {
                   ),
           ),
           divider(),
-          detail(title: "business name", value: client.businessName),
+          detail(
+              title: "business name",
+              value: client.businessName.trim().isEmpty
+                  ? "No Business Name"
+                  : client.businessName),
           divider(),
           detail(
               title: "account type",
@@ -105,7 +112,11 @@ class _UserDetailsTabState extends ConsumerState<UserDetailsTab> {
           divider(),
           detail(title: "referral code", value: client.referralCode),
           divider(),
-          detail(title: "location", value: client.address),
+          detail(
+              title: "location",
+              value: client.address.trim().isEmpty
+                  ? "No Address"
+                  : client.address),
 
           if (!isSelf) ...[
             divider(),

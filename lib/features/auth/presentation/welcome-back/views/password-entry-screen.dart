@@ -18,14 +18,14 @@ class PasswordEntryScreen extends ConsumerStatefulWidget {
   const PasswordEntryScreen({super.key});
 
   @override
-  ConsumerState<PasswordEntryScreen> createState() => _PasswordEntryScreenState();
+  ConsumerState<PasswordEntryScreen> createState() =>
+      _PasswordEntryScreenState();
 }
 
 class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
   final buttonKey = UniqueKey();
   final formKey = GlobalKey<FormState>();
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +42,7 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
               key: formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [     
+                children: [
                   title(),
                   extraLargeSpacer(),
                   regularSpacer(),
@@ -66,12 +66,11 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    if(formKey.currentState!.validate()){
-    Navigator.pushReplacementNamed(context, Routes.homeRoute);
+    if (formKey.currentState!.validate()) {
+      Navigator.pushReplacementNamed(context, Routes.homeRoute);
     }
   }
 
-  
   Widget header() {
     return Container(
       width: double.maxFinite,
@@ -119,13 +118,13 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
           }
         },
         validator: (value) {
-          if(value == null){
+          if (value == null) {
             return "* enter password";
           }
-          if(value.trim().isEmpty){
+          if (value.trim().isEmpty) {
             return "* enter password";
           }
-          if(value.trim() != ClientProvider.readOnlyClient!.password){
+          if (value.trim() != ClientProvider.readOnlyClient!.password) {
             return "* wrong password";
           }
           return null;
@@ -146,9 +145,11 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
   }
 
   Widget forgotPassword() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
       child: InfoText(
+        onPressed: () =>
+            Navigator.pushNamed(context, Routes.forgotPasswordRoute),
         text: "Forgot Password?",
         alignment: Alignment.centerRight,
         fontWeight: FontWeightManager.semibold,
@@ -161,33 +162,30 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
         buttonKey: buttonKey,
         onPressed: signIn,
         usesProvider: true,
-        margin: const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
+        margin:
+            const EdgeInsets.symmetric(horizontal: SizeManager.medium * 1.5),
         label: "Sign In");
   }
 
-  Widget logout(){
+  Widget logout() {
     final style = TextStyle(
-      fontFamily: 'Lato',
-      color: ColorManager.primary,
-      fontSize: FontSizeManager.regular*1.1,
-      fontWeight: FontWeightManager.semibold
-    );
+        fontFamily: 'Lato',
+        color: ColorManager.primary,
+        fontSize: FontSizeManager.regular * 1.1,
+        fontWeight: FontWeightManager.semibold);
     final client = ClientProvider.readOnlyClient!;
     return RichText(
-      text: TextSpan(
-        style: style,
-        children: [
-          TextSpan(text: "Not ${client.firstName}? "),
-          TextSpan(
-            text: "Change Account", 
-            style: style.copyWith(color: ColorManager.accentColor),
-            recognizer: TapGestureRecognizer()..onTap = (){
+      text: TextSpan(style: style, children: [
+        TextSpan(text: "Not ${client.firstName}? "),
+        TextSpan(
+          text: "Change Account",
+          style: style.copyWith(color: ColorManager.accentColor),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
               Navigator.pushReplacementNamed(context, Routes.authRoute);
             },
-            )
-        ]
-      ),
+        )
+      ]),
     );
   }
-
 }

@@ -107,7 +107,7 @@ class TransactionDataHolder {
       totalCost = items?.fold(
           0.0,
           (previousValue, element) =>
-              (previousValue ?? 0) + (element.finalPrice ?? 0));
+              (previousValue ?? 0) + (element.price ?? 0));
     }
   }
 }

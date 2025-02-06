@@ -64,7 +64,7 @@ class _ProofOfWorkWidgetState extends State<ProofOfWorkWidget> {
                 ),
                 smallSpacer(),
                 Text(
-                  "View ${isVirtual ? "document" : "work"} uploaded by ${isVirtual ? "seller" : "developer"}.",
+                  "${isVirtual ? "View" : (item as Service).proofIsLink ? "Copy" : "View"} ${isVirtual ? "document" : (item as Service).proofIsLink ? "link" : "work"} uploaded by ${isVirtual ? "seller" : "developer"}.",
                   style: TextStyle(
                       fontFamily: "quicksand",
                       color: ColorManager.secondary,

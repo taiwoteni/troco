@@ -79,17 +79,28 @@ class _WalletTransactionScreenState extends State<WalletTransactionScreen> {
                 title: "Transaction Status",
                 value: walletTransaction.transactionStatus !=
                         TransactionStatus.Completed
-                    ? "Pending"
-                    : isWithdraw
+                    ? (walletTransaction.transactionStatus ==
+                            TransactionStatus.Cancelled
+                        ? "Declined"
+                        : "Pending")
+                    : walletTransaction.transactionPurpose !=
+                            WalletPurpose.Income
                         ? "Withdraw Paid"
-                        : "Income Credited"),
+                        : "Income Credited",
+                color: walletTransaction.transactionStatus ==
+                        TransactionStatus.Cancelled
+                    ? Colors.red
+                    : walletTransaction.transactionStatus ==
+                            TransactionStatus.Completed
+                        ? ColorManager.accentColor
+                        : ColorManager.secondary),
             mediumSpacer(),
             divider(),
             largeSpacer(),
             detail(
                 title: "Transaction Date",
                 value: DateFormat("MMM d, yyyy 'at' hh:mm a")
-                    .format(walletTransaction.createdTime)),
+                    .format(walletTransaction.timeToSort)),
             mediumSpacer(),
             divider(),
             largeSpacer(),
@@ -170,7 +181,10 @@ class _WalletTransactionScreenState extends State<WalletTransactionScreen> {
   }
 
   Widget detail(
-      {required String title, required String value, bool price = false}) {
+      {required String title,
+      required String value,
+      Color? color,
+      bool price = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: SizeManager.large),
       child: Row(
@@ -196,7 +210,7 @@ class _WalletTransactionScreenState extends State<WalletTransactionScreen> {
                     fontSize: FontSizeManager.medium,
                     fontWeight: FontWeightManager.extrabold)
                 : TextStyle(
-                    color: ColorManager.primary,
+                    color: color ?? ColorManager.primary,
                     fontFamily: 'quicksand',
                     height: 1.4,
                     fontWeight: FontWeightManager.extrabold,

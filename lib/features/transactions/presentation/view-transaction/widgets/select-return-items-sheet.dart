@@ -180,13 +180,6 @@ class _SelectPaymentMethodSheetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const InfoText(
-          fontSize: FontSizeManager.regular * 0.8,
-          text:
-              '* You are to return all the quantity of the selected products given',
-          color: Colors.red,
-        ),
-        smallSpacer(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -211,6 +204,14 @@ class _SelectPaymentMethodSheetState
                   fontSize: FontSizeManager.medium * 0.8),
             ),
           ],
+        ),
+        smallSpacer(),
+        const InfoText(
+          fontSize: FontSizeManager.regular * 0.8,
+          fontWeight: FontWeightManager.bold,
+          text:
+              '* You are to return the total quantity of each selected product at the point of delivery.',
+          color: Colors.red,
         ),
       ],
     );

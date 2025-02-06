@@ -70,7 +70,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     // This way, wether a user has internet connection or not, we would be able to tell wether
     // ...he is online or not.
     userRefreshTimer = Timer.periodic(
-      const Duration(seconds: 10),
+      const Duration(seconds: 5),
       (timer) async {
         // We get the user to try to  know if the user is logged in
         // or not.
@@ -86,6 +86,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         if (!response.error) {
           // To constantly save and update userdata
           final userJson = response.messageBody!["data"];
+          // debugPrint(userJson.toString());
           userJson["password"] = ClientProvider.readOnlyClient!.password;
           final updatedClient = Client.fromJson(json: userJson);
           if (AppStorage.getUser() != null) {

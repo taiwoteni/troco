@@ -15,7 +15,8 @@ class Referral {
 
   String get email => _json["email"];
 
-  String get fullName => _json["firstName"] + " " + _json["lastName"];
+  String get fullName =>
+      (_json["firstName"] ?? "Unknown") + " " + (_json["lastName"] ?? "User");
 
   String get profile =>
       _json["userImage"] ?? ClientProvider.readOnlyClient!.profile;

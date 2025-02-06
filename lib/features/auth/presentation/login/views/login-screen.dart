@@ -334,7 +334,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           // }
           if (map["firstName"] == null ||
               map["firstName"].toString().trim().isEmpty) {
-            Navigator.pushNamed(context, Routes.setupAccountRoute);
+            // If secondary details like firstName were not setup when logging in.
+            // Clients will be asked to verify OTP first.
+
+            final response =
+                await AuthenticationRepo.resendOTP(userId: LoginData.id!);
+            log(response.body);
+            if (response.error) {
+              ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+              SnackbarManager.showErrorSnackbar(
+                  context: context,
+                  message: "Error logging in. Try again later.");
+              return;
+            }
+
+            OtpData.id = map["_id"];
+            OtpData.email = LoginData.email;
+            OtpData.phoneNumber = map["phoneNumber"];
+            LoginData.otp = response.messageBody?["otp"];
+            final verified =
+                (await Navigator.pushNamed(context, Routes.otpRoute) as bool? ??
+                    false);
+            ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+            if (verified) {
+              OtpData.clear();
+              Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
+              return;
+            }
             return;
           }
           // if (map["userImage"] == null) {

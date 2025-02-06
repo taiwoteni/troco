@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/transactions/presentation/my-transactions/widgets/my-transactions-list.dart';
 import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 import 'package:troco/features/wallet/presentation/providers/wallet-history-provider.dart';
 import 'package:troco/features/wallet/presentation/widgets/wallet-transaction-item-widget.dart';
@@ -49,13 +48,10 @@ class _WalletHistoryScreenState extends ConsumerState<WalletHistoryScreen> {
   Future<void> listenToChanges() async {
     ref.listen(walletHistoryStreamProvider, (previous, next) {
       next.whenData((value) {
-        value.sort(
-          (a, b) => (b.time.compareTo(a.time)),
-        );
+        final wt = value;
+        wt.sort((a, b) => b.timeToSort.compareTo(a.timeToSort));
         if (!searching) {
-          setState(() {
-            walletHistory = value;
-          });
+          setState(() => walletHistory = wt);
         }
       });
     });

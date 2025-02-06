@@ -18,7 +18,6 @@ import 'package:troco/core/extensions/list-extension.dart';
 import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/service.dart';
-import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/month-converter.dart';
 import 'package:troco/features/transactions/utils/month-enum.dart';
@@ -80,6 +79,8 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
   String name = "";
   String description = "";
 
+  var images = <String>[];
+
   @override
   void setState(VoidCallback fn) {
     if (!mounted) {
@@ -97,23 +98,13 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
     );
     selectedDay = widget.service?.deadlineTime.day;
     selectedYear = widget.service?.deadlineTime.year;
+    images = widget.service?.images ?? [];
     if (widget.service != null) {
       selectedMonth = Month.values[widget.service!.deadlineTime.month - 1];
       selectedRequirement = widget.service!.serviceRequirement;
     }
 
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      if (widget.service != null) {
-        ref.read(pricingsImagesProvider.notifier).state =
-            widget.service!.images;
-        return;
-      }
-      ref.read(pricingsImagesProvider.notifier).state.clear();
-      setState(
-        () {},
-      );
-    });
   }
 
   @override
@@ -674,15 +665,15 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (ref.watch(pricingsImagesProvider).isEmpty)
+              if (images.isEmpty)
                 pickServiceImage()
               else
                 serviceImage(position: 0),
-              if (ref.watch(pricingsImagesProvider).length < 2)
+              if (images.length < 2)
                 pickServiceImage()
               else
                 serviceImage(position: 1),
-              if (ref.watch(pricingsImagesProvider).length < 3)
+              if (images.length < 3)
                 pickServiceImage()
               else
                 serviceImage(position: 2)
@@ -728,10 +719,7 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
           final escrowCharge =
               (double.parse(price) * (serviceCharge.percentage));
 
-          final productImages =
-              List<String>.from(ref.read(pricingsImagesProvider))
-                  .copy()
-                  .toListString();
+          final productImages = images.copy().toListString();
           final DateTime dateTime = DateTime(
               selectedYear!, selectedMonth!.toMonthOfYear(), selectedDay!);
           Map<dynamic, dynamic> serviceJson = {
@@ -772,10 +760,7 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
             await FileManager.pickImage(imageSource: ImageSource.gallery);
         if (pickedFile != null) {
           setState(() {
-            ref
-                .read(pricingsImagesProvider.notifier)
-                .state
-                .add(pickedFile.path);
+            images.add(pickedFile.path);
           });
         }
       },
@@ -812,8 +797,7 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
         );
       },
       closedBuilder: (context, action) {
-        final image =
-            ref.watch(pricingsImagesProvider).elementAtOrNull(position);
+        final image = images.elementAtOrNull(position);
         return image == null
             ? pickServiceImage()
             : Container(
@@ -832,6 +816,8 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
       openBuilder: (context, action) {
         return ViewAddedItemsScreen(
           currentPosition: position,
+          images: images,
+          onRemove: ({required image}) => setState(() => images.remove(image)),
           itemId: widget.service?.id,
         );
       },

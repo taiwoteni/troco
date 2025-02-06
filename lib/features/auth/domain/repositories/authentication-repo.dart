@@ -76,10 +76,10 @@ class AuthenticationRepo {
 
   static Future<HttpResponseModel> resendOTP(
       {required final String userId,
-      required final String otp,
+      final String? otp,
       final Map<String, String>? headers}) async {
     final result =
-        await ApiInterface.postRequest(url: "resend-otp/$userId", data: {
+        await ApiInterface.patchRequest(url: "resend-otp/$userId", data: {
       "otp": otp,
     });
     return result;

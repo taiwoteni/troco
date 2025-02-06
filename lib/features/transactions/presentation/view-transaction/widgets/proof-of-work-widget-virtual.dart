@@ -1,19 +1,13 @@
-import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:troco/core/app/asset-manager.dart';
-import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/components/animations/lottie.dart';
-import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/core/extensions/string-extension.dart';
-import 'package:troco/features/transactions/domain/entities/service.dart';
-import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../data/models/virtual-document.dart';
-import '../../../domain/entities/sales-item.dart';
 
 class ProofOfWorkVirtualWidget extends StatefulWidget {
   final VirtualDocument document;
@@ -37,11 +31,6 @@ class _ProofOfWorkWidgetState extends State<ProofOfWorkVirtualWidget> {
     return InkWell(
       borderRadius: BorderRadius.circular(SizeManager.regular),
       splashColor: ColorManager.accentColor.withOpacity(0.1),
-      onTap: () {
-        final link = document.source;
-        FlutterClipboard.copy(link);
-        context.pushNamed(routeName: Routes.cardPaymentScreen, arguments: link);
-      },
       child: Container(
         width: double.maxFinite,
         height: 80,

@@ -187,6 +187,15 @@ class AppStorage {
     return transactions.toSet().toList();
   }
 
+  static Transaction? getTransaction({required final String transactionId}) {
+    try {
+      return getTransactions()
+          .firstWhere((element) => element.transactionId == transactionId);
+    } catch (e) {
+      return null;
+    }
+  }
+
   static List<Transaction> getAllTransactions() {
     final jsonString = _pref!.getString(TRANSACTION_STORAGE_KEY);
     if (jsonString == null) {

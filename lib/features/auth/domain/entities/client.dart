@@ -16,24 +16,24 @@ class Client extends Equatable {
   String get profile => _json["userImage"] ?? _json["profile"] ?? "null";
   String get fullName => "$firstName $lastName";
   String get email => _json["email"];
-  String get referralCode => _json["referralCode"];
+  String get referralCode => _json["referralCode"] ?? "loading...";
   double get walletBalance => double.parse((_json["wallet"] ?? "0").toString());
   String get phoneNumber => _json["phoneNumber"];
   String get businessName =>
-      _json["businessName"] ?? _json["BusinessName"] ?? "$firstName Ventures";
+      _json["businessName"] ?? _json["BusinessName"] ?? "--/--";
   Category get accountCategory => CategoryConverter.convertToCategory(
       category: _json["category"] ?? _json["accountType"] ?? "personal");
-  String get address => _json["address"] ?? "";
-  String get city => _json["city"] ?? "";
-  String get state => _json["state"] ?? "";
-  String get zipcode => _json["zipcode"] ?? "";
-  String get bustop => _json["nearestBustop"] ?? "";
+  String get address => _json["address"] ?? "--/--";
+  String get city => _json["city"] ?? "--/--";
+  String get state => _json["state"] ?? "--/--";
+  String get zipcode => _json["zipcode"] ?? "--/--";
+  String get bustop => _json["nearestBustop"] ?? "--/--";
 
   String? get transactionPin => _json["transactionPin"];
 
   bool get blocked => _json["blocked"] == true;
 
-  bool get verified => kycTier != VerificationTier.None;
+  bool get verified => kycTier == VerificationTier.Tier3;
 
   bool get online {
     final difference = DateTime.now().difference(lastSeen);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:recase/recase.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/dialog-manager.dart';
@@ -48,17 +49,27 @@ class WalletTransactionWidget extends StatelessWidget {
               fontFamily: 'Lato',
               fontSize: FontSizeManager.medium,
               fontWeight: FontWeightManager.semibold),
-          subtitle:
-              Text(transaction.transactionStatus != TransactionStatus.Completed
-                  ? "Pending"
-                  : transaction.transactionPurpose != WalletPurpose.Income
-                      ? "Withdraw Paid"
-                      : "Income Credited"),
+          subtitle: Text(transaction.transactionStatus !=
+                  TransactionStatus.Completed
+              ? (transaction.transactionStatus == TransactionStatus.Cancelled
+                  ? "Declined"
+                  : "Pending")
+              : transaction.transactionPurpose != WalletPurpose.Income
+                  ? "Withdraw Paid"
+                  : "Income Credited"),
           subtitleTextStyle: TextStyle(
-              color: ColorManager.secondary,
+              color: transaction.transactionStatus ==
+                      TransactionStatus.Cancelled
+                  ? Colors.red
+                  : transaction.transactionStatus == TransactionStatus.Completed
+                      ? ColorManager.accentColor
+                      : ColorManager.secondary,
               fontFamily: 'Quicksand',
               fontSize: FontSizeManager.regular,
-              fontWeight: FontWeightManager.regular),
+              fontWeight:
+                  transaction.transactionStatus != TransactionStatus.Pending
+                      ? FontWeightManager.semibold
+                      : FontWeightManager.regular),
           leading: Container(
             width: 70,
             height: 70,

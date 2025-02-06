@@ -43,7 +43,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           (MediaQuery.sizeOf(context).width * 4).toDouble();
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getSplashUiOverlayStyle());
-      await Future.delayed(const Duration(seconds: 4));
+      await Future.delayed(const Duration(seconds: 2));
       setState(() {
         showLoading = true;
       });

@@ -15,7 +15,6 @@ import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
 import 'package:troco/core/extensions/list-extension.dart';
 import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
-import 'package:troco/features/transactions/presentation/create-transaction/providers/product-images-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
@@ -74,6 +73,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
   String price = "";
   String name = "";
 
+  var images = <String>[];
+
   @override
   void setState(VoidCallback fn) {
     if (!mounted) {
@@ -92,14 +93,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
     selectedProductCondition = widget.product?.productCondition;
     selectedProductQuality = widget.product?.productQuality;
     quantity = widget.product?.quantity ?? 1;
+    images = widget.product?.images ?? [];
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
-      ref.watch(pricingsImagesProvider.notifier).state.clear();
-      if (widget.product != null) {
-        ref.watch(pricingsImagesProvider.notifier).state =
-            widget.product!.images;
-      }
-    });
   }
 
   @override
@@ -472,15 +467,15 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (ref.watch(pricingsImagesProvider).isEmpty)
+              if (images.isEmpty)
                 pickProductImage()
               else
                 productImage(position: 0),
-              if (ref.watch(pricingsImagesProvider).length < 2)
+              if (images.length < 2)
                 pickProductImage()
               else
                 productImage(position: 1),
-              if (ref.watch(pricingsImagesProvider).length < 3)
+              if (images.length < 3)
                 pickProductImage()
               else
                 productImage(position: 2),
@@ -506,7 +501,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
         });
         await Future.delayed(const Duration(seconds: 2));
         setState(() {
-          productImageError = ref.read(pricingsImagesProvider).isEmpty;
+          productImageError = images.isEmpty;
         });
         if (formKey.currentState!.validate() && !productImageError) {
           formKey.currentState!.save();
@@ -519,8 +514,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
 
           final escrowCharge = (int.parse(price) * (productCharge.percentage));
 
-          final productImages =
-              List.from(ref.read(pricingsImagesProvider)).copy().toListString();
+          final productImages = images.toListString();
           Map<dynamic, dynamic> productJson = {
             "productId": isEditing
                 ? widget.product?.id
@@ -558,10 +552,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
             await FileManager.pickImage(imageSource: ImageSource.gallery);
         if (pickedFile != null) {
           setState(() {
-            ref
-                .read(pricingsImagesProvider.notifier)
-                .state
-                .add(pickedFile.path);
+            images.add(pickedFile.path);
           });
         }
       },
@@ -598,10 +589,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
         );
       },
       closedBuilder: (context, action) {
-        final image =
-            ref.watch(pricingsImagesProvider).elementAtOrNull(position);
-        return ref.watch(pricingsImagesProvider).elementAtOrNull(position) ==
-                null
+        final image = images.elementAtOrNull(position);
+        return images.elementAtOrNull(position) == null
             ? pickProductImage()
             : Container(
                 width: 70,
@@ -619,6 +608,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
       openBuilder: (context, action) {
         return ViewAddedItemsScreen(
           currentPosition: position,
+          images: images,
+          onRemove: ({required image}) => setState(() => images.remove(image)),
           itemId: widget.product?.id,
         );
       },

@@ -168,7 +168,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               .toList());
     }
 
-    debugPrint(response.body);
+    // debugPrint(response.body);
   }
 
   //5781e0

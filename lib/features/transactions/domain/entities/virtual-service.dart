@@ -42,7 +42,7 @@ class VirtualService extends SalesItem {
   List<VirtualDocument> get virtualDocuments {
     return _proofOfWorkList
         .map(
-          (e) => VirtualDocument(value: e, taskName: name),
+          (e) => VirtualDocument(value: e, taskId: id, taskName: name),
         )
         .toList();
   }

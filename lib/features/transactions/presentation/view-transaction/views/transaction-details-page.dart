@@ -53,6 +53,7 @@ import 'package:troco/features/transactions/utils/service-role.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
 import '../../../../report/presentation/widgets/report-transaction-sheet.dart';
+import '../../../data/models/virtual-document.dart';
 import '../../../domain/entities/service.dart';
 import '../../../../groups/domain/entities/group.dart';
 import '../widgets/select-return-items-sheet.dart';
@@ -86,10 +87,14 @@ class _TransactionsDetailPageState
   bool driverDetailsExpanded = false;
   bool returnItemsIsExpanded = false;
 
+  bool justSentRejectedReturnDriverInfo = false;
+
   @override
   void initState() {
-    transaction = widget.transaction;
-    debugPrint(transaction.transactionId.toString());
+    transaction = AppStorage.getTransaction(
+            transactionId: widget.transaction.transactionId) ??
+        widget.transaction;
+    debugPrint(transaction.toJson()["driverInformation"]?.toString() ?? "");
 
     if (AppStorage.getGroups().any(
       (element) => element.groupId == transaction.transactionId,
@@ -935,9 +940,15 @@ class _TransactionsDetailPageState
     if (transaction.hasReturnTransaction) {
       return !isBuyer
           ? !transaction.adminApprovesDriver
-              ? "Admin approving return driver.."
+              ? !transaction.hasReturnDriver
+                  ? "Buyer is expected to re-upload driver info"
+                  : "Admin approving return driver.."
               : "Have you received the returned products?"
-          : "Your items are being returned...";
+          : !transaction.hasReturnDriver
+              ? "Previous driver rejected. Re-upload"
+              : !transaction.adminApprovesDriver
+                  ? "Admin approving return driver.."
+                  : "Your items are being returned...";
     }
 
     // For Product Transactions
@@ -1006,10 +1017,20 @@ class _TransactionsDetailPageState
             .map(
           (task) {
             return GestureDetector(
+              key: ValueKey(task),
               onTap: () {
                 // debugPrint(task.proofOfTask);
                 // FlutterClipboard.copy(task.proofOfTask);
-                // return;
+                // return;\
+                final isLink = task.proofIsLink;
+                if (isLink) {
+                  SnackbarManager.showBasicSnackbar(
+                      context: context, message: "Copied link");
+                  FlutterClipboard.copy(task.proofOfTask);
+
+                  return;
+                }
+
                 final extension = task.proofOfTask
                     .substring(task.proofOfTask.lastIndexOf("."));
                 final fileName =
@@ -1056,15 +1077,24 @@ class _TransactionsDetailPageState
             .map(
           (document) {
             return GestureDetector(
+              key: ValueKey(document),
               onTap: () {
+                if (document.type == VirtualDocumentType.Link) {
+                  SnackbarManager.showBasicSnackbar(
+                      context: context, message: "Copied link");
+                  FlutterClipboard.copy(document.source);
+                  return;
+                }
                 final extension =
                     document.source.substring(document.source.lastIndexOf("."));
                 SnackbarManager.showBasicSnackbar(
                     context: context, message: "Downloading document");
 
+                final indexSeparator = documentIndex(document: document);
+
                 downloadManager.downloadFile(
-                    document.source.replaceAll(" ", "_"),
-                    "${document.taskName}${extension}",
+                    document.source,
+                    "${document.taskName}-$indexSeparator${extension}",
                     "${transaction.transactionName.toLowerCase().replaceAll(" ", "_")}");
               },
               child: Padding(
@@ -1077,6 +1107,19 @@ class _TransactionsDetailPageState
         ).toList(),
       ),
     );
+  }
+
+  int documentIndex({required final VirtualDocument document}) {
+    if (transaction.transactionCategory != TransactionCategory.Virtual) {
+      return 0;
+    }
+    final virtualService = transaction.salesItem
+        .map((element) => element as VirtualService)
+        .firstWhere((element) => element.id == document.taskId);
+    final index = virtualService.virtualDocuments
+        .indexWhere((_document) => _document.taskId == document.taskId);
+
+    return index + 1;
   }
 
   Widget button() {
@@ -1330,6 +1373,30 @@ class _TransactionsDetailPageState
   List<Widget> returnTransactionButtons() {
     final isBuyer = transaction.transactionPurpose == TransactionPurpose.Buying;
     final buttons = <Widget>[];
+
+    if (!transaction.hasReturnDriver) {
+      // waiting for buyer to re-upload driver information
+      if (!isBuyer) {
+        buttons.add(
+            actionButton(positive: null, label: "Hold On..", onPressed: () {}));
+        return buttons;
+      }
+
+      buttons.add(actionButton(
+          positive: true,
+          label: "Add Return Driver",
+          onPressed: addDriverDetails
+          //     () async {
+          //   final r = await addDriverDetails();
+          //   if (r) {
+          //     setState(() {
+          //       justSentRejectedReturnDriverInfo = true;
+          //     });
+          //   }
+          // }
+          ));
+      return buttons;
+    }
 
     if (!transaction.adminApprovesDriver) {
       buttons.add(
@@ -2123,9 +2190,18 @@ class _TransactionsDetailPageState
             .contains(transaction.transactionId)) {
           final t = value.firstWhere(
               (tr) => tr.transactionId == transaction.transactionId);
-          ref.read(currentTransactionProvider.notifier).state = t;
+
+          debugPrint(t.toJson()["driverInformation"]?.toString() ?? "");
+          // if (justSentRejectedReturnDriverInfo &&
+          //     t.hasReturnDriver == transaction.hasReturnDriver) {
+          // } else {
+          //   if (justSentRejectedReturnDriverInfo) {
+          //     setState(() => justSentRejectedReturnDriverInfo = false);
+          //   }
           ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
+          // }
           ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
+          ref.read(currentTransactionProvider.notifier).state = t;
         }
       });
     });

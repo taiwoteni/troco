@@ -42,6 +42,9 @@ class Service extends SalesItem {
   String get proofOfTask =>
       _json["proofOfWork"] != null ? _proofOfWorkList.first : "";
 
+  bool get proofIsLink =>
+      !proofOfTask.toLowerCase().contains("storage.googleapis.com/troco_app");
+
   String get description =>
       _json["description"] ?? "No description of this task";
 

@@ -1,8 +1,15 @@
 class VirtualDocument {
   final String _value;
   final String? _taskName;
+  final String? _taskId;
 
-  const VirtualDocument({required final String value, final String? taskName}) : _value = value, _taskName = taskName;
+  const VirtualDocument(
+      {required final String value,
+      final String? taskName,
+      final String? taskId})
+      : _value = value,
+        _taskId = taskId,
+        _taskName = taskName;
 
   VirtualDocumentType get type {
     final RegExp urlRegex = RegExp(
@@ -12,13 +19,23 @@ class VirtualDocument {
     );
 
     if (urlRegex.hasMatch(source)) {
+      //Already uploaded virtual documents would be a link of course
+      // The remedy is to check if it matches or contains `storage.googleapis.com`
+      // which is the link that a virtual document would have if a document was uploaded.
+      if (source.toLowerCase().contains('storage.googleapis.com/troco_app')) {
+        return VirtualDocumentType.File;
+      }
       return VirtualDocumentType.Link;
     }
     return VirtualDocumentType.File;
   }
 
-  String get taskName{
+  String get taskName {
     return _taskName ?? "";
+  }
+
+  String get taskId {
+    return _taskId ?? "";
   }
 
   String get source {

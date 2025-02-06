@@ -370,7 +370,9 @@ class _WalletPageState extends ConsumerState<WalletPage>
       (previous, next) {
         next.whenData(
           (value) {
-            setState(() => walletHistory = value);
+            final wt = value;
+            wt.sort((a, b) => b.timeToSort.compareTo(a.timeToSort));
+            setState(() => walletHistory = wt);
             debugPrint(value.toString());
           },
         );

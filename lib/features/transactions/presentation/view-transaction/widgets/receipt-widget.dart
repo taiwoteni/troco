@@ -9,6 +9,7 @@ import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 
+import '../../../../../core/app/snackbar-manager.dart';
 import '../../../../splash/presentation/splash-screen.dart';
 import '../../../domain/entities/transaction.dart';
 
@@ -27,6 +28,12 @@ class _ReceiptWidgetState extends State<ReceiptWidget> {
   void initState() {
     transaction = widget.transaction;
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        SnackbarManager.showBasicSnackbar(
+            context: context, message: "Receipt saved to storage.");
+      },
+    );
   }
 
   @override
@@ -107,9 +114,19 @@ class _ReceiptWidgetState extends State<ReceiptWidget> {
               title: "Escrow Charges",
               information: "${transaction.escrowChargesString} NGN"),
           divider(),
-          detailItem(title: "Seller", information: transaction.sellerName),
+          detailItem(
+              title:
+                  transaction.transactionCategory == TransactionCategory.Service
+                      ? "Developer"
+                      : "Seller",
+              information: transaction.sellerName),
           divider(),
-          detailItem(title: "Buyer", information: transaction.buyerName),
+          detailItem(
+              title:
+                  transaction.transactionCategory == TransactionCategory.Service
+                      ? "Client"
+                      : "Buyer",
+              information: transaction.buyerName),
           divider(),
           detailItem(
               title: "Transaction Status",

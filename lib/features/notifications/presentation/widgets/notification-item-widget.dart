@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/dialog-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
+import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-item-dialog.dart';
@@ -26,7 +27,7 @@ class NotificationItemWidget extends ConsumerStatefulWidget {
 
 class _NotificationItemWidgetState
     extends ConsumerState<NotificationItemWidget> {
-  bool loading = false;
+  final buttonKey = UniqueKey();
   @override
   Widget build(BuildContext context) {
     var color = ColorManager.accentColor;
@@ -104,18 +105,14 @@ class _NotificationItemWidgetState
         title: widget.notification.label,
         description: widget.notification.content,
         okLabel: !widget.notification.read ? 'Mark as read' : null,
-        cancelLoading: loading,
-        okLoading: loading,
+        cancelKey: buttonKey,
+        okKey: buttonKey,
         onOk: () async {
-          setState(() {
-            loading = true;
-          });
+          ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
           await Future.delayed(const Duration(seconds: 5));
           final result = await NotificationRepo.markNotificationAsRead(
               notification: widget.notification);
-          setState(() {
-            loading = false;
-          });
+          ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
 
           if (result.error) {
             SnackbarManager.showErrorSnackbar(

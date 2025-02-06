@@ -30,10 +30,14 @@ class _MyTransactionsListState extends ConsumerState<MyTransactionsList> {
 
   @override
   void initState() {
+    final t = AppStorage.getAllTransactions();
+    t.sort(
+      (a, b) => (b.timeToSort.compareTo(a.timeToSort)),
+    );
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       setState(() {
-        transactions = transactions;
+        transactions = t;
       });
     });
   }
@@ -42,7 +46,7 @@ class _MyTransactionsListState extends ConsumerState<MyTransactionsList> {
   Widget build(BuildContext context) {
     listenToTransactionsChanges();
     transactions.sort(
-      (a, b) => b.creationTime.compareTo(a.creationTime),
+      (a, b) => b.timeToSort.compareTo(a.timeToSort),
     );
     return ListView.separated(
         key: const Key("latestTransactionsList"),
@@ -69,8 +73,10 @@ class _MyTransactionsListState extends ConsumerState<MyTransactionsList> {
     ref.listen(transactionsStreamProvider, (previous, next) {
       next.whenData((value) {
         log("loaded");
+        final t = value;
+        t.sort((a, b) => b.timeToSort.compareTo(a.timeToSort));
         setState(() {
-          transactions = value.toSet().toList();
+          transactions = t.toSet().toList();
         });
       });
     });

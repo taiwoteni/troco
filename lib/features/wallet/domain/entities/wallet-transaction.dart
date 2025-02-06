@@ -32,28 +32,42 @@ class WalletTransaction {
   }
 
   TransactionStatus get transactionStatus {
-    if ((_json["transactionStatus"] ?? _json["status"])
-            ?.toString()
-            .toLowerCase() ==
-        "pending") {
-      return TransactionStatus.Pending;
+    if (transactionPurpose == WalletPurpose.Income) {
+      return TransactionStatus.Completed;
     }
-    if ((_json["transactionStatus"] ?? _json["status"])
-            ?.toString()
-            .toLowerCase() ==
-        "declined") {
+
+    final status =
+        (_json["transactionStatus"] ?? _json["status"] ?? "pending") as String;
+
+    if (["disapproved", "declined"].contains(status.toLowerCase())) {
       return TransactionStatus.Cancelled;
     }
-    return TransactionStatus.Completed;
+
+    if (status.toLowerCase() == "pending") {
+      return TransactionStatus.Pending;
+    }
+
+    if (["approved", "completed"].contains(status.toLowerCase())) {
+      return TransactionStatus.Completed;
+    }
+
+    return TransactionStatus.Cancelled;
   }
 
   DateTime get time {
-    return DateTime.parse(_json["date"] ?? DateTime.now().toIso8601String())
+    return DateTime.parse(_json["walletUpdateTime"] ??
+            _json["createdTime"] ??
+            _json["date"] ??
+            _json["data"] ??
+            DateTime.now().toIso8601String())
         .toLocal();
   }
 
+  DateTime get timeToSort => createdTime.isAfter(time) ? createdTime : time;
+
   DateTime get createdTime {
     return DateTime.parse(_json["createdTime"] ??
+            _json["date"] ??
             _json["data"] ??
             DateTime.now().toIso8601String())
         .toLocal();

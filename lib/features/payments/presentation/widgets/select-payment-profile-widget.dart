@@ -82,9 +82,7 @@ class _SelectPaymentMethodWidgetState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isCard
-                      ? cardName()
-                      : (method as AccountMethod).accountNumber,
+                  isCard ? cardName() : (method as AccountMethod).accountNumber,
                   style: TextStyle(
                       fontFamily: "quicksand",
                       color: ColorManager.primary,
@@ -94,14 +92,15 @@ class _SelectPaymentMethodWidgetState
                 Text(
                   isCard
                       ? (method as CardMethod).cardHolderName
-                      : (method as AccountMethod).accountName.length >= 24
+                      : (method as AccountMethod).accountName.length >= 30
                           ? (method as AccountMethod)
                               .accountName
-                              .replaceRange(19, null, '...')
+                              .replaceRange(25, null, '...')
                           : (method as AccountMethod).name,
                   style: TextStyle(
                       fontFamily: "quicksand",
                       color: ColorManager.secondary,
+                      overflow: TextOverflow.ellipsis,
                       fontSize: FontSizeManager.small * 0.9,
                       fontWeight: FontWeightManager.semibold),
                 ),

@@ -638,14 +638,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
         if (deleteRequestResponse) {
           SnackbarManager.showBasicSnackbar(
-              context: context, message: "Left Group.");
+              context: context, message: "Left Order.");
           context.pop();
           return;
         }
 
         SnackbarManager.showErrorSnackbar(
             context: context,
-            message: "Couldn't leave group. Try again some other time");
+            message: "Couldn't leave order. Try again some other time");
         return;
       }
       return;

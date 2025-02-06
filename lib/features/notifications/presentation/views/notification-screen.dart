@@ -35,7 +35,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   @override
   void initState() {
     allNotifications.sort(
-      (a, b) => 1.compareTo(0),
+      (a, b) => !b.read ? 2 : b.time.compareTo(a.time),
     );
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
@@ -186,27 +186,28 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
   Future<void> listenToTransactionsChanges() async {
     ref.listen(notificationsStreamProvider, (previous, next) {
       next.whenData((value) {
-        value.sort(
-          (a, b) => 1.compareTo(0),
+        final ns = value;
+        ns.sort(
+          (a, b) => !b.read ? 2 : b.time.compareTo(a.time),
         );
 
         setState(() {
-          allNotifications = value;
+          allNotifications = ns;
         });
-        markNotificationsAsRead();
+        // markNotificationsAsRead();
       });
     });
   }
 
-  Future<void> markNotificationsAsRead() async {
-    for (final notif in allNotifications) {
-      if (!notif.read) {
-        NotificationRepo.markNotificationAsRead(notification: notif).then(
-          (value) {
-            log(value.body);
-          },
-        );
-      }
-    }
-  }
+  // Future<void> markNotificationsAsRead() async {
+  //   for (final notif in allNotifications) {
+  //     if (!notif.read) {
+  //       NotificationRepo.markNotificationAsRead(notification: notif).then(
+  //         (value) {
+  //           log(value.body);
+  //         },
+  //       );
+  //     }
+  //   }
+  // }
 }
