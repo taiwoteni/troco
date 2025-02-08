@@ -161,7 +161,11 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
         children: [
           slider(),
           Positioned(top: 0, right: 0, left: 0, child: controls()),
-          Positioned(top: 0, right: 0, left: 0, child: itemName()),
+          Positioned(
+              top: 0,
+              right: SizeManager.medium,
+              left: SizeManager.medium,
+              child: itemName()),
           Positioned(
               left: 0,
               right: 0,
@@ -247,6 +251,8 @@ class _ViewTransactionScreenState extends ConsumerState<ViewTransactionScreen> {
       child: Text(
         item.name,
         textAlign: TextAlign.center,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
         style: const TextStyle(
             color: Colors.white,
             fontSize: FontSizeManager.medium,

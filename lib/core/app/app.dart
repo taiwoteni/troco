@@ -13,6 +13,7 @@ import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/home/presentation/providers/blocked-provider.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 
 import '../../features/groups/presentation/friends_tab/providers/friends-provider.dart';
 import '../../features/kyc/utils/enums.dart';
@@ -54,6 +55,8 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    listenTransactionsChanges();
+    listenToFriendsChanges();
     return MaterialApp(
       title: ValuesManager.APP_NAME,
       themeMode: ThemeMode.light,
@@ -61,6 +64,17 @@ class _MyAppState extends ConsumerState<MyApp> {
       onGenerateRoute: (settings) => RouteGenerator.getRoute(settings),
       debugShowCheckedModeBanner: false,
       theme: ThemeManager.getApplicationTheme(),
+    );
+  }
+
+  void listenTransactionsChanges() {
+    ref.listen(
+      transactionsStreamProvider,
+      (previous, next) {
+        next.whenData((value) {
+          AppStorage.saveTransactions(transactions: value);
+        });
+      },
     );
   }
 

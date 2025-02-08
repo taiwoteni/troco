@@ -225,6 +225,7 @@ class _AddVirtualServiceWidgetState
         InputFormField(
           initialValue: widget.virtualService?.description,
           label: 'e.g this facebook page has.....',
+          lines: 3,
           validator: (value) {
             if (value == null) {
               return "* enter item description";
