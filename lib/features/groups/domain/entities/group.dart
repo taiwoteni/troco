@@ -48,10 +48,7 @@ class Group extends Equatable {
           .contains(_transactions.first);
 
   Transaction get transaction {
-    final transactions = AppStorage.getAllTransactions();
-    final _transaction = transactions
-        .firstWhere((transaction) => transaction.transactionId == groupId);
-    return _transaction;
+    return AppStorage.getTransaction(transactionId: groupId)!;
   }
 
   bool get transactionIsHampered =>

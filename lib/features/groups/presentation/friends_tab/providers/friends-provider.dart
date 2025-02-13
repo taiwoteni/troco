@@ -60,7 +60,7 @@ final friendsStreamProvider = StreamProvider<List<Client>>(
             ref.watch(friendsProvider.notifier).state = FriendRepository();
           },
           error: (error, stackTrace) =>
-              log("Error occured when getting transactions from api $error"),
+              log("Error occured when getting friends from api $error"),
           loading: () => null);
     });
 

@@ -55,7 +55,7 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    listenTransactionsChanges();
+    listenToTransactionsChanges();
     listenToFriendsChanges();
     return MaterialApp(
       title: ValuesManager.APP_NAME,
@@ -64,17 +64,6 @@ class _MyAppState extends ConsumerState<MyApp> {
       onGenerateRoute: (settings) => RouteGenerator.getRoute(settings),
       debugShowCheckedModeBanner: false,
       theme: ThemeManager.getApplicationTheme(),
-    );
-  }
-
-  void listenTransactionsChanges() {
-    ref.listen(
-      transactionsStreamProvider,
-      (previous, next) {
-        next.whenData((value) {
-          AppStorage.saveTransactions(transactions: value);
-        });
-      },
     );
   }
 
@@ -88,10 +77,11 @@ class _MyAppState extends ConsumerState<MyApp> {
       (timer) async {
         // We get the user to try to  know if the user is logged in
         // or not.
-        final client = ClientProvider.readOnlyClient;
+        final client = AppStorage.getUser();
         if (client == null) {
           return;
         }
+
         await updateOnlineStatus();
 
         final response = await ApiInterface.findUser(userId: client.userId);
@@ -101,7 +91,7 @@ class _MyAppState extends ConsumerState<MyApp> {
           // To constantly save and update userdata
           final userJson = response.messageBody!["data"];
           // debugPrint(userJson.toString());
-          userJson["password"] = ClientProvider.readOnlyClient!.password;
+          userJson["password"] = client!.password;
           final updatedClient = Client.fromJson(json: userJson);
           if (AppStorage.getUser() != null) {
             ref.watch(clientProvider.notifier).state = updatedClient;
@@ -127,7 +117,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   Future<void> updateOnlineStatus() async {
-    final response = await AuthenticationRepo.updateOnlineStatus();
+    await AuthenticationRepo.updateOnlineStatus();
   }
 
   Future<void> listenToFriendsChanges() async {
@@ -138,5 +128,12 @@ class _MyAppState extends ConsumerState<MyApp> {
         loading: () => null,
       );
     });
+  }
+
+  Future<void> listenToTransactionsChanges() async {
+    ref.listen(
+      transactionsStreamProvider,
+      (previous, next) {},
+    );
   }
 }

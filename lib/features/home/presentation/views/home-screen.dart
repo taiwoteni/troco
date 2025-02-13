@@ -80,6 +80,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // listenToTransactions();
     listenToBlockedChanges();
     listenToNotificationChanges();
     return PopScope(
@@ -170,6 +171,5 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // debugPrint(response.body);
   }
-
   //5781e0
 }

@@ -189,7 +189,7 @@ class AppStorage {
 
   static Transaction? getTransaction({required final String transactionId}) {
     try {
-      return getTransactions()
+      return getAllTransactions()
           .firstWhere((element) => element.transactionId == transactionId);
     } catch (e) {
       return null;

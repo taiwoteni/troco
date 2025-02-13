@@ -1,8 +1,5 @@
 // ignore_for_file: unused_element
 
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,11 +24,9 @@ import 'package:troco/features/transactions/presentation/view-transaction/views/
 import 'package:troco/features/transactions/presentation/view-transaction/views/transaction-progress-page.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/rounded-tab-indicator.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/tab-item.dart';
-import 'package:troco/features/transactions/utils/service-role.dart';
 import 'package:troco/features/transactions/utils/transaction-status-converter.dart';
 
 import '../../../../../core/components/animations/lottie.dart';
-import '../../../../auth/presentation/providers/client-provider.dart';
 import '../../../utils/enums.dart';
 import '../providers/current-transacton-provider.dart';
 import '../providers/transactions-provider.dart';

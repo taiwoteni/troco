@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
 import 'dart:math' as Math;
@@ -11,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:troco/core/api/data/model/response-model.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/dialog-manager.dart';
@@ -37,7 +35,7 @@ import 'package:troco/features/groups/domain/repositories/group-repository.dart'
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -45,6 +43,7 @@ import '../../../../core/app/audio-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/snackbar-manager.dart';
 import '../../../transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
+import '../../../transactions/presentation/view-transaction/providers/transactions-provider.dart';
 import '../../domain/entities/chat.dart';
 import '../../../groups/domain/entities/group.dart';
 
@@ -77,21 +76,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   void initState() {
-    final transactions = AppStorage.getAllTransactions();
-    if (transactions
-        .any((element) => element.transactionId == widget.group.groupId)) {
-      transaction = transactions.firstWhere(
-          (element) => element.transactionId == widget.group.groupId);
-    }
     group = widget.group;
     chats = [
       ...AppStorage.getChats(groupId: group.groupId),
       ...AppStorage.getUnsentChats(groupId: group.groupId)
     ];
     isCreator = group.members.first == ClientProvider.readOnlyClient!.userId;
+    transaction =
+        AppStorage.getTransaction(transactionId: widget.group.groupId);
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
+      listenToGroupChanges();
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getChatUiOverlayStyle());
       scrollController.addListener(() {
@@ -164,9 +160,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     /// To listen to Chat changes.
     /// In this methos i use stream.when. This can only be used in the Build Method.
     /// Do not remove from here.
-    listenToTransactionChanges();
+
     listenToChatChanges();
-    listenToGroupChanges();
+    listenToTransactionChanges();
 
     return Padding(
       padding:
@@ -796,8 +792,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
     if (group.hasTransaction) {
+      ref.read(currentTransactionProvider.notifier).state = transaction!;
       Navigator.pushNamed(context, Routes.viewTransactionRoute,
-          arguments: transaction ?? group.transaction);
+          arguments: transaction);
     } else {
       if (isCreator) {
         if (group.members.length >= 2) {
@@ -1014,7 +1011,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> listenToGroupChanges() async {
-    ref.listen(groupsStreamProvider, (previous, next) {
+    ref.listenManual(groupsStreamProvider, (previous, next) {
       next.whenData((value) {
         if (value.map((e) => e.groupId).contains(group.groupId)) {
           final singleGroup =
@@ -1032,12 +1029,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> listenToTransactionChanges() async {
-    ref.listen(transactionsStreamProvider, (previous, next) {
+    ref.listenManual(transactionsStreamProvider, (previous, next) {
       next.whenData((value) {
         final index = value.lastIndexWhere(
           (element) => element.transactionId == group.groupId,
         );
-        if (index >= 0) {
+        if (index != -1) {
           setState(() {
             transaction = value[index];
           });

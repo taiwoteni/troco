@@ -22,7 +22,6 @@ import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/month-converter.dart';
 import 'package:troco/features/transactions/utils/month-enum.dart';
 import 'package:troco/features/transactions/utils/service-requirement-converter.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -434,8 +433,8 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
     bool februaryValid = selectedYear != null &&
         (selectedMonth == Month.Feb
             ? (selectedYear! % 4 == 0
-                ? (selectedDay ?? 0) <= 29
-                : (selectedDay ?? 0) <= 28)
+                ? (selectedDay) <= 29
+                : (selectedDay) <= 28)
             : true);
 
     return selectedMonth != null &&
@@ -720,8 +719,8 @@ class _AddServiceWidgetState extends ConsumerState<AddServiceSheet> {
               (double.parse(price) * (serviceCharge.percentage));
 
           final productImages = images.copy().toListString();
-          final DateTime dateTime = DateTime(
-              selectedYear!, selectedMonth!.toMonthOfYear(), selectedDay!);
+          // final DateTime dateTime = DateTime(
+          //     selectedYear!, selectedMonth!.toMonthOfYear(), selectedDay!);
           Map<dynamic, dynamic> serviceJson = {
             "serviceId": isEditing
                 ? widget.service!.id

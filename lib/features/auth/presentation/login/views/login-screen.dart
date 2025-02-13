@@ -304,6 +304,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           : AuthenticationRepo.loginUserPhone(
               phoneNumber: LoginData.phoneNumber!,
               password: LoginData.password!));
+      log("Logged In");
       debugPrint("login:${response.body}");
 
       if (response.error) {

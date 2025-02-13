@@ -36,6 +36,8 @@ final transactionsStreamProvider = StreamProvider<List<Transaction>>(
     final periodic = Timer.periodic(const Duration(seconds: 3), (_) {
       ref.watch(transactionFutureProvider).when(
           data: (transactionsJson) {
+            log("Got transactions");
+
             /// First of all we have to compare and contrast between the
             /// values gotten from the APIs and saved on the Device Cache.
             ///

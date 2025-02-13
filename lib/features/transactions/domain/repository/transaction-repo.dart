@@ -392,7 +392,7 @@ class TransactionRepo {
   /// Else: Error will be thrown.
   static Future<HttpResponseModel> getAllTransactions() async {
     return await ApiInterface.getRequest(
-        url: 'get_user_transactions/${ClientProvider.readOnlyClient?.userId}');
+        url: 'get_user_transactions/${AppStorage.getUser()?.userId}');
   }
 
   /// User Data must have been saved on Cache first before [getTransactions] can be called.
