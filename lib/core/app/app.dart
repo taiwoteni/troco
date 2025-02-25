@@ -91,7 +91,7 @@ class _MyAppState extends ConsumerState<MyApp> {
           // To constantly save and update userdata
           final userJson = response.messageBody!["data"];
           // debugPrint(userJson.toString());
-          userJson["password"] = client!.password;
+          userJson["password"] = client.password;
           final updatedClient = Client.fromJson(json: userJson);
           if (AppStorage.getUser() != null) {
             ref.watch(clientProvider.notifier).state = updatedClient;

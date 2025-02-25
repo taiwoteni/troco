@@ -49,210 +49,108 @@ class GroupRepo {
   }
 
   Future<List<dynamic>> getGroupsJson() async {
-    final result = await ApiInterface.getRequest(
-        url: 'findoneuser/${AppStorage.getUser()!.userId}');
-    if (!result.error) {
-      Map<dynamic, dynamic> userJson = result.messageBody!["data"];
-      List userGroupsList = userJson["groups"];
+    final result = await getGroupsOneTime();
 
-      final groupsList = userGroupsList
-          .map(
-            (e) => Group.fromJson(json: e),
-          )
-          .toList();
-      final sortedGroupsList = <Group>[];
-      final cachedGroupsList = AppStorage.getGroups();
-
-      /// We are trying to get and save all the firstName,lastName,userImage and Id;
-      /// And also send all unsent Chats in a group
-      for (final group in groupsList) {
-        Group g = group;
-
-        /// Now, im trying to save the user's details seperately on my end.
-        /// Only if the members have changed
-        /// First check if the cachedGroupsList contains this group
-
-        final containsGroup =
-            cachedGroupsList.map((e) => e.groupId).contains(group.groupId);
-        if (containsGroup) {
-          final cachedGroup = cachedGroupsList.firstWhere(
-            (element) => element.groupId == group.groupId,
-          );
-
-          /// If it contains this group, we then check if the members are the same;
-          final sameMembers = group.members.every(
-            (element) => cachedGroup.sortedMembers
-                .map((e) => e.userId)
-                .contains(element),
-          );
-
-          /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.
-          if (sameMembers) {
-            // Intentionaly not assign it directly as, messages (chats) may differ
-            final gJson = g.toJson();
-            gJson["sortedMembers"] = cachedGroup.toJson()["sortedMembers"];
-            g = Group.fromJson(json: gJson);
-          } else {
-            g = await _getMembersDetailsInGroup(group: group);
-          }
-        } else {
-          g = await _getMembersDetailsInGroup(group: group);
-        }
-
-        sortedGroupsList.add(g);
-      }
-
-      return sortedGroupsList
-          .map(
-            (e) => e.toJson(),
-          )
-          .toList();
+    if (result.error) {
+      return AppStorage.getGroups().map((e) => e.toJson()).toList();
     }
-    // log(result.body.toString());
-    return AppStorage.getGroups().map((e) => e.toJson()).toList();
+
+    return (result.messageBody?["data"] ?? []) as List;
   }
 
   static Future<HttpResponseModel> getGroupsOneTime() async {
-    final result = await ApiInterface.getRequest(
-        url: 'findoneuser/${AppStorage.getUser()!.userId}');
-    if (!result.error) {
-      Map<dynamic, dynamic> userJson = result.messageBody!["data"];
-      List userGroupsList = userJson["groups"];
-
-      final groupsList = userGroupsList
-          .map(
-            (e) => Group.fromJson(json: e),
-          )
-          .toList();
-      final sortedGroupsList = <Group>[];
-      final cachedGroupsList = AppStorage.getGroups();
-
-      /// We are trying to get and save all the firstName,lastName,userImage and Id;
-      /// And also send all unsent Chats in a group
-      for (final group in groupsList) {
-        Group g = group;
-
-        /// Now, im trying to save the user's details seperately on my end.
-        /// Only if the members have changed
-        /// First check if the cachedGroupsList contains this group
-
-        final containsGroup =
-            cachedGroupsList.map((e) => e.groupId).contains(group.groupId);
-        if (containsGroup) {
-          final cachedGroup = cachedGroupsList.firstWhere(
-            (element) => element.groupId == group.groupId,
-          );
-
-          /// If it contains this group, we then check if the members are the same;
-          final sameMembers = group.members.every(
-            (element) => cachedGroup.sortedMembers
-                .map((e) => e.userId)
-                .contains(element),
-          );
-
-          /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.
-          if (sameMembers) {
-            // Intentionaly not assign it directly as, messages (chats) may differ
-            final gJson = g.toJson();
-            gJson["sortedMembers"] = cachedGroup.toJson()["sortedMembers"];
-            g = Group.fromJson(json: gJson);
-          } else {
-            g = await _getMembersDetailsInGroup(group: group);
-          }
-        } else {
-          g = await _getMembersDetailsInGroup(group: group);
-        }
-
-        sortedGroupsList.add(g);
-      }
-
-      final body = result.messageBody ?? {};
-      body["data"] = sortedGroupsList
-          .map(
-            (e) => e.toJson(),
-          )
-          .toList();
-
-      return HttpResponseModel(
-          error: false, body: jsonEncode(body), code: result.code);
-    }
-    // log(result.body.toString());
-    return result;
+    return getUserGroups(userId: ClientProvider.readOnlyClient?.userId ?? "");
   }
 
   static Future<HttpResponseModel> getUserGroups(
       {required final String userId}) async {
-    final result = await ApiInterface.getRequest(url: 'findoneuser/$userId');
-    if (!result.error) {
-      Map<dynamic, dynamic> userJson = result.messageBody!["data"];
-      List userGroupsList = userJson["groups"];
+    var response = await ApiInterface.getRequest(url: "user/$userId/groups");
 
-      final groupsList = userGroupsList
-          .map(
-            (e) => Group.fromJson(json: e),
-          )
-          .toList();
-      final sortedGroupsList = <Map<dynamic, dynamic>>[];
-      final cachedGroupsList = [];
+    if (response.error) {
+      return HttpResponseModel(
+          error: true,
+          body: jsonEncode({"message": "Groups not found"}),
+          code: 400);
+    }
 
-      /// We are trying to get and save all the firstName,lastName,userImage and Id;
-      /// And also send all unsent Chats in a group
-      for (final group in groupsList) {
-        Group g = group;
+    Map<dynamic, dynamic> userJson = response.messageBody ?? {};
+    List userGroupsList = userJson["groups"] ?? [];
+    final groupsList = userGroupsList
+        .map(
+          (e) => Group.fromJson(json: e),
+        )
+        .toList();
+    final sortedGroupsList = <Map<dynamic, dynamic>>[];
+    final cachedGroupsList = [];
 
-        /// Now, im trying to save the user's details seperately on my end.
-        /// Only if the members have changed
-        /// First check if the cachedGroupsList contains this group
+    /// We are trying to get and save all the firstName,lastName,userImage and Id;
+    /// And also send all unsent Chats in a group
+    for (final group in groupsList) {
+      Group g = group;
 
-        final containsGroup =
-            cachedGroupsList.map((e) => e.groupId).contains(group.groupId);
-        if (containsGroup) {
-          final cachedGroup = cachedGroupsList.firstWhere(
-            (element) => element.groupId == group.groupId,
-          );
+      /// Now, im trying to save the user's details seperately on my end.
+      /// Only if the members have changed
+      /// First check if the cachedGroupsList contains this group
 
-          /// If it contains this group, we then check if the members are the same;
-          final sameMembers = group.members.every(
-            (element) => cachedGroup.sortedMembers
-                .map((e) => e.userId)
-                .contains(element),
-          );
+      final containsGroup =
+          cachedGroupsList.map((e) => e.groupId).contains(group.groupId);
+      if (containsGroup) {
+        final cachedGroup = cachedGroupsList.firstWhere(
+          (element) => element.groupId == group.groupId,
+        );
 
-          /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.
-          if (sameMembers) {
-            // Intentionaly not assign it directly as, messages (chats) may differ
-            final gJson = g.toJson();
-            gJson["sortedMembers"] = cachedGroup.toJson()["sortedMembers"];
-            g = Group.fromJson(json: gJson);
-          } else {
-            g = await _getMembersDetailsInGroup(group: group);
-          }
+        /// If it contains this group, we then check if the members are the same;
+        final sameMembers = group.members.every(
+          (element) =>
+              cachedGroup.sortedMembers.map((e) => e.userId).contains(element),
+        );
+
+        /// If it contains this sameMembers then we just assign it to the sortedGroup already stored in cache.
+        if (sameMembers) {
+          // Intentionaly not assign it directly as, messages (chats) may differ
+          final gJson = g.toJson();
+          gJson["sortedMembers"] = cachedGroup.toJson()["sortedMembers"];
+          g = Group.fromJson(json: gJson);
         } else {
           g = await _getMembersDetailsInGroup(group: group);
         }
-
-        sortedGroupsList.add(g.toJson());
+      } else {
+        g = await _getMembersDetailsInGroup(group: group);
       }
 
-      return HttpResponseModel(
-          error: false,
-          body: jsonEncode({
-            "message": result.messageBody?["message"],
-            "data": sortedGroupsList
-          }),
-          code: result.code);
+      sortedGroupsList.add(g.toJson());
     }
-    // log(result.body.toString());
-    return result;
+
+    return HttpResponseModel(
+        error: false,
+        body: jsonEncode({"message": "Groups Found", "data": sortedGroupsList}),
+        code: response.code);
   }
 
   static Future<Group> _getMembersDetailsInGroup(
       {required final Group group}) async {
     final fullMembersList = <Client>[];
+    final friends = AppStorage.getFriends();
     final membersList = group.members
         .where((element) => element.toString() != group.adminId)
         .toList();
     for (final userId in membersList) {
+      if (friends.any(
+        (element) => element.userId == userId,
+      )) {
+        final friend = friends.firstWhere(
+          (element) => element.userId == userId,
+        );
+
+        final clientJson = {
+          "id": friend.userId,
+          "firstName": friend.firstName,
+          "lastName": friend.lastName,
+          "userImage": friend.profile
+        };
+        fullMembersList.add(Client.fromJson(json: clientJson));
+        continue;
+      }
       final searchResponse = await ApiInterface.findUser(userId: userId);
       // log(searchResponse.body);
       if (!searchResponse.error) {

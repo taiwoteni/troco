@@ -6,7 +6,6 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
 import '../../../../chat/domain/entities/chat.dart';
