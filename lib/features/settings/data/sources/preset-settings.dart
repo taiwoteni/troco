@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/dialog-manager.dart';
+import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
@@ -53,7 +55,11 @@ List<SettingsModel> presetSettings(
         label: "Share Troco",
         icon: AssetManager.svgFile(name: "share"),
         settingsType: SettingsType.financial,
-        // onTap: () => Navigator.pushNamed(context, Routes.changeLanguageRoute),
+        onTap: () => {
+              Share.share(
+                  "Hey there!, I'm inviting you to Troco.\nThe greatest platform by Escrow for business.\n\nVisit our website here, to get the Android or iOS app:\nhttps://www.troco.ng.\n\nDo me a favour also, by acknowledging me as your referer😉.\nHere's my referall code:${AppStorage.getUser()?.referralCode}.\n\nHere's to the beginning of your seamless adventure✨",
+                  subject: "Welcome to Troco 🎉")
+            },
         iconType: IconType.svg),
     // SettingsModel(
     //     label: "Change Language",

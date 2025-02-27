@@ -1,12 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
-import 'package:troco/features/transactions/domain/entities/transaction.dart';
-import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 

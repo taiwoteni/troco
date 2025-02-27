@@ -1,9 +1,5 @@
-import 'dart:collection';
-
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/wallet/utils/enums.dart';
-
-import '../../../auth/domain/entities/client.dart';
 
 class Referral {
   final Map<dynamic, dynamic> _json;

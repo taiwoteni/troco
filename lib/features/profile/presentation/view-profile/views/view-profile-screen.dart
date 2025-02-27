@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/api/data/repositories/api-interface.dart';
@@ -7,8 +5,6 @@ import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/groups/domain/repositories/friend-repository.dart';
-import 'package:troco/features/groups/domain/repositories/group-repository.dart';
-import 'package:troco/features/groups/presentation/collections_page/widgets/empty-screen.dart';
 import 'package:troco/features/profile/presentation/view-profile/providers/client-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/providers/friends-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/providers/groups-provider.dart';
@@ -56,8 +52,7 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
     bool failure = false;
     setState(() => error = false);
 
-    return Future.wait(
-            [loadUser(), loadGroups(), loadFriends(), loadReferrals()],
+    return Future.wait([loadUser(), loadFriends(), loadReferrals()],
             eagerError: true)
         .timeout(
       const Duration(seconds: 45),
@@ -75,12 +70,17 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
           setState(() => error = true);
           return;
         }
-        final user = values.first as Client;
-        final groups = values[1] as List<Group>;
-        final friends = values[2] as List<Client>;
-        final referrals = values.last as List<Referral>;
+        final user = values.first as Map;
+        final friends = values[1] as List<Client>;
 
-        ref.read(userProfileProvider.notifier).state = user;
+        final groups = (user["groups"] as List)
+            .map(
+              (e) => Group.fromJson(json: e),
+            )
+            .toList();
+        final referrals = values[2] as List<Referral>;
+        ref.read(userProfileProvider.notifier).state =
+            Client.fromJson(json: user);
         ref.read(groupsProfileProvider.notifier).state = groups;
         ref.read(friendsProfileProvider.notifier).state = friends;
         ref.read(referralsProfileProvider.notifier).state = referrals;
@@ -93,7 +93,7 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
     );
   }
 
-  Future<Client> loadUser() {
+  Future<Map<dynamic, dynamic>> loadUser() {
     return ApiInterface.findUser(userId: widget.client.userId).onError(
       (error, stackTrace) {
         throw Exception(error);
@@ -110,9 +110,7 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
               "Unknown Error when getting user profile");
         }
 
-        final user = Client.fromJson(json: response.messageBody!["data"]);
-
-        return user;
+        return response.messageBody!["data"];
       },
     );
   }
@@ -131,7 +129,6 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
             loading = true;
           });
           throw Exception(friends.messageBody?["message"] ?? "Error occurred");
-          return Future.error(Exception(friends.messageBody?["message"] ?? ""));
         }
 
         return ((friends.messageBody?["data"] ?? []) as List)
@@ -156,8 +153,6 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
           });
           throw Exception(
               referrals.messageBody?["message"] ?? "Error occurred");
-          return Future.error(
-              Exception(referrals.messageBody?["message"] ?? ""));
         }
 
         return ((referrals.messageBody?["data"] ?? []) as List)
@@ -167,27 +162,27 @@ class _ViewProfileScreenState extends ConsumerState<ViewProfileScreen> {
     );
   }
 
-  Future<List<Group>> loadGroups() {
-    return GroupRepo.getUserGroups(userId: widget.client.userId).onError(
-      (error, stackTrace) {
-        throw Exception("Error");
-      },
-    ).then(
-      (groups) {
-        if (groups.error) {
-          setState(() {
-            error = true;
-            loading = true;
-          });
-          throw Exception(groups.messageBody?["message"] ?? "Error occurred");
-        }
+  // Future<List<Group>> loadGroups() {
+  //   return GroupRepo.getUserGroups(userId: widget.client.userId).onError(
+  //     (error, stackTrace) {
+  //       throw Exception("Error");
+  //     },
+  //   ).then(
+  //     (groups) {
+  //       if (groups.error) {
+  //         setState(() {
+  //           error = true;
+  //           loading = true;
+  //         });
+  //         throw Exception(groups.messageBody?["message"] ?? "Error occurred");
+  //       }
 
-        return ((groups.messageBody?["data"] ?? []) as List)
-            .map((json) => Group.fromJson(json: json))
-            .toList();
-      },
-    );
-  }
+  //       return ((groups.messageBody?["data"] ?? []) as List)
+  //           .map((json) => Group.fromJson(json: json))
+  //           .toList();
+  //     },
+  //   );
+  // }
 
   Widget oldProfileUi() {
     return SingleChildScrollView(
