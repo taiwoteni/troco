@@ -4,6 +4,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:troco/core/api/data/model/response-model.dart';
@@ -22,6 +23,7 @@ import 'package:troco/features/auth/data/models/otp-data.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 
 import '../../../../../core/app/routes-manager.dart';
+import '../../../../../core/app/theme-manager.dart';
 import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../utils/phone-number-converter.dart';
 
@@ -41,6 +43,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool primaryPasswordError = false;
   List<String> emails = [];
   List<String> phoneNumbers = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
+      (timeStamp) {
+        SystemChrome.setSystemUIOverlayStyle(
+            ThemeManager.getOnboardingUiOverlayStyle());
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
