@@ -29,7 +29,6 @@ import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/app/snackbar-manager.dart';
 import '../../../../core/components/animations/lottie.dart';
-import '../../../customer care/domain/repositories/customer-care-repository.dart';
 import '../../../groups/domain/entities/group.dart';
 
 class ChatWidget extends ConsumerStatefulWidget {

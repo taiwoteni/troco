@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/dialog-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
-import 'package:troco/features/notifications/presentation/widgets/notification-item-dialog.dart';
-import 'package:troco/features/notifications/utils/enums.dart';
 
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/color-manager.dart';

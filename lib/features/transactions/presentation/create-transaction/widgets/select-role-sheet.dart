@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
-import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/utils/service-role.dart';
 
 import '../../../../../core/app/color-manager.dart';

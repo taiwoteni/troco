@@ -1,14 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:developer';
-
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/drag-handle.dart';
 import 'package:troco/core/components/others/spacer.dart';

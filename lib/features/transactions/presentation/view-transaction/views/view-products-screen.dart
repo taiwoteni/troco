@@ -444,7 +444,7 @@ class _ViewProductScreenState extends ConsumerState<ViewProductScreen> {
 
   Widget escrowPercentage() {
     final product = items[productIndex];
-    final no = product.quantity;
+    // final no = product.quantity;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

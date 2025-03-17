@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/components/others/spacer.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/providers/client-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/providers/groups-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/widgets/groups-in-common-widget.dart';

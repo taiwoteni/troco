@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +15,6 @@ import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
-import '../../../../core/cache/shared-preferences.dart';
 import '../../../../core/components/images/svg.dart';
 import '../../../../core/components/others/spacer.dart';
 import '../../../../core/components/texts/inputs/currency_input_formatter.dart';

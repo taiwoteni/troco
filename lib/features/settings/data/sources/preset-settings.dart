@@ -57,7 +57,7 @@ List<SettingsModel> presetSettings(
         settingsType: SettingsType.financial,
         onTap: () => {
               Share.share(
-                  "Hey there!, I'm inviting you to Troco.\nThe greatest platform by Escrow for business.\n\nVisit our website here, to get the Android or iOS app:\nhttps://www.troco.ng.\n\nDo me a favour also, by acknowledging me as your referer😉.\nHere's my referall code:${AppStorage.getUser()?.referralCode}.\n\nHere's to the beginning of your seamless adventure✨",
+                  "Hello there! I welcome you to Troco Technology, the best escrow platform for your business. You're invited!\n\nTo get the Android or iOS app, visit our website here:\nhttps://www.troco.ng .\n\nAcknowledge this invite when registering by inputing my referall code: ${AppStorage.getUser()?.referralCode}.",
                   subject: "Welcome to Troco 🎉")
             },
         iconType: IconType.svg),

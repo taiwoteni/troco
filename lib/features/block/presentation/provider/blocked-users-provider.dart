@@ -5,7 +5,6 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/features/block/domain/repository/block-repository.dart';
-import 'package:troco/features/groups/domain/repositories/friend-repository.dart';
 
 import '../../../../../core/cache/shared-preferences.dart';
 import '../../../auth/domain/entities/client.dart';

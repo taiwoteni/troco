@@ -5,7 +5,6 @@ import 'dart:developer';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
@@ -442,8 +441,8 @@ class AppStorage {
 
   static Future<void> saveEscrowCharges(
       {required final List<EscrowCharge> escrowCharges}) async {
-    List<Map<dynamic, dynamic>> escrowChargesJson =
-        escrowCharges.map((e) => e.toJson()).toList();
+    // List<Map<dynamic, dynamic>> escrowChargesJson =
+    //     escrowCharges.map((e) => e.toJson()).toList();
 
     _pref!.setString(ESCROW_CHARGES_KEY, json.encode(escrowCharges));
   }

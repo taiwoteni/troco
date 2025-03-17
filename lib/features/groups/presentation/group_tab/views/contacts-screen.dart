@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:troco/core/api/data/repositories/api-interface.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
@@ -18,7 +17,6 @@ import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/font-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/others/spacer.dart';
-import '../../../../auth/domain/entities/client.dart';
 import '../../../../notifications/presentation/widgets/notification-menu-button.dart';
 import '../../collections_page/widgets/empty-screen.dart';
 
@@ -181,7 +179,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 contact: filteredContacts[index]),
             separatorBuilder: (context, index) {
               if (index == filteredContacts.length - 1) {
-                return const Gap(SizeManager.bottomBarHeight);
+                return Gap(SizeManager.bottomBarHeight);
               } else {
                 return Divider(
                   thickness: 0.8,

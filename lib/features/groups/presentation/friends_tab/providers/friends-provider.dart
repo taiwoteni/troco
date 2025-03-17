@@ -13,6 +13,9 @@ import '../../../../auth/domain/entities/client.dart';
 final friendsProvider =
     StateProvider<FriendRepository>((ref) => FriendRepository());
 
+final friendsListProvider =
+    StateProvider<List<Client>>((ref) => AppStorage.getFriends());
+
 /// The Future provider that helps us to perform
 /// The Future task of getting Referrals.
 final friendsFutureProvider =
@@ -55,6 +58,7 @@ final friendsStreamProvider = StreamProvider<List<Client>>(
 
             if (valuesAreDifferent) {
               AppStorage.saveFriends(friends: friendsList);
+              ref.read(friendsListProvider.notifier).state = friendsList;
               streamController.sink.add(friendsList);
             }
             ref.watch(friendsProvider.notifier).state = FriendRepository();

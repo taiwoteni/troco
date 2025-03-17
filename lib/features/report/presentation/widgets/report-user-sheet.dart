@@ -1,16 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:path/path.dart' as Path;
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
-import 'package:troco/features/settings/domain/repository/settings-repository.dart';
-import 'package:troco/features/transactions/utils/write-up-document-type.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';

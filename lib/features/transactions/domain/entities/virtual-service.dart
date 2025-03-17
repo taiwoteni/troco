@@ -32,7 +32,7 @@ class VirtualService extends SalesItem {
             (e) => e.toString(),
           )
           .toList();
-    } on TypeError catch (e) {
+    } on TypeError {
       final list = <String>[];
       list.add(_json["proofOfWork"] ?? "");
       return list;

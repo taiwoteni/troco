@@ -4,15 +4,11 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/block/presentation/provider/blocked-users-provider.dart';
 import 'package:troco/features/block/presentation/widgets/blocked-user-widget.dart';
-import 'package:troco/features/wallet/domain/entities/referral.dart';
-import 'package:troco/features/wallet/presentation/providers/referrals-provider.dart';
-import 'package:troco/features/wallet/presentation/widgets/referral-widget.dart';
 
 import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/others/spacer.dart';
-import '../../../../core/components/texts/outputs/info-text.dart';
 import '../../../auth/domain/entities/client.dart';
 import '../../../groups/presentation/collections_page/widgets/empty-screen.dart';
 

@@ -15,6 +15,9 @@ import '../../../../chat/presentation/providers/chat-provider.dart';
 /// the Group Repo class. Inorder reload to be on the safer side when looking for changes.
 final groupRepoProvider = StateProvider<GroupRepo>((ref) => GroupRepo());
 
+final groupsListProvider =
+    StateProvider<List<Group>>((ref) => AppStorage.getGroups());
+
 /// The Future provider that helps us to perform
 /// The Future task of getting Groups.
 final groupsFutureProvider = FutureProvider<List<dynamic>>((ref) async {
@@ -78,6 +81,10 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
                 // )
                 .toList();
 
+            groupsList.sort(
+              (a, b) => b.createdTime.compareTo(a.createdTime),
+            );
+
             // log("Data Group Names from API: ${groupsList.map((e) => e.groupName).toList()}");
             // log("Data Group Names from Cache: ${AppStorage.getGroups().map((e) => e.groupName).toList()}/n");
 
@@ -109,6 +116,7 @@ final groupsStreamProvider = StreamProvider<List<Group>>(
                   AppStorage.saveChats(chats: chats, groupId: group.groupId);
                 }
               }
+              ref.read(groupsListProvider.notifier).state = groupsList;
               streamController.sink.add(groupsList);
             }
             ref.watch(groupRepoProvider.notifier).state = GroupRepo();

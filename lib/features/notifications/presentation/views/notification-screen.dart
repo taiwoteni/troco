@@ -1,11 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
-import 'package:troco/features/notifications/domain/repository/notification-repository.dart';
 import 'package:troco/features/notifications/presentation/providers/notification-provider.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-item-widget.dart';
 import 'package:troco/features/notifications/presentation/widgets/notification-menu-button.dart';

@@ -4,7 +4,6 @@ import 'package:troco/core/components/button/presentation/provider/button-provid
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
-import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
 
 import '../../../../../core/app/color-manager.dart';

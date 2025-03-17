@@ -114,18 +114,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> saveAllUsersPhones() async {
-    final response = await ApiInterface.searchUser(query: "");
+    final response = await ApiInterface.getAllUsersNumbers();
     if (!response.error) {
-      final users = response.messageBody!["data"] as List;
-      final allUsersPhone = users.map(
-        (e) {
-          final json = e as Map<dynamic, dynamic>;
-          e.remove("groups");
-          e.remove("transactions");
-
-          return Client.fromJson(json: json);
-        },
-      ).toList();
+      final users = (response.messageListBody ?? []);
+      final allUsersPhone = users
+          .map(
+            (e) => Client.fromJson(json: e),
+          )
+          .toList();
       AppStorage.saveAllUsersPhone(phones: allUsersPhone);
     }
   }
@@ -171,5 +167,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // debugPrint(response.body);
   }
+
   //5781e0
 }

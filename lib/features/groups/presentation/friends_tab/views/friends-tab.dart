@@ -41,8 +41,9 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
     //Because of queries from the searchProvider
 
     final filteredFriends = ref.watch(collectionsSearchProvider).trim().isEmpty
-        ? friends.toSet().toList()
-        : friends
+        ? ref.watch(friendsListProvider).toSet().toList()
+        : ref
+            .watch(friendsListProvider)
             .where((element) => element.fullName.toLowerCase().contains(
                 ref.watch(collectionsSearchProvider).trim().toLowerCase()))
             .toSet()
@@ -82,7 +83,7 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
                             fontSize: FontSizeManager.regular * 0.85,
                             text:
                                 "Your Clients are your added contacts who are Troco users.")),
-                    const Gap(SizeManager.bottomBarHeight)
+                    Gap(SizeManager.bottomBarHeight)
                   ],
                 ],
               );
@@ -101,7 +102,6 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
           setState(
             () => friends = data,
           );
-          setState(() {});
         },
         error: (error, stackTrace) => null,
         loading: () => null,

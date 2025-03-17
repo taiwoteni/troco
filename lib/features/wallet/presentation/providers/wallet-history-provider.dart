@@ -4,10 +4,8 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 import 'package:troco/features/wallet/domain/repository/wallet-repository.dart';
-import 'package:troco/features/wallet/presentation/views/wallet-history-screen.dart';
 
 import '../../../../core/cache/shared-preferences.dart';
 

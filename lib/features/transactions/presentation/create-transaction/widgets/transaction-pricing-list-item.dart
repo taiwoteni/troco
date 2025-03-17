@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,16 +9,12 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/sales-item.dart';
-import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/pricings-notifier.dart';
-import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/size-manager.dart';
 import '../../../../../core/components/images/svg.dart';
-import '../../../domain/entities/product.dart';
-import '../../../domain/entities/service.dart';
 
 class TransactionPricingListWidget extends ConsumerStatefulWidget {
   SalesItem item;

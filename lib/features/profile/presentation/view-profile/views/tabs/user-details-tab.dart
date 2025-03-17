@@ -17,7 +17,6 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
-import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/providers/client-provider.dart';
 import 'package:troco/features/report/presentation/widgets/report-user-sheet.dart';

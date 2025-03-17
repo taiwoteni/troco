@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/features/about%20us/presentation/widgets/fade-slide-in-widget.dart';
 import 'package:troco/features/about%20us/utils/enums.dart';

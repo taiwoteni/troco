@@ -43,7 +43,7 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
             header(),
             extraLargeSpacer(),
             servicesList(),
-            const Gap(SizeManager.bottomBarHeight),
+            Gap(SizeManager.bottomBarHeight),
           ],
         ),
       ),

@@ -1,21 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
-import 'package:troco/core/app/theme-manager.dart';
-import 'package:troco/core/extensions/text-extensions.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
-import 'package:troco/features/profile/presentation/view-profile/providers/client-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/providers/tab-index-provider.dart';
 import 'package:troco/features/profile/presentation/view-profile/widgets/body-section.dart';
 import 'package:troco/features/profile/presentation/view-profile/widgets/header-section.dart';
-
-import '../../../../../core/app/asset-manager.dart';
-import '../../../../../core/components/images/svg.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});

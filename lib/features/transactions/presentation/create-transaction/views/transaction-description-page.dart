@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:troco/core/components/others/spacer.dart';
@@ -10,8 +8,6 @@ import 'package:troco/core/components/texts/outputs/info-text.dart';
 import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
-import 'package:troco/features/transactions/utils/date-input-formatter.dart';
-import 'package:troco/features/transactions/utils/date-verification-validation.dart';
 import 'package:troco/features/transactions/utils/month-converter.dart';
 
 import '../../../../../core/app/color-manager.dart';
@@ -22,7 +18,6 @@ import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../../core/components/texts/inputs/dropdown-input-field.dart';
 import '../../../utils/enums.dart';
 import '../../../utils/month-enum.dart';
-import '../../create-transaction/providers/create-transaction-provider.dart';
 
 class TransactionDescriptionPage extends ConsumerStatefulWidget {
   const TransactionDescriptionPage({super.key});
@@ -170,8 +165,8 @@ class _TransactionDescriptionPageState
   Widget aboutProducts() {
     final isService = TransactionDataHolder.transactionCategory ==
         TransactionCategory.Service;
-    final isVirtual = TransactionDataHolder.transactionCategory ==
-        TransactionCategory.Virtual;
+    // final isVirtual = TransactionDataHolder.transactionCategory ==
+    //     TransactionCategory.Virtual;
 
     final TransactionCategory category =
         TransactionDataHolder.transactionCategory ??
@@ -443,9 +438,7 @@ class _TransactionDescriptionPageState
 
     bool februaryValid = selectedYear != null &&
         (selectedMonth == Month.Feb
-            ? (selectedYear! % 4 == 0
-                ? (selectedDay ?? 0) <= 29
-                : (selectedDay ?? 0) <= 28)
+            ? (selectedYear! % 4 == 0 ? selectedDay <= 29 : selectedDay <= 28)
             : true);
 
     return selectedMonth != null &&

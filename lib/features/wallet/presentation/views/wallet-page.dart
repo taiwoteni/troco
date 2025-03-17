@@ -55,7 +55,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
 
   @override
   Widget build(BuildContext context) {
-    const padding = EdgeInsets.only(
+    final padding = EdgeInsets.only(
         right: SizeManager.medium,
         left: SizeManager.medium,
         bottom: SizeManager.bottomBarHeight);
@@ -354,7 +354,7 @@ class _WalletPageState extends ConsumerState<WalletPage>
                       WalletTransactionWidget(
                           transaction: walletHistory[index]),
                       if (index == 2 || index == walletHistory.length - 1)
-                        const Gap(SizeManager.bottomBarHeight)
+                        Gap(SizeManager.bottomBarHeight)
                     ],
                   ),
               separatorBuilder: (context, index) => Divider(

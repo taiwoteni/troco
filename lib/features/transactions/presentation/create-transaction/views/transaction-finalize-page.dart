@@ -19,7 +19,6 @@ import '../../../../../core/components/button/presentation/widget/button.dart';
 import '../../../../groups/domain/entities/group.dart';
 import '../../../domain/entities/transaction.dart';
 import '../../../utils/enums.dart';
-import '../../../utils/transaction-category-converter.dart';
 import '../../view-transaction/widgets/select-return-product-widget.dart';
 import '../widgets/transaction-pin-widget.dart';
 import 'create-transaction-progress-screen.dart';

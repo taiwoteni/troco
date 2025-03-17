@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
-import 'package:troco/core/app/routes-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
-import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/providers/ction-screen-provider.dart';
 import '../../../../../core/app/color-manager.dart';
 
 class TransactionSuccessScreen extends ConsumerStatefulWidget {

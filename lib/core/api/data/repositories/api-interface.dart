@@ -255,6 +255,11 @@ class ApiInterface {
     return result;
   }
 
+  static Future<HttpResponseModel> getAllUsersNumbers() async {
+    final result = await getRequest(url: 'user_phoneNumber');
+    return result;
+  }
+
   static Future<HttpResponseModel> findUser({
     required final String userId,
     final Map<String, String>? headers,

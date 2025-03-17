@@ -1,19 +1,14 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:contacts_service/contacts_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
-import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
-import 'package:troco/features/auth/utils/phone-number-converter.dart';
 import 'package:troco/features/block/domain/repository/block-repository.dart';
 
 import '../../../../../core/app/color-manager.dart';

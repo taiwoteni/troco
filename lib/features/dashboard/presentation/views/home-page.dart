@@ -125,7 +125,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         label: "You do not have any transactions.",
         expanded: true,
       ),
-      const Gap(SizeManager.bottomBarHeight)
+      Gap(SizeManager.bottomBarHeight)
     ]);
   }
 
@@ -138,7 +138,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           const TransactionOverview(),
           largeSpacer(),
           const LatestTransactionsList(),
-          const Gap(SizeManager.bottomBarHeight)
+          Gap(SizeManager.bottomBarHeight)
         ],
       ),
     );

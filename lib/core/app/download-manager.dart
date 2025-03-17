@@ -1,10 +1,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart' as Path;
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:troco/core/app/snackbar-manager.dart';

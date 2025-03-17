@@ -104,10 +104,8 @@ class TransactionDataHolder {
     id = transaction.transactionId;
 
     if (transactionCategory == TransactionCategory.Service) {
-      totalCost = items?.fold(
-          0.0,
-          (previousValue, element) =>
-              (previousValue ?? 0) + (element.price ?? 0));
+      totalCost = items?.fold(0.0,
+          (previousValue, element) => (previousValue ?? 0) + (element.price));
     }
   }
 }

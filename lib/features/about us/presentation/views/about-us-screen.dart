@@ -55,36 +55,36 @@ class _AboutUsScreenState extends ConsumerState<AboutUsScreen> {
                       text:
                           "Troco Limited, via its head office located opposite near Ibuzo Junction asaba, and its operating subsidiaries offer online escrow services that speed up and ease e-commerce by guaranteeing a safe settlement.\n\nThe act of providing online escrow services was invented as Troco Limited. Although it was not yet providing services online, the company was launched in 2018 and is now regarded as one of the top suppliers of secure online business and consumer transaction management, according to Trust National Finance. A team individuals who have been active in Nigeria interstate business scene over a couple of years ownership Troco Limited.\n\nInternet Escrow Services (Social Media) (IES Technologies), one of Troco Limitedited's operating business enterprises, is the exclusive provider of escrow services available on this platform. IES devices complies with all applicable trust legislation and is fully licensed and recognized as an escrow firm.")),
               largeSpacer(),
-              FadeSlideWidget(
-                  delay: const Duration(seconds: 7),
-                  direction: SlideDirection.left,
-                  mustBeVisible: true,
-                  child: header(text: "The Executives")),
-              mediumSpacer(),
-              FadeSlideWidget(
-                  direction: SlideDirection.left,
-                  delay: const Duration(seconds: 8),
-                  mustBeVisible: true,
-                  child: content(
-                      text:
-                          "The executive leadership team of Troco Limited is made up of seasoned experts that have led their companies in their fields and have a wealth of knowledge. Our leadership team is committed to carrying out the business's goal, upholding Troco Limited's distinctive and effective work environment, and making sure we provide our marketplaces and clients with excellent support.")),
-              FadeSlideWidget(
-                  delay: const Duration(seconds: 9),
-                  direction: SlideDirection.right,
-                  mustBeVisible: true,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      mediumSpacer(),
-                      subHeader(text: "Mr. Bonaventure Ibeh"),
-                      regularSpacer(),
-                      author(),
-                      regularSpacer(),
-                      content(
-                          text:
-                              "Business technology entrepreneur Bonaventure Ibeh studied Seo Marketing and information engineering and was an adjunct associate at the University of England Huddersfield's Department of ICT Institutions Afriserver. He spent five years teaching secure communication and then moved on to teach technology venture creation. More than three NG. patent applications are authored by him. In the past, he established a corporation as a director and Executive for writers.")
-                    ],
-                  )),
+              // FadeSlideWidget(
+              //     delay: const Duration(seconds: 7),
+              //     direction: SlideDirection.left,
+              //     mustBeVisible: true,
+              //     child: header(text: "The Executives")),
+              // mediumSpacer(),
+              // FadeSlideWidget(
+              //     direction: SlideDirection.left,
+              //     delay: const Duration(seconds: 8),
+              //     mustBeVisible: true,
+              //     child: content(
+              //         text:
+              //             "The executive leadership team of Troco Limited is made up of seasoned experts that have led their companies in their fields and have a wealth of knowledge. Our leadership team is committed to carrying out the business's goal, upholding Troco Limited's distinctive and effective work environment, and making sure we provide our marketplaces and clients with excellent support.")),
+              // FadeSlideWidget(
+              //     delay: const Duration(seconds: 9),
+              //     direction: SlideDirection.right,
+              //     mustBeVisible: true,
+              //     child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         mediumSpacer(),
+              //         subHeader(text: "Mr. Bonaventure Ibeh"),
+              //         regularSpacer(),
+              //         author(),
+              //         regularSpacer(),
+              //         content(
+              //             text:
+              //                 "Business technology entrepreneur Bonaventure Ibeh studied Seo Marketing and information engineering and was an adjunct associate at the University of England Huddersfield's Department of ICT Institutions Afriserver. He spent five years teaching secure communication and then moved on to teach technology venture creation. More than three NG. patent applications are authored by him. In the past, he established a corporation as a director and Executive for writers.")
+              //       ],
+              //     )),
               // FadeSlideWidget(
               //     delay: const Duration(seconds: 10),
               //     direction: SlideDirection.right,

@@ -60,7 +60,7 @@ android {
         // previous targetSdkVersion: 33
         targetSdkVersion 34
         //previous versionCode: flutterVersionCode.toInteger()
-        versionCode 1
+        versionCode 2
         versionName flutterVersionName
     }
 

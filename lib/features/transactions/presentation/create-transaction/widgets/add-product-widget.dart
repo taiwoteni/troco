@@ -18,7 +18,6 @@ import 'package:troco/features/transactions/domain/entities/product.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/product-condition-converter.dart';
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -32,7 +31,6 @@ import '../../../../../core/components/texts/inputs/currency_input_formatter.dar
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../services/domain/entities/escrow-fee.dart';
-import '../../../data/models/create-transaction-data-holder.dart';
 import '../providers/pricings-notifier.dart';
 import '../views/view-added-products-screen.dart';
 
@@ -147,9 +145,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
   }
 
   Widget title() {
-    final TransactionCategory category =
-        TransactionDataHolder.transactionCategory ??
-            TransactionCategory.Product;
+    // final TransactionCategory category =
+    //     TransactionDataHolder.transactionCategory ??
+    //         TransactionCategory.Product;
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -188,9 +186,9 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
   }
 
   Widget productName() {
-    final TransactionCategory category =
-        TransactionDataHolder.transactionCategory ??
-            TransactionCategory.Product;
+    // final TransactionCategory category =
+    //     TransactionDataHolder.transactionCategory ??
+    //         TransactionCategory.Product;
     return Column(
       children: [
         InfoText(

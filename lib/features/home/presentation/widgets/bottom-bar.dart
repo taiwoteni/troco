@@ -7,9 +7,6 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/features/home/data/models/home-item-model.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 
-import '../../../auth/presentation/providers/client-provider.dart';
-import '../../../transactions/utils/enums.dart';
-
 class BottomBar extends ConsumerStatefulWidget {
   final List<HomeItemModel> pages;
   const BottomBar({super.key, required this.pages});

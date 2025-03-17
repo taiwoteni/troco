@@ -151,18 +151,24 @@ class GroupRepo {
         fullMembersList.add(Client.fromJson(json: clientJson));
         continue;
       }
-      final searchResponse = await ApiInterface.findUser(userId: userId);
-      // log(searchResponse.body);
-      if (!searchResponse.error) {
-        final userJson = searchResponse.messageBody!["data"];
-        final clientJson = {
-          "id": userJson["_id"],
-          "firstName": userJson["firstName"],
-          "lastName": userJson["lastName"],
-          "userImage": userJson["userImage"]
+      var clientJson = {};
+      if (userId == ClientProvider.readOnlyClient?.userId) {
+        clientJson = {
+          "id": ClientProvider.readOnlyClient?.userId,
+          "firstName": ClientProvider.readOnlyClient?.firstName,
+          "lastName": ClientProvider.readOnlyClient?.lastName,
+          "userImage": ClientProvider.readOnlyClient?.profile
         };
-        fullMembersList.add(Client.fromJson(json: clientJson));
+      } else {
+        clientJson = {
+          "id": userId,
+          "firstName": "Loading",
+          "lastName": "Name...",
+          "userImage": "null"
+        };
       }
+
+      fullMembersList.add(Client.fromJson(json: clientJson));
     }
     // We add the admin as a client as well. Although it's wrong :)
     fullMembersList.add(Client.fromJson(json: {

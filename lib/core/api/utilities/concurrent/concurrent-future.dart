@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 abstract class ProgressStream<T extends Object?> {
   T onProgress(void Function(double) onProgress);
@@ -30,9 +29,9 @@ class ConcurrentFuture<T extends Object?>
         results.add(result);
       }
       return results;
-    } on Error catch (e) {
+    } on Error {
       return null;
-    } on Exception catch (e) {
+    } on Exception {
       return null;
     }
   }
@@ -46,9 +45,9 @@ class ConcurrentFuture<T extends Object?>
         results.add(result);
       }
       return results;
-    } on Error catch (e) {
+    } on Error {
       return results;
-    } on Exception catch (e) {
+    } on Exception {
       return results;
     }
   }

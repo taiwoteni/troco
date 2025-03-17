@@ -13,7 +13,6 @@ import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/animations/lottie.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/settings/presentation/settings-page/providers/settings-provider.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/widgets/receipt-widget.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});

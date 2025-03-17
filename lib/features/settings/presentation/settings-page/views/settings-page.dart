@@ -45,7 +45,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             appBar(),
             smallSpacer(),
             settingsList(),
-            const Gap(SizeManager.bottomBarHeight)
+            Gap(SizeManager.bottomBarHeight)
           ],
         ),
       ),

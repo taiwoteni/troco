@@ -18,7 +18,6 @@ import 'package:troco/core/extensions/string-extension.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
 import 'package:troco/features/transactions/utils/virtual-service-requirement-converter.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';

@@ -2,13 +2,10 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:clipboard/clipboard.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/painting.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -18,6 +15,7 @@ import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/texts/outputs/info-text.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/payments/domain/entity/account-method.dart';
 import 'package:troco/features/payments/domain/entity/card-method.dart';
 import 'package:troco/features/payments/domain/entity/payment-method.dart';
@@ -49,7 +47,6 @@ import 'package:troco/features/transactions/presentation/view-transaction/widget
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/upload-item-sheet.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/upload-task-sheet.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
-import 'package:troco/features/transactions/utils/service-role.dart';
 import 'package:troco/features/transactions/utils/transaction-category-converter.dart';
 
 import '../../../../report/presentation/widgets/report-transaction-sheet.dart';
@@ -1523,7 +1520,7 @@ class _TransactionsDetailPageState
         transaction.transactionCategory == TransactionCategory.Virtual;
     final isService =
         transaction.transactionCategory == TransactionCategory.Service;
-    final startedLeading = transaction.sellerStarteedLeading;
+    // final startedLeading = transaction.sellerStarteedLeading;
 
     final buttons = <Widget>[];
 
@@ -1930,7 +1927,7 @@ class _TransactionsDetailPageState
 
     await Future.delayed(const Duration(seconds: 2));
     if (!satisfied) {
-      final reason = await ReasonSheet.bottomSheet(
+      await ReasonSheet.bottomSheet(
           context: context,
           title: "Reason",
           label: "Why aren't you satisfied?");
@@ -1957,7 +1954,7 @@ class _TransactionsDetailPageState
     await Future.delayed(const Duration(seconds: 2));
 
     if (!satisfied) {
-      final reason = await ReasonSheet.bottomSheet(
+      await ReasonSheet.bottomSheet(
           context: context,
           title: "Reason",
           label: "Why aren't you satisfied?");
@@ -2155,7 +2152,7 @@ class _TransactionsDetailPageState
   Future<void> acceptTransaction() async {
     ButtonProvider.startLoading(buttonKey: okKey, ref: ref);
     final result = await TransactionRepo.respondToTransaction(
-        approve: true, transaction: transaction);
+        approve: true, transaction: transaction, ref: ref);
     log(result.body);
     if (result.error) {
       ButtonProvider.stopLoading(buttonKey: okKey, ref: ref);
@@ -2169,7 +2166,7 @@ class _TransactionsDetailPageState
   Future<void> rejectTransaction() async {
     ButtonProvider.startLoading(buttonKey: cancelKey, ref: ref);
     final result = await TransactionRepo.respondToTransaction(
-        approve: false, transaction: transaction);
+        approve: false, transaction: transaction, ref: ref);
 
     debugPrint(result.body);
 
@@ -2180,6 +2177,7 @@ class _TransactionsDetailPageState
             ? "Error rejecting terms"
             : "Rejected Terms Successfully");
     ButtonProvider.stopLoading(buttonKey: cancelKey, ref: ref);
+    context.pop();
   }
 
   Future<void> listenToTransactionsChanges() async {

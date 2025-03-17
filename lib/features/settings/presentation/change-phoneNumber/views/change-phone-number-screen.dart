@@ -1,4 +1,3 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
@@ -6,11 +5,9 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
-import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/otp/views/otp-screen.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/auth/utils/phone-number-converter.dart';
-import 'package:troco/features/settings/domain/repository/edit-profile-repository.dart';
 import 'package:troco/features/settings/domain/repository/settings-repository.dart';
 
 import '../../../../../core/app/asset-manager.dart';

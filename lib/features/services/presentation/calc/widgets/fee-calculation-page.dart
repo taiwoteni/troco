@@ -5,7 +5,6 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/features/services/domain/entities/escrow-fee.dart';
-import 'package:troco/features/transactions/utils/enums.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';

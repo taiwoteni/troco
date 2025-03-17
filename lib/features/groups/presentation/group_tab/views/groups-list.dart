@@ -77,7 +77,7 @@ class _GroupListState extends ConsumerState<GroupList> {
                       group: groups[index],
                     ),
                     if (index == groups.length - 1)
-                      const Gap(SizeManager.bottomBarHeight)
+                      Gap(SizeManager.bottomBarHeight)
                     else
                       Divider(
                         thickness: 0.8,

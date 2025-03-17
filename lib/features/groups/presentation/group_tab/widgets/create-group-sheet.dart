@@ -15,8 +15,11 @@ import 'package:troco/core/components/others/drag-handle.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/texts/inputs/text-form-field.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
+import 'package:troco/core/extensions/list-extension.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
+import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
+import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 
 import '../../../../../core/components/texts/outputs/info-text.dart';
 
@@ -220,7 +223,36 @@ class _CreateGroupSheetState extends ConsumerState<CreateGroupSheet> {
         // List jsonList = json["groups"];
         // log("List of groups checked immediately after commiting a new group : ${jsonList.map((e) => e["name"]).toList()}");
         // await AppStorage.saveGroups(groups: groups);
+        final data = (result.messageBody?["group"] ?? groupJson) as Map;
+        data["sortedMembers"] = (data["members"] as List).toListString().map(
+          (id) {
+            /// By default, when a group is just created,
+            /// the only members are the creator and the assigned admin.
+            /// That way, we can easily distinguish the admin from the creator and map the results as `sortedMembers`.
+            if (id == ClientProvider.readOnlyClient?.userId) {
+              return {
+                "id": ClientProvider.readOnlyClient?.userId,
+                "firstName": ClientProvider.readOnlyClient?.firstName,
+                "lastName": ClientProvider.readOnlyClient?.lastName,
+                "userImage": ClientProvider.readOnlyClient?.profile
+              };
+            }
+            return {
+              "id": id,
+              "firstName": "Admin",
+              "lastName": "",
+              "userImage": null
+            };
+          },
+        ).toList();
+        ref
+            .read(groupsListProvider.notifier)
+            .state
+            .add(Group.fromJson(json: data));
 
+        ref.read(groupsListProvider.notifier).state.sort(
+              (a, b) => b.createdTime.compareTo(a.createdTime),
+            );
         SnackbarManager.showBasicSnackbar(
             context: context,
             message: "Created order successfully",

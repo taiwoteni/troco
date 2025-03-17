@@ -9,7 +9,6 @@ import '../../../../../../core/app/size-manager.dart';
 import '../../../../../../core/components/others/spacer.dart';
 import '../../../../../auth/presentation/providers/client-provider.dart';
 import '../../../../../groups/presentation/collections_page/widgets/empty-screen.dart';
-import '../../../../../notifications/presentation/widgets/notification-menu-button.dart';
 import '../../providers/client-provider.dart';
 
 class ReferralsTab extends ConsumerStatefulWidget {

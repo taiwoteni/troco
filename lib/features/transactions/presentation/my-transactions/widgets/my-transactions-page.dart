@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:troco/features/transactions/presentation/my-transactions/widgets/my-transactions-list.dart';
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';

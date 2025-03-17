@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_local_variable
 
 import 'dart:developer';
 
@@ -23,18 +23,19 @@ import 'package:troco/features/auth/data/models/otp-data.dart';
 import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
-import 'package:troco/features/auth/presentation/welcome-back/views/pin-entry-screen.dart';
 import 'package:troco/features/chat/domain/entities/chat.dart';
 import 'package:troco/features/groups/domain/entities/group.dart';
 import 'package:troco/features/groups/domain/repositories/friend-repository.dart';
 import 'package:troco/features/groups/domain/repositories/group-repository.dart';
+import 'package:troco/features/groups/presentation/friends_tab/providers/friends-provider.dart';
+import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
 import 'package:troco/features/home/presentation/providers/home-pages-provider.dart';
 import 'package:troco/features/kyc/utils/enums.dart';
 import 'package:troco/features/kyc/utils/kyc-converter.dart';
 import 'package:troco/features/settings/utils/enums.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
+import 'package:troco/features/transactions/presentation/create-transaction/widgets/transaction-pin-widget.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
-import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/domain/repository/wallet-repository.dart';
 import 'package:troco/features/wallet/presentation/providers/referrals-provider.dart';
 
@@ -301,184 +302,163 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> next() async {
     LoginData.clear();
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
-    if (formKey.currentState!.validate()) {
-      formKey.currentState!.save();
-      final response = await (LoginData.email != null
-          ? AuthenticationRepo.loginUserEmail(
-              email: LoginData.email!, password: LoginData.password!)
-          : AuthenticationRepo.loginUserPhone(
-              phoneNumber: LoginData.phoneNumber!,
-              password: LoginData.password!));
-      log("Logged In");
-      debugPrint("login:${response.body}");
 
-      if (response.error) {
-        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-        setState(() => errorText = "*${response.messageBody!["message"]}");
-      } else {
-        /// ok now we logged in.
-        /// But there's still a slight problem :(
-        /// in some cases, users may have registered accounts
-        /// but may not have created it completely & successfully
-        /// so as an anointed developer, i should check that and then
-        /// redirect to the other data page if possible
-        setState(() => errorText = null);
-        Map<dynamic, dynamic> map = response.messageBody!["data"];
+    if (!formKey.currentState!.validate()) {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      return;
+    }
 
-        if ((map["firstName"]?.toString().trim().isEmpty ?? true) ||
-            map["userImage"] == null ||
-            map["transactionPin"] == null) {
-          /// then user did not complete registration
+    formKey.currentState!.save();
+    final response = await (LoginData.email != null
+        ? AuthenticationRepo.loginUserEmail(
+            email: LoginData.email!, password: LoginData.password!)
+        : AuthenticationRepo.loginUserPhone(
+            phoneNumber: LoginData.phoneNumber!,
+            password: LoginData.password!));
+    log("Logged In");
+    debugPrint("login:${response.body}");
 
-          /// email and password were already collected at the beginning when validating :)
-          LoginData.id = map["_id"];
-          LoginData.email = map["email"];
-          LoginData.phoneNumber = map["phoneNumber"];
-          LoginData.transactionPin = map["transactionPin"];
-          // if (map["userImage"] != null) {
-          //   LoginData.profile = map["userImage"];
-          // }
-          if (map["firstName"] == null ||
-              map["firstName"].toString().trim().isEmpty) {
-            // If secondary details like firstName were not setup when logging in.
-            // Clients will be asked to verify OTP first.
+    if (response.error) {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      setState(() => errorText = "*${response.messageBody!["message"]}");
+    } else {
+      /// ok now we logged in.
+      /// But there's still a slight problem :(
+      /// in some cases, users may have registered accounts
+      /// but may not have created it completely & successfully
+      /// so as an anointed developer, i should check that and then
+      /// redirect to the other data page if possible
+      setState(() => errorText = null);
+      Map<dynamic, dynamic> map = response.messageBody!["data"];
 
-            final response =
-                await AuthenticationRepo.resendOTP(userId: LoginData.id!);
-            log(response.body);
-            if (response.error) {
-              ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-              SnackbarManager.showErrorSnackbar(
-                  context: context,
-                  message: "Error logging in. Try again later.");
-              return;
-            }
+      if ((map["firstName"]?.toString().trim().isEmpty ?? true) ||
+          map["userImage"] == null ||
+          map["transactionPin"] == null) {
+        /// then user did not complete registration
 
-            OtpData.id = map["_id"];
-            OtpData.email = LoginData.email;
-            OtpData.phoneNumber = map["phoneNumber"];
-            LoginData.otp = response.messageBody?["otp"];
-            final verified =
-                (await Navigator.pushNamed(context, Routes.otpRoute) as bool? ??
-                    false);
+        /// email and password were already collected at the beginning when validating :)
+        LoginData.id = map["_id"];
+        LoginData.email = map["email"];
+        LoginData.phoneNumber = map["phoneNumber"];
+        LoginData.transactionPin = map["transactionPin"];
+        // if (map["userImage"] != null) {
+        //   LoginData.profile = map["userImage"];
+        // }
+        if (map["firstName"] == null ||
+            map["firstName"].toString().trim().isEmpty) {
+          // If secondary details like firstName were not setup when logging in.
+          // Clients will be asked to verify OTP first.
+
+          final response =
+              await AuthenticationRepo.resendOTP(userId: LoginData.id!);
+          log(response.body);
+          if (response.error) {
             ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-            if (verified) {
-              OtpData.clear();
-              Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
-              return;
-            }
+            SnackbarManager.showErrorSnackbar(
+                context: context,
+                message: "Error logging in. Try again later.");
             return;
           }
-          // if (map["userImage"] == null) {
-          //
-          //   LoginData.initializeFromClient(client: Client.fromJson(json: map));
-          //   Navigator.pushNamed(context, Routes.addProfileRoute);
-          //   return;
-          // }
-          if (map["transactionPin"] == null) {
-            LoginData.initializeFromClient(client: Client.fromJson(json: map));
-            Navigator.pushNamed(context, Routes.addTransactionPinRoute);
+
+          OtpData.id = map["_id"];
+          OtpData.email = LoginData.email;
+          OtpData.phoneNumber = map["phoneNumber"];
+          LoginData.otp = response.messageBody?["otp"];
+          final verified =
+              (await Navigator.pushNamed(context, Routes.otpRoute) as bool? ??
+                  false);
+          ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+          if (verified) {
+            OtpData.clear();
+            Navigator.pushReplacementNamed(context, Routes.setupAccountRoute);
             return;
           }
-          LoginData.initializeFromClient(client: Client.fromJson(json: map));
-
-          Navigator.pushNamed(context, Routes.setupAccountRoute);
-
           return;
         }
+        // if (map["userImage"] == null) {
+        //
+        //   LoginData.initializeFromClient(client: Client.fromJson(json: map));
+        //   Navigator.pushNamed(context, Routes.addProfileRoute);
+        //   return;
+        // }
+        if (map["transactionPin"] == null) {
+          LoginData.initializeFromClient(client: Client.fromJson(json: map));
+          Navigator.pushNamed(context, Routes.addTransactionPinRoute);
+          return;
+        }
+        LoginData.initializeFromClient(client: Client.fromJson(json: map));
 
-        map["id"] = map["_id"];
-        map["password"] = LoginData.password;
-        // We have to remove the "_v" key. Although not compulsory.
-        map.remove("__v");
-        // map.remove("password");
-        map.remove("groups");
-        await AppStorage.clear();
+        Navigator.pushNamed(context, Routes.setupAccountRoute);
 
-        AppStorage.saveSettings(
-            settings: Settings.fromJson(map: {
-          "two-factor-enabled": map["two_factor_auth"],
-          "two-factor-method": map["two_fctor_type"] == "None"
-              ? "otp"
-              : map["two_fctor_type"].toString().toLowerCase().contains("pin")
-                  ? "pin"
-                  : "otp",
-          "app-entry-method": "pin",
-          "auto-logout": true,
-        }));
-        final settings = AppStorage.getSettings();
+        return;
+      }
 
-        if (settings.twoFactorEnabled) {
-          if (settings.twoFactorMethod == TwoFactorMethod.Otp) {
-            /// The otp screen only returns true after verifying.
-            OtpData.id = map["_id"];
-            OtpData.email = LoginData.email;
-            OtpData.phoneNumber = map["phoneNumber"];
-            LoginData.otp = map["verificationPin"];
+      map["id"] = map["_id"];
+      map["password"] = LoginData.password;
+      // We have to remove the "_v" key. Although not compulsory.
+      map.remove("__v");
+      // map.remove("password");
+      map.remove("groups");
+      await AppStorage.clear();
 
-            final verified =
-                (await Navigator.pushNamed(context, Routes.otpRoute)
-                        as bool?) ??
-                    false;
+      AppStorage.saveSettings(
+          settings: Settings.fromJson(map: {
+        "two-factor-enabled": map["two_factor_auth"],
+        "two-factor-method": map["two_fctor_type"] == "None"
+            ? "otp"
+            : map["two_fctor_type"].toString().toLowerCase().contains("pin")
+                ? "pin"
+                : "otp",
+        "app-entry-method": "pin",
+        "auto-logout": true,
+      }));
+      final settings = AppStorage.getSettings();
 
-            if (verified) {
-              await saveAndNavigate(map: map);
-            }
-          } else {
-            /// Unlike otp screen that only returns true after verifying,
-            /// the pin entry screen is different, clients only return back if the
-            /// pin never went through 😂😂
-            /// so if they ever come back, we clear the app storage, meaning they could not verify themselves
-            await save(map: map);
-            await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const PinEntryScreen(),
-                ));
+      if (!settings.twoFactorEnabled) {
+        save(map: map);
+        return;
+      }
 
-            /// we also have to change the ui back to light status bar
-            WidgetsFlutterBinding.ensureInitialized()
-                .addPostFrameCallback((timeStamp) {
-              SystemChrome.setSystemUIOverlayStyle(
-                  ThemeManager.getSystemUiOverlayStyle());
-            });
-            AppStorage.clear();
-          }
-        } else {
-          await saveAndNavigate(map: map);
+      // If Two-Factor is OTP
+      if (settings.twoFactorMethod == TwoFactorMethod.Otp) {
+        /// The otp screen only returns true after verifying.
+        OtpData.id = map["_id"];
+        OtpData.email = LoginData.email;
+        OtpData.phoneNumber = map["phoneNumber"];
+        LoginData.otp = map["verificationPin"];
+
+        final verified =
+            (await Navigator.pushNamed(context, Routes.otpRoute) as bool?) ??
+                false;
+
+        if (!verified) {
+          AppStorage.clear();
+          ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+          return;
         }
       }
+
+      if (settings.twoFactorMethod == TwoFactorMethod.Pin) {
+        final correctPin =
+            (await TransactionPinSheet.bottomSheet(context: context)) ?? false;
+
+        if (!correctPin) {
+          AppStorage.clear();
+          ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+          return;
+        }
+      }
+
+      save(map: map);
     }
-    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
   }
 
-  Future<void> saveCollections({required final String userId}) async {
-    final newResponse = await GroupRepo.getGroupsOneTime();
-    if (newResponse.error) {
-      debugPrint(newResponse.body.toString());
-
-      // We have to clear all progress done in saving any data to cache.
-      await AppStorage.clear();
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    } else {
-      final List? data = newResponse.messageBody!["data"];
-      debugPrint(data.toString());
-      AppStorage.saveGroups(
-          groups: ((data ?? [])).map((e) => Group.fromJson(json: e)).toList());
-      List groups = data ?? [];
-
-      for (final group in groups) {
-        AppStorage.saveChats(
-            chats: ((group["messages"] ?? []) as List)
-                .map((e) => Chat.fromJson(json: e))
-                .toList(),
-            groupId: group["_id"]);
-      }
-    }
-
+  Future<void> saveFriends() async {
     final friends = await FriendRepository().getFriends();
     AppStorage.saveFriends(friends: friends);
+  }
 
+  Future<void> saveCustomerCare() async {
     if (AppStorage.getCustomerCareSessionId() == null) {
       AppStorage.saveCustomerCareChats(chats: []);
       final response = await CustomerCareRepository.createChatSession(
@@ -496,7 +476,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             sessionId: id);
 
         log(result.body);
+        return;
       }
+
+      throw Exception(response.messageBody?["message"] ??
+          "Error when saving customer care");
+    }
+  }
+
+  Future<void> saveGroups({required final String userId}) async {
+    final newResponse = await GroupRepo.getGroupsOneTime();
+
+    if (newResponse.error) {
+      // We have to clear all progress done in saving any data to cache.
+      await AppStorage.clear();
+      debugPrint(newResponse.body.toString());
+      throw Exception(newResponse.messageBody?["message"] ?? "");
+    }
+
+    final List? data = newResponse.messageBody!["data"];
+    debugPrint(data.toString());
+    AppStorage.saveGroups(
+        groups: ((data ?? [])).map((e) => Group.fromJson(json: e)).toList());
+    List groups = data ?? [];
+
+    for (final group in groups) {
+      AppStorage.saveChats(
+          chats: ((group["messages"] ?? []) as List)
+              .map((e) => Chat.fromJson(json: e))
+              .toList(),
+          groupId: group["_id"]);
     }
   }
 
@@ -505,11 +514,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.read(transacionRepoProvider.notifier).state = TransactionRepo();
     final transactions = await TransactionRepo().getTransactions();
     AppStorage.saveTransactions(transactions: transactions);
+  }
 
+  Future<void> saveReferrals() async {
     ref.read(walletProvider.notifier).state = WalletRepository();
     final referrals = await WalletRepository().getReferrals();
     AppStorage.saveReferrals(referrals: referrals);
+  }
 
+  Future<void> saveWalletHistory() async {
     final walletHistory = await WalletRepository().getWalletHistory();
     AppStorage.saveWalletTransactions(walletTransactions: walletHistory);
   }
@@ -573,9 +586,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ]));
   }
 
-  Future<void> saveAndNavigate(
-      {required final Map<dynamic, dynamic> map}) async {
-    await save(map: map);
+  Future<void> navigate() async {
+    final friendsProviderRefresh = ref.refresh(friendsProvider);
+    final groupsProviderRefresh = ref.refresh(groupRepoProvider);
+    final transactionsProviderRefresh = ref.refresh(transacionRepoProvider);
+    final friendListRefresh = ref.refresh(friendsListProvider);
+    final transactionsRefresh = ref.refresh(transactionsStreamProvider);
+    final groupsRefresh = ref.refresh(groupsStreamProvider);
+
     ref.watch(homeProvider.notifier).state = 0;
     Navigator.pushNamedAndRemoveUntil(
         context, Routes.homeRoute, (route) => false);
@@ -597,13 +615,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       AppStorage.savekycVerificationStatus(tier: VerificationTier.None);
     }
 
-    try {
-      // We have to locally store all the groups and it's respective chats.
-      await saveCollections(userId: map["_id"]);
-      // We have to save transactions
-      await saveTransactions();
-    } catch (e) {
-      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    }
+    // To simultaneously save data. A way of preventing cummilated latency.
+    await Future.wait([
+      saveTransactions(),
+      saveGroups(userId: map["_id"]),
+      saveFriends(),
+      saveCustomerCare(),
+      saveWalletHistory(),
+      saveReferrals()
+    ], eagerError: true)
+        .onError<Exception>(
+      (error, stackTrace) {
+        SnackbarManager.showErrorSnackbar(
+            context: context, message: "Error occurred when logging in.");
+        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+        return [];
+      },
+    ).then(
+      (value) {
+        navigate();
+      },
+    );
   }
 }

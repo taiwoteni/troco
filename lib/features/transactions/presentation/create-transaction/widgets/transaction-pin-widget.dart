@@ -19,11 +19,29 @@ import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
 
 class TransactionPinSheet extends ConsumerStatefulWidget {
-  const TransactionPinSheet({super.key});
+  final bool createTansactionMode;
+  const TransactionPinSheet({super.key, this.createTansactionMode = false});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _TransactionPinSheetState();
+
+  static Future<bool?> bottomSheet(
+      {required final BuildContext context,
+      bool createTransactionMode = false}) {
+    return showModalBottomSheet<bool?>(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      useSafeArea: true,
+      backgroundColor: ColorManager.background,
+      builder: (context) {
+        return SingleChildScrollView(
+            child: TransactionPinSheet(
+                createTansactionMode: createTransactionMode));
+      },
+    );
+  }
 }
 
 class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
@@ -127,8 +145,11 @@ class _TransactionPinSheetState extends ConsumerState<TransactionPinSheet> {
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
 
-    final escrowChargesResponse = await TransactionRepo.getEscrowCharges();
-    log(escrowChargesResponse.body);
+    if (widget.createTansactionMode) {
+      final escrowChargesResponse = await TransactionRepo.getEscrowCharges();
+      log(escrowChargesResponse.body);
+    }
+
     final response = await AuthenticationRepo.verifyTransactionPin(
         transactionPin: "$pin1$pin2$pin3$pin4");
     // log(response.body.toString());

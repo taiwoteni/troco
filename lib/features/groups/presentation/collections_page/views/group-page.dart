@@ -74,7 +74,7 @@ class _GroupPageState extends ConsumerState<GroupPage>
             ],
           )),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
+        padding: EdgeInsets.only(bottom: SizeManager.bottomBarHeight),
         child: FloatingActionButton(
           onPressed: tabController.index == 0 ? createGroup : addFriends,
           heroTag: "add-group",
@@ -201,16 +201,15 @@ class _GroupPageState extends ConsumerState<GroupPage>
   }
 
   Future<void> createGroup() async {
-    if (AppStorage.getGroups().length >= 20) {
-      if (ClientProvider.readOnlyClient!.accountCategory == Category.Personal) {
-        SnackbarManager.showBasicSnackbar(
-            context: context,
-            mode: ContentType.failure,
-            message: "Max orders for Personal Account is 20.");
-      }
+    if (AppStorage.getGroups().length >= 20 &&
+        ClientProvider.readOnlyClient!.accountCategory == Category.Personal) {
+      SnackbarManager.showBasicSnackbar(
+          context: context,
+          mode: ContentType.failure,
+          message: "Max orders for Personal Account is 20.");
       return;
     }
-    showModalBottomSheet(
+    await showModalBottomSheet(
       isScrollControlled: true,
       enableDrag: true,
       useSafeArea: true,
@@ -220,6 +219,8 @@ class _GroupPageState extends ConsumerState<GroupPage>
         return const SingleChildScrollView(child: CreateGroupSheet());
       },
     );
+
+    setState(() {});
   }
 }
 

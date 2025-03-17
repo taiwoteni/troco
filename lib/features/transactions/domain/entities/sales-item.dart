@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
-import 'package:troco/features/transactions/domain/entities/service.dart';
 
 abstract class SalesItem extends Equatable {
   final String id, name;

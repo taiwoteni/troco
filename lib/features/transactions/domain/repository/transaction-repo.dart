@@ -4,8 +4,10 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/domain/entities/virtual-service.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 import 'package:troco/features/transactions/utils/product-quality-converter.dart';
 import 'package:troco/features/transactions/utils/service-role.dart';
 
@@ -427,11 +429,15 @@ class TransactionRepo {
   static Future<HttpResponseModel> respondToTransaction({
     required final bool approve,
     required final Transaction transaction,
+    required final WidgetRef ref,
   }) async {
     final result = await ApiInterface.patchRequest(
         url:
             "updateTransactionStatus/${transaction.transactionId}/${ClientProvider.readOnlyClient!.userId}/${transaction.creator}",
         data: {"status": approve ? "In Progress" : "Declined"});
+
+    final b = ref.refresh(transactionsStreamProvider);
+    b;
 
     return result;
   }

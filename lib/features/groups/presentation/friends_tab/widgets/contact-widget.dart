@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:contacts_service/contacts_service.dart';
@@ -16,6 +15,7 @@ import 'package:troco/core/components/images/svg.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/utils/phone-number-converter.dart';
+import 'package:troco/features/groups/presentation/friends_tab/providers/friends-provider.dart';
 import 'package:troco/features/wallet/domain/repository/wallet-repository.dart';
 
 import '../../../../../core/app/color-manager.dart';
@@ -177,6 +177,10 @@ class _ContactWidgetState extends ConsumerState<ContactWidget> {
             : "Added friend successfully");
     if (!response.error) {
       setState(() => isFriend = true);
+      ref.read(friendsListProvider.notifier).state.add(client);
+      ref.read(friendsListProvider).sort(
+            (a, b) => b.lastSeen.compareTo(a.lastSeen),
+          );
     }
     debugPrint(response.body);
   }
@@ -194,6 +198,10 @@ class _ContactWidgetState extends ConsumerState<ContactWidget> {
             : "Removed friend successfully");
     if (!response.error) {
       setState(() => isFriend = false);
+      ref.read(friendsListProvider.notifier).state = ref
+          .read(friendsListProvider)
+          .where((element) => client.userId != element.userId)
+          .toList();
     }
 
     debugPrint(response.body);

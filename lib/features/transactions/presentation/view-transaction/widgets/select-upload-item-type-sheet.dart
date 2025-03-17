@@ -1,17 +1,10 @@
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
-import 'package:troco/core/app/file-manager.dart';
-import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/payments/presentation/widgets/select-payment-method-widget.dart';
-import 'package:troco/features/transactions/domain/entities/service.dart';
-import 'package:troco/features/transactions/domain/entities/transaction.dart';
-import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
-import 'package:troco/features/transactions/presentation/view-transaction/widgets/enter-link-sheet.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';

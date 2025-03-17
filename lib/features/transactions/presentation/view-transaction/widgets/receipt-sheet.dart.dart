@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/gestures.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/material.dart';
@@ -9,9 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:troco/core/components/button/presentation/provider/button-provider.dart';
 import 'package:troco/core/components/button/presentation/widget/button.dart';
-import 'package:troco/features/payments/domain/entity/account-method.dart';
-import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
-import 'package:troco/features/payments/presentation/widgets/select-payment-profile-widget.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/current-transacton-provider.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/widgets/receipt-widget.dart';
 

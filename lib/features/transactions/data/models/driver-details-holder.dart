@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 class DriverDetailsHolder {
   static String? companyName,
       driverName,

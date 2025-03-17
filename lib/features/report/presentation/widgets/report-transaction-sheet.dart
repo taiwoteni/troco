@@ -1,18 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:path/path.dart' as Path;
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
 import 'package:troco/core/components/texts/inputs/dropdown-input-field.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
-import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
-import 'package:troco/features/settings/domain/repository/settings-repository.dart';
 import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/domain/repository/transaction-repo.dart';
-import 'package:troco/features/transactions/utils/write-up-document-type.dart';
 
 import '../../../../../core/app/color-manager.dart';
 import '../../../../../core/app/font-manager.dart';
@@ -23,7 +17,6 @@ import '../../../../../core/components/others/drag-handle.dart';
 import '../../../../../core/components/others/spacer.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
-import '../../../auth/domain/entities/client.dart';
 
 class ReportTransactionSheet extends ConsumerStatefulWidget {
   final Transaction transaction;

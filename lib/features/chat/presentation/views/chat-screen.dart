@@ -706,6 +706,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           );
           AppStorage.saveGroups(groups: groups);
         }
+        ref.read(groupsListProvider.notifier).state = ref
+            .read(groupsListProvider)
+            .where((group) => group.groupId != this.group.groupId)
+            .toList();
       }
     }
 

@@ -288,7 +288,7 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
             !task.paymentReleased,
         orElse: () => tasks.last);
 
-    int index = tasks.indexOf(pendingTask);
+    // int index = tasks.indexOf(pendingTask);
 
     if (!pendingTask.paymentMade) {
       animation = isBuyer ? "payment-loading" : "pending";
@@ -333,7 +333,7 @@ class _ProgressDetailsPageState extends ConsumerState<ProgressDetailsPage> {
             !task.paymentReleased,
         orElse: () => tasks.last);
 
-    int index = tasks.indexOf(pendingTask);
+    // int index = tasks.indexOf(pendingTask);
 
     if (!pendingTask.paymentMade) {
       animation = isBuyer ? "payment-loading" : "pending";

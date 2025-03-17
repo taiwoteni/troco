@@ -11,7 +11,6 @@ import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/transactions/data/datasources/create-transaction-stages.dart';
 import 'package:troco/features/transactions/data/models/create-transaction-data-holder.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/create-transaction-provider.dart';
-import 'package:troco/features/transactions/presentation/create-transaction/providers/pricings-notifier.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/providers/transaction-controller-provider.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/providers/ction-screen-provider.dart';
 

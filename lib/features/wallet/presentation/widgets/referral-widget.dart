@@ -4,14 +4,11 @@ import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/wallet/domain/entities/referral.dart';
 import 'package:troco/features/wallet/utils/enums.dart';
 
-import '../../../../core/app/asset-manager.dart';
 import '../../../../core/app/color-manager.dart';
 import '../../../../core/app/font-manager.dart';
 import '../../../../core/app/routes-manager.dart';
 import '../../../../core/app/size-manager.dart';
 import '../../../../core/components/images/profile-icon.dart';
-import '../../../../core/components/images/svg.dart';
-import '../../../../core/components/others/spacer.dart';
 
 class ReferralWidget extends StatefulWidget {
   final Referral referral;

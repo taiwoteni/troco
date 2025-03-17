@@ -67,7 +67,7 @@ class _OTPScreenState extends ConsumerState<OTPScreen> {
   @override
   void initState() {
     isEmail = widget.isEmail;
-    otpVerificationType = widget.otpVerificationType!;
+    otpVerificationType = widget.otpVerificationType;
     target = widget.target;
     super.initState();
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
