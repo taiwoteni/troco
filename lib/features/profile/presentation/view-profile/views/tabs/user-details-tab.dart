@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:flutter_direct_caller_plugin/flutter_direct_caller_plugin.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recase/recase.dart';
 import 'package:troco/core/app/asset-manager.dart';
@@ -70,7 +70,7 @@ class _UserDetailsTabState extends ConsumerState<UserDetailsTab> {
                 : GestureDetector(
                     onTap: () async {
                       final success =
-                          (await FlutterPhoneDirectCaller.callNumber(
+                          (await FlutterDirectCallerPlugin.callNumber(
                                   client.phoneNumber) ??
                               false);
 

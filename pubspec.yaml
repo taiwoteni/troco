@@ -45,9 +45,10 @@ dependencies:
   nigerian_states_and_lga: ^1.0.0
   nigerian_phone_number_validator: ^0.0.1
   shared_preferences: ^2.2.2
-  carousel_slider: ^4.2.1
+  carousel_slider: ^5.0.0
   clipboard: ^0.1.3
-  flutter_phone_direct_caller: ^2.1.1
+  flutter_direct_caller_plugin: 0.0.4
+  flutter_contacts_service:
   intl: ^0.19.0
   http: ^1.2.1
   dio: ^5.4.2+1
@@ -62,7 +63,6 @@ dependencies:
   uuid: ^4.4.0
   cached_network_image: ^3.3.1
   sqflite: ^2.3.3
-  timelines: ^0.1.0
   collection: ^1.16.0
   vibration: ^1.9.0
   recase: ^4.1.0
@@ -72,9 +72,8 @@ dependencies:
   flutter_native_splash: ^2.4.0
   visibility_detector: ^0.4.0+2
   video_thumbnail: ^0.5.3
-  audioplayers: ^6.0.0
+  audioplayers: ^6.4.0
   video_player: ^2.9.1
-  contacts_service: ^0.6.3
   webview_flutter: ^4.8.0
   pdf: ^3.6.0
   printing: ^5.9.0
@@ -82,6 +81,7 @@ dependencies:
   flutter_popup: ^3.3.0
   url_launcher:
   share_plus: ^10.1.4
+  timelines_plus: ^1.0.6
 
 dev_dependencies:
   flutter_test:

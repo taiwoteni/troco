@@ -9,5 +9,5 @@
     "menu.foreground": "#75777b",
     "menu.separatorBackground": "#0D1017"
   },
-  "dart.flutterSdkPath": ".fvm/versions/3.22.2"
+  "dart.flutterSdkPath": ".fvm/versions/3.27.3"
 }

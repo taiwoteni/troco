@@ -35,7 +35,7 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 android {
     namespace "com.escrow.troco"
     // previious compleSdkVersion: flutter.compileSdkVersion
-    compileSdkVersion 34
+    compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -58,7 +58,7 @@ android {
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 24
         // previous targetSdkVersion: 33
-        targetSdkVersion 34
+        targetSdkVersion 35
         //previous versionCode: flutterVersionCode.toInteger()
         versionCode 2
         versionName flutterVersionName

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:contacts_service/contacts_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts_service/flutter_contacts_service.dart'
+    show ContactInfo, FlutterContactsService;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
@@ -26,7 +26,7 @@ import '../../../../auth/domain/entities/client.dart';
 import '../../../domain/repositories/friend-repository.dart';
 
 class ContactWidget extends ConsumerStatefulWidget {
-  final Contact contact;
+  final ContactInfo contact;
   const ContactWidget({super.key, required this.contact});
 
   @override
@@ -34,7 +34,7 @@ class ContactWidget extends ConsumerStatefulWidget {
 }
 
 class _ContactWidgetState extends ConsumerState<ContactWidget> {
-  late Contact contact;
+  late ContactInfo contact;
   late Client client;
   bool trocoUser = false;
   bool isFriend = false;
@@ -146,7 +146,7 @@ class _ContactWidgetState extends ConsumerState<ContactWidget> {
       );
     }
     return FutureBuilder(
-      future: ContactsService.getAvatar(contact),
+      future: FlutterContactsService.getAvatar(contact),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Container(

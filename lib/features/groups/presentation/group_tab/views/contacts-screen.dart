@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter_contacts_service/flutter_contacts_service.dart'
+    show ContactInfo, FlutterContactsService;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +29,7 @@ class ContactsScreen extends ConsumerStatefulWidget {
 }
 
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
-  late List<Contact> contacts, allContacts;
+  late List<ContactInfo> contacts, allContacts;
   final TextEditingController controller = TextEditingController();
   late Widget searchBar;
   ContactsFilter filter = ContactsFilter.Unregistered;
@@ -199,12 +200,13 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     if (await requestPermissions()) {
       // filter out all the contact with empty phone numbers
       final notNullContacts =
-          (await ContactsService.getContacts()).where((element) =>
-              element.phones != null &&
-              element.phones != [] &&
-              element.phones!.any(
-                (element) => element.value != null,
-              ));
+          (await FlutterContactsService.getContacts(withThumbnails: false))
+              .where((element) =>
+                  element.phones != null &&
+                  element.phones != [] &&
+                  element.phones!.any(
+                    (element) => element.value != null,
+                  ));
 
       // distinct all phone numbers (Not duplicate them)
       final distinctNumbers = notNullContacts
@@ -214,7 +216,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           .toList();
 
       /// Add the contacts that contain any unique phone number back to an array
-      final contacts = <Contact>[];
+      final contacts = <ContactInfo>[];
       for (final number in distinctNumbers) {
         final contact =
             notNullContacts.firstWhereOrNull((element) => element.phones!.any(
@@ -290,7 +292,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         borderRadius: BorderRadius.circular(SizeManager.large));
   }
 
-  bool isRegistered({required final Contact contact}) {
+  bool isRegistered({required final ContactInfo contact}) {
     final phoneNumbers = (contact.phones ?? [])
         .map(
           (e) => PhoneNumberConverter.convertToFull(

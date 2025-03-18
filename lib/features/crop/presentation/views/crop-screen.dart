@@ -17,36 +17,36 @@ class CropScreen extends StatelessWidget {
   final Future<CropImageResult> Function(CropImageResult)? onCropped;
 
   static Future<CropImageResult?> showCustomCropper(
-  BuildContext context,
-  ImageProvider imageProvider, {
-  CroppableImageData? initialData,
-  Object? heroTag,
-  Future<CropImageResult> Function(CropImageResult)? onCropped,
-}) async {
-  // Before pushing the route, prepare the initial data. If it's null, populate
-  // it with empty content. This is required for Hero animations.
-  final _initialData = initialData ??
-      await CroppableImageData.fromImageProvider(
-        imageProvider,
+    BuildContext context,
+    ImageProvider imageProvider, {
+    CroppableImageData? initialData,
+    Object? heroTag,
+    Future<CropImageResult> Function(CropImageResult)? onCropped,
+  }) async {
+    // Before pushing the route, prepare the initial data. If it's null, populate
+    // it with empty content. This is required for Hero animations.
+    final _initialData = initialData ??
+        await CroppableImageData.fromImageProvider(
+          imageProvider,
+        );
+
+    if (context.mounted) {
+      return Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            return CropScreen(
+              imageProvider: imageProvider,
+              initialData: _initialData,
+              heroTag: heroTag,
+              onCropped: onCropped,
+            );
+          },
+        ),
       );
+    }
 
-  if (context.mounted) {
-    return Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return CropScreen(
-            imageProvider: imageProvider,
-            initialData: _initialData,
-            heroTag: heroTag,
-            onCropped: onCropped,
-          );
-        },
-      ),
-    );
+    return null;
   }
-
-  return null;
-}
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +95,11 @@ class CropScreen extends StatelessWidget {
                     controller: controller,
                     // We're using the default Material crop handles, but you
                     // can use your own if you want to.
-                    cropHandlesBuilder: (context) => MaterialImageCropperHandles(
+                    cropHandlesBuilder: (context) =>
+                        MaterialImageCropperHandles(
                       controller: controller,
                       gesturePadding: 16.0,
+                      showGestureHandlesOn: [],
                     ),
                     overlayOpacityAnimation: overlayOpacityAnimation,
                     gesturePadding: 16.0,
