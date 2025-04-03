@@ -1,4 +1,4 @@
-package com.escrow.troco
+package com.trocotechnology.troco
 
 import io.flutter.embedding.android.FlutterActivity
 

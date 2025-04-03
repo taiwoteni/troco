@@ -24,11 +24,10 @@ class FriendsTab extends ConsumerStatefulWidget {
 }
 
 class _FriendsTabState extends ConsumerState<FriendsTab> {
-  late List<Client> friends, blockedUsers;
+  late List<Client> blockedUsers;
 
   @override
   void initState() {
-    friends = AppStorage.getFriends();
     blockedUsers = AppStorage.getBlockedUsers();
     super.initState();
   }
@@ -99,9 +98,7 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
     ref.listen(friendsStreamProvider, (previous, next) {
       next.when(
         data: (data) {
-          setState(
-            () => friends = data,
-          );
+          setState(() {});
         },
         error: (error, stackTrace) => null,
         loading: () => null,
