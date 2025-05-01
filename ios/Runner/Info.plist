@@ -48,5 +48,9 @@
 	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Troco needs access to save files to your Photos.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Troco requires contacts access to enable client (friend) features.</string>
 </dict>
 </plist>

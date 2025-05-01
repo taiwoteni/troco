@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:troco/features/about%20us/presentation/views/about-us-screen.dart';
 import 'package:troco/features/auth/data/models/login-data.dart';
@@ -247,8 +249,8 @@ class RouteGenerator {
         return MaterialPageRoute(
           settings: routeSettings,
           builder: (context) {
-            final receiptPath = routeSettings.arguments! as String;
-            return ViewReceiptScreen(receiptPath: receiptPath);
+            final receiptBytes = routeSettings.arguments! as Uint8List;
+            return ViewReceiptScreen(receiptBytes: receiptBytes);
           },
         );
       case Routes.viewProductsRoute:

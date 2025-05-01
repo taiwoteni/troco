@@ -1,14 +1,11 @@
 import 'dart:developer';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:clipboard/clipboard.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:troco/core/app/download-manager.dart';
 import 'package:troco/core/app/file-manager.dart';
@@ -2223,24 +2220,7 @@ class _TransactionsDetailPageState
       ),
     );
 
-    // Save or share the PDF
-    final output = (await (Platform.isAndroid
-        ? getExternalStorageDirectory()
-        : getApplicationDocumentsDirectory()))!;
-    final name = transaction.transactionName.replaceAll(" ", "_").toLowerCase();
-    final file = File("${output.path}/$name.jpg");
-    await file.writeAsBytes(capturedImage);
-
-    if (Platform.isAndroid) {
-      final permsion =
-          (await Permission.manageExternalStorage.request()).isGranted;
-      if (permsion) {
-        final copy = await file.copy("/storage/emulated/0/Download/$name.jpg");
-        debugPrint(copy.path);
-      }
-    }
-
-    Navigator.pushNamed(context, Routes.cardPaymentScreen,
-        arguments: 'file://${file.absolute.path}');
+    Navigator.pushNamed(context, Routes.viewReceiptRoute,
+        arguments: capturedImage);
   }
 }

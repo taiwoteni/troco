@@ -8,8 +8,6 @@ import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/features/transactions/utils/enums.dart';
-
-import '../../../../../core/app/snackbar-manager.dart';
 import '../../../../splash/presentation/splash-screen.dart';
 import '../../../domain/entities/transaction.dart';
 
@@ -28,12 +26,6 @@ class _ReceiptWidgetState extends State<ReceiptWidget> {
   void initState() {
     transaction = widget.transaction;
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
-      (timeStamp) {
-        SnackbarManager.showBasicSnackbar(
-            context: context, message: "Receipt saved to storage.");
-      },
-    );
   }
 
   @override
