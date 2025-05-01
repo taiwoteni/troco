@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
+import 'package:troco/features/auth/domain/entities/client.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/transactions/domain/entities/driver.dart';
 import 'package:troco/features/transactions/domain/entities/product.dart';
@@ -44,6 +45,8 @@ class Transaction extends Equatable {
 
     final seller = AppStorage.getFriends().firstWhere(
       (element) => element.userId == creator,
+      orElse: () =>
+          Client.fromJson(json: {"firstName": "Unknown", "lastName": "Seller"}),
     );
 
     return seller.fullName;
@@ -56,6 +59,8 @@ class Transaction extends Equatable {
 
     final client = AppStorage.getFriends().firstWhere(
       (element) => element.userId == buyer,
+      orElse: () =>
+          Client.fromJson(json: {"firstName": "Unknown", "lastName": "Buyer"}),
     );
 
     return client.fullName;

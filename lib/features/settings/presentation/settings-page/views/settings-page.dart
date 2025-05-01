@@ -39,7 +39,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
+        physics: ClampingScrollPhysics(),
         child: Column(
           children: [
             appBar(),

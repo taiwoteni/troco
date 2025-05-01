@@ -7,6 +7,7 @@ import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/components/others/spacer.dart';
 import 'package:troco/core/components/texts/outputs/info-text.dart';
+import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 
 import '../../../../core/app/font-manager.dart';
@@ -49,7 +50,7 @@ class _WalletTransactionScreenState extends State<WalletTransactionScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
+        physics: ClampingScrollPhysics(),
         child: Column(
           children: [
             header(),
@@ -165,6 +166,17 @@ class _WalletTransactionScreenState extends State<WalletTransactionScreen> {
                     fontWeight: FontWeightManager.bold),
               ),
             ),
+            Positioned(
+                top: MediaQuery.of(context).viewPadding.top / 2 +
+                    SizeManager.regular,
+                left: SizeManager.medium,
+                child: IconButton(
+                    onPressed: () => context.pop(),
+                    icon: SvgIcon(
+                      svgRes: AssetManager.svgFile(name: 'back'),
+                      color: ColorManager.primary,
+                      size: const Size.square(IconSizeManager.medium * 1.1),
+                    )))
           ],
         ),
       ),

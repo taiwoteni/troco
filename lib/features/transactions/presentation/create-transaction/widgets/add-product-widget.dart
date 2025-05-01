@@ -107,6 +107,8 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
       child: Form(
         key: formKey,
         child: SingleChildScrollView(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Column(
             children: [
               extraLargeSpacer(),
@@ -137,6 +139,7 @@ class _AddProductWidgetState extends ConsumerState<AddProductSheet> {
               uploadPicture(),
               largeSpacer(),
               button(),
+              largeSpacer(),
             ],
           ),
         ),

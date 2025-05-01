@@ -105,6 +105,8 @@ class _AddVirtualServiceWidgetState
       child: Form(
         key: formKey,
         child: SingleChildScrollView(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Column(
             children: [
               extraLargeSpacer(),

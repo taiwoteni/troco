@@ -131,6 +131,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget body() {
     return SingleChildScrollView(
+      physics: ClampingScrollPhysics(),
       child: Column(
         children: [
           appBarWidget(),

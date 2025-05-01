@@ -289,7 +289,7 @@ class _TransactionPricingPageState
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.only(
-        bottom: SizeManager.regular,
+        bottom: SizeManager.large,
       ),
       child: Row(
         children: [

@@ -37,7 +37,7 @@ class _ServicesPageState extends ConsumerState<ServicesPage> {
       backgroundColor: ColorManager.background,
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
+        physics: ClampingScrollPhysics(),
         child: Column(
           children: [
             header(),

@@ -43,6 +43,7 @@ import 'package:troco/features/transactions/domain/entities/transaction.dart';
 import 'package:troco/features/transactions/presentation/create-transaction/views/transaction-success-screen.dart';
 import 'package:troco/features/transactions/presentation/my-transactions/views/my-transaction-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-products-screen.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/views/view-receipt-screen.dart';
 import 'package:troco/features/transactions/presentation/view-transaction/views/view-transaction-screen.dart';
 import 'package:troco/features/wallet/domain/entities/wallet-transaction.dart';
 import 'package:troco/features/wallet/presentation/views/referrals-screen.dart';
@@ -132,6 +133,7 @@ class Routes {
   static const contactUsRoute = '/contact-us';
 
   static const disclaimerRoute = '/disclaimer';
+  static const viewReceiptRoute = "/view-receipt";
   static const protectionAndSafetyRoute = '/protection-and-safety';
 }
 
@@ -239,6 +241,14 @@ class RouteGenerator {
           builder: (context) {
             final transaction = routeSettings.arguments! as Transaction;
             return ViewTransactionScreen(transaction: transaction);
+          },
+        );
+      case Routes.viewReceiptRoute:
+        return MaterialPageRoute(
+          settings: routeSettings,
+          builder: (context) {
+            final receiptPath = routeSettings.arguments! as String;
+            return ViewReceiptScreen(receiptPath: receiptPath);
           },
         );
       case Routes.viewProductsRoute:
