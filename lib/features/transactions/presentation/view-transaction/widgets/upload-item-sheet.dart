@@ -206,13 +206,18 @@ class _UploadVirtualDocumentSheetState
       return;
     }
 
-    final filePath = await FileManager.pickMedia();
-    if (filePath == null) {
+    final filePaths =
+        await FileManager.pickDocuments(header: "Select Documents");
+    if (filePaths == null) {
       return;
     }
 
-    final document = VirtualDocument(value: filePath.path);
-    ref.read(virtualDocumentsProvider.notifier).add(document: document);
+    final documents = filePaths
+        .map(
+          (e) => VirtualDocument(value: e.path),
+        )
+        .toList();
+    ref.read(virtualDocumentsProvider.notifier).addAll(documents: documents);
     setState(() {});
   }
 

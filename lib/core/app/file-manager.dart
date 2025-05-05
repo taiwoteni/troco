@@ -1,4 +1,5 @@
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 class FileManager {
@@ -40,5 +41,21 @@ class FileManager {
 
     final XFile? file = await picker.pickMedia();
     return file;
+  }
+
+  static Future<XFile?> pickDocument({final String? header}) async {
+    final files = await FilePicker.platform
+        .pickFiles(type: FileType.any, dialogTitle: header);
+
+    if (files?.xFiles.isEmpty ?? true) return null;
+
+    return files!.xFiles.first;
+  }
+
+  static Future<List<XFile>?> pickDocuments({final String? header}) async {
+    final files = await FilePicker.platform.pickFiles(
+        type: FileType.any, dialogTitle: header, allowMultiple: true);
+
+    return files?.xFiles;
   }
 }

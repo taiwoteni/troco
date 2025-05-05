@@ -146,7 +146,7 @@ class _UploadTaskSheetState extends ConsumerState<UploadTaskSheet> {
       return;
     }
 
-    final file = await FileManager.pickMedia();
+    final file = await FileManager.pickDocument(header: "Select Work Document");
 
     if (file == null) {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

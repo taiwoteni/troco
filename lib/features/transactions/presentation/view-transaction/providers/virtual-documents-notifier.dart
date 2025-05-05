@@ -15,6 +15,10 @@ class VirtualDocumentsNotifier extends Notifier<List<VirtualDocument>> {
     state.add(document);
   }
 
+  void addAll({required final List<VirtualDocument> documents}) {
+    state.addAll(documents);
+  }
+
   VirtualDocument remove({required int index}) {
     return state.removeAt(index);
   }
