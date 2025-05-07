@@ -30,6 +30,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         .addPostFrameCallback((timeStamp) async {
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getSystemUiOverlayStyle());
+      await AppStorage.clear();
+
       ref.read(clientProvider.notifier).state = null;
       final friendsRefresh = ref.refresh(friendsStreamProvider);
       final groupRefresh = ref.refresh(groupsStreamProvider);
@@ -39,8 +41,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       friendsRefresh;
       groupRefresh;
       transactionRefresh;
-
-      await AppStorage.clear();
     });
   }
 
