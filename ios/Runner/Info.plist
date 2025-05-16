@@ -52,5 +52,13 @@
 	<string>Troco needs access to save files to your Photos.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Troco requires contacts access to enable client (friend) features.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Troco requires camera access to take photos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Troco requires microphone access for audio recording.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Troco requires access to your photo library to select images.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Troco requires access to your media library.</string>
 </dict>
 </plist>
