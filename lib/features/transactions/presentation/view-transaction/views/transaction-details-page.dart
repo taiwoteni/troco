@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:clipboard/clipboard.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:troco/core/app/download-manager.dart';
 import 'package:troco/core/app/file-manager.dart';
 import 'package:troco/core/app/snackbar-manager.dart';
@@ -1035,8 +1037,7 @@ class _TransactionsDetailPageState
                     mode: ContentType.help,
                     message: "Downloading document....");
 
-                downloadManager.downloadFile(task.proofOfTask, fileName,
-                    "${transaction.transactionName.toLowerCase().replaceAll(" ", "_")}");
+                downloadFile(url: task.proofOfTask, name: fileName);
               },
               child: Padding(
                 padding:
@@ -1086,10 +1087,9 @@ class _TransactionsDetailPageState
 
                 final indexSeparator = documentIndex(document: document);
 
-                downloadManager.downloadFile(
-                    document.source,
-                    "${document.taskName}-$indexSeparator${extension}",
-                    "${transaction.transactionName.toLowerCase().replaceAll(" ", "_")}");
+                downloadFile(
+                    url: document.source,
+                    name: "${document.taskName}-$indexSeparator${extension}");
               },
               child: Padding(
                 padding:
@@ -1101,6 +1101,27 @@ class _TransactionsDetailPageState
         ).toList(),
       ),
     );
+  }
+
+  Future<void> downloadFile({required String url, required String name}) async {
+    final success = await downloadManager.downloadFile(url, name,
+        "${transaction.transactionName.toLowerCase().replaceAll(" ", "_")}");
+
+    if (success == null) return;
+
+    if (Platform.isIOS) {
+      if (await File(success).exists()) {
+        final result = await Share.shareXFiles([XFile(success)],
+            subject: "Troco", text: "Choose where to save this document");
+        if (result.status != ShareResultStatus.success) {
+          SnackbarManager.showErrorSnackbar(
+              context: context, message: "Error saving document");
+          return;
+        }
+        SnackbarManager.showBasicSnackbar(
+            context: context, message: "Saved document to your iPhone");
+      }
+    }
   }
 
   int documentIndex({required final VirtualDocument document}) {

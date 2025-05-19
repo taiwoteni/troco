@@ -83,6 +83,7 @@ dependencies:
   share_plus: ^10.1.4
   timelines_plus: ^1.0.6
   file_picker: ^10.1.2
+  image_gallery_saver: ^2.0.3
 
 dev_dependencies:
   flutter_test:

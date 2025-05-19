@@ -48,6 +48,15 @@
 	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Troco needs access to save files to your Photos.</string>
 	<key>NSContactsUsageDescription</key>

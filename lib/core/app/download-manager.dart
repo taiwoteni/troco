@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:path/path.dart' as Path;
 
 import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,34 +18,38 @@ class DownloadManager {
     return status.isGranted;
   }
 
-  Future<void> _saveFileLocally(String filename, List<int> bytes) async {
-    Directory directory = await getApplicationDocumentsDirectory();
-    String path = Path.join(directory.path, filename);
-    File file = File(path);
-    await file.writeAsBytes(bytes);
-    print("File saved at $path");
-  }
+  // Future<void> _saveFileLocally(String filename, List<int> bytes) async {
+  //   Directory directory = await getApplicationDocumentsDirectory();
+  //   String path = Path.join(directory.path, filename);
+  //   File file = File(path);
+  //   await file.writeAsBytes(bytes);
+  //   print("File saved at $path");
+  // }
 
   Future<Directory> _getDownloadDirectory(String? subDirectory) async {
-    var defaultDir = Directory(
-        "/storage/emulated/0/Documents/Troco${subDirectory != null ? "/$subDirectory" : ""}");
-    final useDefaultDirectory = Platform.isAndroid;
+    var defaultDir = Platform.isIOS
+        ? (await getApplicationDocumentsDirectory())
+        : Directory(
+            "/storage/emulated/0/Documents/Troco${subDirectory != null ? "/$subDirectory" : ""}");
     final defaultDirExists = await defaultDir.exists();
 
-    if (useDefaultDirectory && !defaultDirExists) {
+    if (!defaultDirExists) {
       defaultDir = await defaultDir.create(recursive: true);
     }
 
-    if (useDefaultDirectory) {
-      return defaultDir;
-    }
-
-    return ((await getDownloadsDirectory()) ??
-        (await getApplicationDocumentsDirectory()));
+    return defaultDir;
   }
 
-  Future<void> downloadFile(
+  Future<String?> downloadFile(
       String url, String fileName, String? subDirectory) async {
+    final permissionGranted = await _checkAndRequestStoragePermission();
+
+    if (!permissionGranted) {
+      SnackbarManager.showErrorSnackbar(
+          context: context, message: "Enable Troco File permission to save");
+      return null;
+    }
+
     var dir = await _getDownloadDirectory(subDirectory);
     var file = File('${dir.path}/${fileName}');
 
@@ -61,20 +64,20 @@ class DownloadManager {
       if (statusCode >= 200 && statusCode < 300) {
         SnackbarManager.showBasicSnackbar(
             context: context, message: "Downloaded successfully");
+        return file.path;
       }
 
-      // final raf = file.openSync(mode: FileMode.write);
-      // raf.writeFromSync(downloadResponse.data);
-      // await raf.close();
+      return null;
     } catch (e) {
       debugPrint(e.toString());
       SnackbarManager.showErrorSnackbar(
           context: context, message: "Failed to download");
+      return null;
     }
   }
 
-  Future<bool> isDownloaded(String fileName) async {
-    Directory appDir = await getApplicationDocumentsDirectory();
+  Future<bool> isDownloaded(String fileName, String? subDirectory) async {
+    Directory appDir = await _getDownloadDirectory(subDirectory);
 
     // Define the file save path
     String savePath = "${appDir.path}/$fileName";
