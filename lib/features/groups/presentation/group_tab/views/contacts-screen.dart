@@ -1,17 +1,15 @@
-import 'package:collection/collection.dart';
 import 'package:flutter_contacts_service/flutter_contacts_service.dart'
-    show ContactInfo, FlutterContactsService;
+    show ContactInfo;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/theme-manager.dart';
 import 'package:troco/core/cache/shared-preferences.dart';
-import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/auth/utils/phone-number-converter.dart';
 import 'package:troco/features/groups/presentation/friends_tab/widgets/contact-widget.dart';
+import 'package:troco/features/groups/utils/contacts-loader.dart';
 import 'package:troco/features/groups/utils/enums.dart';
 
 import '../../../../../core/app/asset-manager.dart';
@@ -32,6 +30,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   late List<ContactInfo> contacts, allContacts;
   final TextEditingController controller = TextEditingController();
   late Widget searchBar;
+  bool loadingContacts = true;
   ContactsFilter filter = ContactsFilter.Unregistered;
 
   @override
@@ -43,7 +42,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timestamp) {
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getWalletUiOverlayStyle());
-      initiatePermissions();
+      fetchContacts();
     });
   }
 
@@ -57,16 +56,6 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final query = controller.text.trim();
-    contacts = query.trim().isEmpty
-        ? allContacts
-        : allContacts
-            .where((element) => (element.displayName ?? "")
-                .toString()
-                .toLowerCase()
-                .contains(query.trim().toLowerCase()))
-            .toList();
-
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: SizedBox.square(
@@ -138,7 +127,18 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               children: [
                 ToggleWidget(
                     selected: filter == this.filter,
-                    onChecked: () => setState(() => this.filter = filter),
+                    onChecked: () {
+                      setState(() {
+                        this.filter = filter;
+                      });
+                      final filteredContacts = allContacts
+                          .where((element) =>
+                              this.filter == ContactsFilter.Unregistered
+                                  ? !isRegistered(contact: element)
+                                  : isRegistered(contact: element))
+                          .toList();
+                      setState(() => contacts = filteredContacts);
+                    },
                     label: filter.name.toLowerCase()),
                 regularSpacer(),
                 smallSpacer(),
@@ -151,12 +151,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   }
 
   Widget contactsList() {
-    final filteredContacts = contacts
-        .where((element) => filter == ContactsFilter.Unregistered
-            ? !isRegistered(contact: element)
-            : isRegistered(contact: element))
-        .toList();
-    return filteredContacts.isEmpty
+    return contacts.isEmpty
         ? Flexible(
             child: EmptyScreen(
               expanded: false,
@@ -168,7 +163,9 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               xIndex: controller.text.trim().isEmpty ? 0 : 0.25,
               label: controller.text.trim().isNotEmpty
                   ? "No results for '${controller.text}'"
-                  : "Getting Contacts",
+                  : loadingContacts
+                      ? "Getting Contacts"
+                      : "You do not have any contact",
             ),
           )
         : ListView.separated(
@@ -176,10 +173,9 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) => ContactWidget(
-                key: ObjectKey(filteredContacts[index]),
-                contact: filteredContacts[index]),
+                key: ObjectKey(contacts[index]), contact: contacts[index]),
             separatorBuilder: (context, index) {
-              if (index == filteredContacts.length - 1) {
+              if (index == contacts.length - 1) {
                 return Gap(SizeManager.bottomBarHeight);
               } else {
                 return Divider(
@@ -188,64 +184,22 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 );
               }
             },
-            itemCount: filteredContacts.length);
+            itemCount: contacts.length);
   }
 
-  Future<bool> requestPermissions() async {
-    PermissionStatus status = await Permission.contacts.request();
-    return status.isGranted;
-  }
+  Future<void> fetchContacts() async {
+    final _fetchedContacts = await ContactsLoader.getContacts();
+    final filteredContacts = _fetchedContacts
+        .where((element) => this.filter == ContactsFilter.Unregistered
+            ? !isRegistered(contact: element)
+            : isRegistered(contact: element))
+        .toList();
 
-  Future<void> initiatePermissions() async {
-    if (await requestPermissions()) {
-      // filter out all the contact with empty phone numbers
-      final notNullContacts =
-          (await FlutterContactsService.getContacts(withThumbnails: false))
-              .where((element) =>
-                  element.phones != null &&
-                  element.phones != [] &&
-                  element.phones!.any(
-                    (element) => element.value != null,
-                  ));
-
-      // distinct all phone numbers (Not duplicate them)
-      final distinctNumbers = notNullContacts
-          .map(
-              (e) => PhoneNumberConverter.convertToFull(e.phones!.first.value!))
-          .toSet()
-          .toList();
-
-      /// Add the contacts that contain any unique phone number back to an array
-      final contacts = <ContactInfo>[];
-      for (final number in distinctNumbers) {
-        final contact =
-            notNullContacts.firstWhereOrNull((element) => element.phones!.any(
-                  (element) =>
-                      PhoneNumberConverter.convertToFull(element.value!) ==
-                      number,
-                ));
-        if (contact != null) {
-          contacts.add(contact);
-        }
-      }
-
-      /// Remove any contact that contains this logged in user's number;
-      final notUserContacts = contacts
-          .toSet()
-          .where(
-            (element) => element.phones!.every(
-              (element) =>
-                  PhoneNumberConverter.convertToFull(element.value!) !=
-                  ClientProvider.readOnlyClient!.phoneNumber,
-            ),
-          )
-          .toSet();
-
-      setState(() {
-        this.contacts = notUserContacts.toList();
-        allContacts = notUserContacts.toList();
-      });
-    }
+    setState(() {
+      loadingContacts = false;
+      this.contacts = filteredContacts;
+      allContacts = _fetchedContacts;
+    });
   }
 
   Widget searchBarWidget() {
@@ -253,7 +207,20 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
       controller: controller,
       maxLines: 1,
       onChanged: (text) {
-        setState(() {});
+        final _contacts = text.trim().isEmpty
+            ? allContacts
+            : allContacts
+                .where((element) => (element.displayName ?? "")
+                    .toString()
+                    .toLowerCase()
+                    .contains(text.trim().toLowerCase()))
+                .toList();
+        final filteredContacts = _contacts
+            .where((element) => filter == ContactsFilter.Unregistered
+                ? !isRegistered(contact: element)
+                : isRegistered(contact: element))
+            .toList();
+        setState(() => contacts = filteredContacts);
       },
       cursorColor: ColorManager.themeColor,
       cursorRadius: const Radius.circular(SizeManager.medium),

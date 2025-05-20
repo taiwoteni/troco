@@ -11,6 +11,8 @@ class DownloadManager {
   DownloadManager({required this.context});
 
   Future<bool> _checkAndRequestStoragePermission() async {
+    if (Platform.isAndroid) return true;
+
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       status = await Permission.storage.request();

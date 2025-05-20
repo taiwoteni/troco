@@ -1105,7 +1105,7 @@ class _TransactionsDetailPageState
 
   Future<void> downloadFile({required String url, required String name}) async {
     final success = await downloadManager.downloadFile(url, name,
-        "${transaction.transactionName.toLowerCase().replaceAll(" ", "_")}");
+        "${transaction.transactionName.toLowerCase().trim().replaceAll(" ", "_")}");
 
     if (success == null) return;
 

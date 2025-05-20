@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts_service/flutter_contacts_service.dart'
-    show ContactInfo, FlutterContactsService;
+    show ContactInfo;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:troco/core/app/asset-manager.dart';
 import 'package:troco/core/app/routes-manager.dart';
@@ -145,23 +145,8 @@ class _ContactWidgetState extends ConsumerState<ContactWidget> {
         ),
       );
     }
-    return FutureBuilder(
-      future: FlutterContactsService.getAvatar(contact),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Container(
-            width: 53,
-            height: 53,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                    fit: BoxFit.cover, image: MemoryImage(contact.avatar!))),
-          );
-        }
-        return Transform.scale(
-            scale: 1.25, child: const ProfileIcon(size: 53, url: null));
-      },
-    );
+    return Transform.scale(
+        scale: 1.25, child: const ProfileIcon(size: 53, url: null));
   }
 
   Future<void> addFriend() async {

@@ -10,6 +10,10 @@ import 'package:troco/core/components/images/profile-icon.dart';
 import 'package:troco/core/extensions/navigator-extension.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/payments/presentation/provider/payment-methods-provider.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
+import '../../../../core/components/button/presentation/provider/button-provider.dart';
+import '../../../groups/presentation/friends_tab/providers/friends-provider.dart';
+import '../../../groups/presentation/group_tab/providers/groups-provider.dart';
 import '../../utils/enums.dart';
 
 import '../../../../core/app/routes-manager.dart';
@@ -82,6 +86,7 @@ List<SettingsModel> presetSettings(
         label: "Logout",
         icon: AssetManager.svgFile(name: "logout"),
         onTap: () async {
+          final buttonKey = UniqueKey();
           final dialogService = DialogManager(context: context);
           final logout = (await dialogService.showDialogContent<bool>(
                   title: "Logout",
@@ -92,7 +97,21 @@ List<SettingsModel> presetSettings(
                     size: 60,
                   ),
                   cancelLabel: "Yes, Log me out",
-                  onCancel: () {
+                  cancelKey: buttonKey,
+                  onCancel: () async {
+                    ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+                    await AppStorage.clear();
+                    final friendsRefresh = ref.refresh(friendsStreamProvider);
+                    final groupRefresh = ref.refresh(groupsStreamProvider);
+                    final transactionRefresh =
+                        ref.refresh(transactionsStreamProvider);
+
+                    // Just to call it.
+                    friendsRefresh;
+                    groupRefresh;
+                    transactionRefresh;
+                    await Future.delayed(const Duration(seconds: 1));
+                    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
                     context.pop(result: true);
                   }) ??
               false);

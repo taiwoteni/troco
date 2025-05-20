@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:troco/core/app/color-manager.dart';
 import 'package:troco/core/app/font-manager.dart';
 import 'package:troco/core/app/size-manager.dart';
@@ -97,20 +97,21 @@ class _ViewReceiptScreenState extends ConsumerState<ViewReceiptScreen> {
         .replaceAll(" ", "_")
         .toLowerCase();
 
-    if (Platform.isAndroid) {
-      // First save file in external storage path
-      final file = File("${output.path}/$name.jpg");
-      await file.writeAsBytes(widget.receiptBytes);
-      await Future.delayed(const Duration(seconds: 2));
+    // First save file in storage path
+    final file = File("${output.path}/$name.jpg");
+    await file.writeAsBytes(widget.receiptBytes);
+    await Future.delayed(const Duration(seconds: 2));
 
+    if (Platform.isAndroid) {
       // Request storage permission to continue
-      final permissionGranted = (await Permission.storage.request()).isGranted;
-      if (!permissionGranted) {
-        SnackbarManager.showErrorSnackbar(
-            context: context, message: "Enable Troco File permission to save");
-        ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-        return;
-      }
+      // final permissionGranted =
+      //     (await Permission.manageExternalStorage.request()).isGranted;
+      // if (!permissionGranted) {
+      //   SnackbarManager.showErrorSnackbar(
+      //       context: context, message: "Enable Troco File permission to save");
+      //   ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      //   return;
+      // }
 
       // Copy to downloads folder
       final copy = await file.copy("/storage/emulated/0/Download/$name.jpg");
@@ -125,8 +126,6 @@ class _ViewReceiptScreenState extends ConsumerState<ViewReceiptScreen> {
     }
 
     if (Platform.isIOS) {
-      await Future.delayed(const Duration(seconds: 2));
-
       // Firtsy request photos permission
       final permissionGranted = (await Permission.photos.request()).isGranted;
       if (!permissionGranted) {
@@ -136,9 +135,9 @@ class _ViewReceiptScreenState extends ConsumerState<ViewReceiptScreen> {
         return;
       }
 
-      final result = await ImageGallerySaver.saveImage(widget.receiptBytes,
-          quality: 90, name: name);
-      if (!result['isSuccess']) {
+      final result = await Share.shareXFiles([XFile(file.path)],
+          subject: "Save Receipt", text: "Choose were to save this receipt");
+      if (result.status != ShareResultStatus.success) {
         SnackbarManager.showErrorSnackbar(
             context: context, message: "Error saving receipt");
         ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
