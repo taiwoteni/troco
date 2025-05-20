@@ -302,6 +302,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> next() async {
     LoginData.clear();
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
+    await AppStorage.clear();
+    ref.read(clientProvider.notifier).state = null;
 
     if (!formKey.currentState!.validate()) {
       ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);

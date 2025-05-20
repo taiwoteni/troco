@@ -12,6 +12,7 @@ import 'package:troco/core/cache/shared-preferences.dart';
 import 'package:troco/features/auth/presentation/providers/client-provider.dart';
 import 'package:troco/features/groups/presentation/friends_tab/providers/friends-provider.dart';
 import 'package:troco/features/groups/presentation/group_tab/providers/groups-provider.dart';
+import 'package:troco/features/transactions/presentation/view-transaction/providers/transactions-provider.dart';
 
 import '../../../../../core/components/others/spacer.dart';
 
@@ -28,14 +29,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized()
         .addPostFrameCallback((timeStamp) async {
+      ref.read(clientProvider.notifier).state = null;
       SystemChrome.setSystemUIOverlayStyle(
           ThemeManager.getSystemUiOverlayStyle());
       await AppStorage.clear();
 
-      ref.read(clientProvider.notifier).state = null;
       final friendsRefresh = ref.refresh(friendsStreamProvider);
       final groupRefresh = ref.refresh(groupsStreamProvider);
-      final transactionRefresh = ref.refresh(friendsStreamProvider);
+      final transactionRefresh = ref.refresh(transactionsStreamProvider);
 
       // Just to call it.
       friendsRefresh;

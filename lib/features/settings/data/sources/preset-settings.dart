@@ -112,6 +112,7 @@ List<SettingsModel> presetSettings(
                     transactionRefresh;
                     await Future.delayed(const Duration(seconds: 1));
                     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+                    ref.read(clientProvider.notifier).state = null;
                     context.pop(result: true);
                   }) ??
               false);
