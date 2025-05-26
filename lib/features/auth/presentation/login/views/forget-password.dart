@@ -22,9 +22,11 @@ import 'package:troco/features/auth/presentation/otp/views/otp-screen.dart';
 
 import '../../../../../core/app/routes-manager.dart';
 import '../../../../../core/app/size-manager.dart';
+import '../../../../../core/cache/shared-preferences.dart';
 import '../../../../../core/components/texts/outputs/info-text.dart';
 import '../../../../../core/components/texts/inputs/text-form-field.dart';
 import '../../../../settings/domain/repository/settings-repository.dart';
+import '../../../domain/entities/client.dart';
 import '../../../utils/phone-number-converter.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -153,6 +155,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         newPassword: LoginData.password!);
     ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
     if (!response.error) {
+      // To save new password to device.
+      final client = AppStorage.getUser()?.toJson() ?? {};
+      client["password"] = LoginData.password;
+      AppStorage.saveClient(client: Client.fromJson(json: client));
+
       SnackbarManager.showBasicSnackbar(
           context: context, message: "Successfully reset password");
       Navigator.pop(context);

@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:troco/features/auth/data/models/login-data.dart';
+import 'package:troco/features/auth/domain/repositories/authentication-repo.dart';
 
 import '../../../../../core/app/asset-manager.dart';
 import '../../../../../core/app/color-manager.dart';
@@ -24,6 +26,7 @@ class PasswordEntryScreen extends ConsumerStatefulWidget {
 
 class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
   final buttonKey = UniqueKey();
+  String? error = null;
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -63,12 +66,31 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
   }
 
   Future<void> signIn() async {
+    final client = ClientProvider.readOnlyClient!;
+    setState(
+      () => error = null,
+    );
     ButtonProvider.startLoading(buttonKey: buttonKey, ref: ref);
     await Future.delayed(const Duration(seconds: 3));
-    ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
-    if (formKey.currentState!.validate()) {
-      Navigator.pushReplacementNamed(context, Routes.homeRoute);
+
+    if (!formKey.currentState!.validate()) {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      return;
     }
+
+    formKey.currentState!.save();
+    final response = await AuthenticationRepo.loginUserEmail(
+        email: client.email, password: LoginData.password!);
+
+    if (response.error) {
+      ButtonProvider.stopLoading(buttonKey: buttonKey, ref: ref);
+      setState(() => error =
+          "*${response.messageBody!["message"] ?? "unknow error occurred"}");
+      formKey.currentState!.validate();
+      return;
+    }
+
+    Navigator.pushReplacementNamed(context, Routes.homeRoute);
   }
 
   Widget header() {
@@ -124,10 +146,11 @@ class _PasswordEntryScreenState extends ConsumerState<PasswordEntryScreen> {
           if (value.trim().isEmpty) {
             return "* enter password";
           }
-          if (value.trim() != ClientProvider.readOnlyClient!.password) {
-            return "* wrong password";
-          }
-          return null;
+
+          return error;
+        },
+        onSaved: (value) {
+          LoginData.password = value?.trim();
         },
         prefixIcon: IconButton(
           onPressed: null,

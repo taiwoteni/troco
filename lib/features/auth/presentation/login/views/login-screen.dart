@@ -66,27 +66,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   List<String> phoneNumbers = [];
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback(
-      (timeStamp) {
-        SystemChrome.setSystemUIOverlayStyle(
-            ThemeManager.getOnboardingUiOverlayStyle());
-      },
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-          top: MediaQuery.of(context).viewPadding.top,
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: ThemeManager.getOnboardingUiOverlayStyle(),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: ColorManager.background,
         appBar: appBar(),
         body: SingleChildScrollView(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Center(
             child: Form(
               key: formKey,
@@ -531,12 +520,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   PreferredSizeWidget appBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(72),
+      preferredSize:
+          Size.fromHeight(72 + MediaQuery.of(context).viewPadding.top),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium),
+            padding: const EdgeInsets.symmetric(horizontal: SizeManager.medium)
+                .copyWith(top: MediaQuery.of(context).viewPadding.top),
             child: Row(
               children: [
                 IconButton(
